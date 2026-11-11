@@ -193,7 +193,7 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   Earth (DS-11), all GO. Both IGN licences are Licence Ouverte 2.0, read in IGN's
   own metadata records (S-013, S-014); Natural Earth is public domain (S-015).
   Foreign land is drawn flat (BD ALTI covers France only). Proposed by Claude,
-  2026-11-11; to confirm by Guillaume.
+  confirmed by Guillaume, 2026-11-11 (decision card in the project thread).
 - **Why:** the official publisher, under the licence the project already uses for
   éCO2mix; no share-alike on a database committed to the repo; the neighbours'
   coast at 1:10m is fine for 4 km cells.
@@ -218,8 +218,8 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   Tournai, Monaco, Ventimiglia, Andorra la Vella, San Sebastián and Alderney (all
   measured). Brussels, Bern, Ostend, Dover, Jersey, Guernsey and Sardinia are
   abroad. The sea off Corsica gets the national view like Corsica. The picker's
-  behaviour (D-011) is unchanged. Proposed by Claude, 2026-11-11; to confirm by
-  Guillaume.
+  behaviour (D-011) is unchanged. Proposed by Claude, confirmed by Guillaume,
+  2026-11-11 (decision card in the project thread).
 - **Why:** measured against the full-precision official outlines, the 65 wrong
   points of 20 000 all lie within 0.55 km of a border (ARCHITECTURE § Geolocation); the margin keeps people
   near the coast or a border on the region they are next to; a viewer in a foreign

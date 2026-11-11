@@ -170,7 +170,7 @@ export const REGION_CAPITALS: Readonly<Record<RegionCode, string>> = {
  * A position outside France but within this distance of the centre of a French cell
  * maps to the nearest one: a beach or a boat off the coast, GPS error, a town just
  * across a border (Geneva, Basel, Monaco). 22 km is 12 nautical miles, the breadth
- * of the territorial sea (D-015, provisional).
+ * of the territorial sea (D-015).
  */
 export const NEAR_FRANCE_KM = 22;
 

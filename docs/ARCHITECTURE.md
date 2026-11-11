@@ -264,7 +264,7 @@ the centre of a French cell (`NEAR_FRANCE_KM`, 12 nautical miles, the breadth of
 the territorial sea) takes the region of the nearest one: a beach or a boat off the
 coast, GPS error, a town across a border (Geneva, Basel, Luxembourg, Monaco: the
 measured list is in D-015); farther away it is abroad and gets the national view
-(D-015, provisional).
+(D-015).
 
 Measured with `tools/check-regions.ts` against the full-precision official outlines
 (IGN ADMIN EXPRESS COG, S-013), not the generalised ones the map is baked from
