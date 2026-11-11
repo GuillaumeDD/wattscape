@@ -14,10 +14,11 @@ either document wrong, update it in the same commit.
 ## 1. Project
 
 **Wattscape**: a browser "screensaver" in minimal pixel art that shows, live, how
-electricity is produced and consumed in the user's region of France. An endless
-panorama of the region (its landmarks, its power plants, its towns) whose every moving
-part is driven by open data: RTE éCO2mix for the grid, Open-Meteo for the weather, the
-sun's real position for day and night. Inspired by
+electricity is produced and consumed in the user's region of France. An isometric map
+of France that zooms from the whole country to the region (its landmarks, its power
+plants, its towns), whose every moving part is driven by open data: RTE éCO2mix for
+the grid, Open-Meteo for the weather, the sun's real position for day and night, the
+date for the seasons. Inspired by
 [Infinite Jungle](https://github.com/0xfe/jungle) and
 [Electricity Maps](https://app.electricitymaps.com/).
 
@@ -45,7 +46,7 @@ you haven't read it.
 - **The position stays private.** The GPS position is never stored, logged or sent
   anywhere except, rounded to 0.1°, to the weather API; the region lookup runs
   offline (ARCHITECTURE § Privacy).
-- **Reproducible world.** The panorama is a pure function of (seed, area, data, time):
+- **Reproducible world.** The scene is a pure function of (seed, area, data, time):
   no `Math.random`, no wall-clock reads outside the clock module (ARCHITECTURE §
   World generation).
 - **API data and URL settings are untrusted.** Validate at the boundary; never
