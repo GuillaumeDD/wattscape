@@ -61,6 +61,61 @@ The CSP's `connect-src` lists exactly `https://odre.opendatasoft.com` and
 > much is consumed, nationally and per region. **ODRÉ** (Open Data Réseaux Énergies)
 > is the open-data portal that serves it through an API.
 
+### éCO2mix: how a reading reaches the scene
+
+Every 15 minutes, while the tab is visible, the browser asks ODRÉ for the latest
+published step of the area (`src/data/eco2mix.ts`). Nothing else sits in between:
+no backend, no key, no cookie.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant RTE as RTE (telemetry)
+    participant ODRE as ODRÉ API<br/>odre.opendatasoft.com
+    participant App as Wattscape (browser)
+    participant Scene as Scene
+
+    RTE->>ODRE: publishes each 15-min step, ~1 h late (regional)<br/>~20 min late (national)
+    Note over ODRE: one row per area and step,<br/>steps still to come have every figure null
+    App->>ODRE: GET …/eco2mix-regional-tr/records<br/>where code_insee_region = "28" and consommation is not null<br/>order_by date_heure desc, limit 1
+    alt answer ok (HTTP 200, ≤ 64 KB, within 30 s)
+        ODRE-->>App: { results: [ one row ] }
+        App->>App: strict parser: shape, area, 15-min UTC step,<br/>each figure finite, in range, right sign
+        alt every figure valid
+            App->>App: freshness against the clock:<br/>fresh, stale (> 3 h) or future (> 15 min ahead)
+            App->>Scene: reading (MW per source, load factors,<br/>exchanges, pumping, batteries) + its time
+        else one figure invalid
+            App->>Scene: unavailable (reason)
+        end
+    else network error, timeout, HTTP error, too large, not JSON
+        App->>Scene: unavailable (reason)
+    else area changed or tab hidden meanwhile
+        App->>App: aborted: dropped, not shown as an outage
+    end
+```
+
+What one step says: the area's consumption is met by its own production, plus
+what it imports, minus what its pumps and batteries draw. The sign of each field
+is the one the API sends; the balance closes to a few MW (§ caveats below).
+
+```mermaid
+flowchart LR
+    subgraph IN["Supply (MW)"]
+        P["Production per source ≥ 0<br/>thermique · nucleaire · eolien<br/>solaire · hydraulique · bioenergies"]
+        D["destockage_batterie ≥ 0"]
+        E["ech_physiques<br/>positive = import, negative = export"]
+    end
+    subgraph OUT["Use (MW)"]
+        C["consommation, positive"]
+        S["pompage ≤ 0<br/>stockage_batterie ≤ 0"]
+    end
+    P --> B(("consommation =<br/>production + ech_physiques<br/>+ pompage + stockage_batterie<br/>+ destockage_batterie"))
+    D --> B
+    E --> B
+    B --> C
+    B -. "drawn by pumps and batteries<br/>(negative sign in the API)" .-> S
+```
+
 ### éCO2mix: fields and caveats
 
 Checked against the API itself on 2026-11-11: the datasets' field list and
