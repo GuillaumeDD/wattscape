@@ -6,5 +6,15 @@
   "switchLanguageLabel": "Passer en français",
   "creditsData": "Data:",
   "creditsEco2mixLicence": "(Open Licence 2.0), weather by",
-  "creditsWeatherLicence": "(CC BY 4.0)"
+  "creditsWeatherLicence": "(CC BY 4.0)",
+  "areaLabel": "Region:",
+  "areaFrance": "All of France",
+  "useMyLocation": "Use my location",
+  "locationWhy": "Your position is only used to find your region, in the browser, and the weather, rounded to 10 km. It is never stored.",
+  "locationSearching": "Looking for your position…",
+  "locationFound": "Region found from your position.",
+  "locationAbroad": "You seem to be outside mainland France: national view.",
+  "locationCorsica": "Corsica has no regional real-time data: national view.",
+  "locationRefused": "Position refused or unavailable. You can pick a region from the list.",
+  "locationUnavailable": "Position unavailable in this browser. You can pick a region from the list."
 }

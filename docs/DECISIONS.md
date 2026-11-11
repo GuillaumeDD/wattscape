@@ -117,3 +117,23 @@ revisit it.
   rare in France and would each cost a particle effect for a few days a year.
 - **Revisit if:** freezing rain or hail deserve their own effect (Growth), or the
   API adds codes (the parser would reject them: update the table).
+
+## D-011 — Region lookup: nearest prefecture until the map, and how the picker behaves
+
+- **Context:** B-004 needs a region from a position, offline. The exact answer needs
+  the outlines of the regions, which belong to the baked map (B-008, DS-04 still to
+  check). The nearest-prefecture lookup was measured: 8.0 % of the mainland's area
+  maps to a neighbouring region (ARCHITECTURE § Geolocation).
+- **Options:** (a) ship the nearest-prefecture lookup now, with the region list to
+  correct it; (b) bring forward a coarse grid of regions baked from the official
+  outlines (DS-04) into this step.
+- **Decision:** (a), with a region list always available. Beyond 120 km from every
+  prefecture a position is abroad (national view); towns just across a border map
+  to the French region next door. On refusal the viewer stays on the current area;
+  abroad, France is shown without forgetting the remembered region.
+  Region names are the official French names in every language. Proposed by
+  Claude, 2026-11-11, to confirm by Guillaume.
+- **Why:** the grid is B-008's job and needs DS-04 decided first; most people live
+  near a prefecture, and the error is one click to fix.
+- **Revisit if:** Guillaume wants (b) now, or B-008 lands (the lookup then switches
+  to map cells, as planned).

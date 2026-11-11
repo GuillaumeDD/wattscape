@@ -6,5 +6,15 @@
   "switchLanguageLabel": "Switch to English",
   "creditsData": "Données :",
   "creditsEco2mixLicence": "(Licence Ouverte 2.0), météo",
-  "creditsWeatherLicence": "(CC BY 4.0)"
+  "creditsWeatherLicence": "(CC BY 4.0)",
+  "areaLabel": "Région :",
+  "areaFrance": "France entière",
+  "useMyLocation": "Utiliser ma position",
+  "locationWhy": "Votre position sert seulement à trouver votre région, dans le navigateur, et la météo, arrondie à 10 km. Elle n'est jamais enregistrée.",
+  "locationSearching": "Recherche de votre position…",
+  "locationFound": "Région trouvée à partir de votre position.",
+  "locationAbroad": "Vous semblez hors de France métropolitaine : vue nationale.",
+  "locationCorsica": "La Corse n'a pas de données régionales en temps réel : vue nationale.",
+  "locationRefused": "Position refusée ou indisponible. Vous pouvez choisir une région dans la liste.",
+  "locationUnavailable": "Position indisponible dans ce navigateur. Vous pouvez choisir une région dans la liste."
 }

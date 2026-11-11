@@ -241,22 +241,49 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
 
 ## Privacy
 
-- The browser's Geolocation API is called only after the user presses "Use my
-  location" (no prompt on load), and only once per visit.
+- The browser's Geolocation API is called only when the user presses "Use my
+  location" (no prompt on load).
 - The position is used for: (1) the offline area lookup (§ Geolocation); (2) the
   weather query, **rounded to 0.1°** (about 10 km). It is never stored, logged,
   put in the URL or sent elsewhere. What is remembered in `localStorage` is the area
   code only.
-- Without a position, the weather is taken at the area's reference point.
+- Without a position, the weather will be taken (B-007) at the area's reference
+  point, its regional prefecture (`referencePoint`); the national view has none
+  (provisional).
+- The position is rounded to 0.1° as soon as it arrives (`src/ui/area-picker.ts`);
+  the raw value is never kept.
 
 ### Geolocation
 
 `src/geo/regions.ts` maps a position to the region of the **nearest prefecture**
-(94 mainland prefectures + 2 in Corsica, coordinates from S-006). This is
-**provisional**: close to a border (within a few km, more in large départements) it
-can pick the neighbour. When the baked map lands (B-008), the lookup reads the region
-of the map cell instead, which is exact to the cell size. Farther than about 150 km
-from every prefecture, the position is abroad and gets the national view.
+(94 mainland prefectures + 2 in Corsica, coordinates from S-006), with distances on
+an equirectangular projection at the position's latitude. The cosine is a Taylor
+series (`cosDeg`), not `Math.cos`, so every engine picks the same area. This is **provisional**,
+until the baked map (B-008) lets the lookup read the region of the map cell.
+
+Measured with `tools/check-regions.ts` against the official outlines (S-011,
+2026-11-11):
+
+- every prefecture lies inside its own département and region;
+- **8.0 % of the mainland's area** maps to a neighbouring region (1 604 of 20 000
+  random points), mostly in large regions far from their prefectures. A famous case:
+  Mont-Saint-Michel (Normandie) is nearer Rennes than Saint-Lô, so it maps to
+  Bretagne. The viewer can always correct it from the region list;
+- every point of the mainland is within 112 km of a prefecture, so a position
+  farther than **120 km** from every prefecture is abroad (`ABROAD_KM`) and gets
+  the national view. Towns just across a border (Geneva, Brussels, Basel,
+  Luxembourg, Monaco, Andorra, Jersey) still map to the French region next door.
+
+Corsica gets the national view (no regional data, S-003); near Corsica but outside
+its bounding box (Sardinia) is abroad. The UI (`src/ui/area-picker.ts`)
+offers the region list and a "Use my location" button; the URL setting `?area=`
+(`src/ui/settings.ts`) wins over the remembered area, which wins over France. On
+refusal, without the Geolocation API, or with no answer within 60 s (the prompt
+may never call back), the viewer stays on the area they are on. Abroad or in
+Corsica the view switches to France for the visit without overwriting the
+remembered region. An answer that arrives after the viewer picked an area by hand
+is dropped; the button can always be pressed again. Region
+names are the official French names in every language (D-011).
 
 ## Map
 

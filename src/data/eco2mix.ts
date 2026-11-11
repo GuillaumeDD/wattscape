@@ -6,7 +6,7 @@
  * ARCHITECTURE § Data sources for every caveat. The parser is the trust boundary: it
  * accepts only that shape and returns "unavailable" for anything else, never throws.
  */
-import { fetchJson, Invalid, isRecord, safely, type Result } from "./fetch-json";
+import { fetchJson, Invalid, isRecord, safely, type Result } from "./fetch-json.ts";
 
 /** INSEE codes of the 12 mainland regions in the regional dataset (Corsica is absent). */
 export const REGION_CODES = [

@@ -7,7 +7,7 @@
  * the API's own code list (S-010). The parser is the trust boundary: it accepts only
  * that shape and returns "unavailable" for anything else, never throws.
  */
-import { fetchJson, Invalid, isRecord, safely, type Result } from "./fetch-json";
+import { fetchJson, Invalid, isRecord, safely, type Result } from "./fetch-json.ts";
 
 declare const rounded: unique symbol;
 
