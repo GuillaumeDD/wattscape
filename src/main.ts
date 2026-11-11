@@ -1,26 +1,6 @@
-import { detectLocale, isLocale, translate, type Locale, type MessageKey } from "./i18n";
+import { detectLocale, translate, type Locale, type MessageKey } from "./i18n";
 import { mountAreaPicker, renderAreaOptions, type AreaState } from "./ui/area-picker";
-import { browserStorage, initialArea } from "./ui/settings";
-
-const LOCALE_KEY = "wattscape.locale";
-
-/** The saved language, if storage works and holds a known value (storage is untrusted). */
-function savedLocale(): Locale | undefined {
-  try {
-    const value = localStorage.getItem(LOCALE_KEY);
-    return isLocale(value) ? value : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function saveLocale(locale: Locale): void {
-  try {
-    localStorage.setItem(LOCALE_KEY, locale);
-  } catch {
-    // Storage can be blocked (private mode, settings): the choice then lasts the visit.
-  }
-}
+import { browserStorage, initialArea, savedLocale, saveLocale } from "./ui/settings";
 
 function setText(id: string, text: string): void {
   const el = document.getElementById(id);
@@ -41,6 +21,7 @@ function render(locale: Locale): void {
   document.getElementById("language")?.setAttribute("aria-label", t("switchLanguageLabel"));
   setText("area-label", t("areaLabel"));
   setText("locate", t("useMyLocation"));
+  setText("debug-link", t("debugTitle"));
 }
 
 /** The area list: rebuilt only when the language changes, otherwise just selected. */
@@ -52,13 +33,15 @@ function renderArea(rebuild: boolean): void {
   setText("location-note", translate(locale, areaState.note));
 }
 
+const storage = browserStorage();
+
 const areaState: AreaState = {
-  area: initialArea(location.search, browserStorage()),
+  area: initialArea(location.search, storage),
   position: null,
   note: "locationWhy",
 };
 
-let locale: Locale = savedLocale() ?? detectLocale(navigator.languages);
+let locale: Locale = savedLocale(storage) ?? detectLocale(navigator.languages);
 render(locale);
 renderArea(true);
 mountAreaPicker(areaState, () => {
@@ -67,7 +50,7 @@ mountAreaPicker(areaState, () => {
 
 document.getElementById("language")?.addEventListener("click", () => {
   locale = locale === "fr" ? "en" : "fr";
-  saveLocale(locale);
+  saveLocale(storage, locale);
   render(locale);
   renderArea(true);
 });

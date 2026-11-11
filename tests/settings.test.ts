@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { areaFromQuery, initialArea, saveArea, savedArea } from "../src/ui/settings";
+import {
+  areaFromQuery,
+  initialArea,
+  saveArea,
+  savedArea,
+  savedLocale,
+  saveLocale,
+} from "../src/ui/settings";
 
 function memoryStorage(initial: Record<string, string> = {}): Storage {
   const data = new Map(Object.entries(initial));
@@ -66,6 +73,20 @@ describe("saved area", () => {
     expect(savedArea(undefined)).toBeUndefined();
     expect(() => {
       saveArea(throwing, "28");
+    }).not.toThrow();
+  });
+});
+
+describe("saved language", () => {
+  it("round-trips a locale and ignores anything else or blocked storage", () => {
+    const storage = memoryStorage();
+    saveLocale(storage, "en");
+    expect(savedLocale(storage)).toBe("en");
+    expect(savedLocale(memoryStorage({ "wattscape.locale": "de" }))).toBeUndefined();
+    expect(savedLocale(throwing)).toBeUndefined();
+    expect(savedLocale(undefined)).toBeUndefined();
+    expect(() => {
+      saveLocale(throwing, "fr");
     }).not.toThrow();
   });
 });

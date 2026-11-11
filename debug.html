@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://odre.opendatasoft.com https://api.open-meteo.com; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
+    <meta name="robots" content="noindex" />
+    <title>Wattscape</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body class="debug">
+    <main id="debug">
+      <h1 id="title"></h1>
+      <p id="intro"></p>
+      <div id="controls">
+        <select id="area"></select>
+        <button id="refresh" type="button"></button>
+        <button id="language" type="button"></button>
+        <a id="back" href="./"></a>
+      </div>
+      <div id="sections"></div>
+    </main>
+    <script type="module" src="./src/debug.ts"></script>
+  </body>
+</html>

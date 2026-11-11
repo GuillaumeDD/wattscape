@@ -94,3 +94,71 @@ select {
   color: var(--muted);
   font-size: 0.875rem;
 }
+
+/* Debug page (B-007): a plain listing, readable rather than pretty. */
+body.debug main {
+  display: block;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  text-align: left;
+}
+
+#controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+#controls button {
+  margin-top: 0;
+}
+
+#controls a {
+  color: var(--muted);
+}
+
+#sections section {
+  margin-top: 1.5rem;
+}
+
+#sections h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+#sections .source,
+#sections .status {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+#sections .debugStale,
+#sections .debugFuture,
+#sections .debugUnavailable {
+  color: var(--accent);
+}
+
+#sections table {
+  margin-top: 0.5rem;
+  border-collapse: collapse;
+}
+
+#sections th,
+#sections td {
+  padding: 0.15rem 1rem 0.15rem 0;
+  font-weight: normal;
+  text-align: left;
+}
+
+#sections th {
+  font-family: ui-monospace, monospace;
+  color: var(--muted);
+}
+
+#sections td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
