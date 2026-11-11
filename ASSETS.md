@@ -11,6 +11,6 @@ its author, source and license. Files without an entry are not merged.
 - Baked data (map, installed capacities, recorded API fixtures) keeps its source
   licence, named here with the source's id in `docs/DATA-SOURCES.md`.
 
-| File       | Author | Source | License |
-| ---------- | ------ | ------ | ------- |
-| _none yet_ |        |        |         |
+| File                     | Author                 | Source                                          | License      |
+| ------------------------ | ---------------------- | ----------------------------------------------- | ------------ |
+| `docs/screenshots/*.png` | Wattscape contributors | Screenshots of this app; no third-party content | CC BY-SA 4.0 |
