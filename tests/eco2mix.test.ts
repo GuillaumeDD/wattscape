@@ -8,11 +8,11 @@ import {
   parseEco2mix,
   REGION_CODES,
   SOURCES,
-  FETCH_TIMEOUT_MS,
   STALE_AFTER_MS,
   type Eco2mixArea,
   type Eco2mixReading,
 } from "../src/data/eco2mix";
+import { FETCH_TIMEOUT_MS } from "../src/data/fetch-json";
 
 // Real answers recorded on 2026-11-11 by tools/record-eco2mix.ts (DS-01, DS-02).
 const DIR = "tests/fixtures/eco2mix";

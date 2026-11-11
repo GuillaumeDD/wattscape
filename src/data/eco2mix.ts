@@ -6,6 +6,7 @@
  * ARCHITECTURE § Data sources for every caveat. The parser is the trust boundary: it
  * accepts only that shape and returns "unavailable" for anything else, never throws.
  */
+import { fetchJson, Invalid, isRecord, safely, type Result } from "./fetch-json";
 
 /** INSEE codes of the 12 mainland regions in the regional dataset (Corsica is absent). */
 export const REGION_CODES = [
@@ -67,9 +68,7 @@ export interface Eco2mixReading {
   readonly batteryDischargeMw: number;
 }
 
-export type Eco2mixResult =
-  | { readonly ok: true; readonly reading: Eco2mixReading }
-  | { readonly ok: false; readonly reason: string };
+export type Eco2mixResult = Result<Eco2mixReading>;
 
 const API = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets";
 
@@ -91,12 +90,6 @@ export function eco2mixUrl(area: Eco2mixArea): string {
 const MAX_ABS_MW = 200_000;
 const MAX_LOAD_FACTOR_PCT = 200;
 const MAX_STRING = 64;
-
-class Invalid extends Error {}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /**
  * A MW figure. The API sends some columns as JSON numbers and others as text
@@ -190,15 +183,12 @@ function parseRow(area: Eco2mixArea, row: Record<string, unknown>): Eco2mixReadi
 
 /** Parses the body of {@link eco2mixUrl}'s answer. Never throws. */
 export function parseEco2mix(area: Eco2mixArea, body: unknown): Eco2mixResult {
-  try {
+  return safely(() => {
     if (!isRecord(body) || !Array.isArray(body.results)) throw new Invalid("not a records answer");
     const row: unknown = body.results[0];
     if (!isRecord(row)) throw new Invalid("no published step");
-    return { ok: true, reading: parseRow(area, row) };
-  } catch (error) {
-    if (error instanceof Invalid) return { ok: false, reason: error.message };
-    return { ok: false, reason: "unexpected parser error" };
-  }
+    return parseRow(area, row);
+  });
 }
 
 /**
@@ -226,63 +216,20 @@ export function freshness(reading: Eco2mixReading, nowMs: number): Freshness {
   return age > STALE_AFTER_MS ? "stale" : "fresh";
 }
 
-/** A request that has not finished by then is given up. */
-export const FETCH_TIMEOUT_MS = 30_000;
-
 /** The answer is one row of about 1 KB; anything much larger is not ours. */
 const MAX_BODY_CHARS = 64 * 1024;
 
-/**
- * Fetches and parses the latest step. Every failure becomes "unavailable" with a
- * reason; "aborted" means the caller cancelled (the area changed, the tab was
- * hidden), so it must not be shown as an outage.
- */
-export async function fetchEco2mix(
+/** Fetches and parses the latest step (failures: see {@link fetchJson}). */
+export function fetchEco2mix(
   area: Eco2mixArea,
   fetchFn: typeof fetch,
   signal?: AbortSignal,
 ): Promise<Eco2mixResult> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => {
-    controller.abort();
-  }, FETCH_TIMEOUT_MS);
-  const cancel = (): void => {
-    controller.abort();
-  };
-  signal?.addEventListener("abort", cancel);
-  if (signal?.aborted) controller.abort();
-  const failed = (reason: string): Eco2mixResult => ({
-    ok: false,
-    reason: signal?.aborted ? "aborted" : reason,
-  });
-  try {
-    let response: Response;
-    try {
-      response = await fetchFn(eco2mixUrl(area), {
-        signal: controller.signal,
-        credentials: "omit",
-        referrerPolicy: "no-referrer",
-      });
-    } catch {
-      return failed(controller.signal.aborted ? "timeout" : "network error");
-    }
-    if (!response.ok) return failed(`HTTP ${String(response.status)}`);
-    let text: string;
-    try {
-      text = await response.text();
-    } catch {
-      return failed(controller.signal.aborted ? "timeout" : "network error");
-    }
-    if (text.length > MAX_BODY_CHARS) return failed("answer too large");
-    let body: unknown;
-    try {
-      body = JSON.parse(text);
-    } catch {
-      return failed("not JSON");
-    }
-    return signal?.aborted ? failed("aborted") : parseEco2mix(area, body);
-  } finally {
-    clearTimeout(timer);
-    signal?.removeEventListener("abort", cancel);
-  }
+  return fetchJson(
+    eco2mixUrl(area),
+    MAX_BODY_CHARS,
+    (body) => parseEco2mix(area, body),
+    fetchFn,
+    signal,
+  );
 }

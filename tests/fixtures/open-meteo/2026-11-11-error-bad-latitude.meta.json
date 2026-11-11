@@ -1,0 +1,6 @@
+{
+  "url": "https://api.open-meteo.com/v1/forecast?latitude=91.0&longitude=1.1&current=temperature_2m",
+  "status": 400,
+  "recordedAt": "2026-11-11T15:03:34.935Z",
+  "source": "DS-03, S-005"
+}

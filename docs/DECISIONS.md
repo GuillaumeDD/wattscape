@@ -101,3 +101,19 @@ revisit it.
 - **Revisit if:** the API starts sending partial steps (the parser would then reject
   many readings: `tools/check-eco2mix.ts` counts them), or a longer run shows a
   longer normal delay.
+
+## D-010 — How an Open-Meteo reading is accepted and grouped
+
+- **Context:** B-006 checked the API's answers and its list of weather codes (S-010).
+  The scene draws seven kinds of weather, not 29 codes.
+- **Decision:** like D-009, a weather reading is accepted whole or not at all: one
+  invalid field, an unexpected unit, a grid point more than 0.5° from the position
+  asked, or a code outside the API's list makes it "unavailable". Freezing drizzle
+  and freezing rain are drawn as drizzle and rain, snow grains as snow, hail as a
+  storm (table in ARCHITECTURE § Open-Meteo). The position sent is rounded to 0.1°
+  and printed with one decimal. A weather reading is stale after 1 h. Proposed by Claude, 2026-11-11, to confirm by
+  Guillaume.
+- **Why:** the same rule as for the grid keeps the scene honest; ice and hail are
+  rare in France and would each cost a particle effect for a few days a year.
+- **Revisit if:** freezing rain or hail deserve their own effect (Growth), or the
+  API adds codes (the parser would reject them: update the table).

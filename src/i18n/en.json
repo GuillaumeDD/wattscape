@@ -3,5 +3,8 @@
   "tagline": "Your region's electricity, live, in pixel art.",
   "status": "Under construction: the scene is coming soon.",
   "switchLanguage": "Français",
-  "switchLanguageLabel": "Passer en français"
+  "switchLanguageLabel": "Passer en français",
+  "creditsData": "Data:",
+  "creditsEco2mixLicence": "(Open Licence 2.0), weather by",
+  "creditsWeatherLicence": "(CC BY 4.0)"
 }

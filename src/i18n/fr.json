@@ -3,5 +3,8 @@
   "tagline": "L'électricité de votre région, en direct et en pixel art.",
   "status": "En construction : la scène arrive bientôt.",
   "switchLanguage": "English",
-  "switchLanguageLabel": "Switch to English"
+  "switchLanguageLabel": "Switch to English",
+  "creditsData": "Données :",
+  "creditsEco2mixLicence": "(Licence Ouverte 2.0), météo",
+  "creditsWeatherLicence": "(CC BY 4.0)"
 }
