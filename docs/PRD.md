@@ -176,23 +176,12 @@ idea that the grid can be seen.
   **CC BY-SA 4.0**, listed in `ASSETS.md`.
 - No third-party images, sprites or fonts unless CC0 / CC BY / CC BY-SA, with an
   `ASSETS.md` entry.
-- **Data licences and attribution**, shown in the app's credits (register:
-  [`DATA-SOURCES.md`](DATA-SOURCES.md), GO / NO-GO per source):
-  - RTE éCO2mix via ODRÉ: Licence Ouverte / Open Licence 2.0 (S-004).
-  - Open-Meteo: CC BY 4.0, free tier for non-commercial use only (S-005). Wattscape
-    stays non-commercial (no ads, no subscription).
-  - Geographic shapes (regions, coast): an open source under Licence Ouverte or ODbL,
-    chosen in B-008 (ARCHITECTURE § Map).
-- **Landmarks and copyright** (decided: Q-4, D-004). In France, freedom of panorama is
-  narrow: a recent building or bridge stays protected until 70 years after its
-  architect's death. Old landmarks (Eiffel Tower structure, Mont-Saint-Michel,
-  cathedrals, Pont du Gard, Étretat cliffs) are free to draw. The Eiffel Tower's
-  **night illumination and sparkle** are claimed as a protected work by its operator;
-  recent works (Viaduc de Millau, Pont de Normandie, Louvre pyramid) are protected.
-  Rule: draw only public-domain works, and draw the tower lit plainly, not
-  sparkling. Each landmark's status (author, date of death or "natural site",
-  source) is recorded in [`POI.md`](POI.md) before it is drawn, so the choice
-  can be audited and revisited.
+- **Data:** only open data that is GO in [`DATA-SOURCES.md`](DATA-SOURCES.md), with
+  the attribution each licence asks for in the app's credits. Wattscape stays
+  non-commercial (no ads, no subscription), as Open-Meteo's free tier requires.
+- **Landmarks:** only public-domain works and natural or generic sites, each GO in
+  [`POI.md`](POI.md) before it is drawn (D-004). French freedom of panorama is
+  narrow, so recent works (and the Eiffel Tower's light show) stay out.
 
 ## 7. Art direction (direction A chosen: Q-1)
 

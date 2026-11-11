@@ -43,11 +43,11 @@ Which sources we use, and under which licence, is decided in the register
 [`DATA-SOURCES.md`](DATA-SOURCES.md) (GO / NO-GO with a comment for each); only
 **GO** sources appear here.
 
-| Source                   | Endpoint                                                                              | Used for                                           | Refresh | Licence, limits                                      |
-| ------------------------ | ------------------------------------------------------------------------------------- | -------------------------------------------------- | ------- | ---------------------------------------------------- |
-| éCO2mix regional (S-003) | `odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records` | regional mix, consumption, exchanges, load factors | 15 min  | Licence Ouverte 2.0; 50 000 calls/user/month (S-004) |
-| éCO2mix national (S-009) | same API, dataset `eco2mix-national-tr`                                               | national view                                      | 15 min  | Licence Ouverte 2.0                                  |
-| Open-Meteo (S-005)       | `api.open-meteo.com/v1/forecast?current=…`                                            | current weather                                    | 15 min  | CC BY 4.0; non-commercial; 10 000 calls/day/IP       |
+| Source                   | Endpoint                                                                              | Used for                                           | Refresh |
+| ------------------------ | ------------------------------------------------------------------------------------- | -------------------------------------------------- | ------- |
+| éCO2mix regional (DS-01) | `odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records` | regional mix, consumption, exchanges, load factors | 15 min  |
+| éCO2mix national (DS-02) | same API, dataset `eco2mix-national-tr`                                               | national view                                      | 15 min  |
+| Open-Meteo (DS-03)       | `api.open-meteo.com/v1/forecast?current=…`                                            | current weather                                    | 15 min  |
 
 The CSP's `connect-src` lists exactly `https://odre.opendatasoft.com` and
 `https://api.open-meteo.com`.
@@ -96,8 +96,9 @@ Caveats (provenance in brackets):
 - Battery and onshore/offshore wind split columns are "not available" in the
   regional file (S-007).
 - Corsica is not among the spec's regions (S-007): Corsica gets the national view.
-- Quota: 50 000 calls per user per month (S-004). One viewer refreshing every 15
-  minutes makes about 3 000: fine, but never poll faster, and stop when hidden.
+- Rate limits (DS-01, DS-03): one viewer refreshing every 15 minutes makes about
+  3 000 calls a month per API, well within them; never poll faster, and stop when
+  hidden.
 
 ### Open-Meteo
 
@@ -105,7 +106,6 @@ Caveats (provenance in brackets):
   at the rounded position.
 - `weather_code` is a WMO code; we group it into `clear`, `cloudy`, `fog`, `drizzle`,
   `rain`, `snow`, `storm` (table to be recorded with the API doc's id in B-006).
-- Attribution "Weather data by Open-Meteo.com (CC BY 4.0)" in the credits (S-005).
 
 ## Privacy
 
@@ -132,9 +132,8 @@ from every prefecture, the position is abroad and gets the national view.
 
 - The map is **baked at build time** by `tools/bake-map` from open geographic data
   into a small committed file: a grid of cells (about 4 km) with, per cell, land/sea,
-  region code and an elevation class. Candidate sources: IGN ADMIN EXPRESS (regions,
-  Licence Ouverte) and a coarse elevation model (to be chosen); the choice is logged
-  in SOURCES and ASSETS.
+  region code and an elevation class. Candidate sources: DS-04 (regions) and DS-05
+  (relief) in `DATA-SOURCES.md`; the baked file gets an ASSETS entry.
 - Projection: longitude scaled by cos 46.5° (an equirectangular projection centred on
   France), then the isometric 2:1 transform of § Art direction. Good enough at this
   scale; a Lambert-93 projection can replace it without touching the renderer.
@@ -150,8 +149,8 @@ from every prefecture, the position is abroad and gets the national view.
   with integer and rational arithmetic only; transcendental functions are allowed
   for **how** things move (a turbine's angle), never for placement.
 - Diffuse sources are placed with a density per region proportional to its installed
-  capacity per technology (source to choose: the ODRÉ national register of production
-  installations, aggregated by region, baked at build time; **provisional**).
+  capacity per technology (candidate source: DS-07, aggregated by region and baked at
+  build time; **provisional**).
 
 ## Data-to-scene mapping
 

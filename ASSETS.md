@@ -9,7 +9,7 @@ its author, source and license. Files without an entry are not merged.
 - **No image files of real places**: landmarks are drawn in code from our own
   observation, and only public-domain works are drawn (PRD § Content and licensing).
 - Baked data (map, installed capacities, recorded API fixtures) keeps its source
-  licence, named here with the source's id in `docs/SOURCES.md`.
+  licence, named here with the source's id in `docs/DATA-SOURCES.md`.
 
 | File       | Author | Source | License |
 | ---------- | ------ | ------ | ------- |
