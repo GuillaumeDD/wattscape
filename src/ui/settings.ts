@@ -3,8 +3,10 @@
  * Security): only a known area code is accepted, anything else is ignored.
  */
 import { isEco2mixArea, type Eco2mixArea } from "../data/eco2mix";
+import { isLocale, type Locale } from "../i18n";
 
 const AREA_KEY = "wattscape.area";
+const LOCALE_KEY = "wattscape.locale";
 
 /** `localStorage`, or `undefined` where merely touching it throws (blocked storage). */
 export function browserStorage(): Storage | undefined {
@@ -49,4 +51,22 @@ export function initialArea(
   storage: Pick<Storage, "getItem"> | undefined,
 ): Eco2mixArea {
   return areaFromQuery(search) ?? savedArea(storage) ?? "FR";
+}
+
+/** The language remembered in this browser, if storage works and holds a known one. */
+export function savedLocale(storage: Pick<Storage, "getItem"> | undefined): Locale | undefined {
+  try {
+    const value = storage?.getItem(LOCALE_KEY);
+    return isLocale(value) ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function saveLocale(storage: Pick<Storage, "setItem"> | undefined, locale: Locale): void {
+  try {
+    storage?.setItem(LOCALE_KEY, locale);
+  } catch {
+    // Storage can be blocked (private mode, settings): the choice then lasts the visit.
+  }
 }

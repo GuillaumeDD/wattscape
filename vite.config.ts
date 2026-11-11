@@ -22,6 +22,10 @@ export default defineConfig({
   plugins: [devCsp()],
   build: {
     target: "es2022",
+    rolldownOptions: {
+      // Two pages: the scene, and the debug page listing the live figures (B-007).
+      input: { main: "index.html", debug: "debug.html" },
+    },
   },
   test: {
     include: ["tests/**/*.test.ts"],

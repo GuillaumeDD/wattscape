@@ -137,3 +137,20 @@ revisit it.
   near a prefecture, and the error is one click to fix.
 - **Revisit if:** Guillaume wants (b) now, or B-008 lands (the lookup then switches
   to map cells, as planned).
+
+## D-012 — The sun and the moon are checked against Astronomy Engine, not NOAA's site
+
+- **Context:** B-007 asks for the sun within 0.5° of NOAA's calculator (S-008). The
+  cloud sessions cannot open gml.noaa.gov (refused by the network policy,
+  2026-11-11), nor its archived copies.
+- **Options:** (a) check against Astronomy Engine (S-012), an independent ephemeris
+  tested against JPL Horizons, with its values committed as a fixture; (b) wait
+  until gml.noaa.gov is allowed in the `wattscape` environment and read NOAA's
+  values; (c) Guillaume reads a few values on NOAA's calculator by hand.
+- **Decision:** (a) now: a stricter check than the target (agreement within 0.01°
+  with the sun up). The algorithm stays NOAA's. Proposed by Claude, 2026-11-11, to
+  confirm by Guillaume, who may add (b) or (c).
+- **Why:** a second, independent and more precise model is a stronger test than one
+  calculator built on the same equations; the fixture makes it reproducible offline.
+- **Revisit if:** gml.noaa.gov becomes reachable, or a value read on NOAA's
+  calculator disagrees by more than 0.1° with the sun up.

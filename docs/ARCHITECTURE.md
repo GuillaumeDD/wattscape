@@ -285,6 +285,23 @@ remembered region. An answer that arrives after the viewer picked an area by han
 is dropped; the button can always be pressed again. Region
 names are the official French names in every language (D-011).
 
+### Debug page
+
+`debug.html` (linked from the credits as "Live data") lists every live figure the
+scene uses (B-007): each éCO2mix and Open-Meteo field under its API name, the
+dataset or the rounded point it comes from, the time it describes, its age and
+freshness ("up to date", "stale", or "dated in the future", whose figures are then
+not shown), and the sun and moon computed for now. A failed source shows its
+reason ("timeout", "HTTP 429", …), never a value. It reads the area like the main
+page (`?area=`, then the remembered choice, then France), without ever writing
+it, and takes the weather and
+the sun at the region's reference point, rounded to 0.1°: the viewer's position is
+not kept between pages. The national view has no reference point, so it shows no
+weather and no sun. Data is fetched again every 15 minutes while the page is
+visible, and not at all while it is hidden. Changing the area, pressing Refresh or
+hiding the page cancels the load in flight; a late answer from it is dropped. The listing itself is a pure function
+(`src/ui/live-figures.ts`), tested on the recorded fixtures.
+
 ## Map
 
 **Provisional**, settled by B-008 once the art direction is chosen.
@@ -334,12 +351,23 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
 
 ## Sky, light and weather
 
-- **Sun:** NOAA's solar position algorithm (S-008) gives elevation and azimuth for
-  the place and instant; tested against the NOAA calculator for several cities and
-  dates.
-- **Moon:** phase from the synodic month (29.53 days) since a reference new moon,
-  accurate to about a day, which is enough to draw it; position from a simplified
-  ephemeris (provisional).
+- **Sun** (`src/sky/sun.ts`): NOAA's solar position algorithm (S-008) gives the
+  apparent elevation (with NOAA's refraction fit), the geometric elevation and the
+  azimuth for a place and instant. Checked against Astronomy Engine (S-012) at 5
+  landmarks × 4 dates (equinoxes, solstices 2026) × 12 hours: azimuth and, with the
+  sun up, elevation agree within 0.01°. Below the horizon the two differ by up to
+  0.55°, only because their refraction conventions differ there; twilight
+  thresholds use the geometric elevation, which refraction does not touch. NOAA's
+  own calculator could not be opened from the cloud sessions (S-008), so it is not
+  yet compared directly (D-012).
+- **Moon** (`src/sky/moon.ts`): phase from the mean synodic month (29.530588861
+  days) since Meeus's mean new moon of 2000-01-06. Against every quarter of
+  2026–2030 from S-012, the worst gap is 0.8 day, within the 1-day target; the lit
+  fraction follows from the phase. Position in the sky: simplified ephemeris, later
+  (provisional).
+- **Determinism:** both use `Math.sin` and friends. That is allowed because the sky
+  only animates the scene (light, sky colour, the moon's drawing); it never decides
+  what the world contains (§ World generation).
 - **Light keyframes** by solar elevation: night (< −12°), blue hour (−12° to −4°),
   golden hour (−4° to 6°), day (> 6°). Each keyframe sets a sky gradient, a global
   tint for the land, and whether emissive pixels show. Keyframes interpolate in

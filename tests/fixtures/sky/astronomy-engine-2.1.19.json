@@ -1,0 +1,2922 @@
+{
+ "source": "S-012",
+ "generator": "astronomy-engine@2.1.19, tools/record-sky.ts",
+ "generatedAt": "2026-11-11T16:08:46.925Z",
+ "sunNote": "Apparent position: refraction 'normal', observer at sea level",
+ "sun": [
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T00:00:00.000Z",
+   "elevationDeg": -39.232,
+   "azimuthDeg": 1.5145
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T02:00:00.000Z",
+   "elevationDeg": -32.6462,
+   "azimuthDeg": 38.1409
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T04:00:00.000Z",
+   "elevationDeg": -17.4258,
+   "azimuthDeg": 67.0635
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T06:00:00.000Z",
+   "elevationDeg": 1.0384,
+   "azimuthDeg": 91.0079
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T08:00:00.000Z",
+   "elevationDeg": 19.1304,
+   "azimuthDeg": 115.1507
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T10:00:00.000Z",
+   "elevationDeg": 33.714,
+   "azimuthDeg": 144.6166
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T12:00:00.000Z",
+   "elevationDeg": 39.3259,
+   "azimuthDeg": 181.5557
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T14:00:00.000Z",
+   "elevationDeg": 32.8626,
+   "azimuthDeg": 218.0774
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T16:00:00.000Z",
+   "elevationDeg": 17.8474,
+   "azimuthDeg": 246.9988
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T18:00:00.000Z",
+   "elevationDeg": -0.1346,
+   "azimuthDeg": 270.9788
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T20:00:00.000Z",
+   "elevationDeg": -18.6136,
+   "azimuthDeg": 295.1675
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-03-20T22:00:00.000Z",
+   "elevationDeg": -33.259,
+   "azimuthDeg": 324.6758
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T00:00:00.000Z",
+   "elevationDeg": -15.3526,
+   "azimuthDeg": 2.5149
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T02:00:00.000Z",
+   "elevationDeg": -9.9421,
+   "azimuthDeg": 30.2121
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T04:00:00.000Z",
+   "elevationDeg": 2.553,
+   "azimuthDeg": 54.6286
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T06:00:00.000Z",
+   "elevationDeg": 19.5655,
+   "azimuthDeg": 76.5136
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T08:00:00.000Z",
+   "elevationDeg": 38.4225,
+   "azimuthDeg": 99.5561
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T10:00:00.000Z",
+   "elevationDeg": 55.5185,
+   "azimuthDeg": 131.818
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T12:00:00.000Z",
+   "elevationDeg": 62.733,
+   "azimuthDeg": 185.2293
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T14:00:00.000Z",
+   "elevationDeg": 52.9243,
+   "azimuthDeg": 235.0678
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T16:00:00.000Z",
+   "elevationDeg": 35.1433,
+   "azimuthDeg": 264.7968
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T18:00:00.000Z",
+   "elevationDeg": 16.3837,
+   "azimuthDeg": 287.238
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T20:00:00.000Z",
+   "elevationDeg": 0.1937,
+   "azimuthDeg": 309.3724
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-06-21T22:00:00.000Z",
+   "elevationDeg": -11.503,
+   "azimuthDeg": 334.4073
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T00:00:00.000Z",
+   "elevationDeg": -38.8208,
+   "azimuthDeg": 6.361
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T02:00:00.000Z",
+   "elevationDeg": -30.9331,
+   "azimuthDeg": 42.1109
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T04:00:00.000Z",
+   "elevationDeg": -15.0957,
+   "azimuthDeg": 70.1645
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T06:00:00.000Z",
+   "elevationDeg": 3.2845,
+   "azimuthDeg": 93.8901
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T08:00:00.000Z",
+   "elevationDeg": 21.2421,
+   "azimuthDeg": 118.4665
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T10:00:00.000Z",
+   "elevationDeg": 34.9445,
+   "azimuthDeg": 148.9258
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T12:00:00.000Z",
+   "elevationDeg": 39.0129,
+   "azimuthDeg": 186.4002
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T14:00:00.000Z",
+   "elevationDeg": 31.1322,
+   "azimuthDeg": 222.0302
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T16:00:00.000Z",
+   "elevationDeg": 15.4071,
+   "azimuthDeg": 250.0025
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T18:00:00.000Z",
+   "elevationDeg": -2.7618,
+   "azimuthDeg": 273.6796
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T20:00:00.000Z",
+   "elevationDeg": -21.1054,
+   "azimuthDeg": 298.2354
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-09-23T22:00:00.000Z",
+   "elevationDeg": -35.0295,
+   "azimuthDeg": 328.7696
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T00:00:00.000Z",
+   "elevationDeg": -62.4558,
+   "azimuthDeg": 7.2223
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T02:00:00.000Z",
+   "elevationDeg": -52.1185,
+   "azimuthDeg": 56.2994
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T04:00:00.000Z",
+   "elevationDeg": -34.0942,
+   "azimuthDeg": 85.5955
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T06:00:00.000Z",
+   "elevationDeg": -15.1977,
+   "azimuthDeg": 107.9425
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T08:00:00.000Z",
+   "elevationDeg": 1.1951,
+   "azimuthDeg": 130.1311
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T10:00:00.000Z",
+   "elevationDeg": 12.4004,
+   "azimuthDeg": 155.2783
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T12:00:00.000Z",
+   "elevationDeg": 15.9151,
+   "azimuthDeg": 183.3828
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T14:00:00.000Z",
+   "elevationDeg": 10.3114,
+   "azimuthDeg": 211.0021
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T16:00:00.000Z",
+   "elevationDeg": -2.1262,
+   "azimuthDeg": 235.3094
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T18:00:00.000Z",
+   "elevationDeg": -19.5665,
+   "azimuthDeg": 257.158
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T20:00:00.000Z",
+   "elevationDeg": -38.5883,
+   "azimuthDeg": 280.3204
+  },
+  {
+   "place": "lille-grand-place",
+   "latitude": 50.637,
+   "longitude": 3.063,
+   "time": "2026-12-21T22:00:00.000Z",
+   "elevationDeg": -55.6744,
+   "azimuthDeg": 313.0534
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T00:00:00.000Z",
+   "elevationDeg": -41.5107,
+   "azimuthDeg": 351.074
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T02:00:00.000Z",
+   "elevationDeg": -37.6853,
+   "azimuthDeg": 30.2512
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T04:00:00.000Z",
+   "elevationDeg": -23.1717,
+   "azimuthDeg": 61.1826
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T06:00:00.000Z",
+   "elevationDeg": -3.9084,
+   "azimuthDeg": 85.1657
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T08:00:00.000Z",
+   "elevationDeg": 15.3637,
+   "azimuthDeg": 107.9015
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T10:00:00.000Z",
+   "elevationDeg": 32.4178,
+   "azimuthDeg": 135.0742
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T12:00:00.000Z",
+   "elevationDeg": 41.5926,
+   "azimuthDeg": 171.1628
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T14:00:00.000Z",
+   "elevationDeg": 37.8584,
+   "azimuthDeg": 210.2001
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T16:00:00.000Z",
+   "elevationDeg": 23.5391,
+   "azimuthDeg": 241.115
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T18:00:00.000Z",
+   "elevationDeg": 4.6084,
+   "azimuthDeg": 265.1325
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T20:00:00.000Z",
+   "elevationDeg": -14.8087,
+   "azimuthDeg": 287.9146
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-03-20T22:00:00.000Z",
+   "elevationDeg": -31.958,
+   "azimuthDeg": 315.1355
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T00:00:00.000Z",
+   "elevationDeg": -17.8548,
+   "azimuthDeg": 355.0056
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T02:00:00.000Z",
+   "elevationDeg": -14.5869,
+   "azimuthDeg": 23.5217
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T04:00:00.000Z",
+   "elevationDeg": -2.6765,
+   "azimuthDeg": 48.6942
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T06:00:00.000Z",
+   "elevationDeg": 13.9728,
+   "azimuthDeg": 70.2788
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T08:00:00.000Z",
+   "elevationDeg": 33.6126,
+   "azimuthDeg": 91.4022
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T10:00:00.000Z",
+   "elevationDeg": 52.8674,
+   "azimuthDeg": 118.8786
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T12:00:00.000Z",
+   "elevationDeg": 65.0614,
+   "azimuthDeg": 168.6424
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T14:00:00.000Z",
+   "elevationDeg": 58.5097,
+   "azimuthDeg": 227.4428
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T16:00:00.000Z",
+   "elevationDeg": 40.5152,
+   "azimuthDeg": 260.3591
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T18:00:00.000Z",
+   "elevationDeg": 20.6178,
+   "azimuthDeg": 282.5871
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T20:00:00.000Z",
+   "elevationDeg": 2.4767,
+   "azimuthDeg": 303.5314
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-06-21T22:00:00.000Z",
+   "elevationDeg": -11.2891,
+   "azimuthDeg": 327.2739
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T00:00:00.000Z",
+   "elevationDeg": -41.5469,
+   "azimuthDeg": 356.134
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T02:00:00.000Z",
+   "elevationDeg": -36.1588,
+   "azimuthDeg": 34.5844
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T04:00:00.000Z",
+   "elevationDeg": -20.8266,
+   "azimuthDeg": 64.3832
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T06:00:00.000Z",
+   "elevationDeg": -1.3425,
+   "azimuthDeg": 87.9404
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T08:00:00.000Z",
+   "elevationDeg": 17.7158,
+   "azimuthDeg": 110.9599
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T10:00:00.000Z",
+   "elevationDeg": 34.0569,
+   "azimuthDeg": 139.1268
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T12:00:00.000Z",
+   "elevationDeg": 41.7224,
+   "azimuthDeg": 176.2044
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T14:00:00.000Z",
+   "elevationDeg": 36.3123,
+   "azimuthDeg": 214.5143
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T16:00:00.000Z",
+   "elevationDeg": 21.0815,
+   "azimuthDeg": 244.2134
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T18:00:00.000Z",
+   "elevationDeg": 1.9664,
+   "azimuthDeg": 267.7151
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T20:00:00.000Z",
+   "elevationDeg": -17.5252,
+   "azimuthDeg": 290.6999
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-09-23T22:00:00.000Z",
+   "elevationDeg": -34.1156,
+   "azimuthDeg": 318.9009
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T00:00:00.000Z",
+   "elevationDeg": -64.9912,
+   "azimuthDeg": 350.8045
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T02:00:00.000Z",
+   "elevationDeg": -57.7721,
+   "azimuthDeg": 48.8954
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T04:00:00.000Z",
+   "elevationDeg": -39.4812,
+   "azimuthDeg": 81.1814
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T06:00:00.000Z",
+   "elevationDeg": -19.4279,
+   "azimuthDeg": 103.2623
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T08:00:00.000Z",
+   "elevationDeg": -1.0281,
+   "azimuthDeg": 124.2448
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T10:00:00.000Z",
+   "elevationDeg": 12.2739,
+   "azimuthDeg": 148.1127
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T12:00:00.000Z",
+   "elevationDeg": 18.4692,
+   "azimuthDeg": 175.8844
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T14:00:00.000Z",
+   "elevationDeg": 14.9429,
+   "azimuthDeg": 204.3427
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T16:00:00.000Z",
+   "elevationDeg": 3.0827,
+   "azimuthDeg": 229.384
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T18:00:00.000Z",
+   "elevationDeg": -13.9258,
+   "azimuthDeg": 250.8931
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T20:00:00.000Z",
+   "elevationDeg": -33.7786,
+   "azimuthDeg": 272.0745
+  },
+  {
+   "place": "pointe-du-raz",
+   "latitude": 48.039,
+   "longitude": -4.74,
+   "time": "2026-12-21T22:00:00.000Z",
+   "elevationDeg": -53.1046,
+   "azimuthDeg": 299.9202
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T00:00:00.000Z",
+   "elevationDeg": -41.0372,
+   "azimuthDeg": 0.6051
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T02:00:00.000Z",
+   "elevationDeg": -34.3464,
+   "azimuthDeg": 38.0932
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T04:00:00.000Z",
+   "elevationDeg": -18.5542,
+   "azimuthDeg": 67.009
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T06:00:00.000Z",
+   "elevationDeg": 0.6547,
+   "azimuthDeg": 90.4506
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T08:00:00.000Z",
+   "elevationDeg": 19.4521,
+   "azimuthDeg": 113.9731
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T10:00:00.000Z",
+   "elevationDeg": 34.882,
+   "azimuthDeg": 143.1016
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T12:00:00.000Z",
+   "elevationDeg": 41.1173,
+   "azimuthDeg": 180.6511
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T14:00:00.000Z",
+   "elevationDeg": 34.5499,
+   "azimuthDeg": 218.0243
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T16:00:00.000Z",
+   "elevationDeg": 18.9663,
+   "azimuthDeg": 246.9396
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T18:00:00.000Z",
+   "elevationDeg": 0.2312,
+   "azimuthDeg": 270.4185
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T20:00:00.000Z",
+   "elevationDeg": -18.939,
+   "azimuthDeg": 293.9884
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-03-20T22:00:00.000Z",
+   "elevationDeg": -34.438,
+   "azimuthDeg": 323.1626
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T00:00:00.000Z",
+   "elevationDeg": -17.1659,
+   "azimuthDeg": 1.8523
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T02:00:00.000Z",
+   "elevationDeg": -11.7305,
+   "azimuthDeg": 29.7672
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T04:00:00.000Z",
+   "elevationDeg": 1.2493,
+   "azimuthDeg": 54.0517
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T06:00:00.000Z",
+   "elevationDeg": 18.688,
+   "azimuthDeg": 75.4093
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T08:00:00.000Z",
+   "elevationDeg": 38.2325,
+   "azimuthDeg": 97.564
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T10:00:00.000Z",
+   "elevationDeg": 56.3215,
+   "azimuthDeg": 128.8232
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T12:00:00.000Z",
+   "elevationDeg": 64.5479,
+   "azimuthDeg": 184.0496
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T14:00:00.000Z",
+   "elevationDeg": 54.3116,
+   "azimuthDeg": 236.1682
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T16:00:00.000Z",
+   "elevationDeg": 35.753,
+   "azimuthDeg": 265.4894
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T18:00:00.000Z",
+   "elevationDeg": 16.2955,
+   "azimuthDeg": 287.2315
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T20:00:00.000Z",
+   "elevationDeg": -0.4633,
+   "azimuthDeg": 308.8071
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-06-21T22:00:00.000Z",
+   "elevationDeg": -12.9147,
+   "azimuthDeg": 333.592
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T00:00:00.000Z",
+   "elevationDeg": -40.6562,
+   "azimuthDeg": 5.5872
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T02:00:00.000Z",
+   "elevationDeg": -32.5774,
+   "azimuthDeg": 42.1042
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T04:00:00.000Z",
+   "elevationDeg": -16.1434,
+   "azimuthDeg": 70.0609
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T06:00:00.000Z",
+   "elevationDeg": 2.9522,
+   "azimuthDeg": 93.2547
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T08:00:00.000Z",
+   "elevationDeg": 21.667,
+   "azimuthDeg": 117.2191
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T10:00:00.000Z",
+   "elevationDeg": 36.2164,
+   "azimuthDeg": 147.4292
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T12:00:00.000Z",
+   "elevationDeg": 40.8341,
+   "azimuthDeg": 185.6291
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T14:00:00.000Z",
+   "elevationDeg": 32.7643,
+   "azimuthDeg": 222.0168
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T16:00:00.000Z",
+   "elevationDeg": 16.4479,
+   "azimuthDeg": 249.8899
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T18:00:00.000Z",
+   "elevationDeg": -2.4037,
+   "azimuthDeg": 273.034
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T20:00:00.000Z",
+   "elevationDeg": -21.5267,
+   "azimuthDeg": 296.973
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-09-23T22:00:00.000Z",
+   "elevationDeg": -36.3077,
+   "azimuthDeg": 327.2527
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T00:00:00.000Z",
+   "elevationDeg": -64.2946,
+   "azimuthDeg": 6.1761
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T02:00:00.000Z",
+   "elevationDeg": -53.4897,
+   "azimuthDeg": 57.4075
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T04:00:00.000Z",
+   "elevationDeg": -34.6847,
+   "azimuthDeg": 86.265
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T06:00:00.000Z",
+   "elevationDeg": -15.0861,
+   "azimuthDeg": 107.9145
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T08:00:00.000Z",
+   "elevationDeg": 1.9131,
+   "azimuthDeg": 129.5517
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T10:00:00.000Z",
+   "elevationDeg": 13.8125,
+   "azimuthDeg": 154.4621
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T12:00:00.000Z",
+   "elevationDeg": 17.7151,
+   "azimuthDeg": 182.7287
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T14:00:00.000Z",
+   "elevationDeg": 12.0677,
+   "azimuthDeg": 210.5594
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T16:00:00.000Z",
+   "elevationDeg": -0.7157,
+   "azimuthDeg": 234.7222
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T18:00:00.000Z",
+   "elevationDeg": -18.6984,
+   "azimuthDeg": 256.0325
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T20:00:00.000Z",
+   "elevationDeg": -38.4209,
+   "azimuthDeg": 278.2967
+  },
+  {
+   "place": "notre-dame-de-paris",
+   "latitude": 48.853,
+   "longitude": 2.35,
+   "time": "2026-12-21T22:00:00.000Z",
+   "elevationDeg": -56.5191,
+   "azimuthDeg": 310.045
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T00:00:00.000Z",
+   "elevationDeg": -41.0457,
+   "azimuthDeg": 7.8156
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T02:00:00.000Z",
+   "elevationDeg": -32.1933,
+   "azimuthDeg": 44.0619
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T04:00:00.000Z",
+   "elevationDeg": -15.2941,
+   "azimuthDeg": 71.545
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T06:00:00.000Z",
+   "elevationDeg": 3.9678,
+   "azimuthDeg": 94.5065
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T08:00:00.000Z",
+   "elevationDeg": 22.7598,
+   "azimuthDeg": 118.5468
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T10:00:00.000Z",
+   "elevationDeg": 37.0903,
+   "azimuthDeg": 149.1999
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T12:00:00.000Z",
+   "elevationDeg": 41.1238,
+   "azimuthDeg": 187.8297
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T14:00:00.000Z",
+   "elevationDeg": 32.4181,
+   "azimuthDeg": 223.9793
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T16:00:00.000Z",
+   "elevationDeg": 15.7417,
+   "azimuthDeg": 251.4726
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T18:00:00.000Z",
+   "elevationDeg": -3.2424,
+   "azimuthDeg": 274.4742
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T20:00:00.000Z",
+   "elevationDeg": -22.2777,
+   "azimuthDeg": 298.5637
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-03-20T22:00:00.000Z",
+   "elevationDeg": -36.6611,
+   "azimuthDeg": 329.2607
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T00:00:00.000Z",
+   "elevationDeg": -17.1592,
+   "azimuthDeg": 7.052
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T02:00:00.000Z",
+   "elevationDeg": -10.0531,
+   "azimuthDeg": 34.4683
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T04:00:00.000Z",
+   "elevationDeg": 3.8787,
+   "azimuthDeg": 58.0235
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T06:00:00.000Z",
+   "elevationDeg": 22.0951,
+   "azimuthDeg": 79.0795
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T08:00:00.000Z",
+   "elevationDeg": 41.7873,
+   "azimuthDeg": 101.9055
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T10:00:00.000Z",
+   "elevationDeg": 59.1276,
+   "azimuthDeg": 136.3867
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T12:00:00.000Z",
+   "elevationDeg": 64.2081,
+   "azimuthDeg": 195.5313
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T14:00:00.000Z",
+   "elevationDeg": 51.3779,
+   "azimuthDeg": 242.9192
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T16:00:00.000Z",
+   "elevationDeg": 32.2076,
+   "azimuthDeg": 269.8296
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T18:00:00.000Z",
+   "elevationDeg": 12.8559,
+   "azimuthDeg": 291.0552
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T20:00:00.000Z",
+   "elevationDeg": -3.3552,
+   "azimuthDeg": 312.9615
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-06-21T22:00:00.000Z",
+   "elevationDeg": -14.6226,
+   "azimuthDeg": 338.4549
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T00:00:00.000Z",
+   "elevationDeg": -40.3541,
+   "azimuthDeg": 12.7283
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T02:00:00.000Z",
+   "elevationDeg": -30.2333,
+   "azimuthDeg": 47.8478
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T04:00:00.000Z",
+   "elevationDeg": -12.8082,
+   "azimuthDeg": 74.4812
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T06:00:00.000Z",
+   "elevationDeg": 6.418,
+   "azimuthDeg": 97.3193
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T08:00:00.000Z",
+   "elevationDeg": 24.8935,
+   "azimuthDeg": 121.9335
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T10:00:00.000Z",
+   "elevationDeg": 38.2012,
+   "azimuthDeg": 153.7439
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T12:00:00.000Z",
+   "elevationDeg": 40.5325,
+   "azimuthDeg": 192.7489
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T14:00:00.000Z",
+   "elevationDeg": 30.4438,
+   "azimuthDeg": 227.7465
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T16:00:00.000Z",
+   "elevationDeg": 13.1547,
+   "azimuthDeg": 254.3059
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T18:00:00.000Z",
+   "elevationDeg": -6.0023,
+   "azimuthDeg": 277.0977
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T20:00:00.000Z",
+   "elevationDeg": -24.789,
+   "azimuthDeg": 301.6938
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-09-23T22:00:00.000Z",
+   "elevationDeg": -38.3167,
+   "azimuthDeg": 333.6044
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T00:00:00.000Z",
+   "elevationDeg": -63.8216,
+   "azimuthDeg": 17.5852
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T02:00:00.000Z",
+   "elevationDeg": -50.4922,
+   "azimuthDeg": 64.0254
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T04:00:00.000Z",
+   "elevationDeg": -31.1051,
+   "azimuthDeg": 90.5675
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T06:00:00.000Z",
+   "elevationDeg": -11.6177,
+   "azimuthDeg": 111.7384
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T08:00:00.000Z",
+   "elevationDeg": 4.6215,
+   "azimuthDeg": 133.7262
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T10:00:00.000Z",
+   "elevationDeg": 15.4525,
+   "azimuthDeg": 159.3466
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T12:00:00.000Z",
+   "elevationDeg": 17.6541,
+   "azimuthDeg": 187.9247
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T14:00:00.000Z",
+   "elevationDeg": 10.3712,
+   "azimuthDeg": 215.2376
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T16:00:00.000Z",
+   "elevationDeg": -3.5656,
+   "azimuthDeg": 238.6765
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T18:00:00.000Z",
+   "elevationDeg": -22.1495,
+   "azimuthDeg": 259.7049
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T20:00:00.000Z",
+   "elevationDeg": -41.9991,
+   "azimuthDeg": 282.6842
+  },
+  {
+   "place": "strasbourg-cathedral",
+   "latitude": 48.582,
+   "longitude": 7.751,
+   "time": "2026-12-21T22:00:00.000Z",
+   "elevationDeg": -59.2954,
+   "azimuthDeg": 317.768
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T00:00:00.000Z",
+   "elevationDeg": -46.5351,
+   "azimuthDeg": 5.0842
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T02:00:00.000Z",
+   "elevationDeg": -37.1876,
+   "azimuthDeg": 44.1045
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T04:00:00.000Z",
+   "elevationDeg": -18.5789,
+   "azimuthDeg": 71.2471
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T06:00:00.000Z",
+   "elevationDeg": 2.6964,
+   "azimuthDeg": 92.5016
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T08:00:00.000Z",
+   "elevationDeg": 23.6424,
+   "azimuthDeg": 114.4885
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T10:00:00.000Z",
+   "elevationDeg": 40.6027,
+   "azimuthDeg": 144.026
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T12:00:00.000Z",
+   "elevationDeg": 46.5709,
+   "azimuthDeg": 185.1104
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T14:00:00.000Z",
+   "elevationDeg": 37.3761,
+   "azimuthDeg": 224.0025
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T16:00:00.000Z",
+   "elevationDeg": 18.9988,
+   "azimuthDeg": 251.1611
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T18:00:00.000Z",
+   "elevationDeg": -1.8993,
+   "azimuthDeg": 272.4608
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T20:00:00.000Z",
+   "elevationDeg": -23.1697,
+   "azimuthDeg": 294.5006
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-03-20T22:00:00.000Z",
+   "elevationDeg": -40.2063,
+   "azimuthDeg": 324.0929
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T00:00:00.000Z",
+   "elevationDeg": -22.6398,
+   "azimuthDeg": 4.9328
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T02:00:00.000Z",
+   "elevationDeg": -15.415,
+   "azimuthDeg": 33.1275
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T04:00:00.000Z",
+   "elevationDeg": -0.0128,
+   "azimuthDeg": 56.2155
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T06:00:00.000Z",
+   "elevationDeg": 19.321,
+   "azimuthDeg": 75.5539
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T08:00:00.000Z",
+   "elevationDeg": 40.9445,
+   "azimuthDeg": 95.3608
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T10:00:00.000Z",
+   "elevationDeg": 61.3677,
+   "azimuthDeg": 125.7728
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T12:00:00.000Z",
+   "elevationDeg": 69.7486,
+   "azimuthDeg": 193.1288
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T14:00:00.000Z",
+   "elevationDeg": 55.1355,
+   "azimuthDeg": 246.6873
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T16:00:00.000Z",
+   "elevationDeg": 33.7989,
+   "azimuthDeg": 271.5709
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T18:00:00.000Z",
+   "elevationDeg": 12.5225,
+   "azimuthDeg": 290.5843
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T20:00:00.000Z",
+   "elevationDeg": -5.6766,
+   "azimuthDeg": 310.7958
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-06-21T22:00:00.000Z",
+   "elevationDeg": -18.8863,
+   "azimuthDeg": 335.6249
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T00:00:00.000Z",
+   "elevationDeg": -45.916,
+   "azimuthDeg": 10.4887
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T02:00:00.000Z",
+   "elevationDeg": -35.0488,
+   "azimuthDeg": 47.973
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T04:00:00.000Z",
+   "elevationDeg": -15.8641,
+   "azimuthDeg": 74.0052
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T06:00:00.000Z",
+   "elevationDeg": 5.3636,
+   "azimuthDeg": 95.0588
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T08:00:00.000Z",
+   "elevationDeg": 26.0872,
+   "azimuthDeg": 117.639
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T10:00:00.000Z",
+   "elevationDeg": 42.046,
+   "azimuthDeg": 148.6574
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T12:00:00.000Z",
+   "elevationDeg": 46.0514,
+   "azimuthDeg": 190.5151
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T14:00:00.000Z",
+   "elevationDeg": 35.2256,
+   "azimuthDeg": 227.8487
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T16:00:00.000Z",
+   "elevationDeg": 16.1908,
+   "azimuthDeg": 253.804
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T18:00:00.000Z",
+   "elevationDeg": -4.8959,
+   "azimuthDeg": 274.808
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T20:00:00.000Z",
+   "elevationDeg": -25.9681,
+   "azimuthDeg": 297.3519
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-09-23T22:00:00.000Z",
+   "elevationDeg": -42.1797,
+   "azimuthDeg": 328.4476
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T00:00:00.000Z",
+   "elevationDeg": -69.411,
+   "azimuthDeg": 15.7127
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T02:00:00.000Z",
+   "elevationDeg": -54.1994,
+   "azimuthDeg": 67.7622
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T04:00:00.000Z",
+   "elevationDeg": -32.644,
+   "azimuthDeg": 92.2307
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T06:00:00.000Z",
+   "elevationDeg": -11.2166,
+   "azimuthDeg": 111.202
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T08:00:00.000Z",
+   "elevationDeg": 6.9419,
+   "azimuthDeg": 131.5187
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T10:00:00.000Z",
+   "elevationDeg": 19.7279,
+   "azimuthDeg": 156.5197
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T12:00:00.000Z",
+   "elevationDeg": 23.0988,
+   "azimuthDeg": 185.8384
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T14:00:00.000Z",
+   "elevationDeg": 15.644,
+   "azimuthDeg": 213.9031
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T16:00:00.000Z",
+   "elevationDeg": 0.5164,
+   "azimuthDeg": 236.8342
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T18:00:00.000Z",
+   "elevationDeg": -19.399,
+   "azimuthDeg": 256.11
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T20:00:00.000Z",
+   "elevationDeg": -41.2194,
+   "azimuthDeg": 276.0259
+  },
+  {
+   "place": "notre-dame-de-la-garde",
+   "latitude": 43.284,
+   "longitude": 5.371,
+   "time": "2026-12-21T22:00:00.000Z",
+   "elevationDeg": -61.6725,
+   "azimuthDeg": 307.0832
+  }
+ ],
+ "moonQuarters": [
+  {
+   "quarter": 2,
+   "time": "2026-01-03T10:03:26.043Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-01-10T15:49:02.731Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-01-18T19:52:39.367Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-01-26T04:47:56.246Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-02-01T22:09:49.657Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-02-09T12:43:45.995Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-02-17T12:01:47.328Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-02-24T12:28:08.778Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-03-03T11:38:32.022Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-03-11T09:39:07.989Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-03-19T01:24:05.931Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-03-25T19:18:16.167Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-04-02T02:12:36.809Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-04-10T04:52:18.443Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-04-17T11:52:21.628Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-04-24T02:32:17.627Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-05-01T17:23:47.564Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-05-09T21:11:02.665Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-05-16T20:01:32.344Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-05-23T11:11:29.459Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-05-31T08:45:48.291Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-06-08T10:00:59.929Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-06-15T02:54:39.007Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-06-21T21:55:57.925Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-06-29T23:57:17.744Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-07-07T19:29:28.944Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-07-14T09:44:04.307Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-07-21T11:06:11.173Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-07-29T14:36:19.011Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-08-06T02:21:58.672Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-08-12T17:37:11.343Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-08-20T02:46:58.247Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-08-28T04:19:06.085Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-09-04T07:51:42.224Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-09-11T03:27:28.467Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-09-18T20:44:24.674Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-09-26T16:49:32.233Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-10-03T13:25:33.710Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-10-10T15:50:36.724Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-10-18T16:13:19.496Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-10-26T04:12:15.538Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-11-01T20:28:58.794Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-11-09T07:02:42.392Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-11-17T11:48:27.140Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-11-24T14:54:04.191Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-12-01T06:09:14.538Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2026-12-09T00:52:31.284Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2026-12-17T05:43:14.883Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2026-12-24T01:28:45.040Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2026-12-30T19:00:07.341Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-01-07T20:25:05.910Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-01-15T20:35:05.099Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-01-22T12:17:50.281Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-01-29T10:56:06.214Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-02-06T15:56:47.415Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-02-14T07:59:02.102Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-02-20T23:24:07.298Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-02-28T05:17:07.361Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-03-08T09:30:07.391Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-03-15T16:25:43.868Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-03-22T10:44:19.393Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-03-30T00:54:36.127Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-04-06T23:51:45.366Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-04-13T22:57:12.539Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-04-20T22:27:44.813Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-04-28T20:18:33.313Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-05-06T10:59:10.533Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-05-13T04:44:28.256Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-05-20T10:59:39.474Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-05-28T13:58:35.177Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-06-04T19:40:51.143Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-06-11T10:56:42.858Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-06-19T00:45:01.303Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-06-27T04:54:56.888Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-07-04T03:02:32.965Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-07-10T18:39:36.903Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-07-18T15:45:36.038Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-07-26T16:55:28.698Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-08-02T10:05:42.274Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-08-09T04:54:48.450Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-08-17T07:29:19.949Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-08-25T02:27:54.872Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-08-31T17:41:40.859Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-09-07T18:31:57.387Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-09-15T23:04:09.408Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-09-23T10:21:00.695Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-09-30T02:36:34.580Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-10-07T11:48:03.430Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-10-15T13:47:34.041Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-10-22T17:29:42.781Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-10-29T13:37:04.567Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-11-06T08:00:40.459Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-11-14T03:26:25.672Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-11-21T00:48:46.049Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-11-28T03:24:59.323Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2027-12-06T05:22:47.178Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2027-12-13T16:09:18.503Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2027-12-20T09:11:27.577Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2027-12-27T20:12:56.268Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-01-05T01:41:05.516Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-01-12T04:03:35.250Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-01-18T19:26:33.105Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-01-26T15:13:09.905Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-02-03T19:11:06.093Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-02-10T15:04:13.909Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-02-17T08:08:37.047Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-02-25T10:38:03.838Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-03-04T09:02:59.056Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-03-11T01:06:30.808Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-03-17T23:23:29.447Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-03-26T04:31:58.183Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-04-02T19:16:02.457Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-04-09T10:27:05.370Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-04-16T16:37:33.013Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-04-24T19:47:31.131Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-05-02T02:26:17.865Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-05-08T19:49:27.382Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-05-16T10:43:44.353Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-05-24T08:16:51.263Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-05-31T07:37:09.310Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-06-07T06:09:21.941Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-06-15T04:28:00.786Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-06-22T18:28:05.407Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-06-29T12:11:08.951Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-07-06T18:11:24.613Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-07-14T20:57:08.436Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-07-22T03:02:12.962Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-07-28T17:40:40.585Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-08-05T08:10:25.424Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-08-13T11:45:53.686Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-08-20T10:44:18.950Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-08-27T01:36:27.888Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-09-03T23:48:12.853Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-09-12T00:46:19.895Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-09-18T18:24:12.490Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-09-25T13:10:39.556Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-10-03T16:25:38.555Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-10-11T11:57:24.651Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-10-18T02:57:16.332Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-10-25T04:53:46.220Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-11-02T09:17:57.674Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-11-09T21:26:25.464Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-11-16T13:18:29.111Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-11-24T00:15:17.380Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-12-02T01:40:45.472Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2028-12-09T05:39:27.984Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2028-12-16T02:06:48.928Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2028-12-23T21:45:36.998Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2028-12-31T16:48:59.675Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-01-07T13:26:54.727Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-01-14T17:25:04.419Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-01-22T19:23:50.520Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-01-30T06:04:04.988Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-02-05T21:52:44.986Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-02-13T10:32:07.641Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-02-21T15:10:33.123Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-02-28T17:10:41.546Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-03-07T07:52:10.491Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-03-15T04:19:53.395Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-03-23T07:33:44.287Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-03-30T02:26:51.604Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-04-05T19:52:10.223Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-04-13T21:40:49.335Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-04-21T19:50:43.362Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-04-28T10:37:18.225Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-05-05T09:48:38.870Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-05-13T13:42:45.386Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-05-21T04:16:43.002Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-05-27T18:38:01.011Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-06-04T01:19:27.021Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-06-12T03:51:06.526Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-06-19T09:54:38.929Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-06-26T03:22:52.166Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-07-03T17:58:06.147Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-07-11T15:51:38.023Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-07-18T14:14:49.622Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-07-25T13:36:20.875Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-08-02T11:15:57.325Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-08-10T01:56:20.601Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-08-16T18:55:50.948Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-08-24T01:51:52.268Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-09-01T04:33:41.462Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-09-08T10:44:53.514Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-09-15T01:29:52.687Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-09-22T16:29:59.007Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-09-30T20:57:28.269Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-10-07T19:15:03.475Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-10-14T11:09:30.604Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-10-22T09:28:16.872Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-10-30T11:32:51.474Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-11-06T04:24:36.398Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-11-13T00:35:54.051Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-11-21T04:03:39.129Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-11-28T23:48:22.891Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2029-12-05T14:52:35.435Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2029-12-12T17:50:07.466Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2029-12-20T22:47:07.108Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2029-12-28T09:49:39.607Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-01-04T02:50:03.334Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-01-11T14:06:43.274Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-01-19T15:54:55.641Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-01-26T18:14:58.662Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-02-02T16:08:04.913Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-02-10T11:50:07.700Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-02-18T06:20:21.113Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-02-25T01:58:15.409Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-03-04T06:35:17.321Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-03-12T08:48:18.068Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-03-19T17:57:01.027Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-03-26T09:51:56.433Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-04-02T22:03:11.573Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-04-11T02:57:32.212Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-04-18T03:20:30.180Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-04-24T18:39:31.608Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-05-02T14:12:51.587Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-05-10T17:12:03.966Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-05-17T11:19:35.510Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-05-24T04:57:59.754Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-06-01T06:22:00.842Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-06-09T03:36:18.897Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-06-15T18:41:27.269Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-06-22T17:20:14.994Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-06-30T21:35:03.841Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-07-08T11:02:25.520Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-07-15T02:12:26.716Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-07-22T08:08:08.665Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-07-30T11:11:33.215Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-08-06T16:43:13.531Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-08-13T10:44:54.214Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-08-21T01:15:59.969Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-08-28T23:07:52.736Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-09-04T21:56:05.202Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-09-11T21:18:28.879Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-09-19T19:57:03.488Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-09-27T09:55:09.045Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-10-04T03:56:40.590Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-10-11T10:47:25.227Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-10-19T14:50:56.690Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-10-26T20:17:26.387Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-11-02T11:56:30.471Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-11-10T03:30:56.196Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-11-18T08:32:55.606Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-11-25T06:46:57.337Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-12-01T22:57:24.133Z"
+  },
+  {
+   "quarter": 2,
+   "time": "2030-12-09T22:41:06.011Z"
+  },
+  {
+   "quarter": 3,
+   "time": "2030-12-18T00:01:46.179Z"
+  },
+  {
+   "quarter": 0,
+   "time": "2030-12-24T17:32:41.689Z"
+  },
+  {
+   "quarter": 1,
+   "time": "2030-12-31T13:36:43.659Z"
+  }
+ ]
+}
