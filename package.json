@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "vite build --config vite.e2e.config.ts && playwright test --trace off"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

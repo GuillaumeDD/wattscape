@@ -227,3 +227,21 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   France in one click.
 - **Revisit if:** viewers near a border complain, or GPS positions at sea need a
   wider margin.
+
+## D-016 — Palette, darkening chains and night darkness
+
+- **Context:** B-009 fixes the palette, the dithering and the light keyframes that
+  the mockups (B-010) will be drawn with. ARCHITECTURE asked for about 24 colours,
+  a signature colour per source, and light changes in palette steps.
+- **Options:** night drawn as (a) a darker palette colour per colour, chained, with
+  dithered fractional steps; (b) an RGB multiply (leaves the palette, rejected by
+  ARCHITECTURE § Art direction); (c) a second, night palette (twice the colours to
+  draw and validate). Night darkness of (a): 2 or 3 steps.
+- **Decision:** (a), 24 colours (ARCHITECTURE § Art direction), land darkening
+  towards the sea's blues and never into a source's colour; 2 steps at night,
+  because 3 steps turned most land into the night sky on the test card. Proposed
+  by Claude, 2026-11-11; to be validated with the mockups (B-010, PRD Q-1).
+- **Why:** the scene stays in palette at every hour, the change of light spreads
+  evenly by dithering, and sources stay recognisable at night.
+- **Revisit if:** the mockups show the night too dark or too flat, or a colour
+  reads badly next to its neighbours.
