@@ -111,8 +111,8 @@ revisit it.
   asked, or a code outside the API's list makes it "unavailable". Freezing drizzle
   and freezing rain are drawn as drizzle and rain, snow grains as snow, hail as a
   storm (table in ARCHITECTURE § Open-Meteo). The position sent is rounded to 0.1°
-  and printed with one decimal. A weather reading is stale after 1 h. Proposed by Claude, 2026-11-11, to confirm by
-  Guillaume.
+  and printed with one decimal. A weather reading is stale after 1 h. Proposed by Claude, confirmed by
+  Guillaume, 2026-11-11 (end-of-step questionnaire in the project thread).
 - **Why:** the same rule as for the grid keeps the scene honest; ice and hail are
   rare in France and would each cost a particle effect for a few days a year.
 - **Revisit if:** freezing rain or hail deserve their own effect (Growth), or the
@@ -132,7 +132,9 @@ revisit it.
   to the French region next door. On refusal the viewer stays on the current area;
   abroad, France is shown without forgetting the remembered region.
   Region names are the official French names in every language. Proposed by
-  Claude, 2026-11-11, to confirm by Guillaume.
+  Claude, confirmed by Guillaume, 2026-11-11 (end-of-step questionnaire), who adds
+  that a more exact lookup is better for the viewer as soon as it can be had: the
+  switch to map cells in B-008 is that correction.
 - **Why:** the grid is B-008's job and needs DS-04 decided first; most people live
   near a prefecture, and the error is one click to fix.
 - **Revisit if:** Guillaume wants (b) now, or B-008 lands (the lookup then switches
@@ -148,9 +150,27 @@ revisit it.
   until gml.noaa.gov is allowed in the `wattscape` environment and read NOAA's
   values; (c) Guillaume reads a few values on NOAA's calculator by hand.
 - **Decision:** (a) now: a stricter check than the target (agreement within 0.01°
-  with the sun up). The algorithm stays NOAA's. Proposed by Claude, 2026-11-11, to
-  confirm by Guillaume, who may add (b) or (c).
+  with the sun up). The algorithm stays NOAA's. Proposed by Claude, 2026-11-11;
+  confirmed by Guillaume, 2026-11-11 (end-of-step questionnaire) **with option (b)**:
+  gml.noaa.gov was allowed in the `wattscape` environment the same day, NOAA's own
+  code was read (S-008), and `tests/sun.test.ts` now also checks `sunPosition`
+  against a transcription of it on 20,000 random instants and places (agreement
+  within 10⁻⁶°; 10⁻⁹° measured).
 - **Why:** a second, independent and more precise model is a stronger test than one
   calculator built on the same equations; the fixture makes it reproducible offline.
 - **Revisit if:** gml.noaa.gov becomes reachable, or a value read on NOAA's
   calculator disagrees by more than 0.1° with the sun up.
+
+## D-013 — The "Live data" page is public
+
+- **Context:** B-007 added a debug page listing every live figure with its source
+  and time (ARCHITECTURE § Debug page). It could be hidden (no link) or linked from
+  the page.
+- **Options:** (a) linked from the credits, public; (b) reachable only by its URL;
+  (c) left out of the deployed build.
+- **Decision:** (a). Proposed by Claude, confirmed by Guillaume, 2026-11-11
+  (end-of-step questionnaire).
+- **Why:** it is the proof that every figure on screen is true and traceable
+  (AGENTS.md §1); it shows only open data and a prefecture's position, never the
+  viewer's.
+- **Revisit if:** it ever needs to show anything that is not public open data.

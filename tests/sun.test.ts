@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sunPosition, type SunPosition } from "../src/sky/sun";
+import { noaaAzEl } from "./noaa-reference";
 import { SKY_REFERENCE } from "./sky-reference";
 
 function at(time: string, latitude: number, longitude: number): SunPosition {
@@ -58,6 +59,31 @@ describe("sunPosition against an independent ephemeris (S-012)", () => {
       // or take the refraction gap just below it (< 0.6°).
       if (Math.abs(r.elevationDeg) > 0.6) expect(p.elevationDeg > 0).toBe(r.elevationDeg > 0);
     }
+  });
+});
+
+describe("sunPosition against NOAA's own code (S-008)", () => {
+  it("matches NOAA's calcAzEl on 20,000 random instants and places in and around France", () => {
+    // A seeded LCG (Numerical Recipes): the same points on every run and engine.
+    let seed = 2026;
+    const next = (): number => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      return seed / 4294967296;
+    };
+    let worst = 0;
+    for (let i = 0; i < 20_000; i++) {
+      const timeMs = Date.UTC(2000, 0, 1) + next() * 50 * 365.25 * 86_400_000;
+      const latitude = 41 + next() * 10;
+      const longitude = -6 + next() * 16;
+      const ours = at(new Date(timeMs).toISOString(), latitude, longitude);
+      const noaa = noaaAzEl(Date.parse(new Date(timeMs).toISOString()), latitude, longitude);
+      worst = Math.max(
+        worst,
+        Math.abs(ours.elevationDeg - noaa.elevation),
+        azimuthGap(ours.azimuthDeg, noaa.azimuth),
+      );
+    }
+    expect(worst).toBeLessThan(1e-6);
   });
 });
 

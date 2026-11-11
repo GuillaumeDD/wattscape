@@ -2,8 +2,8 @@
  * The sun's position seen from a place at an instant, by NOAA's solar position
  * algorithm (S-008: the equations of NOAA's Solar Calculator, after Meeus,
  * "Astronomical Algorithms"). Accurate to about 0.01° between 1800 and 2100, far
- * finer than a pixel. Checked against an independent ephemeris (S-012) in
- * tests/sun.test.ts.
+ * finer than a pixel. Checked in tests/sun.test.ts against NOAA's own code and
+ * against an independent ephemeris (S-012).
  *
  * Determinism: this uses `Math.sin` and friends, whose last bit may differ between
  * engines. That is allowed because the sun only animates the scene (light, sky); it
