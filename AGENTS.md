@@ -26,6 +26,7 @@ sun's real position for day and night. Inspired by
 | When you…                                        | Read first                                               |
 | ------------------------------------------------ | -------------------------------------------------------- |
 | start or scope a feature                         | `docs/PRD.md`, `docs/BACKLOG.md`                         |
+| revisit a choice already made                    | `docs/DECISIONS.md`                                      |
 | touch code, dependencies, CI or the build        | `docs/ARCHITECTURE.md`                                   |
 | read, show or explain a figure from an API       | `docs/ARCHITECTURE.md` § Data sources, `docs/SOURCES.md` |
 | draw a sprite, landmark, palette or animation    | `docs/ARCHITECTURE.md` § Art direction, `ASSETS.md`      |
@@ -249,6 +250,10 @@ specific. Focus on it:
 - At the end of a step, put every provisional choice still open to Guillaume in one
   questionnaire: each with a recommendation and room for a free answer. Record the
   answers with their provenance ("Guillaume, date") in one PR.
+- **Decisions are auditable.** Every decision (an answered question, a rejected
+  option, a rule) gets an entry in `docs/DECISIONS.md`: context, options, decision,
+  who and when, why, and what would make us revisit it. A later change reverses an
+  entry with a new entry, never by editing the old one.
 
 ### Planning & backlog
 

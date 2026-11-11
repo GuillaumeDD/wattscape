@@ -227,24 +227,37 @@ mockups of B-010 are validated.
 
 ### Landmarks
 
-First list, to be checked against PRD §6 (copyright) and drawn region by region in
-B-016. "PD" means the work is in the public domain (natural site, or architect dead
-for more than 70 years).
+Only public-domain works and natural or generic sites are drawn (PRD §6, D-004).
+**Before a landmark is drawn**, its row below gets its copyright basis and source,
+so the choice can be audited and revisited. "PD" means public domain (in France: the
+author died more than 70 years ago, counted from 1 January after the death).
+Statuses: `candidate` (basis not checked), `cleared` (basis checked, source cited),
+`excluded` (protected, with the reason).
 
-| Region                     | Landmarks                                                                                     |
-| -------------------------- | --------------------------------------------------------------------------------------------- |
-| Île-de-France              | Eiffel Tower (PD; lit plainly, no sparkle), Sacré-Cœur (PD), Arc de Triomphe (PD)             |
-| Normandie                  | Étretat cliffs (natural), port of Le Havre cranes (generic), Mont-Saint-Michel (PD)           |
-| Hauts-de-France            | Twin slag heaps of Loos-en-Gohelle (natural/industrial), a belfry (PD), Amiens cathedral (PD) |
-| Grand Est                  | Strasbourg cathedral (PD), Champagne vineyards (generic), Haut-Kœnigsbourg (PD)               |
-| Centre-Val de Loire        | Château de Chambord (PD), Chartres cathedral (PD)                                             |
-| Bourgogne-Franche-Comté    | Hospices de Beaune roofs (PD), Besançon citadel (PD), vineyards (generic)                     |
-| Pays de la Loire           | Château des ducs de Bretagne (PD), salt marshes of Guérande (generic)                         |
-| Bretagne                   | A lighthouse at sea (PD), Carnac standing stones (PD)                                         |
-| Nouvelle-Aquitaine         | Dune du Pilat (natural), Fort Boyard (PD), Bordeaux Place de la Bourse (PD)                   |
-| Occitanie                  | Pont du Gard (PD), Cité de Carcassonne (PD), Pic du Midi (natural)                            |
-| Auvergne-Rhône-Alpes       | Mont Blanc (natural), Puy de Dôme and the volcanoes (natural), Fourvière (PD)                 |
-| Provence-Alpes-Côte d'Azur | Notre-Dame de la Garde (PD), the Calanques (natural), lavender fields (generic)               |
+| Region                     | Landmark                                       | Basis (to check)                                   | Status    |
+| -------------------------- | ---------------------------------------------- | -------------------------------------------------- | --------- |
+| Normandie (Seine-Maritime) | Étretat cliffs, arch and needle                | natural site                                       | candidate |
+| Normandie (Seine-Maritime) | Port of Le Havre, container cranes             | generic industrial equipment                       | candidate |
+| Normandie (Seine-Maritime) | Saint-Joseph church, Le Havre                  | Auguste Perret, died 1954: PD since 2025           | candidate |
+| Normandie (Seine-Maritime) | Fécamp, Palais Bénédictine                     | architect Camille Albert, death year to check      | candidate |
+| Normandie (Seine-Maritime) | Fécamp cliffs and harbour                      | natural site, generic                              | candidate |
+| Normandie                  | Mont-Saint-Michel                              | medieval                                           | candidate |
+| Normandie                  | Pont de Normandie                              | opened 1995, designers alive or recently deceased  | excluded  |
+| Île-de-France              | Eiffel Tower, lit plainly (no sparkle)         | Gustave Eiffel, died 1923; lighting is protected   | candidate |
+| Île-de-France              | Sacré-Cœur, Arc de Triomphe                    | 19th century, authors long dead                    | candidate |
+| Hauts-de-France            | Twin slag heaps of Loos-en-Gohelle             | natural/industrial site                            | candidate |
+| Hauts-de-France            | A belfry, Amiens cathedral                     | medieval                                           | candidate |
+| Grand Est                  | Strasbourg cathedral, Haut-Kœnigsbourg         | medieval; restoration 1908 (Bodo Ebhardt, d. 1945) | candidate |
+| Grand Est                  | Champagne vineyards                            | generic                                            | candidate |
+| Centre-Val de Loire        | Château de Chambord, Chartres cathedral        | Renaissance, medieval                              | candidate |
+| Bourgogne-Franche-Comté    | Hospices de Beaune, Besançon citadel           | 15th and 17th century                              | candidate |
+| Pays de la Loire           | Château des ducs de Bretagne, Guérande         | medieval; salt marshes generic                     | candidate |
+| Bretagne                   | A lighthouse at sea, Carnac stones             | 19th-century lighthouse to pick; prehistoric       | candidate |
+| Nouvelle-Aquitaine         | Dune du Pilat, Fort Boyard, Place de la Bourse | natural; 19th century; 18th century                | candidate |
+| Occitanie                  | Pont du Gard, Carcassonne, Pic du Midi         | Roman; medieval (Viollet-le-Duc, d. 1879); natural | candidate |
+| Occitanie                  | Viaduc de Millau                               | opened 2004, architect alive                       | excluded  |
+| Auvergne-Rhône-Alpes       | Mont Blanc, Puy de Dôme, Fourvière             | natural; natural; 19th century                     | candidate |
+| Provence-Alpes-Côte d'Azur | Notre-Dame de la Garde, Calanques, lavender    | 19th century; natural; generic                     | candidate |
 
 ## Rendering and loop
 

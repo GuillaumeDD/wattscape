@@ -81,8 +81,11 @@ idea that the grid can be seen.
   - Between the two, detail fades in and out smoothly (level of detail), never pops.
 - **Pan** by drag, arrows or WASD; the camera drifts slowly on its own after a few
   seconds of inactivity, like a screensaver.
-- **Idle tour:** left alone, the camera alternates between the viewer's region and
-  short flights to other regions or the national view (rhythm: open question Q-6).
+- **Idle tour:** left alone, the camera stays on the viewer's region and, every 5
+  minutes, takes a 1-minute flight to another region or the national view (Q-6).
+  The tour can be switched off (setting, remembered in the browser).
+- **Home button:** one button (and the `Home` key) flies back to the viewer's own
+  position (or home region) from anywhere, at any zoom (Q-6).
 
 ### 4.4 Landmarks (POIs)
 
@@ -164,14 +167,16 @@ idea that the grid can be seen.
     stays non-commercial (no ads, no subscription).
   - Geographic shapes (regions, coast): an open source under Licence Ouverte or ODbL,
     chosen in B-008 (ARCHITECTURE § Map).
-- **Landmarks and copyright** (to be decided: Q-4). In France, freedom of panorama is
+- **Landmarks and copyright** (decided: Q-4, D-004). In France, freedom of panorama is
   narrow: a recent building or bridge stays protected until 70 years after its
   architect's death. Old landmarks (Eiffel Tower structure, Mont-Saint-Michel,
   cathedrals, Pont du Gard, Étretat cliffs) are free to draw. The Eiffel Tower's
   **night illumination and sparkle** are claimed as a protected work by its operator;
   recent works (Viaduc de Millau, Pont de Normandie, Louvre pyramid) are protected.
-  Proposed rule: draw only public-domain works, and draw the tower lit plainly, not
-  sparkling.
+  Rule: draw only public-domain works, and draw the tower lit plainly, not
+  sparkling. Each landmark's status (author, date of death or "natural site",
+  source) is recorded in ARCHITECTURE § Landmarks before it is drawn, so the choice
+  can be audited and revisited.
 
 ## 7. Art direction (direction A chosen: Q-1)
 
@@ -212,7 +217,9 @@ Each step ends with a playable deployed build and a questionnaire of open choice
    two regions, a palette, the six source sprites; Guillaume validates (B-008 to
    B-010).
 4. **Step 3 — First region:** map, zoom and pan, plants driven by live data, day and
-   night, for one region and the national view (B-011 to B-015).
+   night, for Normandie, detailed first in Seine-Maritime (Le Havre, Fécamp, Étretat,
+   the Paluel and Penly nuclear plants, the Fécamp offshore wind farm), and the
+   national view (B-011 to B-015).
 5. **Step 4 — All regions:** landmarks and plants for the 12 regions, idle tour
    (B-016 to B-017).
 6. **Step 5 — Weather and learning layer:** weather effects, legend, captions,
@@ -230,21 +237,22 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-004 | CO₂ intensity of the area as a subtle tint of the sky or a smog layer                  | proposed |
 | G-005 | Ambient sound (wind, rain, a hum that follows consumption), muted by default           | proposed |
 | G-006 | A "day in a minute" replay of today's data                                             | proposed |
-| G-007 | Offshore wind farms drawn at sea (Saint-Nazaire, Fécamp, Saint-Brieuc…)                | proposed |
+| G-007 | Offshore wind farms drawn at sea (Saint-Nazaire, Fécamp, Saint-Brieuc…)                | planned  |
 | G-008 | Pumped-storage plants (STEP) pumping water uphill at night, from the `pompage` figure  | proposed |
 | G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | proposed |
 
 ## 10. Open questions
 
-Each with a recommendation; answers are recorded here with their date.
+Each with a recommendation; answers are recorded here with their date, and the
+decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 
-| Id  | Question                                                        | Recommendation                                                                                       | Answer                    |
-| --- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------- |
-| Q-1 | Art direction: isometric map (A) or side panorama (B)?          | A, because the France ↔ region zoom needs a real map                                                 | A (Guillaume, 2026-11-11) |
-| Q-2 | Docs and code in English (like Return of the Runners)?          | Yes; the app itself defaults to French                                                               |                           |
-| Q-3 | Licence: GPL-3.0-or-later code, CC BY-SA 4.0 art?               | Yes, same as Return of the Runners (already in `LICENSE`)                                            |                           |
-| Q-4 | Landmarks: only public-domain works, tower lit without sparkle? | Yes (§6); recent works such as the Viaduc de Millau are left out                                     |                           |
-| Q-5 | First region for step 3?                                        | Normandie: coast, cliffs, a port, three nuclear sites, offshore wind; it exercises the most features |                           |
-| Q-6 | Idle tour rhythm                                                | Stay on the home region; every 5 minutes, a 1-minute flight elsewhere                                |                           |
-| Q-7 | Frame rate cap                                                  | 30 fps: pixel art barely gains from more, and it halves the battery cost                             |                           |
+| Id  | Question                                                        | Recommendation                                                                                       | Answer                                                                |
+| --- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Q-1 | Art direction: isometric map (A) or side panorama (B)?          | A, because the France ↔ region zoom needs a real map                                                 | A (Guillaume, 2026-11-11)                                             |
+| Q-2 | Docs and code in English (like Return of the Runners)?          | Yes; the app itself defaults to French                                                               | Yes (Guillaume, 2026-11-11)                                           |
+| Q-3 | Licence: GPL-3.0-or-later code, CC BY-SA 4.0 art?               | Yes, same as Return of the Runners (already in `LICENSE`)                                            | Yes (Guillaume, 2026-11-11)                                           |
+| Q-4 | Landmarks: only public-domain works, tower lit without sparkle? | Yes (§6); recent works such as the Viaduc de Millau are left out                                     | Yes, and trace each decision (Guillaume, 2026-11-11)                  |
+| Q-5 | First region for step 3?                                        | Normandie: coast, cliffs, a port, three nuclear sites, offshore wind; it exercises the most features | Normandie, Seine-Maritime first (Guillaume, 2026-11-11)               |
+| Q-6 | Idle tour rhythm                                                | Stay on the home region; every 5 minutes, a 1-minute flight elsewhere                                | Yes, plus a home button and a tour off switch (Guillaume, 2026-11-11) |
+| Q-7 | Frame rate cap                                                  | 30 fps: pixel art barely gains from more, and it halves the battery cost                             | Yes (Guillaume, 2026-11-11)                                           |
