@@ -95,7 +95,7 @@ revisit it.
   the real API never sent a partial step in 10 weeks and a partial mix would draw a
   false share. A `null` load factor means "no such plant". Load factors are
   accepted up to 200 %; a negative production figure is rejected. A reading is
-  stale after 3 h; a step more than 15 min in the future counts as unavailable. Proposed by Claude, 2026-11-11, to confirm by Guillaume.
+  stale after 3 h; a step more than 15 min in the future counts as unavailable. Proposed by Claude, confirmed by Guillaume, 2026-11-11 (decision card in the project thread).
 - **Why:** the scene never shows a made-up or half-true mix (AGENTS.md §1); 3 h
   covers the measured 1 h delay plus one missed hourly refresh.
 - **Revisit if:** the API starts sending partial steps (the parser would then reject
