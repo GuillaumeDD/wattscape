@@ -14,7 +14,10 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    // Lets tools/*.ts import src/*.ts under `node --experimental-strip-types`, which
+    // needs the .ts extension. Remove if the tools move to a bundler-run script.
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "tests", "vite.config.ts"]
+  "include": ["src", "tests", "tools", "vite.config.ts"]
 }

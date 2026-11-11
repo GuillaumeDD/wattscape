@@ -82,3 +82,22 @@ revisit it.
 - **Why:** seasons make the scene alive over months, and explain seasonal patterns
   in the data (winter consumption, summer solar).
 - **Revisit if:** the mockups (B-010) show four palettes cost too much to draw well.
+
+## D-009 — How an éCO2mix reading is accepted
+
+- **Context:** B-005 checked the API itself (ARCHITECTURE § éCO2mix: fields and
+  caveats). Every published step has every figure; a technology absent from a region
+  is 0 MW with a `null` load factor; load factors exceed 100 %; regional steps arrive
+  about an hour late.
+- **Options:** (a) accept a reading figure by figure, keeping the valid ones; (b)
+  accept it whole or not at all. For staleness: 1 h, 3 h or 6 h.
+- **Decision:** (b): one invalid figure makes the whole reading "unavailable", since
+  the real API never sent a partial step in 10 weeks and a partial mix would draw a
+  false share. A `null` load factor means "no such plant". Load factors are
+  accepted up to 200 %; a negative production figure is rejected. A reading is
+  stale after 3 h; a step more than 15 min in the future counts as unavailable. Proposed by Claude, confirmed by Guillaume, 2026-11-11 (decision card in the project thread).
+- **Why:** the scene never shows a made-up or half-true mix (AGENTS.md §1); 3 h
+  covers the measured 1 h delay plus one missed hourly refresh.
+- **Revisit if:** the API starts sending partial steps (the parser would then reject
+  many readings: `tools/check-eco2mix.ts` counts them), or a longer run shows a
+  longer normal delay.

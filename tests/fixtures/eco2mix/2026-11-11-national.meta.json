@@ -1,0 +1,6 @@
+{
+  "url": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-national-tr/records?where=consommation+is+not+null&order_by=date_heure+desc&limit=1",
+  "status": 200,
+  "recordedAt": "2026-11-11T08:54:03.000Z",
+  "source": "DS-02, S-009"
+}
