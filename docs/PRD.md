@@ -1,0 +1,250 @@
+# PRD — Wattscape
+
+_France's electricity, live, as a pixel-art screensaver._
+
+## 1. Vision
+
+A calm, beautiful scene to leave running on a screen, that teaches without lecturing.
+You open a link; the map of France appears in minimal pixel art, centered on your
+region. Its power plants are alive with the grid's real numbers: cooling towers steam
+as hard as the reactors are running right now, wind turbines turn as fast as the wind
+farms produce, dams spill, solar fields glint while the sun shines, town windows light
+up with the evening peak. The sky follows the real sun and the real weather. Zoom out
+and you see the whole country's mix; zoom in and you see your region's landmarks
+(the Eiffel Tower, the cliffs of Étretat, the port of Le Havre…) next to the plants
+that power them.
+
+Inspired by [Infinite Jungle](https://mo.town/jungle/index.html) (S-002) for the mood
+and craft, and by [Electricity Maps](https://app.electricitymaps.com/) (S-001) for the
+idea that the grid can be seen.
+
+## 2. Users
+
+- **Viewers:** Guillaume, family and friends, then anyone curious. The scene runs on
+  an idle screen (laptop, TV, office display), so it is watched for seconds at a time,
+  often from a distance, and must read at a glance.
+- **Learners:** the same people, when something on screen makes them ask "why is the
+  nuclear plant quieter tonight?". The answer must be one tap away, never in the way.
+
+## 3. Goals and non-goals
+
+### Goals
+
+- **True:** every moving part reflects a live, sourced figure (AGENTS.md §1).
+- **Beautiful:** minimal, elegant pixel art; a scene people leave on for its own sake.
+- **Local:** centered on the viewer's region, with its own landmarks and plants.
+- **Alive:** day and night from the real sun, weather from the real sky.
+- **Explorable:** a continuous zoom between the whole of France and one region.
+- Zero install: one link, a static site, works offline with sample data.
+
+### Non-goals
+
+- A dashboard or an analysis tool (Electricity Maps and RTE éCO2mix already are).
+- Forecasts, history charts, prices, CO₂ accounting beyond what éCO2mix publishes.
+- Plant-by-plant production in the first version (see Growth G-003).
+- Overseas France and Corsica at regional detail: éCO2mix's regional real-time data
+  covers the 12 mainland regions only (S-007); they get the national view.
+- Accounts, a backend, analytics, ads.
+
+## 4. Functional requirements
+
+### 4.1 Location
+
+- On first visit, ask for the browser's position, with one sentence saying why and
+  what is (not) done with it (ARCHITECTURE § Privacy).
+- The position maps to a mainland region **offline**; outside mainland France, in
+  Corsica, or when the user declines, the scene opens on the national view.
+- The user can pick another region at any time (region list, or zoom and pan); the
+  choice is remembered in the browser and can be set in the URL (`?area=28`).
+
+### 4.2 Live grid data
+
+- Source: RTE éCO2mix real-time data, published by ODRÉ (S-003, S-004): consumption,
+  production by source (nuclear, hydro, wind, solar, thermal, bioenergy), pumping,
+  net exchanges, load factors, every 15 minutes, per region and for France.
+- Refresh every 15 minutes while visible; pause when the tab is hidden.
+- Show the time of the reading ("RTE éCO2mix, 08:45"). A reading older than 2 hours
+  is shown as stale.
+- When the API is down: keep the last reading with its age; with none, use built-in
+  sample data, **labelled as sample** on screen.
+
+### 4.3 The scene and the zoom
+
+- The world is the map of France, drawn in pixel art (projection and style: §7 and
+  ARCHITECTURE § Art direction).
+- **Zoom** is continuous, from the whole of France to one region, by mouse wheel,
+  pinch, `+`/`−`, and double-click/tap on a region:
+  - **France level:** the 12 regions, each showing its dominant sources; the national
+    mix in the legend; the grid's big flows between regions (Growth G-002).
+  - **Region level:** the region's major power plants at their real places, its
+    landmarks (§4.4), towns and terrain; the regional mix in the legend.
+  - Between the two, detail fades in and out smoothly (level of detail), never pops.
+- **Pan** by drag, arrows or WASD; the camera drifts slowly on its own after a few
+  seconds of inactivity, like a screensaver.
+- **Idle tour:** left alone, the camera alternates between the viewer's region and
+  short flights to other regions or the national view (rhythm: open question Q-6).
+
+### 4.4 Landmarks (POIs)
+
+- Each region shows 2 to 4 salient, instantly recognisable landmarks, drawn in code,
+  at their real place (first list: ARCHITECTURE § Landmarks; candidates are checked
+  against §6 before drawing).
+- Landmarks are context, not data: they never carry a figure, but they can react to
+  the time and weather (lit at night, a lighthouse beam, boats in a port).
+
+### 4.5 Power plants and the data-to-scene mapping
+
+- Major plants are placed at their real location (nuclear sites, large dams, large
+  thermal plants, offshore wind farms); diffuse sources (onshore wind, solar,
+  bioenergy, small hydro) are scattered procedurally where they are, in proportion to
+  the region's installed mix.
+- Each source has one animation driven by one documented figure (ARCHITECTURE §
+  Data-to-scene mapping), e.g. the steam plume of cooling towers follows the regional
+  nuclear load factor.
+- Consumption is shown by towns: lit windows and the pulse of power lines follow the
+  region's consumption relative to its typical range.
+
+### 4.6 Day and night
+
+- The sky, the light and the shadows follow the real position of the sun for the
+  place and time (twilights included); the moon shows its real phase.
+- At night, towns light up (driven by consumption), landmarks are illuminated, solar
+  fields go dark.
+
+### 4.7 Weather
+
+- Live current weather from Open-Meteo (S-005) at the viewer's position (rounded) or
+  at the region's reference point: cloud cover, rain, snow, fog, thunderstorm, wind.
+- The weather is drawn (clouds, rain, snow, fog banks), and explains the data: clouds
+  over the solar fields, wind bending the trees when the turbines spin.
+
+### 4.8 Learning layer
+
+- A discreet legend: the area's mix (stacked bar), consumption, imports/exports, and
+  the time of the reading. Hidden after a few seconds of inactivity.
+- Hover or tap on a plant or landmark: a short caption (name, what it is, the live
+  figure it shows). Every caption fact is sourced (AGENTS.md §5).
+- The legend and captions never cover the scene for long; the screensaver mode shows
+  no UI at all.
+
+### 4.9 Screensaver controls
+
+- Full screen (`F`, button), cursor hidden when idle, a Wake Lock request to keep the
+  screen on while in full screen (if the browser supports it).
+- Keys: zoom, pan, `R` next region, `H` hide/show the legend, `?` help, `Space`
+  pause the drift. Settings: time-lapse (to watch a day in a minute), weather override
+  and fixed data, for demos and screenshots (also as URL settings).
+- `prefers-reduced-motion`: no camera drift, slow animations.
+
+### 4.10 Localization
+
+- French (default) and English, chosen from the browser's language and switchable.
+
+## 5. Non-functional requirements
+
+- **Targets:** current Chrome, Firefox, Safari and Edge on desktop; mobile browsers
+  as a bonus (touch zoom and pan work, no layout breaks).
+- **Smooth and frugal:** steady frame rate at the chosen cap on a mid-range laptop,
+  low CPU, memory flat over hours (budget: ARCHITECTURE § Performance).
+- **Static site** on GitHub Pages; no backend, no API key, no cookies.
+- **Resilient:** any API failure degrades to stale or sample data, never to a blank
+  or frozen screen.
+- **Privacy by design:** the position never leaves the browser except, rounded to
+  about 10 km, to the weather API.
+
+## 6. Content and licensing
+
+- Code: **GPL-3.0-or-later**. Project art (sprites drawn in code, screenshots):
+  **CC BY-SA 4.0**, listed in `ASSETS.md`.
+- No third-party images, sprites or fonts unless CC0 / CC BY / CC BY-SA, with an
+  `ASSETS.md` entry.
+- **Data licences and attribution**, shown in the app's credits:
+  - RTE éCO2mix via ODRÉ: Licence Ouverte / Open Licence 2.0 (S-004).
+  - Open-Meteo: CC BY 4.0, free tier for non-commercial use only (S-005). Wattscape
+    stays non-commercial (no ads, no subscription).
+  - Geographic shapes (regions, coast): an open source under Licence Ouverte or ODbL,
+    chosen in B-008 (ARCHITECTURE § Map).
+- **Landmarks and copyright** (to be decided: Q-4). In France, freedom of panorama is
+  narrow: a recent building or bridge stays protected until 70 years after its
+  architect's death. Old landmarks (Eiffel Tower structure, Mont-Saint-Michel,
+  cathedrals, Pont du Gard, Étretat cliffs) are free to draw. The Eiffel Tower's
+  **night illumination and sparkle** are claimed as a protected work by its operator;
+  recent works (Viaduc de Millau, Pont de Normandie, Louvre pyramid) are protected.
+  Proposed rule: draw only public-domain works, and draw the tower lit plainly, not
+  sparkling.
+
+## 7. Art direction (proposal, to be decided: Q-1)
+
+Two directions fit the brief; the zoom between France and a region (§4.3) decides
+between them.
+
+- **A. Isometric map of France (recommended).** France as a pixel-art relief model,
+  seen from above at a 2:1 isometric angle, like a board game or a tabletop diorama.
+  Zoomed out, a small, elegant map with each region tinted; zoomed in, terrain tiles,
+  towns, plants and landmarks as small iso sprites. The zoom is natural, plants sit at
+  their real place, and Infinite Jungle shows the style holds up. Cost: we need the
+  real shapes of France (coast, regions, relief) baked into tiles, and iso sprites are
+  harder to draw.
+- **B. Side-scrolling panorama.** An endless horizontal landscape of the region, in
+  parallax layers, like a vintage railway poster. Easier to draw, very readable from
+  afar, but places are not where they are and the "zoom" can only switch between a
+  national and a regional landscape.
+
+Shared principles for either (details: ARCHITECTURE § Art direction):
+
+- **Minimal:** a small fixed palette (about 24 colours), flat shapes, hard pixel
+  edges, no anti-aliasing, gradients only by ordered dithering.
+- **Colour carries meaning:** each source has one signature colour used for its plants
+  and in the legend (nuclear, hydro, wind, solar, thermal, bioenergy); the land
+  stays muted so that the energy stands out.
+- **Light carries time:** one global light tint (dawn, day, golden hour, dusk, night)
+  plus emissive pixels (windows, beacons, plumes lit from below) drawn on top at night.
+- **Integer scaling** of a low-resolution canvas: crisp pixels at any screen size.
+
+## 8. Roadmap
+
+Each step ends with a playable deployed build and a questionnaire of open choices.
+
+1. **Step 0 — Skeleton:** repo, tooling, CI, Pages deploy, CSP, i18n (B-001 to B-003).
+2. **Step 1 — Data:** location → area, éCO2mix and Open-Meteo clients with recorded
+   fixtures, sun and moon, a debug view of the live figures (B-004 to B-007).
+3. **Step 2 — Art direction:** mockups of the chosen direction at day and night for
+   two regions, a palette, the six source sprites; Guillaume validates (B-008 to
+   B-010).
+4. **Step 3 — First region:** map, zoom and pan, plants driven by live data, day and
+   night, for one region and the national view (B-011 to B-015).
+5. **Step 4 — All regions:** landmarks and plants for the 12 regions, idle tour
+   (B-016 to B-017).
+6. **Step 5 — Weather and learning layer:** weather effects, legend, captions,
+   screensaver mode (B-018 to B-021).
+
+## 9. Growth
+
+The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
+
+| Id    | Idea                                                                                   | Status   |
+| ----- | -------------------------------------------------------------------------------------- | -------- |
+| G-001 | Département-level zoom, below regions                                                  | proposed |
+| G-002 | Physical flows between regions and with neighbouring countries, drawn as moving pulses | proposed |
+| G-003 | Plant-by-plant production (RTE "production par groupe") for the large units            | proposed |
+| G-004 | CO₂ intensity of the area as a subtle tint of the sky or a smog layer                  | proposed |
+| G-005 | Ambient sound (wind, rain, a hum that follows consumption), muted by default           | proposed |
+| G-006 | A "day in a minute" replay of today's data                                             | proposed |
+| G-007 | Offshore wind farms drawn at sea (Saint-Nazaire, Fécamp, Saint-Brieuc…)                | proposed |
+| G-008 | Pumped-storage plants (STEP) pumping water uphill at night, from the `pompage` figure  | proposed |
+| G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
+| G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | proposed |
+
+## 10. Open questions
+
+Each with a recommendation; answers are recorded here with their date.
+
+| Id  | Question                                                        | Recommendation                                                                                       | Answer |
+| --- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------ |
+| Q-1 | Art direction: isometric map (A) or side panorama (B)?          | A, because the France ↔ region zoom needs a real map                                                 |        |
+| Q-2 | Docs and code in English (like Return of the Runners)?          | Yes; the app itself defaults to French                                                               |        |
+| Q-3 | Licence: GPL-3.0-or-later code, CC BY-SA 4.0 art?               | Yes, same as Return of the Runners (already in `LICENSE`)                                            |        |
+| Q-4 | Landmarks: only public-domain works, tower lit without sparkle? | Yes (§6); recent works such as the Viaduc de Millau are left out                                     |        |
+| Q-5 | First region for step 3?                                        | Normandie: coast, cliffs, a port, three nuclear sites, offshore wind; it exercises the most features |        |
+| Q-6 | Idle tour rhythm                                                | Stay on the home region; every 5 minutes, a 1-minute flight elsewhere                                |        |
+| Q-7 | Frame rate cap                                                  | 30 fps: pixel art barely gains from more, and it halves the battery cost                             |        |

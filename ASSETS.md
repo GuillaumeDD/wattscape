@@ -1,0 +1,16 @@
+# Assets
+
+Every graphics, sound, font, map or data file in this repository is listed here with
+its author, source and license. Files without an entry are not merged.
+
+- Project art (sprites drawn in code, screenshots, mockups) is licensed under
+  **CC BY-SA 4.0** unless stated otherwise.
+- Third-party assets must be CC0, CC BY, CC BY-SA or GPL-3.0 compatible.
+- **No image files of real places**: landmarks are drawn in code from our own
+  observation, and only public-domain works are drawn (PRD § Content and licensing).
+- Baked data (map, installed capacities, recorded API fixtures) keeps its source
+  licence, named here with the source's id in `docs/SOURCES.md`.
+
+| File       | Author | Source | License |
+| ---------- | ------ | ------ | ------- |
+| _none yet_ |        |        |         |
