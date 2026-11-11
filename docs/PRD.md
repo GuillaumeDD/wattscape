@@ -91,7 +91,7 @@ idea that the grid can be seen.
 ### 4.4 Landmarks (POIs)
 
 - Each region shows 2 to 4 salient, instantly recognisable landmarks, drawn in code,
-  at their real place (first list: ARCHITECTURE § Landmarks; candidates are checked
+  at their real place (register: [`POI.md`](POI.md), GO / NO-GO; candidates are checked
   against §6 before drawing).
 - Landmarks are context, not data: they never carry a figure, but they can react to
   the time and weather (lit at night, a lighthouse beam, boats in a port).
@@ -176,7 +176,8 @@ idea that the grid can be seen.
   **CC BY-SA 4.0**, listed in `ASSETS.md`.
 - No third-party images, sprites or fonts unless CC0 / CC BY / CC BY-SA, with an
   `ASSETS.md` entry.
-- **Data licences and attribution**, shown in the app's credits:
+- **Data licences and attribution**, shown in the app's credits (register:
+  [`DATA-SOURCES.md`](DATA-SOURCES.md), GO / NO-GO per source):
   - RTE éCO2mix via ODRÉ: Licence Ouverte / Open Licence 2.0 (S-004).
   - Open-Meteo: CC BY 4.0, free tier for non-commercial use only (S-005). Wattscape
     stays non-commercial (no ads, no subscription).
@@ -190,7 +191,7 @@ idea that the grid can be seen.
   recent works (Viaduc de Millau, Pont de Normandie, Louvre pyramid) are protected.
   Rule: draw only public-domain works, and draw the tower lit plainly, not
   sparkling. Each landmark's status (author, date of death or "natural site",
-  source) is recorded in ARCHITECTURE § Landmarks before it is drawn, so the choice
+  source) is recorded in [`POI.md`](POI.md) before it is drawn, so the choice
   can be audited and revisited.
 
 ## 7. Art direction (direction A chosen: Q-1)

@@ -39,6 +39,10 @@ output. That is what makes frames reproducible (§ World generation).
 
 ## Data sources
 
+Which sources we use, and under which licence, is decided in the register
+[`DATA-SOURCES.md`](DATA-SOURCES.md) (GO / NO-GO with a comment for each); only
+**GO** sources appear here.
+
 | Source                   | Endpoint                                                                              | Used for                                           | Refresh | Licence, limits                                      |
 | ------------------------ | ------------------------------------------------------------------------------------- | -------------------------------------------------- | ------- | ---------------------------------------------------- |
 | éCO2mix regional (S-003) | `odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records` | regional mix, consumption, exchanges, load factors | 15 min  | Licence Ouverte 2.0; 50 000 calls/user/month (S-004) |
@@ -236,37 +240,10 @@ mockups of B-010 are validated.
 
 ### Landmarks
 
-Only public-domain works and natural or generic sites are drawn (PRD §6, D-004).
-**Before a landmark is drawn**, its row below gets its copyright basis and source,
-so the choice can be audited and revisited. "PD" means public domain (in France: the
-author died more than 70 years ago, counted from 1 January after the death).
-Statuses: `candidate` (basis not checked), `cleared` (basis checked, source cited),
-`excluded` (protected, with the reason).
-
-| Region                     | Landmark                                       | Basis (to check)                                   | Status    |
-| -------------------------- | ---------------------------------------------- | -------------------------------------------------- | --------- |
-| Normandie (Seine-Maritime) | Étretat cliffs, arch and needle                | natural site                                       | candidate |
-| Normandie (Seine-Maritime) | Port of Le Havre, container cranes             | generic industrial equipment                       | candidate |
-| Normandie (Seine-Maritime) | Saint-Joseph church, Le Havre                  | Auguste Perret, died 1954: PD since 2025           | candidate |
-| Normandie (Seine-Maritime) | Fécamp, Palais Bénédictine                     | architect Camille Albert, death year to check      | candidate |
-| Normandie (Seine-Maritime) | Fécamp cliffs and harbour                      | natural site, generic                              | candidate |
-| Normandie                  | Mont-Saint-Michel                              | medieval                                           | candidate |
-| Normandie                  | Pont de Normandie                              | opened 1995, designers alive or recently deceased  | excluded  |
-| Île-de-France              | Eiffel Tower, lit plainly (no sparkle)         | Gustave Eiffel, died 1923; lighting is protected   | candidate |
-| Île-de-France              | Sacré-Cœur, Arc de Triomphe                    | 19th century, authors long dead                    | candidate |
-| Hauts-de-France            | Twin slag heaps of Loos-en-Gohelle             | natural/industrial site                            | candidate |
-| Hauts-de-France            | A belfry, Amiens cathedral                     | medieval                                           | candidate |
-| Grand Est                  | Strasbourg cathedral, Haut-Kœnigsbourg         | medieval; restoration 1908 (Bodo Ebhardt, d. 1945) | candidate |
-| Grand Est                  | Champagne vineyards                            | generic                                            | candidate |
-| Centre-Val de Loire        | Château de Chambord, Chartres cathedral        | Renaissance, medieval                              | candidate |
-| Bourgogne-Franche-Comté    | Hospices de Beaune, Besançon citadel           | 15th and 17th century                              | candidate |
-| Pays de la Loire           | Château des ducs de Bretagne, Guérande         | medieval; salt marshes generic                     | candidate |
-| Bretagne                   | A lighthouse at sea, Carnac stones             | 19th-century lighthouse to pick; prehistoric       | candidate |
-| Nouvelle-Aquitaine         | Dune du Pilat, Fort Boyard, Place de la Bourse | natural; 19th century; 18th century                | candidate |
-| Occitanie                  | Pont du Gard, Carcassonne, Pic du Midi         | Roman; medieval (Viollet-le-Duc, d. 1879); natural | candidate |
-| Occitanie                  | Viaduc de Millau                               | opened 2004, architect alive                       | excluded  |
-| Auvergne-Rhône-Alpes       | Mont Blanc, Puy de Dôme, Fourvière             | natural; natural; 19th century                     | candidate |
-| Provence-Alpes-Côte d'Azur | Notre-Dame de la Garde, Calanques, lavender    | 19th century; natural; generic                     | candidate |
+Which landmarks are drawn, and why, is decided in the register
+[`POI.md`](POI.md) (GO / NO-GO with a comment for each, D-004). Only **GO** landmarks
+are drawn; each is drawn in code from public views of the site, never traced from a
+photo.
 
 ## Rendering and loop
 

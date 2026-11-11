@@ -31,6 +31,8 @@ date for the seasons. Inspired by
 | touch code, dependencies, CI or the build        | `docs/ARCHITECTURE.md`                                   |
 | read, show or explain a figure from an API       | `docs/ARCHITECTURE.md` § Data sources, `docs/SOURCES.md` |
 | draw a sprite, landmark, palette or animation    | `docs/ARCHITECTURE.md` § Art direction, `ASSETS.md`      |
+| add or draw a landmark                           | `docs/POI.md`                                            |
+| use a new data source or dataset                 | `docs/DATA-SOURCES.md`                                   |
 | touch geolocation, network calls or URL settings | `docs/ARCHITECTURE.md` § Privacy and § Security          |
 | rely on a web API (geolocation, fullscreen, …)   | `docs/ARCHITECTURE.md` § Browser quirks                  |
 
@@ -52,7 +54,9 @@ you haven't read it.
 - **API data and URL settings are untrusted.** Validate at the boundary; never
   `innerHTML`/`eval` (ARCHITECTURE § Security).
 - **No third-party art, and landmarks are drawn in code.** Every asset has an
-  `ASSETS.md` entry (PRD § Content and licensing).
+  `ASSETS.md` entry; a landmark is drawn only when it is GO in `docs/POI.md`, and a
+  data source is used only when it is GO in `docs/DATA-SOURCES.md` (PRD § Content
+  and licensing).
 - **Public repo.** Every commit is published: apply §5 "Privacy, secrets &
   publishing" before every push.
 

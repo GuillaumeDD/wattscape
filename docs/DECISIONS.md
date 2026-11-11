@@ -41,7 +41,8 @@ revisit it.
   Tower's illumination are protected (PRD §6).
 - **Decision:** draw only public-domain works and natural or generic sites; draw the
   Eiffel Tower lit plainly, never sparkling; record each landmark's copyright basis
-  and source in ARCHITECTURE § Landmarks before drawing it. Guillaume, 2026-11-11
+  and source in the register `docs/POI.md` (GO / NO-GO with a comment) before
+  drawing it; open-data sources get the same treatment in `docs/DATA-SOURCES.md`. Guillaume, 2026-11-11
   (PRD Q-4, PR #1 review: "trace the decisions so that we are auditable").
 - **Why:** a public repo publishes every sprite; this keeps the project clear of
   claims without a lawyer.
