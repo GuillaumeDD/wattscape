@@ -33,7 +33,8 @@ idea that the grid can be seen.
 - **True:** every moving part reflects a live, sourced figure (AGENTS.md §1).
 - **Beautiful:** minimal, elegant pixel art; a scene people leave on for its own sake.
 - **Local:** centered on the viewer's region, with its own landmarks and plants.
-- **Alive:** day and night from the real sun, weather from the real sky.
+- **Alive:** day and night from the real sun, weather from the real sky, and the
+  four seasons.
 - **Explorable:** a continuous zoom between the whole of France and one region.
 - Zero install: one link, a static site, works offline with sample data.
 
@@ -121,6 +122,20 @@ idea that the grid can be seen.
 - The weather is drawn (clouds, rain, snow, fog banks), and explains the data: clouds
   over the solar fields, wind bending the trees when the turbines spin.
 
+### 4.7b Seasons
+
+- The land follows the season of the date at the viewer's place: winter, spring,
+  summer, autumn, with gradual transitions over a few weeks, never a jump on a fixed
+  day (D-008).
+- Each season changes the land palette and the life on it: bare trees and frost in
+  winter, blossom and fresh greens in spring, ripe fields and dry grass in summer,
+  red and gold leaves and ploughed fields in autumn. Vineyards, crops and lavender
+  follow their own calendar.
+- Snow on the ground comes from the live weather (snow depth where available), not
+  from the calendar alone: a snowless winter stays green-brown.
+- Seasons also show in the data, and the scene must not fight it: long nights and
+  lit towns in winter (higher consumption), strong solar in summer.
+
 ### 4.8 Learning layer
 
 - A discreet legend: the area's mix (stacked bar), consumption, imports/exports, and
@@ -204,6 +219,8 @@ Shared principles for either (details: ARCHITECTURE § Art direction):
   stays muted so that the energy stands out.
 - **Light carries time:** one global light tint (dawn, day, golden hour, dusk, night)
   plus emissive pixels (windows, beacons, plumes lit from below) drawn on top at night.
+- **The land carries the season:** one land palette per season, blended cell by
+  cell over weeks (§4.7b).
 - **Integer scaling** of a low-resolution canvas: crisp pixels at any screen size.
 
 ## 8. Roadmap
@@ -222,8 +239,8 @@ Each step ends with a playable deployed build and a questionnaire of open choice
    national view (B-011 to B-015).
 5. **Step 4 — All regions:** landmarks and plants for the 12 regions, idle tour
    (B-016 to B-017).
-6. **Step 5 — Weather and learning layer:** weather effects, legend, captions,
-   screensaver mode (B-018 to B-021).
+6. **Step 5 — Weather, seasons and learning layer:** weather effects, seasons,
+   legend, captions, screensaver mode (B-018 to B-022).
 
 ## 9. Growth
 
@@ -240,7 +257,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-007 | Offshore wind farms drawn at sea (Saint-Nazaire, Fécamp, Saint-Brieuc…)                | planned  |
 | G-008 | Pumped-storage plants (STEP) pumping water uphill at night, from the `pompage` figure  | proposed |
 | G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
-| G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | proposed |
+| G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |
 
 ## 10. Open questions
 

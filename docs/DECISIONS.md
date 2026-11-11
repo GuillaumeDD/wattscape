@@ -71,3 +71,13 @@ revisit it.
   Q-7, PR #1 review).
 - **Why:** pixel art barely gains from more, and it halves the battery cost.
 - **Revisit if:** the zoom or camera drift looks choppy in B-011.
+
+## D-008 — Seasons are part of the art direction
+
+- **Context:** the scene already follows the time of day and the weather.
+- **Decision:** it also follows the four seasons, with gradual transitions; snow on
+  the ground comes from live data. Guillaume, 2026-11-11 (project thread). Growth
+  G-010 is planned; backlog B-022.
+- **Why:** seasons make the scene alive over months, and explain seasonal patterns
+  in the data (winter consumption, summer solar).
+- **Revisit if:** the mockups (B-010) show four palettes cost too much to draw well.

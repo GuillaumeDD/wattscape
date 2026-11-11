@@ -185,6 +185,15 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
 - **Weather layers:** clouds (count and darkness from `cloud_cover`, drifting with
   the wind), rain and snow particles, fog banks (dithered), lightning flashes for
   storms. Particles are seeded (PRNG) so frames stay reproducible.
+- **Seasons (provisional, D-008):** a season position from the day of the year (an
+  angle over the year, so that transitions are continuous), mapped to four keyframes
+  centred on mid-January, mid-April, mid-July and mid-October. Each keyframe is a
+  **land palette ramp** (grass, leaves, fields, soil) and a set of seasonal props
+  (blossom, ripe crops, fallen leaves, bare branches); between two keyframes, cells
+  switch from one to the next by a seeded per-cell threshold, so the change spreads
+  across the map like a real season instead of a global fade. Snow cover comes from
+  Open-Meteo's snow depth (field name **unverified**, B-006), with altitude: the
+  Alps whiten before the plains.
 
 ## Art direction
 

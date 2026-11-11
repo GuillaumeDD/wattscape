@@ -29,3 +29,4 @@ Statuses: `todo` / `in-progress` / `done`.
 | B-019 | Legend                            | Stacked mix bar, consumption, import/export, reading time and staleness, sample label; auto-hide                                                                    | todo   |
 | B-020 | Captions                          | Hover/tap a plant or landmark: name, what it is, live figure; every fact sourced                                                                                    | todo   |
 | B-021 | Screensaver mode                  | Fullscreen, idle cursor hidden, wake lock, idle tour with off switch, home button, reduced motion; checked in 3 engines                                             | todo   |
+| B-022 | Seasons                           | Four seasonal land palettes and props; continuous, per-cell transitions by date; live snow cover; frame snapshots for each season                                   | todo   |
