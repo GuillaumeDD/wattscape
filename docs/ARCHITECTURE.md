@@ -188,10 +188,11 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
 
 ## Art direction
 
-**Proposed**, to be validated by Guillaume (PRD Q-1). This section becomes the
-reference once validated.
+Direction A, the isometric map, was chosen by Guillaume on 2026-11-11 (PRD Q-1). The
+details below (palette, resolution, level of detail) are still **proposed** until the
+mockups of B-010 are validated.
 
-- **Projection (direction A):** isometric 2:1 (a tile is twice as wide as it is
+- **Projection:** isometric 2:1 (a tile is twice as wide as it is
   tall), light from the south-east, no perspective.
 - **Resolution:** the scene is drawn at low resolution into a pixel buffer, then
   scaled by an **integer** factor to the screen (nearest-neighbour); the buffer size

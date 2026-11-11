@@ -173,12 +173,12 @@ idea that the grid can be seen.
   Proposed rule: draw only public-domain works, and draw the tower lit plainly, not
   sparkling.
 
-## 7. Art direction (proposal, to be decided: Q-1)
+## 7. Art direction (direction A chosen: Q-1)
 
 Two directions fit the brief; the zoom between France and a region (§4.3) decides
 between them.
 
-- **A. Isometric map of France (recommended).** France as a pixel-art relief model,
+- **A. Isometric map of France (chosen, Guillaume, 2026-11-11).** France as a pixel-art relief model,
   seen from above at a 2:1 isometric angle, like a board game or a tabletop diorama.
   Zoomed out, a small, elegant map with each region tinted; zoomed in, terrain tiles,
   towns, plants and landmarks as small iso sprites. The zoom is natural, plants sit at
@@ -239,12 +239,12 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 
 Each with a recommendation; answers are recorded here with their date.
 
-| Id  | Question                                                        | Recommendation                                                                                       | Answer |
-| --- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------ |
-| Q-1 | Art direction: isometric map (A) or side panorama (B)?          | A, because the France ↔ region zoom needs a real map                                                 |        |
-| Q-2 | Docs and code in English (like Return of the Runners)?          | Yes; the app itself defaults to French                                                               |        |
-| Q-3 | Licence: GPL-3.0-or-later code, CC BY-SA 4.0 art?               | Yes, same as Return of the Runners (already in `LICENSE`)                                            |        |
-| Q-4 | Landmarks: only public-domain works, tower lit without sparkle? | Yes (§6); recent works such as the Viaduc de Millau are left out                                     |        |
-| Q-5 | First region for step 3?                                        | Normandie: coast, cliffs, a port, three nuclear sites, offshore wind; it exercises the most features |        |
-| Q-6 | Idle tour rhythm                                                | Stay on the home region; every 5 minutes, a 1-minute flight elsewhere                                |        |
-| Q-7 | Frame rate cap                                                  | 30 fps: pixel art barely gains from more, and it halves the battery cost                             |        |
+| Id  | Question                                                        | Recommendation                                                                                       | Answer                    |
+| --- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------- |
+| Q-1 | Art direction: isometric map (A) or side panorama (B)?          | A, because the France ↔ region zoom needs a real map                                                 | A (Guillaume, 2026-11-11) |
+| Q-2 | Docs and code in English (like Return of the Runners)?          | Yes; the app itself defaults to French                                                               |                           |
+| Q-3 | Licence: GPL-3.0-or-later code, CC BY-SA 4.0 art?               | Yes, same as Return of the Runners (already in `LICENSE`)                                            |                           |
+| Q-4 | Landmarks: only public-domain works, tower lit without sparkle? | Yes (§6); recent works such as the Viaduc de Millau are left out                                     |                           |
+| Q-5 | First region for step 3?                                        | Normandie: coast, cliffs, a port, three nuclear sites, offshore wind; it exercises the most features |                           |
+| Q-6 | Idle tour rhythm                                                | Stay on the home region; every 5 minutes, a 1-minute flight elsewhere                                |                           |
+| Q-7 | Frame rate cap                                                  | 30 fps: pixel art barely gains from more, and it halves the battery cost                             |                           |
