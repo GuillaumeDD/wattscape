@@ -1,4 +1,6 @@
 import { detectLocale, isLocale, translate, type Locale, type MessageKey } from "./i18n";
+import { mountAreaPicker, renderAreaOptions, type AreaState } from "./ui/area-picker";
+import { browserStorage, initialArea } from "./ui/settings";
 
 const LOCALE_KEY = "wattscape.locale";
 
@@ -37,13 +39,35 @@ function render(locale: Locale): void {
   setText("credits-eco2mix-licence", t("creditsEco2mixLicence"));
   setText("credits-weather-licence", t("creditsWeatherLicence"));
   document.getElementById("language")?.setAttribute("aria-label", t("switchLanguageLabel"));
+  setText("area-label", t("areaLabel"));
+  setText("locate", t("useMyLocation"));
 }
+
+/** The area list: rebuilt only when the language changes, otherwise just selected. */
+function renderArea(rebuild: boolean): void {
+  const select = document.getElementById("area");
+  if (!(select instanceof HTMLSelectElement)) return;
+  if (rebuild) renderAreaOptions(select, (key) => translate(locale, key), areaState.area);
+  else select.value = areaState.area;
+  setText("location-note", translate(locale, areaState.note));
+}
+
+const areaState: AreaState = {
+  area: initialArea(location.search, browserStorage()),
+  position: null,
+  note: "locationWhy",
+};
 
 let locale: Locale = savedLocale() ?? detectLocale(navigator.languages);
 render(locale);
+renderArea(true);
+mountAreaPicker(areaState, () => {
+  renderArea(false);
+});
 
 document.getElementById("language")?.addEventListener("click", () => {
   locale = locale === "fr" ? "en" : "fr";
   saveLocale(locale);
   render(locale);
+  renderArea(true);
 });

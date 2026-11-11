@@ -67,3 +67,30 @@ button {
 #credits a {
   color: inherit;
 }
+
+#area-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+#area-picker button {
+  margin-top: 0;
+}
+
+select {
+  padding: 0.4rem;
+  border: 1px solid var(--muted);
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+
+#location-note {
+  max-width: 36rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
