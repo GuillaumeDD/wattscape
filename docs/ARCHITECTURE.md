@@ -400,14 +400,17 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
   only animates the scene (light, sky colour, the moon's drawing); it never decides
   what the world contains (§ World generation).
 - **Light keyframes** (`src/sky/light.ts`) by geometric solar elevation: night
-  (< −12°), blue hour (−12° to −4°), golden hour (−4° to 6°), day (≥ 6°). Each
-  period sets a sky gradient (night: skyNight; blue hour: skyNight to skyBlueHour;
-  golden hour: skyBlueHour to skyGolden; day: skyDay) and whether emissive pixels
-  show (blue hour and night). The land's **darkness** is counted in palette steps
+  (< −12°), blue hour (−12° to −4°), golden hour (−4° to 6°), day (≥ 6°). The sky
+  gradient, zenith to horizon, has its own keyframes (−12°: skyNight to skyNight;
+  −4°: skyNight to skyBlueHour; 0°: skyBlueHour to skyGolden; 6°: skyDay), each end
+  dithered from one keyframe's colour to the next, so the sky never jumps. Emissive
+  pixels show once the sun is below the horizon (< 0°), when the land is a full step
+  dark. The land's **darkness** is counted in palette steps
   (`DARKER`, § Art direction), linear between keyframes: 0 at 6° and above, 1 at
   0°, 1.5 at −4°, 2 at −12° and below (provisional: 2 steps keep the land readable
   at night). A fractional step is drawn by dithering between the two whole steps,
-  so the land stays in palette. A `NaN` elevation reads as night.
+  so the land stays in palette. A `NaN` elevation, or a `NaN` darkness, reads as
+  night.
 - **Weather layers:** clouds (count and darkness from `cloud_cover`, drifting with
   the wind), rain and snow particles, fog banks (dithered), lightning flashes for
   storms. Particles are seeded (PRNG) so frames stay reproducible.

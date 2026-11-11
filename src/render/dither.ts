@@ -65,8 +65,10 @@ export function fillGradient(
   second: ColourName,
 ): void {
   for (let row = 0; row < height; row++) {
-    // Integer division: the row's level, from 0 on the top row to 16 on the bottom one.
-    const level = height > 1 ? Math.floor((row * DITHER_LEVELS) / (height - 1)) : 0;
+    // The row's level, rounded in integers: 0 on the top row, 16 on the bottom one,
+    // every level in between as wide as the others.
+    const level =
+      height > 1 ? Math.floor((2 * row * DITHER_LEVELS + (height - 1)) / (2 * (height - 1))) : 0;
     fillDithered(surface, left, top + row, width, 1, first, second, level);
   }
 }

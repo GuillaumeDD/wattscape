@@ -15,6 +15,11 @@ test("draws the same frames as Node", async ({ page }) => {
     string,
     string
   >;
-  expect(hashes["test-card"]).toBe(expected["test-card"]);
+  // Every recorded frame, so that a frame added to the fixture is checked here too.
+  const frames = Object.fromEntries(
+    Object.entries(expected).filter(([name]) => name !== "_comment"),
+  );
+  expect(Object.keys(frames).length).toBeGreaterThan(0);
+  expect(hashes).toEqual(frames);
   expect(errors).toEqual([]);
 });

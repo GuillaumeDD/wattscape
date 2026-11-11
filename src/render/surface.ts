@@ -27,14 +27,19 @@ export function setPixel(surface: Surface, x: number, y: number, colour: Rgb): v
   surface.data[i + 3] = 255;
 }
 
-/** The colour of one pixel, alpha left out. */
+/** The colour of one pixel, alpha left out; a pixel outside the surface throws. */
 export function getPixel(surface: Surface, x: number, y: number): Rgb {
+  if (!(Number.isInteger(x) && Number.isInteger(y)) || x < 0 || y < 0)
+    throw new RangeError(`no pixel at ${String(x)}, ${String(y)}`);
+  if (x >= surface.width || y >= surface.height)
+    throw new RangeError(`no pixel at ${String(x)}, ${String(y)}`);
   const i = (y * surface.width + x) * 4;
   return [surface.data[i] ?? 0, surface.data[i + 1] ?? 0, surface.data[i + 2] ?? 0];
 }
 
 /**
- * FNV-1a (32-bit) over every byte of the buffer, with its size, as 8 hex digits: the
+ * FNV-1a (32-bit) over its size (4 bytes each, little-endian) and every byte of the
+ * buffer, as 8 hex digits: the
  * frame hash of the determinism tests (AGENTS.md § Determinism). Integer arithmetic
  * only, so every engine gives the same value for the same frame.
  */
@@ -43,10 +48,9 @@ export function hashSurface(surface: Surface): string {
   const mix = (byte: number): void => {
     h = Math.imul(h ^ byte, 0x01000193) >>> 0;
   };
-  for (const n of [surface.width, surface.height]) {
-    mix(n & 0xff);
-    mix((n >>> 8) & 0xff);
-  }
-  for (const byte of surface.data) mix(byte);
+  for (const n of [surface.width, surface.height])
+    for (let shift = 0; shift < 32; shift += 8) mix((n >>> shift) & 0xff);
+  const data = surface.data;
+  for (let i = 0; i < data.length; i++) mix(data[i] ?? 0);
   return h.toString(16).padStart(8, "0");
 }

@@ -25,14 +25,35 @@ export const DARKNESS_KEYFRAMES: readonly (readonly [number, number])[] = [
   [6, 0],
 ];
 
+/**
+ * Sky gradient keyframes: zenith and horizon colours at given solar elevations. In
+ * between, each end moves from one keyframe's colour to the next by dithering, so the
+ * sky never jumps; beyond the ends it stays. Night is the night sky; at −4° the
+ * horizon is blue; at sunrise and sunset it is golden under a blue zenith; at 6° the
+ * day's sky.
+ */
+export const SKY_KEYFRAMES: readonly (readonly [number, ColourName, ColourName])[] = [
+  [-12, "skyNight", "skyNight"],
+  [-4, "skyNight", "skyBlueHour"],
+  [0, "skyBlueHour", "skyGolden"],
+  [6, "skyDay", "skyDay"],
+];
+
+/** The most darkness the tint counts: past it every chain has reached skyNight. */
+const MAX_DARKNESS = 16;
+
 export interface Light {
   readonly period: Period;
   /** Land darkness in palette steps, 0 (day) to 2 (night), fractional in between. */
   readonly darkness: number;
-  /** Sky gradient, zenith (top) to horizon (bottom). */
+  /** Sky gradient, zenith (top) to horizon (bottom): each end is a mix (0–16) of a
+   * colour and the next keyframe's, at `skyLevel`. */
   readonly skyTop: ColourName;
+  readonly skyTopNext: ColourName;
   readonly skyHorizon: ColourName;
-  /** Whether windows, beacons and other emissive pixels are drawn. */
+  readonly skyHorizonNext: ColourName;
+  readonly skyLevel: number;
+  /** Whether windows, beacons and other emissive pixels are drawn: sun below the horizon. */
   readonly emissive: boolean;
 }
 
@@ -57,33 +78,66 @@ export function darknessAt(elevation: number): number {
   return last[1];
 }
 
-const SKY: Readonly<Record<Period, readonly [ColourName, ColourName]>> = {
-  night: ["skyNight", "skyNight"],
-  blueHour: ["skyNight", "skyBlueHour"],
-  goldenHour: ["skyBlueHour", "skyGolden"],
-  day: ["skyDay", "skyDay"],
-};
+/** The sky's two ends at a solar elevation, and how far each is towards the next. */
+function skyAt(
+  elevation: number,
+): Pick<Light, "skyTop" | "skyTopNext" | "skyHorizon" | "skyHorizonNext" | "skyLevel"> {
+  const first = SKY_KEYFRAMES[0] ?? [0, "skyNight", "skyNight"];
+  const last = SKY_KEYFRAMES[SKY_KEYFRAMES.length - 1] ?? first;
+  let from = first;
+  let to = first;
+  let fraction = 0;
+  if (elevation >= last[0]) from = to = last;
+  else if (elevation > first[0]) {
+    // NaN fails both tests above and stays at night.
+    for (let i = 1; i < SKY_KEYFRAMES.length; i++) {
+      to = SKY_KEYFRAMES[i] ?? last;
+      from = SKY_KEYFRAMES[i - 1] ?? first;
+      if (elevation < to[0]) break;
+    }
+    fraction = (elevation - from[0]) / (to[0] - from[0]);
+  }
+  return {
+    skyTop: from[1],
+    skyTopNext: to[1],
+    skyHorizon: from[2],
+    skyHorizonNext: to[2],
+    skyLevel: ditherLevel(fraction),
+  };
+}
 
 export function lightAt(elevation: number): Light {
-  const period = periodOf(elevation);
-  const [skyTop, skyHorizon] = SKY[period];
   return {
-    period,
+    period: periodOf(elevation),
     darkness: darknessAt(elevation),
-    skyTop,
-    skyHorizon,
-    emissive: period === "night" || period === "blueHour",
+    ...skyAt(elevation),
+    emissive: !(elevation >= 0), // NaN reads as night
   };
+}
+
+/**
+ * The sky's colour at (x, y), `level` (0–16) of the way from zenith to horizon. The
+ * keyframe mix uses the Bayer pattern shifted by (1, 2), so that it does not line up
+ * with the gradient's own.
+ */
+export function skyColour(light: Light, level: number, x: number, y: number): ColourName {
+  const next = takesSecond(x + 1, y + 2, light.skyLevel);
+  if (takesSecond(x, y, level)) return next ? light.skyHorizonNext : light.skyHorizon;
+  return next ? light.skyTopNext : light.skyTop;
 }
 
 /**
  * The colour a land pixel at (x, y) is drawn in under `darkness`: its own colour,
  * whole steps darker, and one more step on the share of pixels the fraction asks for
- * (ordered dithering, so the change is even across the land).
+ * (ordered dithering, so the change is even across the land). A darkness that is not
+ * a number reads as night; past 16 steps every colour is skyNight anyway.
  */
 export function tinted(colour: ColourName, darkness: number, x: number, y: number): ColourName {
-  const whole = Math.floor(Math.max(0, darkness));
-  const level = ditherLevel(Math.max(0, darkness) - whole);
+  const d = Number.isNaN(darkness)
+    ? darknessAt(Number.NaN)
+    : Math.min(MAX_DARKNESS, Math.max(0, darkness));
+  const whole = Math.floor(d);
+  const level = ditherLevel(d - whole);
   if (level === DITHER_LEVELS) return darken(colour, whole + 1);
   return darken(colour, whole + (takesSecond(x, y, level) ? 1 : 0));
 }

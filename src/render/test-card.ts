@@ -4,10 +4,10 @@
  * (AGENTS.md § Determinism; tests/render.test.ts and e2e/frame-hash.spec.ts). It is
  * also a quick way to look at the palette (tools/preview-palette.ts).
  */
-import { fillDithered, fillGradient } from "./dither.ts";
+import { fillDithered } from "./dither.ts";
 import { COLOUR_NAMES, type ColourName, PALETTE } from "./palette.ts";
 import { createSurface, setPixel, type Surface } from "./surface.ts";
-import { lightAt, tinted } from "../sky/light.ts";
+import { lightAt, skyColour, tinted } from "../sky/light.ts";
 
 export const TEST_CARD_WIDTH = 96;
 export const TEST_CARD_HEIGHT = 72;
@@ -22,10 +22,14 @@ export function drawTestCard(): Surface {
   COLOUR_NAMES.forEach((name, i) => {
     fillDithered(s, i * 4, 0, 4, 8, name, name, 0);
   });
-  // Row 2: the five skies, as gradients from zenith to horizon.
+  // Row 2: the five skies, from zenith (level 0) to horizon (level 16).
   TEST_CARD_ELEVATIONS.forEach((elevation, i) => {
     const light = lightAt(elevation);
-    fillGradient(s, i * 19, 8, 19, 24, light.skyTop, light.skyHorizon);
+    for (let row = 0; row < 24; row++) {
+      const level = Math.floor((2 * row * 16 + 23) / 46);
+      for (let x = i * 19; x < i * 19 + 19; x++)
+        setPixel(s, x, 8 + row, PALETTE[skyColour(light, level, x, 8 + row)]);
+    }
   });
   // Row 3: the 17 mix levels between two land colours.
   for (let level = 0; level <= 16; level++) {
@@ -45,13 +49,15 @@ export function drawTestCard(): Surface {
   ];
   TEST_CARD_ELEVATIONS.forEach((elevation, row) => {
     const light = lightAt(elevation);
-    for (let x = 0; x < TEST_CARD_WIDTH; x++) {
-      const name = land[Math.floor(x / 11)] ?? "sea";
-      for (let y = 40 + row * 6; y < 46 + row * 6; y++) {
-        setPixel(s, x, y, PALETTE[tinted(name, light.darkness, x, y)]);
-      }
-      if (light.emissive && x % 11 === 5) setPixel(s, x, 42 + row * 6, PALETTE.lamp);
-    }
+    land.forEach((name, i) => {
+      // Column i spans [i × 96 / 9, (i + 1) × 96 / 9): the 9 colours fill the width.
+      const from = Math.floor((i * TEST_CARD_WIDTH) / land.length);
+      const to = Math.floor(((i + 1) * TEST_CARD_WIDTH) / land.length);
+      for (let x = from; x < to; x++)
+        for (let y = 40 + row * 6; y < 46 + row * 6; y++)
+          setPixel(s, x, y, PALETTE[tinted(name, light.darkness, x, y)]);
+      if (light.emissive) setPixel(s, (from + to) >> 1, 42 + row * 6, PALETTE.lamp);
+    });
   });
   return s;
 }

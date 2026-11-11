@@ -17,7 +17,15 @@ import {
 } from "../src/render/palette";
 import { createSurface, getPixel, hashSurface, setPixel } from "../src/render/surface";
 import { drawTestCard } from "../src/render/test-card";
-import { darknessAt, DARKNESS_KEYFRAMES, lightAt, periodOf, tinted } from "../src/sky/light";
+import {
+  darknessAt,
+  DARKNESS_KEYFRAMES,
+  lightAt,
+  periodOf,
+  SKY_KEYFRAMES,
+  skyColour,
+  tinted,
+} from "../src/sky/light";
 import hashes from "./fixtures/frames/hashes.json";
 
 const SOURCES: readonly ColourName[] = [
@@ -38,6 +46,22 @@ describe("Surface", () => {
     expect(getPixel(s, 2, 1)).toEqual([1, 2, 3]);
     expect(() => createSurface(-1, 2)).toThrow();
     expect(() => createSurface(1.5, 2)).toThrow();
+  });
+
+  it("tells sizes apart beyond 16 bits (all 4 bytes of each size are hashed)", () => {
+    expect(hashSurface(createSurface(65537, 0))).not.toBe(hashSurface(createSurface(1, 0)));
+  });
+
+  it("refuses to read a pixel outside the surface, rather than one of the next row", () => {
+    const s = createSurface(2, 2);
+    setPixel(s, 0, 1, [7, 7, 7]);
+    for (const [x, y] of [
+      [2, 0],
+      [-1, 0],
+      [0, 2],
+      [0.5, 0],
+    ] as const)
+      expect(() => getPixel(s, x, y), `${String(x)}, ${String(y)}`).toThrow(RangeError);
   });
 
   it("clips pixels outside the surface", () => {
@@ -67,7 +91,7 @@ describe("Surface", () => {
         seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
         s.data[i] = seed >>> 24;
       }
-      expect(hashSurface(s)).toBe(naive([w & 255, w >> 8, h & 255, h >> 8, ...s.data]));
+      expect(hashSurface(s)).toBe(naive([w, 0, 0, 0, h, 0, 0, 0, ...s.data]));
     }
   });
 
@@ -146,6 +170,20 @@ describe("ordered dithering", () => {
       expect(getPixel(s, x, 0)).toEqual(PALETTE.skyNight);
       expect(getPixel(s, x, 16)).toEqual(PALETTE.skyGolden);
     }
+    // Every level is as wide as the others, give or take a row: 17 levels over 34
+    // rows, two rows each (the first fix made the last level one row only).
+    const g = createSurface(4, 34);
+    fillGradient(g, 0, 0, 4, 34, "skyNight", "skyGolden");
+    const rows = new Map<number, number>();
+    for (let y = 0; y < 34; y++) {
+      let golden = 0;
+      for (let x = 0; x < 4; x++)
+        if (getPixel(g, x, y).join() === PALETTE.skyGolden.join()) golden++;
+      rows.set(y, golden);
+    }
+    expect(rows.get(32)).toBe(4);
+    expect(rows.get(33)).toBe(4);
+    expect(rows.get(31)).toBeLessThan(4);
     const t = createSurface(8, 8);
     fillDithered(t, 0, 0, 8, 8, "grass", "field", 5);
     const colours = new Set<string>();
@@ -177,12 +215,39 @@ describe("light keyframes", () => {
     }
   });
 
-  it("lights windows only at blue hour and at night", () => {
+  it("lights windows once the sun is below the horizon, with the land a full step dark", () => {
     expect(lightAt(30).emissive).toBe(false);
     expect(lightAt(0).emissive).toBe(false);
+    expect(lightAt(-0.01).emissive).toBe(true);
+    // At −3.9° the land is almost 1.5 steps dark: the windows must be lit (review).
+    expect(lightAt(-3.9).emissive).toBe(true);
     expect(lightAt(-8).emissive).toBe(true);
     expect(lightAt(-30).emissive).toBe(true);
+    expect(lightAt(Number.NaN).emissive).toBe(true);
     expect(lightAt(30)).toMatchObject({ skyTop: "skyDay", skyHorizon: "skyDay", darkness: 0 });
+  });
+
+  it("moves the sky by keyframes without a jump at any period boundary", () => {
+    for (const [e, top, horizon] of SKY_KEYFRAMES)
+      expect(lightAt(e), String(e)).toMatchObject({ skyTop: top, skyHorizon: horizon });
+    // Across each boundary of the periods, at most one 16th of a step.
+    for (const boundary of [-12, -4, 0, 6]) {
+      const before = lightAt(boundary - 0.01);
+      const after = lightAt(boundary);
+      for (let y = 0; y < 4; y++)
+        for (let x = 0; x < 4; x++)
+          for (const level of [0, 16]) {
+            const a = skyColour(before, level, x, y);
+            const b = skyColour(after, level, x, y);
+            if (a !== b) expect(before.skyLevel, `${String(boundary)}°`).toBeGreaterThanOrEqual(15);
+          }
+    }
+  });
+
+  it("reads a NaN darkness as night, and a huge one as the darkest colour", () => {
+    expect(tinted("grass", Number.NaN, 0, 0)).toBe(darken("grass", 2));
+    expect(tinted("grass", Number.POSITIVE_INFINITY, 0, 0)).toBe("skyNight");
+    expect(tinted("grass", -3, 0, 0)).toBe("grass");
   });
 
   it("tints by whole steps, and a fraction by its share of each 4 × 4 block", () => {
