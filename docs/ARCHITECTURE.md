@@ -35,7 +35,7 @@ Provisional; each folder lands with the backlog item that needs it.
 | `src/render/` | Palette, dithering, sprites drawn in code, layers, camera, `Surface` (pixel buffer)        | no (the canvas blit is in `ui/`)   |
 | `src/i18n/`   | FR and EN catalogs (`fr.json`, `en.json`), language detection                              | no                                 |
 | `src/ui/`     | Canvas blit and scaling, input (zoom, pan, keys), legend, captions, settings               | DOM                                |
-| `tools/`      | Build-time scripts: map baking, mockups, screenshots                                       | files                              |
+| `tools/`      | Scripts run by hand: fixture recording, map baking, mockups, screenshots                   | files                              |
 | `tests/`      | Unit tests, recorded API fixtures, frame-hash snapshots                                    | —                                  |
 
 Everything outside `clock/`, `data/` fetchers and `ui/` is pure: same inputs, same
@@ -63,46 +63,80 @@ The CSP's `connect-src` lists exactly `https://odre.opendatasoft.com` and
 
 ### éCO2mix: fields and caveats
 
-Fields come from RTE's file specification (S-007). Their **API names** below are the
-names we expect from the ODRÉ datasets; they are **unverified**: the cloud sessions
-cannot reach ODRÉ (HTTP 403 from the session proxy, 2026-11-11), so B-005 starts by
-recording a real response from a browser and committing it as a fixture.
+Checked against the API itself on 2026-11-11: the datasets' field list and
+descriptions (S-003, S-009), recorded answers committed in
+`tests/fixtures/eco2mix/` (`tools/record-eco2mix.ts`), and every published step of
+both datasets from 2026-09-01 to 2026-11-11 run through the parser
+(`tools/check-eco2mix.ts`; the ~60 MB export it reads is not committed). The client is
+`src/data/eco2mix.ts`; it asks for the latest row with a non-null `consommation`.
 
-| Spec column (S-007)  | Expected API field | Meaning                                                             |
-| -------------------- | ------------------ | ------------------------------------------------------------------- |
-| Date, Heure          | `date_heure`       | Start of the 15-minute step (ISO 8601 with offset)                  |
-| Consommation         | `consommation`     | Consumption, MW                                                     |
-| Thermique            | `thermique`        | Fossil thermal production, MW (national: `gaz`, `fioul`, `charbon`) |
-| Nucléaire            | `nucleaire`        | MW                                                                  |
-| Eolien               | `eolien`           | MW                                                                  |
-| Solaire              | `solaire`          | MW                                                                  |
-| Hydraulique          | `hydraulique`      | MW                                                                  |
-| Pompage              | `pompage`          | Pumped-storage consumption, MW                                      |
-| Bioénergies          | `bioenergies`      | MW                                                                  |
-| Ech. physiques       | `ech_physiques`    | Net import/export balance, MW                                       |
-| TCO / TCH per source | `tco_*`, `tch_*`   | Coverage rate and **load factor** (%) per technology                |
+| API field (type as sent)                                                | Meaning                                                                   |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `date_heure` (text, `2026-11-11T07:45:00+00:00`)                        | Start of the 15-minute step, UTC                                          |
+| `code_insee_region` (text) / `perimetre` (`"France"`)                   | The area of the row                                                       |
+| `consommation` (number)                                                 | Consumption, MW                                                           |
+| `thermique` (number, regional only)                                     | Fossil thermal, MW; nationally the scene sums `gaz` + `fioul` + `charbon` |
+| `nucleaire`, `eolien`, `solaire`, `hydraulique`, `bioenergies` (number) | Production, MW                                                            |
+| `ech_physiques` (number)                                                | Net physical exchanges, MW: **positive = import, negative = export**      |
+| `pompage` (text regionally, number nationally)                          | Pumped-storage pumps, MW, **≤ 0**                                         |
+| `stockage_batterie` / `destockage_batterie` (text regionally)           | Battery charge (≤ 0) and discharge (≥ 0), MW                              |
+| `tch_*` (number or `null`, regional only)                               | **Load factor** per technology, %                                         |
+| `tco_*` (number, regional only)                                         | Coverage rate (production / consumption, %); not used, it reaches 598 %   |
 
 Caveats (provenance in brackets):
 
-- The real-time datasets hold rows for every step of the day; steps still to come are
-  empty, so we query the latest row with a non-null `consommation` (S-004).
-- Real-time values come from telemetry plus estimates; month M is replaced by
-  consolidated data mid-M+1 (S-004). We only ever show the latest reading, so this
-  only matters for fixtures: a recorded fixture is dated, never "refreshed".
-- A value can be missing ("ND"), absent because the technology does not exist in the
-  region ("-"), or withheld under statistical secrecy ("DC") (S-007). How the API
-  renders these (null? string?) is **unverified**. All three become "no figure",
-  never 0: a region with no nuclear plant shows none, a missing reading shows the
-  plant idle with "no data" in its caption.
-- **Sign of `ech_physiques` is unknown** (S-007 does not say). B-005 settles it from
-  a recorded response with the balance consumption + pumping ≈ production +
-  imports.
-- Battery and onshore/offshore wind split columns are "not available" in the
-  regional file (S-007).
-- Corsica is not among the spec's regions (S-007): Corsica gets the national view.
-- Rate limits (DS-01, DS-03): one viewer refreshing every 15 minutes makes about
-  3 000 calls a month per API, well within them; never poll faster, and stop when
+- **Sign of `ech_physiques`:** "exportateur si négatif, importateur si positif"
+  (field description, S-003, S-009). The balance confirms it: consumption =
+  production + `ech_physiques` + `pompage` + `stockage_batterie` +
+  `destockage_batterie`, to a mean of 4 MW or less and a maximum of 21 MW in every
+  region over 82 224 steps; with the opposite sign the error would be twice the
+  exchange. Nationally the same balance holds to 10 MW on average, but 58 of 6 855
+  steps are off by more than 100 MW (up to 3.2 GW, around midday on sunny days of
+  September): unexplained, and not a sign issue (tools/check-eco2mix.ts,
+  2026-11-11).
+- **Numbers sent as text:** `pompage` and the battery columns regionally,
+  `hydraulique_fil_eau_eclusee` nationally, are JSON strings such as `"-50"` (field
+  types in S-003, S-009, and the fixtures). The parser accepts a plain integer or
+  decimal string there.
+- **Missing values:** the spec's "ND", "-" and "DC" markers (S-007) never appear in
+  the API over the 10 weeks checked: every published step has every figure. A step
+  not yet published has every figure `null` (recorded fixture
+  `…-regional-empty-step`). A technology absent from a region is sent as **0 MW
+  with a `null` load factor**: `nucleaire = 0` and `tch_nucleaire = null` in every
+  step of Île-de-France, Bourgogne-Franche-Comté, Pays de la Loire, Bretagne and
+  Provence-Alpes-Côte d'Azur. The scene therefore tells "no such plant" (load
+  factor `null`) from "plant idle" (load factor 0). Any other `null`, string or
+  out-of-range value makes the whole reading "unavailable", never 0.
+- **Load factor above 100 %:** `tch_hydraulique` reaches 125 % and
+  `tch_bioenergies` 114 % (2026-09-01 to 2026-11-11), presumably because the
+  capacity reference lags new installations (not confirmed). The parser accepts
+  0–200 %; the scene clamps (B-012).
+- **No load factors nationally:** the national dataset has no `tch_*` column
+  (S-009), so the national view needs installed capacities to animate plants
+  (DS-07, B-012).
+- **Delay:** at 08:48 UTC on 2026-11-11 the latest regional step was 07:45 UTC
+  (63 min old) and the latest national one 08:30 UTC (18 min). The datasets keep
+  about 10 weeks: from 2026-08-31 22:00 UTC that day (S-003, S-009). A reading is
+  labelled stale after 3 hours (`STALE_AFTER_MS`, provisional); a step more than
+  15 minutes ahead of the clock counts as unavailable. A request is given up after
+  30 s, and an answer over 64 KB is rejected.
+- **Revisions:** a published step can still change: Île-de-France at 07:45 UTC read
+  7 757 MW at 08:48 and 7 758 MW at 08:54 (2026-11-11). Month M is replaced by
+  consolidated data mid-M+1 (S-004). A recorded fixture is dated, never refreshed.
+- The onshore/offshore wind split is national only (S-009). The battery columns,
+  "not available" regionally in the file specification (S-007), are filled in the
+  regional API (S-003).
+- Corsica is not in the regional dataset (12 regions, S-003): Corsica gets the
+  national view.
+- **CORS:** answers carry `Access-Control-Allow-Origin: *`, so the browser can call
+  the API directly (2026-11-11).
+- **Rate limits:** answers carry `X-RateLimit-Dataset-Limit: 50000` per month and
+  `X-RateLimit-Limit: 10000000` per day (2026-11-11, S-004). One viewer refreshing
+  every 15 minutes makes about 3 000 calls a month; never poll faster, and stop when
   hidden.
+- **Flaky connection from the cloud sessions:** about one connection in three to
+  ODRÉ was reset through the session proxy on 2026-11-11; the recording tools
+  retry. Whether browsers see this is unknown.
 
 ### Open-Meteo
 
@@ -172,7 +206,7 @@ real recorded data, then fixed here.
 | Thermal plant chimneys              | `tch_thermique`                | smoke rate ∝ load factor                                             |
 | Bioenergy plants                    | `tch_bioenergies`              | small smoke and a lit furnace ∝ load factor                          |
 | Town windows lit, power-line pulses | `consommation`                 | ∝ position of consumption in the area's typical range (baked p5–p95) |
-| Legend: stacked bar and figures     | MW per source, `ech_physiques` | shares of total production; import/export from the sign rule (B-005) |
+| Legend: stacked bar and figures     | MW per source, `ech_physiques` | shares of total production; import if > 0, export if < 0             |
 
 A missing figure shows the element **idle** (no motion, no glow) and the caption says
 "no data", never a guessed value.
@@ -278,7 +312,7 @@ Budget (**provisional**, to be measured in B-013 and fixed here):
 
 - **Untrusted input:** API responses and URL settings. Parsers live in `src/data/`
   and `src/ui/settings.ts`; they accept only the documented shape, finite numbers in
-  range (|MW| ≤ 200 000, percentages 0–100), bounded strings, known area codes; they
+  range (|MW| ≤ 200 000, load factors 0–200 %), bounded strings, known area codes; they
   never throw past the boundary: a bad response is "data unavailable".
 - No `innerHTML`, `eval` or `new Function` anywhere (lint rules); captions use
   `textContent`.

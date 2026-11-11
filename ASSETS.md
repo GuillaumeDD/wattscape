@@ -11,6 +11,7 @@ its author, source and license. Files without an entry are not merged.
 - Baked data (map, installed capacities, recorded API fixtures) keeps its source
   licence, named here with the source's id in `docs/DATA-SOURCES.md`.
 
-| File                     | Author                 | Source                                          | License      |
-| ------------------------ | ---------------------- | ----------------------------------------------- | ------------ |
-| `docs/screenshots/*.png` | Wattscape contributors | Screenshots of this app; no third-party content | CC BY-SA 4.0 |
+| File                            | Author                 | Source                                                                    | License             |
+| ------------------------------- | ---------------------- | ------------------------------------------------------------------------- | ------------------- |
+| `docs/screenshots/*.png`        | Wattscape contributors | Screenshots of this app; no third-party content                           | CC BY-SA 4.0        |
+| `tests/fixtures/eco2mix/*.json` | RTE, served by ODRÉ    | Recorded API answers, DS-01 and DS-02 (date and URL in each `.meta.json`) | Licence Ouverte 2.0 |

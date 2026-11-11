@@ -1,0 +1,6 @@
+{
+  "url": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records?where=code_insee_region+%3D+%2228%22+and+consommation+is+not+null&order_by=date_heure+desc&limit=1",
+  "status": 200,
+  "recordedAt": "2026-11-11T08:54:03.227Z",
+  "source": "DS-01, S-003"
+}
