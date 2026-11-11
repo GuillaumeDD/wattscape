@@ -1,10 +1,20 @@
 import { detectLocale, translate, type Locale, type MessageKey } from "./i18n";
+import { MAP_BAKED_ON } from "./map/france";
 import { mountAreaPicker, renderAreaOptions, type AreaState } from "./ui/area-picker";
 import { browserStorage, initialArea, savedLocale, saveLocale } from "./ui/settings";
 
 function setText(id: string, text: string): void {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
+}
+
+/** The month the map data was extracted, as Licence Ouverte asks for its date. */
+function mapDate(locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${MAP_BAKED_ON}T00:00:00Z`));
 }
 
 function render(locale: Locale): void {
@@ -18,6 +28,8 @@ function render(locale: Locale): void {
   setText("credits-data", t("creditsData"));
   setText("credits-eco2mix-licence", t("creditsEco2mixLicence"));
   setText("credits-weather-licence", t("creditsWeatherLicence"));
+  setText("credits-map", t("creditsMap"));
+  setText("credits-map-licence", t("creditsMapLicence").replace("{date}", mapDate(locale)));
   document.getElementById("language")?.setAttribute("aria-label", t("switchLanguageLabel"));
   setText("area-label", t("areaLabel"));
   setText("locate", t("useMyLocation"));

@@ -1,10 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { REGION_CODES } from "../src/data/eco2mix";
+import { FINE_ROWS_RLE } from "../src/map/france";
 import {
-  ABROAD_KM,
+  cellCentre,
+  decodeRuns,
+  FINE_COLUMNS,
+  FINE_ROWS,
+  fineIndexOf,
+  onFineGrid,
+  regionOfKind,
+} from "../src/map/grid";
+import {
   areaOfPosition,
   CORSICA,
-  cosDeg,
+  NEAR_FRANCE_KM,
   PREFECTURES,
   REGION_CAPITALS,
   REGION_NAMES,
@@ -55,32 +64,64 @@ describe("areaOfPosition", () => {
     }
   });
 
-  it("shows the nearest-prefecture limit on a famous case", () => {
-    // Mont-Saint-Michel is in Normandie but nearer Rennes than Saint-Lô: the
-    // provisional lookup (ARCHITECTURE § Geolocation) picks Bretagne until B-008.
-    expect(areaOfPosition(48.636, -1.511).area).toBe("53");
+  it("puts Mont-Saint-Michel in Normandie, which the nearest prefecture got wrong", () => {
+    // Regression: nearer Rennes than Saint-Lô, it mapped to Bretagne before B-008.
+    expect(areaOfPosition(48.636, -1.511)).toEqual({ area: "28", reason: "region" });
+  });
+
+  it("follows the border where prefectures misled, on both sides of it", () => {
+    // Landmark and town-hall coordinates, a few km from a regional border.
+    const cases: [string, number, number, string][] = [
+      ["Pontorson (Normandie, by Brittany)", 48.553, -1.508, "28"],
+      ["Cancale (Bretagne)", 48.676, -1.852, "53"],
+      ["Giverny (Normandie, by Île-de-France)", 49.075, 1.533, "28"],
+      ["La Roche-Guyon (Île-de-France)", 49.081, 1.628, "11"],
+      ["Château de Chenonceau (Centre-Val de Loire)", 47.325, 1.07, "24"],
+      ["Lascaux (Nouvelle-Aquitaine)", 45.054, 1.169, "75"],
+      ["Rocamadour (Occitanie)", 44.799, 1.618, "76"],
+    ];
+    for (const [name, lat, lon, area] of cases) {
+      expect(areaOfPosition(lat, lon), name).toEqual({ area, reason: "region" });
+    }
+  });
+
+  it("maps the sea off a French coast to that coast's region", () => {
+    expect(areaOfPosition(49.9, 0.3).area).toBe("28"); // off Fécamp
+    expect(areaOfPosition(48.0, -4.9).area).toBe("53"); // off the Pointe du Raz
+    expect(areaOfPosition(43.2, 5.3).area).toBe("93"); // off Marseille
   });
 
   it("gives Corsica the national view, and Sardinia the abroad one", () => {
     expect(areaOfPosition(42.15, 9.1)).toEqual({ area: "FR", reason: "corsica" });
     expect(areaOfPosition(41.39, 9.16)).toEqual({ area: "FR", reason: "corsica" }); // Bonifacio
-    expect(areaOfPosition(41.24, 9.4)).toEqual({ area: "FR", reason: "abroad" }); // Sardinia
+    expect(areaOfPosition(40.92, 9.5)).toEqual({ area: "FR", reason: "abroad" }); // Olbia
+    // Regression: Santa Teresa Gallura, 14 km from Corsica, read "Corsica" in review.
+    expect(areaOfPosition(41.24, 9.19)).toEqual({ area: "FR", reason: "abroad" });
+    expect(areaOfPosition(41.24, 9.4)).toEqual({ area: "FR", reason: "abroad" });
+    expect(areaOfPosition(42.0, 8.6)).toEqual({ area: "FR", reason: "corsica" }); // off Ajaccio
   });
 
-  it("gives the national view far abroad, and is honest about places near a border", () => {
+  it(`gives the national view abroad, beyond ${String(NEAR_FRANCE_KM)} km of France`, () => {
     for (const [name, lat, lon] of [
       ["Turin", 45.07, 7.69],
       ["Barcelona", 41.39, 2.17],
       ["London", 51.51, -0.13],
+      ["Brussels", 50.85, 4.35],
+      ["Bern", 46.95, 7.45],
+      ["Saint Helier, Jersey", 49.186, -2.107],
       ["Null Island", 0, 0],
       ["Tokyo", 35.68, 139.69],
     ] as const) {
       expect(areaOfPosition(lat, lon), name).toEqual({ area: "FR", reason: "abroad" });
     }
-    // Known limit (ARCHITECTURE § Geolocation): within ABROAD_KM of a prefecture,
-    // a foreign town maps to the French region next door.
+  });
+
+  it(`maps a place within ${String(NEAR_FRANCE_KM)} km of France to the region next door`, () => {
     expect(areaOfPosition(46.2, 6.15).area).toBe("84"); // Geneva
-    expect(areaOfPosition(50.85, 4.35).area).toBe("32"); // Brussels
+    expect(areaOfPosition(47.56, 7.59).area).toBe("44"); // Basel
+    expect(areaOfPosition(43.74, 7.42).area).toBe("93"); // Monaco
+    expect(areaOfPosition(49.611, 6.13).area).toBe("44"); // Luxembourg
+    expect(areaOfPosition(42.507, 1.522).area).toBe("76"); // Andorra la Vella
   });
 
   it("rejects positions that are not numbers or not on Earth", () => {
@@ -94,50 +135,77 @@ describe("areaOfPosition", () => {
     }
   });
 
-  it("agrees with a brute-force reference on random positions (cross-check)", () => {
-    // Naive reference: haversine distance to every prefecture.
-    const R = 6371;
-    const rad = (d: number): number => (d * Math.PI) / 180;
-    const haversine = (a: number, b: number, c: number, d: number): number => {
-      const h =
-        Math.sin(rad(c - a) / 2) ** 2 +
-        Math.cos(rad(a)) * Math.cos(rad(c)) * Math.sin(rad(d - b) / 2) ** 2;
-      return 2 * R * Math.asin(Math.sqrt(h));
-    };
+  it("agrees with a brute-force nearest-cell search outside France (cross-check)", () => {
+    // Naive reference: every French cell of the fine grid, distances in km on the
+    // sphere's local tangent plane, with Math.cos. Cells are visited outward from
+    // the point's latitude, and the search stops once the latitude gap alone exceeds
+    // the distance to the nearest cell of another region: an exact search, just
+    // fast enough for CI.
+    const grid = decodeRuns(FINE_ROWS_RLE, FINE_COLUMNS);
+    const french: [number, number, string][] = [];
+    for (let r = 0; r < FINE_ROWS; r++) {
+      for (let c = 0; c < FINE_COLUMNS; c++) {
+        const region = regionOfKind(grid[r * FINE_COLUMNS + c] ?? 0);
+        if (region !== null) {
+          const centre = cellCentre(r, c, 1);
+          french.push([centre.latitude, centre.longitude, region]);
+        }
+      }
+    }
+    french.sort((a, b) => a[0] - b[0]);
     let seed = 99;
     const next = (): number => {
       seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
       return seed / 4294967296;
     };
-    let disagreements = 0;
-    const n = 5000;
-    for (let i = 0; i < n; i++) {
+    let checked = 0;
+    let near = 0;
+    while (checked < 300) {
       const lat = 41 + next() * 10.5;
       const lon = -5.5 + next() * 15.5;
-      let best = Number.POSITIVE_INFINITY;
-      let region = "";
-      for (const [, , r, plat, plon] of PREFECTURES) {
-        const d = haversine(lat, lon, plat, plon);
-        if (d < best) {
-          best = d;
-          region = r;
+      const cell = fineIndexOf(lat, lon);
+      if (cell === null) continue;
+      if (onFineGrid(cell.row, cell.column) && grid[cell.row * FINE_COLUMNS + cell.column] !== 0)
+        continue;
+      const k = Math.cos((lat * Math.PI) / 180) * 111.2;
+      // The nearest cell, and the nearest one of another region.
+      let first: [number, string] = [Number.POSITIVE_INFINITY, ""];
+      let other = Number.POSITIVE_INFINITY;
+      const visit = ([la, lo, code]: readonly [number, number, string]): void => {
+        const d = Math.hypot((la - lat) * 111.2, (lo - lon) * k);
+        if (d < first[0]) {
+          if (code !== first[1]) other = first[0];
+          first = [d, code];
+        } else if (code !== first[1] && d < other) other = d;
+      };
+      let hi = 0;
+      while (hi < french.length && (french[hi]?.[0] ?? 0) < lat) hi++;
+      let lo = hi - 1;
+      while (lo >= 0 || hi < french.length) {
+        const up = french[hi];
+        const down = french[lo];
+        const gapUp = up === undefined ? Number.POSITIVE_INFINITY : (up[0] - lat) * 111.2;
+        const gapDown = down === undefined ? Number.POSITIVE_INFINITY : (lat - down[0]) * 111.2;
+        if (Math.min(gapUp, gapDown) > other) break;
+        if (gapUp <= gapDown && up !== undefined) {
+          visit(up);
+          hi++;
+        } else if (down !== undefined) {
+          visit(down);
+          lo--;
         }
       }
-      const expected = best > ABROAD_KM ? "FR" : region === CORSICA ? "FR" : region;
-      if (areaOfPosition(lat, lon).area !== expected) disagreements++;
+      // Skip near-ties and points at the threshold, where rounding may tip either way.
+      if (Math.abs(first[0] - NEAR_FRANCE_KM) < 0.05) continue;
+      if (other - first[0] < 0.05) continue;
+      const isNear = first[0] < NEAR_FRANCE_KM;
+      if (isNear) near++;
+      const expected = !isNear || first[1] === CORSICA ? "FR" : first[1];
+      expect(areaOfPosition(lat, lon).area, `${String(lat)}, ${String(lon)}`).toBe(expected);
+      checked++;
     }
-    // The projection differs from the sphere by well under 1 %: only near-ties and
-    // points right at ABROAD_KM may disagree.
-    expect(disagreements / n).toBeLessThan(0.005);
-  });
-});
-
-describe("cosDeg", () => {
-  it("matches Math.cos to 2e-6 from 0 to 60° (reference)", () => {
-    for (let d = 0; d <= 60; d += 0.25) {
-      expect(Math.abs(cosDeg(d) - Math.cos((d * Math.PI) / 180))).toBeLessThan(2e-6);
-    }
-  });
+    expect(near).toBeGreaterThan(10);
+  }, 20_000); // about 3 s locally, slower on CI runners: room above the 5 s default
 });
 
 describe("referencePoint", () => {
