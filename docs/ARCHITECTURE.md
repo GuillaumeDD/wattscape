@@ -30,7 +30,8 @@ Provisional; each folder lands with the backlog item that needs it.
 | `src/map/`    | The baked map of France (land, sea, regions, relief) and its tiles                         | no                                 |
 | `src/world/`  | Seeded PRNG; placement of plants, towns, trees and landmarks; level of detail              | no                                 |
 | `src/render/` | Palette, dithering, sprites drawn in code, layers, camera, `Surface` (pixel buffer)        | no (the canvas blit is in `ui/`)   |
-| `src/ui/`     | Canvas blit and scaling, input (zoom, pan, keys), legend, captions, settings, i18n         | DOM                                |
+| `src/i18n/`   | FR and EN catalogs (`fr.json`, `en.json`), language detection                              | no                                 |
+| `src/ui/`     | Canvas blit and scaling, input (zoom, pan, keys), legend, captions, settings               | DOM                                |
 | `tools/`      | Build-time scripts: map baking, mockups, screenshots                                       | files                              |
 | `tests/`      | Unit tests, recorded API fixtures, frame-hash snapshots                                    | —                                  |
 
@@ -265,8 +266,9 @@ Budget (**provisional**, to be measured in B-013 and fixed here):
 
 ## Internationalization
 
-- `src/ui/i18n.ts`: one catalog per language (FR, EN) with the same keys, checked by
-  a test; numbers and times formatted with `Intl` in the active language.
+- `src/i18n/`: one JSON catalog per language (FR, EN) with the same keys, checked by
+  a test and by the type checker (`satisfies`); French is the default and the
+  fallback; the choice is remembered in `localStorage`; numbers and times formatted with `Intl` in the active language.
 - Region and landmark names are proper nouns kept in French in both languages.
 
 ## Security
@@ -279,6 +281,8 @@ Budget (**provisional**, to be measured in B-013 and fixed here):
   `textContent`.
 - **CSP** (in `index.html`):
   `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://odre.opendatasoft.com https://api.open-meteo.com; object-src 'none'; base-uri 'self'; form-action 'none'`.
+  The dev server alone adds `'self' ws:` to `connect-src` for live reload
+  (`vite.config.ts`); the build ships the CSP unchanged.
 
 ## Build, CI and deploy
 

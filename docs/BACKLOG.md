@@ -8,7 +8,7 @@ Statuses: `todo` / `in-progress` / `done`.
 
 | ID    | Item                              | Acceptance criteria                                                                                                                                                 | Status |
 | ----- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| B-001 | Project skeleton (step 0)         | TS strict + Vite build; ESLint + Prettier; Vitest; FR/EN i18n with a test that both catalogs have the same keys; strict CSP with the two API hosts only             | todo   |
+| B-001 | Project skeleton (step 0)         | TS strict + Vite build; ESLint + Prettier; Vitest; FR/EN i18n with a test that both catalogs have the same keys; strict CSP with the two API hosts only             | done   |
 | B-002 | CI                                | On every PR and push to `main`: `npm ci`, typecheck, lint, test, build, `npm audit --omit=dev`, gitleaks over full history                                          | todo   |
 | B-003 | GitHub Pages deploy               | Push to `main` publishes `dist/` to Pages; least-privilege permissions; actions pinned by SHA                                                                       | todo   |
 | B-004 | Position → area                   | "Use my location" button; offline lookup (nearest prefecture); national view abroad, in Corsica or on refusal; area remembered; `?area=`; test per prefecture       | todo   |

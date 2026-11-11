@@ -1,0 +1,52 @@
+:root {
+  color-scheme: dark;
+  --bg: #10131c;
+  --fg: #e8e4d8;
+  --muted: #9aa0ad;
+  --accent: #f2c14e;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 100%;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+p {
+  margin: 0;
+}
+
+#status {
+  color: var(--muted);
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--muted);
+  border-radius: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+}
