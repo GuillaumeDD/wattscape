@@ -137,7 +137,10 @@ describe("areaOfPosition", () => {
 
   it("agrees with a brute-force nearest-cell search outside France (cross-check)", () => {
     // Naive reference: every French cell of the fine grid, distances in km on the
-    // sphere's local tangent plane, with Math.cos.
+    // sphere's local tangent plane, with Math.cos. Cells are visited outward from
+    // the point's latitude, and the search stops once the latitude gap alone exceeds
+    // the distance to the nearest cell of another region: an exact search, just
+    // fast enough for CI.
     const grid = decodeRuns(FINE_ROWS_RLE, FINE_COLUMNS);
     const french: [number, number, string][] = [];
     for (let r = 0; r < FINE_ROWS; r++) {
@@ -149,6 +152,7 @@ describe("areaOfPosition", () => {
         }
       }
     }
+    french.sort((a, b) => a[0] - b[0]);
     let seed = 99;
     const next = (): number => {
       seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
@@ -167,14 +171,29 @@ describe("areaOfPosition", () => {
       // The nearest cell, and the nearest one of another region.
       let first: [number, string] = [Number.POSITIVE_INFINITY, ""];
       let other = Number.POSITIVE_INFINITY;
-      for (const [la, lo, code] of french) {
-        const dy = (la - lat) * 111.2;
-        if (Math.abs(dy) > other) continue;
-        const d = Math.hypot(dy, (lo - lon) * k);
+      const visit = ([la, lo, code]: readonly [number, number, string]): void => {
+        const d = Math.hypot((la - lat) * 111.2, (lo - lon) * k);
         if (d < first[0]) {
           if (code !== first[1]) other = first[0];
           first = [d, code];
         } else if (code !== first[1] && d < other) other = d;
+      };
+      let hi = 0;
+      while (hi < french.length && (french[hi]?.[0] ?? 0) < lat) hi++;
+      let lo = hi - 1;
+      while (lo >= 0 || hi < french.length) {
+        const up = french[hi];
+        const down = french[lo];
+        const gapUp = up === undefined ? Number.POSITIVE_INFINITY : (up[0] - lat) * 111.2;
+        const gapDown = down === undefined ? Number.POSITIVE_INFINITY : (lat - down[0]) * 111.2;
+        if (Math.min(gapUp, gapDown) > other) break;
+        if (gapUp <= gapDown && up !== undefined) {
+          visit(up);
+          hi++;
+        } else if (down !== undefined) {
+          visit(down);
+          lo--;
+        }
       }
       // Skip near-ties and points at the threshold, where rounding may tip either way.
       if (Math.abs(first[0] - NEAR_FRANCE_KM) < 0.05) continue;
@@ -186,7 +205,7 @@ describe("areaOfPosition", () => {
       checked++;
     }
     expect(near).toBeGreaterThan(10);
-  });
+  }, 20_000); // about 3 s locally, slower on CI runners: room above the 5 s default
 });
 
 describe("referencePoint", () => {
