@@ -1,0 +1,7 @@
+{
+  "url": "https://api.open-meteo.com/v1/forecast?latitude=49.4&longitude=1.1&current=temperature_2m,weather_code,cloud_cover,precipitation,snowfall,snow_depth,wind_speed_10m,is_day",
+  "status": 429,
+  "recordedAt": "2026-11-11T15:01:24Z",
+  "source": "DS-03, S-005",
+  "note": "Recorded with curl from a cloud session whose egress address is shared: the per-address daily quota was spent. Headers: X-RateLimit-Limit 10000.0, X-RateLimit-Window 86400, Retry-After 32330."
+}

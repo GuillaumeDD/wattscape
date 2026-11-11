@@ -195,10 +195,49 @@ Caveats (provenance in brackets):
 
 ### Open-Meteo
 
-- Query: `current=temperature_2m,weather_code,cloud_cover,precipitation,snowfall,wind_speed_10m,is_day`
-  at the rounded position.
-- `weather_code` is a WMO code; we group it into `clear`, `cloudy`, `fog`, `drizzle`,
-  `rain`, `snow`, `storm` (table to be recorded with the API doc's id in B-006).
+Checked against the API itself on 2026-11-11: answers recorded at three landmarks in
+`tests/fixtures/open-meteo/` (`tools/record-open-meteo.ts`), and the API's own list
+of weather codes (S-010). The client is `src/data/open-meteo.ts`.
+
+- **Query:** `current=temperature_2m,weather_code,cloud_cover,precipitation,snowfall,snow_depth,wind_speed_10m,wind_direction_10m,is_day`
+  and `timeformat=unixtime`, at the position rounded to 0.1° (`roundPosition`; the
+  URL prints exactly one decimal).
+- **Answer:** `latitude`/`longitude` of the model's grid point, not the position
+  asked (49.4, 1.1 → 49.4017, 1.0999; the Mont Blanc summit → a point at 2 308 m);
+  `current_units`; `current` with `time` (seconds, UTC, start of a 15-minute
+  interval: `interval` = 900) and one number per field. The parser checks each unit
+  (°C, %, mm, cm, m, km/h, °, wmo code), so a change of unit cannot pass as a value,
+  and rejects a grid point more than 0.5° away from the position asked.
+- **Units and meaning** (S-010): `precipitation` (mm) and `snowfall` (cm) are sums
+  over the preceding hour for hourly data; over which window for `current` (15
+  minutes or an hour) is **unverified**, so no formula may rely on it yet;
+  `snow_depth` is snow on the ground in **metres**;
+  `cloud_cover` is total cover in %; `wind_direction_10m` is where the wind blows
+  from; `is_day` is 1 in daylight at the grid point.
+- **Errors:** `{"error": true, "reason": "…"}` with HTTP 400 for a bad query, 429
+  when the daily quota is spent (recorded). The quota is per address: 10 000 calls a
+  day (`X-RateLimit-Limit`, `X-RateLimit-Window: 86400`). The cloud sessions share
+  their address and often get 429; a viewer's browser has its own.
+- **CORS:** `Access-Control-Allow-Origin: *` (2026-11-11).
+- **Freshness:** a reading is labelled stale after 1 hour (four missed refreshes,
+  `WEATHER_STALE_AFTER_MS`, provisional); one more than 15 minutes ahead of the
+  clock counts as unavailable. Requests share the éCO2mix client's rules
+  (`src/data/fetch-json.ts`): 30 s timeout, size cap, abort.
+- **Weather codes:** the API sends a subset of WMO code table 4677 (S-010). One
+  invalid field, or a code outside this table, makes the whole reading
+  "unavailable" (D-010).
+
+| WMO codes (S-010)                              | Group     |
+| ---------------------------------------------- | --------- |
+| 0 clear sky, 1 mainly clear                    | `clear`   |
+| 2 partly cloudy, 3 overcast                    | `cloudy`  |
+| 45 fog, 48 depositing rime fog                 | `fog`     |
+| 51, 53, 55 drizzle; 56, 57 freezing drizzle    | `drizzle` |
+| 61, 63, 65 rain; 66, 67 freezing rain          | `rain`    |
+| 80, 81, 82 rain showers                        | `rain`    |
+| 71, 73, 75 snowfall; 77 snow grains            | `snow`    |
+| 85, 86 snow showers                            | `snow`    |
+| 95, 97 thunderstorm; 96, 99 thunderstorm, hail | `storm`   |
 
 ## Privacy
 
@@ -288,7 +327,7 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
   (blossom, ripe crops, fallen leaves, bare branches); between two keyframes, cells
   switch from one to the next by a seeded per-cell threshold, so the change spreads
   across the map like a real season instead of a global fade. Snow cover comes from
-  Open-Meteo's snow depth (field name **unverified**, B-006), with altitude: the
+  Open-Meteo's `snow_depth` (metres, checked in B-006), with altitude: the
   Alps whiten before the plains.
 
 ## Art direction

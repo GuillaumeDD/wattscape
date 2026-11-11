@@ -15,3 +15,4 @@ its author, source and license. Files without an entry are not merged.
 | ------------------------------- | ---------------------- | ------------------------------------------------------------------------- | ------------------- |
 | `docs/screenshots/*.png`        | Wattscape contributors | Screenshots of this app; no third-party content                           | CC BY-SA 4.0        |
 | `tests/fixtures/eco2mix/*.json` | RTE, served by ODRÉ    | Recorded API answers, DS-01 and DS-02 (date and URL in each `.meta.json`) | Licence Ouverte 2.0 |
+| `tests/fixtures/open-meteo/*`   | Open-Meteo.com         | Recorded API answers, DS-03 (date and URL in each `.meta.json`)           | CC BY 4.0           |

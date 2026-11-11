@@ -1,0 +1,6 @@
+{
+  "url": "https://api.open-meteo.com/v1/forecast?latitude=49.4&longitude=1.1&current=temperature_2m%2Cweather_code%2Ccloud_cover%2Cprecipitation%2Csnowfall%2Csnow_depth%2Cwind_speed_10m%2Cwind_direction_10m%2Cis_day&timeformat=unixtime",
+  "status": 200,
+  "recordedAt": "2026-11-11T15:03:34.773Z",
+  "source": "DS-03, S-005"
+}

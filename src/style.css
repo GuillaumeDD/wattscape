@@ -21,8 +21,10 @@ main {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  box-sizing: border-box;
   min-height: 100%;
-  padding: 0 1rem;
+  /* Room for the fixed credits footer, so it never covers the language button. */
+  padding: 0 1rem 3rem;
   text-align: center;
 }
 
@@ -49,4 +51,19 @@ button {
   color: var(--fg);
   font: inherit;
   cursor: pointer;
+}
+
+#credits {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+#credits a {
+  color: inherit;
 }
