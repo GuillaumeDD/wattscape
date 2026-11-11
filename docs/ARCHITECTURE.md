@@ -287,7 +287,7 @@ names are the official French names in every language (D-011).
 
 ### Debug page
 
-`debug.html` (linked from the credits as "Live data") lists every live figure the
+`debug.html` (linked from the credits as "Live data", public by D-013) lists every live figure the
 scene uses (B-007): each éCO2mix and Open-Meteo field under its API name, the
 dataset or the rounded point it comes from, the time it describes, its age and
 freshness ("up to date", "stale", or "dated in the future", whose figures are then
@@ -357,9 +357,9 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
   landmarks × 4 dates (equinoxes, solstices 2026) × 12 hours: azimuth and, with the
   sun up, elevation agree within 0.01°. Below the horizon the two differ by up to
   0.55°, only because their refraction conventions differ there; twilight
-  thresholds use the geometric elevation, which refraction does not touch. NOAA's
-  own calculator could not be opened from the cloud sessions (S-008), so it is not
-  yet compared directly (D-012).
+  thresholds use the geometric elevation, which refraction does not touch. It is
+  also checked against a transcription of NOAA's own code (S-008) on 20,000 random
+  instants and places: the two agree within 10⁻⁹° (D-012).
 - **Moon** (`src/sky/moon.ts`): phase from the mean synodic month (29.530588861
   days) since Meeus's mean new moon of 2000-01-06. Against every quarter of
   2026–2030 from S-012, the worst gap is 0.8 day, within the 1-day target; the lit
