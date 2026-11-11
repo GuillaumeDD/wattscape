@@ -120,6 +120,8 @@ revisit it.
 
 ## D-011 — Region lookup: nearest prefecture until the map, and how the picker behaves
 
+Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-france) for the lookup rule and the abroad threshold.
+
 - **Context:** B-004 needs a region from a position, offline. The exact answer needs
   the outlines of the regions, which belong to the baked map (B-008, DS-04 still to
   check). The nearest-prefecture lookup was measured: 8.0 % of the mainland's area
@@ -174,3 +176,54 @@ revisit it.
   (AGENTS.md §1); it shows only open data and a prefecture's position, never the
   viewer's.
 - **Revisit if:** it ever needs to show anything that is not public open data.
+
+## D-014 — Sources of the baked map: IGN for France, Natural Earth for its neighbours
+
+- **Context:** B-008 bakes the map of France: region outlines (DS-04), relief
+  (DS-05) and, so that France does not float alone, the land of its neighbours. The
+  `wattscape` cloud environment was opened to IGN's servers (data.geopf.fr,
+  geoservices.ign.fr) on 2026-11-11 to read them.
+- **Options:** regions: (a) IGN ADMIN EXPRESS from IGN's WFS, (b) the france-geojson
+  mirror of its 2018 edition (S-011). Relief: (a) IGN BD ALTI from IGN's WMS, (b)
+  Copernicus DEM GLO-90 (reachable on AWS, but its licence page, on
+  dataspace.copernicus.eu, could not be read from the cloud sessions; it is a
+  custom licence, not one the register's GO rule lists). Neighbours: (a) Natural
+  Earth 1:10m countries, (b) OpenStreetMap (DS-06, share-alike), (c) none.
+- **Decision:** IGN ADMIN EXPRESS COG CARTO (DS-04), IGN BD ALTI (DS-05) and Natural
+  Earth (DS-11), all GO. Both IGN licences are Licence Ouverte 2.0, read in IGN's
+  own metadata records (S-013, S-014); Natural Earth is public domain (S-015).
+  Foreign land is drawn flat (BD ALTI covers France only). Proposed by Claude,
+  2026-11-11; to confirm by Guillaume.
+- **Why:** the official publisher, under the licence the project already uses for
+  éCO2mix; no share-alike on a database committed to the repo; the neighbours'
+  coast at 1:10m is fine for 4 km cells.
+- **Revisit if:** the neighbours need relief (the Alps' Italian side, the Pyrenees'
+  Spanish side): a licence-compatible DEM beyond France is then needed.
+
+## D-015 — Region lookup on the map cells, and 22 km around France
+
+- **Context:** D-011 shipped the nearest-prefecture lookup until the map existed;
+  it put 8.0 % of the mainland in the wrong region. Guillaume asked for an exact
+  lookup as soon as possible (D-011). The baked map (B-008, D-014) now holds the
+  region of every 1 km cell.
+- **Options:** cell size: 4 km (the scene's grid, borders four times coarser)
+  or 1 km (0.33 % measured, 37 KB more). Near France: (a) keep D-011's
+  rule (within 120 km of a prefecture: Brussels maps to Hauts-de-France); (b) within
+  22 km of a French cell, the nearest region; (c) only inside France, abroad
+  otherwise (a beach or a boat off the coast would read "abroad").
+- **Decision:** 1 km cells, and (b), measured from the position to the centre of
+  the nearest French cell in true km: 22 km is 12 nautical miles, the breadth of
+  the territorial sea. Foreign towns near the border map to the French region next
+  door: Geneva, Lausanne, Basel, Freiburg, Karlsruhe, Saarbrücken, Luxembourg, Mons,
+  Tournai, Monaco, Ventimiglia, Andorra la Vella, San Sebastián and Alderney (all
+  measured). Brussels, Bern, Ostend, Dover, Jersey, Guernsey and Sardinia are
+  abroad. The sea off Corsica gets the national view like Corsica. The picker's
+  behaviour (D-011) is unchanged. Proposed by Claude, 2026-11-11; to confirm by
+  Guillaume.
+- **Why:** measured against the full-precision official outlines, the 65 wrong
+  points of 20 000 all lie within 0.55 km of a border (ARCHITECTURE § Geolocation); the margin keeps people
+  near the coast or a border on the region they are next to; a viewer in a foreign
+  town near the border gets a French region rather than nothing, and can switch to
+  France in one click.
+- **Revisit if:** viewers near a border complain, or GPS positions at sea need a
+  wider margin.

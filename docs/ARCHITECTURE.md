@@ -30,7 +30,7 @@ Provisional; each folder lands with the backlog item that needs it.
 | `src/geo/`    | Regions, offline position → area lookup, map projection                                    | no                                 |
 | `src/data/`   | éCO2mix and Open-Meteo clients: URL building, strict parsers, refresh and staleness        | network (fetchers only)            |
 | `src/sky/`    | Sun and moon position, moon phase, light keyframes                                         | no                                 |
-| `src/map/`    | The baked map of France (land, sea, regions, relief) and its tiles                         | no                                 |
+| `src/map/`    | The baked map of France (land, sea, regions, relief) and its grid                          | no                                 |
 | `src/world/`  | Seeded PRNG; placement of plants, towns, trees and landmarks; level of detail              | no                                 |
 | `src/render/` | Palette, dithering, sprites drawn in code, layers, camera, `Surface` (pixel buffer)        | no (the canvas blit is in `ui/`)   |
 | `src/i18n/`   | FR and EN catalogs (`fr.json`, `en.json`), language detection                              | no                                 |
@@ -54,7 +54,8 @@ Which sources we use, and under which licence, is decided in the register
 | Open-Meteo (DS-03)       | `api.open-meteo.com/v1/forecast?current=…`                                            | current weather                                    | 15 min  |
 
 The CSP's `connect-src` lists exactly `https://odre.opendatasoft.com` and
-`https://api.open-meteo.com`.
+`https://api.open-meteo.com`. The map's sources (DS-04, DS-05, DS-11) are read once,
+by hand, when the map is baked (§ Map); the browser never calls them.
 
 > 💡 **éCO2mix** is RTE's public view of the French grid: RTE runs the high-voltage
 > network and publishes, every 15 minutes, how much each technology produces and how
@@ -255,27 +256,29 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
 
 ### Geolocation
 
-`src/geo/regions.ts` maps a position to the region of the **nearest prefecture**
-(94 mainland prefectures + 2 in Corsica, coordinates from S-006), with distances on
-an equirectangular projection at the position's latitude. The cosine is a Taylor
-series (`cosDeg`), not `Math.cos`, so every engine picks the same area. This is **provisional**,
-until the baked map (B-008) lets the lookup read the region of the map cell.
+`src/geo/regions.ts` reads the region of the position's cell in the **fine grid of
+the baked map** (1 km cells, § Map), offline. Only + and × turn a position into a
+cell, so every engine picks the same one; a lookup decodes only the rows it reads
+and keeps nothing. Outside France, a position within **22 km** (true distance) of
+the centre of a French cell (`NEAR_FRANCE_KM`, 12 nautical miles, the breadth of
+the territorial sea) takes the region of the nearest one: a beach or a boat off the
+coast, GPS error, a town across a border (Geneva, Basel, Luxembourg, Monaco: the
+measured list is in D-015); farther away it is abroad and gets the national view
+(D-015, provisional).
 
-Measured with `tools/check-regions.ts` against the official outlines (S-011,
-2026-11-11):
+Measured with `tools/check-regions.ts` against the full-precision official outlines
+(IGN ADMIN EXPRESS COG, S-013), not the generalised ones the map is baked from
+(2026-11-11):
 
-- every prefecture lies inside its own département and region;
-- **8.0 % of the mainland's area** maps to a neighbouring region (1 604 of 20 000
-  random points), mostly in large regions far from their prefectures. A famous case:
-  Mont-Saint-Michel (Normandie) is nearer Rennes than Saint-Lô, so it maps to
-  Bretagne. The viewer can always correct it from the region list;
-- every point of the mainland is within 112 km of a prefecture, so a position
-  farther than **120 km** from every prefecture is abroad (`ABROAD_KM`) and gets
-  the national view. Towns just across a border (Geneva, Brussels, Basel,
-  Luxembourg, Monaco, Andorra, Jersey) still map to the French region next door.
+- every prefecture (S-006) lies inside its own département and region, and in a
+  cell of its region;
+- **0.33 % of the mainland's area** maps to a neighbouring region (65 of 20 000
+  random points), all within **0.55 km** of a regional border: the size of a cell.
+  The nearest-prefecture rule it replaces (D-011) put 8.0 % of the area in the wrong
+  region, Mont-Saint-Michel in Bretagne among them.
 
-Corsica gets the national view (no regional data, S-003); near Corsica but outside
-its bounding box (Sardinia) is abroad. The UI (`src/ui/area-picker.ts`)
+Corsica, and the sea within 22 km of it inside Corsica's bounding box, get the
+national view (no regional data, S-003); Sardinia is abroad. The UI (`src/ui/area-picker.ts`)
 offers the region list and a "Use my location" button; the URL setting `?area=`
 (`src/ui/settings.ts`) wins over the remembered area, which wins over France. On
 refusal, without the Geolocation API, or with no answer within 60 s (the prompt
@@ -304,15 +307,43 @@ hiding the page cancels the load in flight; a late answer from it is dropped. Th
 
 ## Map
 
-**Provisional**, settled by B-008 once the art direction is chosen.
+The map is **baked by hand** by `tools/bake-map.ts` from three GO sources (§ Data
+sources: DS-04, DS-05, DS-11) into a committed file, `src/map/france.ts` (about
+125 KB, ASSETS entry); `tools/preview-map.ts` draws it as a flat PNG to check a
+bake. The browser never downloads map data: the CSP is unchanged.
 
-- The map is **baked at build time** by `tools/bake-map` from open geographic data
-  into a small committed file: a grid of cells (about 4 km) with, per cell, land/sea,
-  region code and an elevation class. Candidate sources: DS-04 (regions) and DS-05
-  (relief) in `DATA-SOURCES.md`; the baked file gets an ASSETS entry.
-- Projection: longitude scaled by cos 46.5° (an equirectangular projection centred on
-  France), then the isometric 2:1 transform of § Art direction. Good enough at this
-  scale; a Lambert-93 projection can replace it without touching the renderer.
+- **Projection:** equirectangular, longitude scaled by cos 46.5° (computed by a
+  Taylor series, `cosDeg`), 111.2 km per degree of latitude. A cell is true to scale
+  north–south; east–west it is 9 % too wide in the north (51° N) and 9 % too narrow
+  in Corsica (41.3° N), as cos(latitude)/cos 46.5° says; the isometric 2:1 transform of § Art direction comes on top. A Lambert-93
+  projection could replace it without touching the renderer.
+- **Grid** (`src/map/grid.ts`): north-west corner 51.2° N, 5.4° W; 1 152 × 1 104 cells
+  of 1 km (the **fine grid**), grouped 4 × 4 into 288 × 276 cells of 4 km (the
+  **coarse grid**). It covers mainland France and Corsica with a margin.
+- **Fine grid:** the region at the centre of each cell, or "not France". Used by the
+  region lookup (§ Geolocation). Baked from the generalised outlines of ADMIN
+  EXPRESS COG CARTO, read from IGN's WFS (S-013).
+- **Coarse grid:** sea, foreign land, or a region. A cell is land when at least 8 of
+  its 16 fine cells are land (French, or a neighbouring country in Natural Earth's
+  1:10m countries, S-015); it is French when French cells outnumber foreign ones,
+  and then takes the region holding most of them (ties go to the lowest region
+  code).
+- **Relief:** each French coarse cell gets an elevation class (0 to 15, lower bounds
+  0, 50, 100, 200, 300, 400, 600, 800, 1 000, 1 300, 1 600, 2 000, 2 400, 2 800,
+  3 200, 3 600 m) from the **mean** of 64 altitudes sampled every 500 m from IGN BD
+  ALTI through IGN's WMS (raw 32-bit floats, S-014). BD ALTI covers France only
+  (−99 999 elsewhere): sea and foreign land are class 0. The highest cell (class 14,
+  3 349 m) is on the French side of the Mont Blanc massif; the summit's own cell is
+  mostly Italian, so it is foreign land.
+- **Encoding:** one line per grid row: run-length encoded kinds (`a12c40` = 12 cells
+  of kind 0, then 40 of kind 2), one hexadecimal digit per cell for the elevation.
+  The decoder throws on a malformed row; the tests decode the committed file.
+- **Re-baking:** the regions come from the WFS layer `LATEST`, the countries from a
+  pinned commit of Natural Earth; the date of the bake and the WFS time stamp are
+  written in the file's header. Region borders have not changed since 2016, so a
+  re-bake should only move a few cells (a second bake the same day gave identical
+  grids). The day of the bake (`MAP_BAKED_ON`) is shown in the credits, as Licence
+  Ouverte asks for the date of the data.
 - Real places (plants, landmarks, towns) are stored as latitude/longitude and
   projected the same way.
 

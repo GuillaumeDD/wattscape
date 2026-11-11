@@ -1,11 +1,28 @@
 /**
- * Regions and prefectures, for the offline position → area lookup (ARCHITECTURE §
+ * Regions, prefectures and the offline position → area lookup (ARCHITECTURE §
  * Geolocation). Pure: no DOM, no network, no clock.
  */
 import type { Eco2mixArea, RegionCode } from "../data/eco2mix.ts";
+import { FINE_ROWS_RLE } from "../map/france.ts";
+import {
+  type CellRegion,
+  CORSICA,
+  cosDeg,
+  decodeRuns,
+  FINE_COLUMNS,
+  FINE_KM,
+  FINE_ROWS,
+  KM_PER_DEGREE,
+  KM_PER_DEGREE_LON,
+  NORTH,
+  onFineGrid,
+  PROJECTION_LATITUDE,
+  regionOfKind,
+  WEST,
+} from "../map/grid.ts";
 
 /** Corsica's INSEE code: a region, but absent from the regional éCO2mix data. */
-export const CORSICA = "94";
+export { CORSICA };
 
 /** Official names of the 12 regions of the regional éCO2mix data (S-003). */
 export const REGION_NAMES: Readonly<Record<RegionCode, string>> = {
@@ -149,82 +166,91 @@ export const REGION_CAPITALS: Readonly<Record<RegionCode, string>> = {
   "93": "13",
 };
 
-/** Mean kilometres per degree of latitude. */
-export const KM_PER_DEGREE = 111.2;
-
 /**
- * cos(latitude) by its Taylor series to x⁸: only + and ×, so every JS engine gives
- * the same bits (AGENTS.md § Determinism: Math.cos may differ by 1 ulp, and here the
- * result picks an area). Error below 2·10⁻⁶ up to 60° of latitude.
+ * A position outside France but within this distance of the centre of a French cell
+ * maps to the nearest one: a beach or a boat off the coast, GPS error, a town just
+ * across a border (Geneva, Basel, Monaco). 22 km is 12 nautical miles, the breadth
+ * of the territorial sea (D-015, provisional).
  */
-export function cosDeg(degrees: number): number {
-  const x = (degrees * 3.141592653589793) / 180;
-  const x2 = x * x;
-  return 1 - (x2 / 2) * (1 - (x2 / 12) * (1 - (x2 / 30) * (1 - x2 / 56)));
-}
-
-/** Squared distance in degrees of latitude, equirectangular at `k` = cos(latitude). */
-function distanceSq(lat1: number, lon1: number, lat2: number, lon2: number, k: number): number {
-  const dy = lat2 - lat1;
-  const dx = (lon2 - lon1) * k;
-  return dx * dx + dy * dy;
-}
-
-/** Distance in km from a position to its nearest prefecture (for tools and tests). */
-export function nearestPrefectureKm(latitude: number, longitude: number): number {
-  const k = cosDeg(latitude);
-  let best = Number.POSITIVE_INFINITY;
-  for (const [, , , lat, lon] of PREFECTURES) {
-    best = Math.min(best, distanceSq(latitude, longitude, lat, lon, k));
-  }
-  return Math.sqrt(best) * KM_PER_DEGREE;
-}
-
-/** Corsica's bounding box: near Corsica but outside it is abroad (Sardinia). */
-function inCorsica(latitude: number, longitude: number): boolean {
-  return latitude >= 41.33 && latitude <= 43.03 && longitude >= 8.53 && longitude <= 9.57;
-}
-
-/**
- * Farther than this from every prefecture, a position is outside mainland France.
- * Every point of the mainland is within 112 km of a prefecture
- * (S-011), so this keeps a margin; places just across a border (Geneva, Brussels)
- * still map to the French region next door.
- */
-export const ABROAD_KM = 120;
+export const NEAR_FRANCE_KM = 22;
 
 export type LookupResult =
   | { readonly area: RegionCode; readonly reason: "region" }
   | { readonly area: "FR"; readonly reason: "abroad" | "corsica" | "invalid" };
 
 /**
- * The area of a position: the region of the nearest prefecture; the national view
- * for Corsica, for a position abroad, or for a position that is not a number.
- * Distances use an equirectangular projection at the position's latitude, accurate
- * to well under 1 % over these distances.
+ * One row of the fine grid, decoded on demand: a lookup reads one row, or the few
+ * dozen around the position near France, and keeps nothing (memory stays flat).
+ */
+function fineRow(row: number): Uint8Array {
+  return decodeRuns([FINE_ROWS_RLE[row] ?? ""], FINE_COLUMNS);
+}
+
+/**
+ * The region of the nearest French cell whose centre is within `NEAR_FRANCE_KM` of a
+ * position, or null. `y` and `x` are the position in fine cells from the grid's
+ * north-west corner; distances are in true km (east–west, a cell is cos(latitude) /
+ * cos 46.5° of its nominal width). Ties go to the first cell in reading order.
+ */
+function nearestFrenchCell(latitude: number, y: number, x: number): CellRegion | null {
+  const kmPerColumn = (FINE_KM * cosDeg(latitude)) / cosDeg(PROJECTION_LATITUDE);
+  if (!(kmPerColumn > 0)) return null;
+  const rows = Math.ceil(NEAR_FRANCE_KM / FINE_KM);
+  const columns = Math.ceil(NEAR_FRANCE_KM / kmPerColumn);
+  const limitSq = NEAR_FRANCE_KM * NEAR_FRANCE_KM;
+  let best: CellRegion | null = null;
+  let bestSq = Number.POSITIVE_INFINITY;
+  const top = Math.max(0, Math.floor(y) - rows);
+  const bottom = Math.min(FINE_ROWS - 1, Math.floor(y) + rows);
+  const left = Math.max(0, Math.floor(x) - columns);
+  const right = Math.min(FINE_COLUMNS - 1, Math.floor(x) + columns);
+  for (let r = top; r <= bottom; r++) {
+    const cells = fineRow(r);
+    const dy = (r + 0.5 - y) * FINE_KM;
+    for (let c = left; c <= right; c++) {
+      const region = regionOfKind(cells[c] ?? 0);
+      if (region === null) continue;
+      const dx = (c + 0.5 - x) * kmPerColumn;
+      const sq = dx * dx + dy * dy;
+      if (sq <= limitSq && sq < bestSq) {
+        best = region;
+        bestSq = sq;
+      }
+    }
+  }
+  return best;
+}
+
+/** Corsica's bounding box: the sea off Corsica is Corsica, Sardinia is abroad. */
+function inCorsica(latitude: number, longitude: number): boolean {
+  return latitude >= 41.33 && latitude <= 43.03 && longitude >= 8.53 && longitude <= 9.57;
+}
+
+/**
+ * The area of a position, read from the 1 km cells of the baked map (ARCHITECTURE §
+ * Geolocation): the region of the cell; near France, the region of the nearest
+ * French cell; the national view for Corsica (no regional data), farther abroad, or
+ * for a position that is not a number. Only +, ×, ÷ and floor, so every engine
+ * agrees.
  */
 export function areaOfPosition(latitude: number, longitude: number): LookupResult {
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude))
     return { area: "FR", reason: "invalid" };
   if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180)
     return { area: "FR", reason: "invalid" };
-  const k = cosDeg(latitude);
-  let best: RegionCode | typeof CORSICA = "11";
-  let bestSq = Number.POSITIVE_INFINITY;
-  for (const [, , region, lat, lon] of PREFECTURES) {
-    const sq = distanceSq(latitude, longitude, lat, lon, k);
-    if (sq < bestSq) {
-      bestSq = sq;
-      best = region;
-    }
-  }
-  if (Math.sqrt(bestSq) * KM_PER_DEGREE > ABROAD_KM) return { area: "FR", reason: "abroad" };
-  if (best === CORSICA) {
+  // Position in fine cells; off the grid, the search below still reaches France.
+  const y = ((NORTH - latitude) * KM_PER_DEGREE) / FINE_KM;
+  const x = ((longitude - WEST) * KM_PER_DEGREE_LON) / FINE_KM;
+  const row = Math.floor(y);
+  const column = Math.floor(x);
+  const own = onFineGrid(row, column) ? regionOfKind(fineRow(row)[column] ?? 0) : null;
+  const region = own ?? nearestFrenchCell(latitude, y, x);
+  if (region === null) return { area: "FR", reason: "abroad" };
+  if (region === CORSICA)
     return inCorsica(latitude, longitude)
       ? { area: "FR", reason: "corsica" }
       : { area: "FR", reason: "abroad" };
-  }
-  return { area: best, reason: "region" };
+  return { area: region, reason: "region" };
 }
 
 /** Where to read the weather for an area when no position is known; none for France. */

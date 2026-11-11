@@ -17,6 +17,12 @@ describe("i18n catalogs", () => {
     }
   });
 
+  it("keeps the map credit's {date} placeholder in every locale", () => {
+    for (const locale of LOCALES) {
+      expect(translate(locale, "creditsMapLicence"), locale).toContain("{date}");
+    }
+  });
+
   it("translate returns the locale's string", () => {
     expect(translate("fr", "switchLanguage")).toBe("English");
     expect(translate("en", "switchLanguage")).toBe("Français");
