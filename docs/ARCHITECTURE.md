@@ -10,6 +10,9 @@ external system that we have not yet checked against the system itself.
 - **TypeScript** (strict) compiled and bundled by **Vite**; tests with **Vitest**,
   browser tests with **Playwright**; **ESLint** + **Prettier**. Same versions and
   configuration as Return of the Runners, to share habits.
+  - TypeScript is held below 6.1: typescript-eslint 8.x supports TypeScript < 6.1.
+    Dependabot ignores newer TypeScript until typescript-eslint supports it.
+  - `@types/node` stays on the major version of the Node we run (22, `.nvmrc`).
 - **No runtime dependency.** The scene is drawn by our own code into an RGBA pixel
   buffer (see § Rendering), so it renders identically in Node (tests) and in the
   browser.
@@ -286,7 +289,8 @@ Budget (**provisional**, to be measured in B-013 and fixed here):
 
 ## Build, CI and deploy
 
-- `npm run build` → `dist/`, served from `/wattscape/` on GitHub Pages.
+- `npm run build` → `dist/`, served from `/wattscape/` on GitHub Pages
+  (`https://guillaumedd.github.io/wattscape/`).
 - CI (`.github/workflows/ci.yml`) on every PR and push to `main`: `npm ci`,
   typecheck, lint, test, build, `npm audit --omit=dev`, gitleaks over the full
   history. Deploy (`deploy.yml`) on push to `main`. Actions pinned by SHA.
