@@ -1,4 +1,7 @@
 {
   "_comment": "Frame hashes (hashSurface) that Node (tests/render.test.ts) and Chromium (e2e/frame-hash.spec.ts) must both draw. Update only when a drawing change is intended, in the same commit.",
-  "test-card": "4528e016"
+  "test-card": "a828e8bb",
+  "map-france-day": "9cd8bf55",
+  "map-france-night": "2ac1e5cf",
+  "map-normandie-night": "25da25b0"
 }

@@ -17,9 +17,15 @@ export function createSurface(width: number, height: number): Surface {
   return { width, height, data: new Uint8ClampedArray(width * height * 4) };
 }
 
-/** Paints one opaque pixel; a pixel outside the surface is ignored (clipping). */
-export function setPixel(surface: Surface, x: number, y: number, colour: Rgb): void {
-  if (x < 0 || y < 0 || x >= surface.width || y >= surface.height) return;
+/**
+ * Paints one opaque pixel; a pixel outside the surface is ignored (clipping).
+ * Coordinates are floored first: a fractional y would otherwise land half a row
+ * away, at the wrong x.
+ */
+export function setPixel(surface: Surface, px: number, py: number, colour: Rgb): void {
+  const x = Math.floor(px);
+  const y = Math.floor(py);
+  if (!(x >= 0 && y >= 0 && x < surface.width && y < surface.height)) return;
   const i = (y * surface.width + x) * 4;
   surface.data[i] = colour[0];
   surface.data[i + 1] = colour[1];

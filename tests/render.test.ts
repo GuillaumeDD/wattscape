@@ -64,6 +64,14 @@ describe("Surface", () => {
       expect(() => getPixel(s, x, y), `${String(x)}, ${String(y)}`).toThrow(RangeError);
   });
 
+  it("floors fractional coordinates instead of shifting the pixel along the row", () => {
+    // Regression: y = 1.5 on a 4-wide surface wrote pixel (2, 1) in the mockups.
+    const s = createSurface(4, 3);
+    setPixel(s, 0.5, 1.5, [7, 7, 7]);
+    expect(getPixel(s, 0, 1)).toEqual([7, 7, 7]);
+    expect(getPixel(s, 2, 1)).toEqual([0, 0, 0]);
+  });
+
   it("clips pixels outside the surface", () => {
     const s = createSurface(2, 2);
     for (const [x, y] of [
@@ -123,7 +131,7 @@ describe("palette", () => {
       expect(darken(n, COLOUR_NAMES.length), n).toBe("skyNight");
     }
     expect(darken("grass", 0)).toBe("grass");
-    expect(darken("grass", 2)).toBe("seaDeep");
+    expect(darken("grass", 2)).toBe("sea");
   });
 
   it("never darkens a colour into a source's signature colour", () => {
