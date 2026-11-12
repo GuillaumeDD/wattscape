@@ -437,3 +437,29 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   (S-016): Guillaume's confirmation is the check it waited for.
 - **Revisit if:** a source contradicts the tower list, or a plant reads in the wrong
   place on a real screen.
+
+## D-028 — The performance budget, measured
+
+- **Context:** B-013: ARCHITECTURE § Performance held a provisional budget (≤ 8 ms
+  of main-thread work per frame at 1080p, memory flat over 4 hours, 2 requests
+  every 15 minutes), to be measured and fixed. `tools/perf.ts` measured the built
+  site in Chromium, 2026-11-12.
+- **Options:** (a) one figure for every frame, 8 ms; (b) a budget for the steady
+  state (still, plants moving, idle drift), which a screensaver runs for hours, and
+  another for the camera moving (flight, zoom, pan), which lasts seconds; (c) (b),
+  plus a coarser 2 km layer between scales 0.5 and 1.4 to bring the moving camera
+  under 8 ms.
+- **Decision:** (b): steady state ≤ 3 ms per frame at p95 and ≤ 25 ms of work per
+  second; camera moving ≤ 25 ms per frame at p95; memory and network as before.
+  Proposed by Claude, 2026-11-12; (c) is put to Guillaume as PRD Q-17.
+- **Why:** the steady state measures 0.3 ms per frame (2.4 ms at p95) and 9 to
+  21 ms of work per second, about 2 % of a core: the battery cost is there, and it
+  is small. The moving camera measures 18 to 22 ms at p95, under the 33 ms of a
+  frame at 30 fps: smooth, for a few seconds. Its cost follows the 1 km cells a
+  frame walks, thinner than a pixel between scales 0.55 and 1.35; three changes
+  that keep every pixel gained 4 % at most (ARCHITECTURE § Performance). Only a
+  coarser layer would cut it, and that changes the picture, which is Guillaume's
+  call.
+- **Revisit if:** a laptop shows the flight or the zoom stuttering, a frame of the
+  steady state outgrows its budget (`tools/perf.ts frames` after a drawing change),
+  or Guillaume picks the 2 km layer (Q-17).
