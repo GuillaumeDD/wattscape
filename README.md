@@ -26,7 +26,8 @@ Inspired by [Infinite Jungle](https://github.com/0xfe/jungle) and
 
 Code: [GPL-3.0-or-later](LICENSE). Art drawn in code: CC BY-SA 4.0 (see
 [`ASSETS.md`](ASSETS.md)). Data: RTE éCO2mix via ODRÉ (Licence Ouverte 2.0), weather by
-[Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Map: regions and relief from
-[IGN](https://geoservices.ign.fr/) ADMIN EXPRESS and BD ALTI (Licence Ouverte 2.0),
+[Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Map: regions, towns and relief from
+[IGN](https://geoservices.ign.fr/) ADMIN EXPRESS and BD ALTI, places of plants and
+landmarks from IGN BD TOPO (Licence Ouverte 2.0),
 neighbouring countries from [Natural Earth](https://www.naturalearthdata.com/) (public
 domain).
