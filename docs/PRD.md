@@ -248,7 +248,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-004 | CO₂ intensity of the area as a subtle tint of the sky or a smog layer                  | proposed |
 | G-005 | Ambient sound (wind, rain, a hum that follows consumption), muted by default           | proposed |
 | G-006 | A "day in a minute" replay of today's data                                             | proposed |
-| G-007 | Offshore wind farms drawn at sea (Saint-Nazaire, Fécamp, Saint-Brieuc…)                | planned  |
+| G-007 | Offshore wind farms drawn at sea (Saint-Nazaire, Fécamp, Saint-Brieuc…)                | done     |
 | G-008 | Pumped-storage plants (STEP) pumping water uphill at night, from the `pompage` figure  | proposed |
 | G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |

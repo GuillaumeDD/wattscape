@@ -529,3 +529,27 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   2 000 inhabitants is the INSEE threshold of an urban commune; no new source.
 - **Revisit if:** the national view reads too busy or too sparse, a region view
   shows towns as noise, or urban units are wanted (one blob per agglomeration).
+
+## D-032 — Plants where they stand, offshore farms at sea
+
+- **Context:** B-015 and G-007: the plants stood at their commune's town hall
+  (D-024, PRD Q-15), a few kilometres off, and the offshore wind farms were left
+  out, the registry giving only the commune where a farm lands on the grid.
+  Guillaume insisted on the offshore farms, Fécamp first (2026-11-12).
+- **Options:** (a) keep the town halls; (b) coordinates typed by hand, each logged
+  in SOURCES; (c) IGN BD TOPO, which maps every power plant's zone and every wind
+  turbine, offshore included.
+- **Decision:** (c), DS-13 GO (Guillaume, 2026-11-12, on a decision card). A site
+  stands at the centre of the largest BD TOPO « Centrale électrique » zone of its
+  kind (`ZONE_KINDS`) in its commune, else at the town hall as before; an offshore
+  farm (`OFFSHORE_FARMS`: Fécamp, Saint-Nazaire, Saint-Brieuc) is the units of the
+  registry that share its name, at the centre of its turbines at sea, driven by the
+  region where it lands (its `tch_eolien`, which mixes onshore and offshore: the
+  split is national only) and drawn as five turbines on the water. Proposed by
+  Claude, 2026-11-12.
+- **Why:** the national mapping agency's data, under the same licence as the map;
+  baked once, so no new host at runtime; the nuclear sites move 1 to 5 km, onto the
+  shore for Paluel and Penly.
+- **Revisit if:** RTE publishes a regional offshore figure; a new farm comes into
+  service (Calvados, Dieppe - Le Tréport, Yeu - Noirmoutier: re-bake with the next
+  registry); or a zone is matched to the wrong plant.

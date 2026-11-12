@@ -377,16 +377,21 @@ bake. The browser never downloads map data: the CSP is unchanged.
 - Real places (plants, landmarks, towns) are stored as latitude/longitude and
   projected the same way.
 - **Plant sites** (B-012, D-024): `tools/bake-plants.ts` bakes `src/map/plants.ts`
-  (304 sites, 33 KB) from the national registry of installations at 31/12/2024
+  (307 sites, 37 KB) from the national registry of installations at 31/12/2024
   (DS-07, S-016): every unit in service of 10 MW or more, summed per technology and
   commune; per region and technology, every nuclear site and the largest of the
   others (at most 8; at least 50 MW for hydro, 100 MW for thermal, 10 MW for the
-  rest). Each site stands at the chef-lieu of its commune (IGN, DS-04, S-013),
-  moved onto the nearest 1 km cell of its region within 5 km when that falls on the
-  sea or across a border; the registry has no coordinates, so a site can be a few
-  kilometres off (PRD Q-15). Left out: offshore wind, whose commune is where the
-  farm lands on the grid (G-007); Corsica and overseas, not in the regional
-  éCO2mix; one site whose commune IGN no longer lists (Lyon 7e, 10 MW of
+  rest). The registry has no coordinates (PRD Q-15): each site stands at the centre
+  of the largest BD TOPO zone of its kind in its commune (« Centrale électrique »,
+  by `nature_detaillee`, DS-13, S-018; 173 sites, all 18 nuclear ones, 1 to 5 km
+  from their town hall), else at the chef-lieu of its commune (IGN, DS-04, S-013);
+  then moved onto the nearest 1 km cell of its region within 5 km when that falls on
+  the sea or across a border (D-032). The offshore wind farms in service (Fécamp,
+  Saint-Nazaire, Saint-Brieuc; G-007) are the registry's units that share a farm's
+  name, at the centre of its BD TOPO turbines at sea (`OFFSHORE_FARMS`), driven by
+  the region where they land. Left out: Corsica and overseas, not in the regional
+  éCO2mix; Faraman's floating turbines (25 MW), not yet in BD TOPO; one site whose
+  commune IGN no longer lists (Lyon 7e, 10 MW of
   bioenergy) and one whose chef-lieu is 5 km or more out of its region (a wind farm
   of Mont Lozère). A nuclear site draws cooling towers if it is in the list of
   `tools/bake-plants-rules.ts` (11 sites, from general knowledge, confirmed by Guillaume, D-027). In 2026-11 the
@@ -427,7 +432,7 @@ checked against real screens.
 | ----------------------------------- | ----------------- | -------------------------------------------------------------------------------- |
 | Steam puffs over cooling towers     | `tch_nucleaire`   | height 3 + 9·a px, a puff every 3 / (0.4 + 0.6·a) s per tower; none at 0         |
 | Nuclear plants without towers       | `tch_nucleaire`   | lit windows at night, round(3·a) of 3; nothing moves (PRD Q-16)                  |
-| Wind turbine rotors                 | `tch_eolien`      | 0.5·a turn a second (blades pass at 1.5·a Hz); stopped at 0; 1–3 turbines by MW  |
+| Wind turbine rotors                 | `tch_eolien`      | 0.5·a turn a second (blades pass at 1.5·a Hz); 1–3 turbines by MW, 5 at sea      |
 | Solar fields                        | `tch_solaire`     | glints on a·33 % of the panel cells, a new draw every 0.5 s (so none at night)   |
 | Dams                                | `tch_hydraulique` | ceil(3·a) streams of water falling down the face                                 |
 | Thermal plant chimneys              | `tch_thermique`   | smoke 2 + 7·a px high, a puff every 3 / (0.3 + 0.7·a) s                          |

@@ -69,6 +69,8 @@ export const SPRITES: Readonly<Record<string, PixelMap>> = {
     "GGGGGGGGGGGGG",
   ],
   wind: [".G.", "GgG"],
+  // At sea: the mast's foot in the foam of its foundation.
+  windOffshore: [".g.", "fgf"],
   solar: ["..bBbBbBbB", ".bBbBbBbB.", "bBbBbBbB..", "GGGGGGGG.."],
   hydro: ["wwwwwwwwww", "gggggggggg", ".gggggggg.", "..gggggg..", "..GGGGGG.."],
   thermal: ["..gg....", "..tg....", "..gg....", "..tg....", "TtttgttT", "TtLtLttT", "GGGGGGGG"],
@@ -80,7 +82,9 @@ const MARKER: PixelMap = [".c.", "ccc", "CCC"];
 
 /** Which sprite a plant draws. */
 export function spriteOf(site: PlantSite): string {
-  return site.source === "nuclear" && site.towers ? "nuclearTowers" : site.source;
+  if (site.source === "nuclear" && site.towers) return "nuclearTowers";
+  if (site.source === "wind" && site.offshore) return "windOffshore";
+  return site.source;
 }
 
 function draw(
@@ -119,9 +123,13 @@ function windows(map: PixelMap): number {
   return map.join("").split("L").length - 1;
 }
 
-/** How many wind turbines stand for a farm: one, two or three by capacity. */
-export function turbineCount(mw: number): number {
-  return mw >= 60 ? 3 : mw >= 30 ? 2 : 1;
+/**
+ * How many wind turbines stand for a farm: one, two or three by capacity on land;
+ * five at sea, where a farm is ten times larger (G-007).
+ */
+export function turbineCount(site: Pick<PlantSite, "mw" | "offshore">): number {
+  if (site.offshore) return 5;
+  return site.mw >= 60 ? 3 : site.mw >= 30 ? 2 : 1;
 }
 
 /** Turbines are this many pixels apart, and this tall. */
@@ -151,7 +159,7 @@ export function drawBody(
   const map = SPRITES[spriteOf(site)] ?? [];
   const lit = activity === null ? 0 : Math.round(activity * windows(map));
   if (site.source === "wind") {
-    const n = turbineCount(site.mw);
+    const n = turbineCount(site);
     for (let k = 0; k < n; k++) {
       const x = ax + (k - (n - 1) / 2) * TURBINE_GAP;
       const bx = Math.round(x);
@@ -304,7 +312,7 @@ export function drawMotion(
       return;
     case "wind": {
       if (!big) return;
-      const n = turbineCount(site.mw);
+      const n = turbineCount(site);
       // Half a turn a second at full load; each turbine a little out of step.
       const turns = seconds * 0.5 * a;
       for (let k = 0; k < n; k++) {
