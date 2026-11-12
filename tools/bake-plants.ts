@@ -10,21 +10,31 @@
  * - DS-07, ODRÉ « Registre national des installations de production et de stockage
  *   d'électricité » at 31/12/2024 (S-016): every unit in service of 10 MW or more,
  *   with its technology, capacity and the INSEE code of its commune;
+ * - DS-13, IGN BD TOPO (S-018): the zones of the power plants (« Centrale
+ *   électrique ») and the wind turbines, where the plant really stands (B-015, D-032);
  * - DS-04, IGN ADMIN EXPRESS COG, the chef-lieu (town hall) of each commune (S-013),
- *   where the plant is placed.
+ *   where a plant is placed when BD TOPO has no zone of its kind in its commune.
  *
  * A **site** is the units of one technology in one commune. Per region and
- * technology, the largest sites are kept (`MIN_MW`, `MAX_SITES`), each moved onto the
- * nearest 1 km cell of its region if its chef-lieu falls elsewhere (the coast, a
- * border). Offshore wind is left out: the registry gives the commune where a farm
- * lands on the grid, not where it stands at sea (G-007).
+ * technology, the largest sites are kept (`MIN_MW`, `MAX_SITES`), each at the centre
+ * of the largest BD TOPO zone of its kind in its commune, else at the commune's
+ * chef-lieu, and moved onto the nearest 1 km cell of its region if it falls elsewhere
+ * (the coast, a border). An offshore wind farm (`OFFSHORE_FARMS`) is the units of the
+ * registry that share its name, at the centre of its BD TOPO turbines at sea (G-007).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { REGION_CODES, type RegionCode, type Source } from "../src/data/eco2mix.ts";
-import { COOLING_TOWERS, FILIERES, MAX_SITES, MIN_MW } from "./bake-plants-rules.ts";
+import {
+  COOLING_TOWERS,
+  FILIERES,
+  MAX_SITES,
+  MIN_MW,
+  OFFSHORE_FARMS,
+  ZONE_KINDS,
+} from "./bake-plants-rules.ts";
 import {
   decodeRuns,
   FINE_COLUMNS,
@@ -78,6 +88,7 @@ interface Unit {
   readonly codeinseecommune: string | null;
   readonly codeinseecommuneimplantation: string | null;
   readonly puismaxinstallee: number;
+  readonly nominstallation: string | null;
 }
 
 const where = [
@@ -90,9 +101,9 @@ const where = [
 const unitsUrl = `${REGISTRY}/exports/json?${new URLSearchParams({
   where,
   select:
-    "codefiliere,technologie,coderegion,codeinseecommune,codeinseecommuneimplantation,puismaxinstallee",
+    "codefiliere,technologie,coderegion,codeinseecommune,codeinseecommuneimplantation,puismaxinstallee,nominstallation",
 }).toString()}`;
-const units = JSON.parse((await cached("units.json", unitsUrl)).toString("utf8")) as Unit[];
+const units = JSON.parse((await cached("units-named.json", unitsUrl)).toString("utf8")) as Unit[];
 if (!Array.isArray(units) || units.length < 1000) throw new Error("registry: unexpected answer");
 
 const isRegion = (code: string): code is RegionCode => REGION_CODES.some((r) => r === code);
@@ -104,13 +115,13 @@ interface Site {
   mw: number;
 }
 const sites = new Map<string, Site>();
-let offshore = 0;
+const offshoreUnits: Unit[] = [];
 let outside = 0;
 for (const u of units) {
   const source = FILIERES[u.codefiliere];
   if (source === undefined) continue;
   if (u.technologie?.startsWith("En mer") === true) {
-    offshore++;
+    offshoreUnits.push(u);
     continue;
   }
   // Corsica and overseas: not in the regional éCO2mix, so never animated.
@@ -169,6 +180,74 @@ for (let i = 0; i < codes.length; i += 80) {
     });
 }
 
+// The plant zones of BD TOPO (DS-13), by commune: one request for all of France.
+interface Zone {
+  readonly kind: string | null;
+  readonly name: string;
+  readonly x: number;
+  readonly y: number;
+  /** Area, km² (planar, in map kilometres). */
+  readonly area: number;
+}
+type Ring = readonly (readonly [number, number])[];
+const zonesUrl = `${WFS}?${new URLSearchParams({
+  SERVICE: "WFS",
+  VERSION: "2.0.0",
+  REQUEST: "GetFeature",
+  TYPENAMES: "BDTOPO_V3:zone_d_activite_ou_d_interet",
+  OUTPUTFORMAT: "application/json",
+  CQL_FILTER: "nature='Centrale électrique' AND etat_de_l_objet='En service'",
+  COUNT: "10000",
+}).toString()}`;
+const zonesJson = JSON.parse((await cached("zones.json", zonesUrl)).toString("utf8")) as {
+  features: {
+    geometry: { type: string; coordinates: Ring[][] } | null;
+    properties: {
+      insee_commune: string | null;
+      nature_detaillee: string | null;
+      toponyme: string | null;
+    };
+  }[];
+};
+if (zonesJson.features.length < 3000) throw new Error("BD TOPO: unexpected answer");
+/** Centre (of area) and area of a polygon's outer ring, in map kilometres. */
+function ringCentre(ring: Ring): { x: number; y: number; area: number } {
+  const pts = ring.map(([lon, lat]) => kmOf(lat, lon));
+  let a = 0;
+  let cx = 0;
+  let cy = 0;
+  for (let k = 0; k + 1 < pts.length; k++) {
+    const p = pts[k];
+    const q = pts[k + 1];
+    if (p === undefined || q === undefined) continue;
+    const cross = p.x * q.y - q.x * p.y;
+    a += cross;
+    cx += (p.x + q.x) * cross;
+    cy += (p.y + q.y) * cross;
+  }
+  return a === 0
+    ? { x: pts[0]?.x ?? 0, y: pts[0]?.y ?? 0, area: 0 }
+    : { x: cx / (3 * a), y: cy / (3 * a), area: Math.abs(a) / 2 };
+}
+const zones = new Map<string, Zone[]>();
+for (const f of zonesJson.features) {
+  const insee = f.properties.insee_commune;
+  if (insee === null || f.geometry?.type !== "MultiPolygon") continue;
+  // The largest polygon of the zone.
+  const best = f.geometry.coordinates
+    .map((polygon) => ringCentre(polygon[0] ?? []))
+    .sort((a, b) => b.area - a.area)[0];
+  if (best === undefined) continue;
+  const list = zones.get(insee) ?? [];
+  list.push({ kind: f.properties.nature_detaillee, name: f.properties.toponyme ?? "", ...best });
+  zones.set(insee, list);
+}
+/** The largest zone of a source's kind in a commune, if any. */
+const zoneOf = (insee: string, source: Source): Zone | undefined =>
+  (zones.get(insee) ?? [])
+    .filter((z) => ZONE_KINDS[source].includes(z.kind))
+    .sort((a, b) => b.area - a.area || a.name.localeCompare(b.name))[0];
+
 // Onto a 1 km cell of the site's region.
 const kinds = decodeRuns(FINE_ROWS_RLE, FINE_COLUMNS);
 const kindAt = (r: number, c: number): number =>
@@ -184,8 +263,11 @@ interface Baked {
   readonly mw: number;
   readonly towers: boolean;
   readonly commune: string;
+  readonly exact: boolean;
+  readonly offshore: boolean;
 }
 const baked: Baked[] = [];
+let exact = 0;
 const missing: string[] = [];
 const off: string[] = [];
 for (const site of kept) {
@@ -194,7 +276,9 @@ for (const site of kept) {
     missing.push(`${site.insee} ${site.source} ${site.mw.toFixed(0)} MW`);
     continue;
   }
-  const at = kmOf(chef.lat, chef.lon);
+  const zone = zoneOf(site.insee, site.source);
+  if (zone !== undefined) exact++;
+  const at = zone ?? kmOf(chef.lat, chef.lon);
   const r0 = Math.floor(at.y / FINE_KM);
   const c0 = Math.floor(at.x / FINE_KM);
   const want = kindOfRegion(site.region);
@@ -219,11 +303,54 @@ for (const site of kept) {
     mw: Math.round(site.mw),
     towers: site.source === "nuclear" && COOLING_TOWERS.includes(chef.name),
     commune: chef.name,
+    exact: zone !== undefined,
+    offshore: false,
+  });
+}
+
+// The offshore wind farms (G-007): their units, and their BD TOPO turbines at sea.
+for (const farm of OFFSHORE_FARMS) {
+  const mw =
+    offshoreUnits
+      .filter((u) => u.nominstallation?.includes(farm.units) === true)
+      .reduce((t, u) => t + u.puismaxinstallee, 0) / 1000;
+  const [south, west, north, east] = farm.box;
+  const url = `${WFS}?${new URLSearchParams({
+    SERVICE: "WFS",
+    VERSION: "2.0.0",
+    REQUEST: "GetFeature",
+    TYPENAMES: "BDTOPO_V3:construction_ponctuelle",
+    OUTPUTFORMAT: "application/json",
+    CQL_FILTER: `nature='Eolienne' AND etat_de_l_objet='En service' AND BBOX(geometrie,${String(south)},${String(west)},${String(north)},${String(east)})`,
+    COUNT: "1000",
+  }).toString()}`;
+  const json = JSON.parse((await cached(`turbines-${farm.units}.json`, url)).toString("utf8")) as {
+    features: { geometry: { coordinates: [number, number] } }[];
+  };
+  // At sea only: the box also holds a few turbines on the cliffs.
+  const atSea = json.features
+    .map((f) => kmOf(f.geometry.coordinates[1], f.geometry.coordinates[0]))
+    .filter((p) => kindAt(Math.floor(p.y / FINE_KM), Math.floor(p.x / FINE_KM)) === SEA);
+  if (!(mw > 100) || atSea.length < 20)
+    throw new Error(`${farm.name}: ${String(mw)} MW, ${String(atSea.length)} turbines at sea`);
+  const x = atSea.reduce((t, p) => t + p.x, 0) / atSea.length;
+  const y = atSea.reduce((t, p) => t + p.y, 0) / atSea.length;
+  console.log(`${farm.name}: ${mw.toFixed(0)} MW, ${String(atSea.length)} turbines at sea`);
+  baked.push({
+    source: "wind",
+    region: farm.region,
+    x: Math.round(x * 10) / 10,
+    y: Math.round(y * 10) / 10,
+    mw: Math.round(mw),
+    towers: false,
+    commune: farm.name,
+    exact: true,
+    offshore: true,
   });
 }
 
 const line = (p: Baked): string =>
-  `  [${[p.source, p.region].map((v) => JSON.stringify(v)).join(", ")}, ${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${String(p.mw)}, ${String(p.towers)}, ${JSON.stringify(p.commune)}],`;
+  `  [${[p.source, p.region].map((v) => JSON.stringify(v)).join(", ")}, ${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${String(p.mw)}, ${String(p.towers)}, ${JSON.stringify(p.commune)}, ${String(p.exact)}, ${String(p.offshore)}],`;
 writeFileSync(
   OUT,
   `/**
@@ -233,8 +360,9 @@ writeFileSync(
  * - Units in service of 10 MW or more: ODRÉ « Registre national des installations de
  *   production et de stockage d'électricité » at 31/12/2024 (DS-07, S-016), Licence
  *   Ouverte 2.0.
- * - Each site at the chef-lieu of its commune: IGN ADMIN EXPRESS COG (DS-04, S-013),
- *   Licence Ouverte 2.0.
+ * - Each site at the centre of its zone, or of its turbines at sea, in IGN BD TOPO
+ *   (DS-13, S-018), else at the chef-lieu of its commune, IGN ADMIN EXPRESS COG
+ *   (DS-04, S-013); both Licence Ouverte 2.0.
  */
 import { type RegionCode, type Source } from "../data/eco2mix.ts";
 
@@ -250,22 +378,46 @@ export interface PlantSite {
   readonly mw: number;
   /** A nuclear site cooled by towers, which steam (list confirmed by Guillaume, D-027). */
   readonly towers: boolean;
-  /** The commune it stands in (IGN's official name). */
+  /** The commune it stands in (IGN's official name), or an offshore farm's name. */
   readonly commune: string;
+  /** Placed where it stands (BD TOPO, D-032); false: at its commune's town hall. */
+  readonly exact: boolean;
+  /** An offshore wind farm, at sea (G-007). */
+  readonly offshore: boolean;
 }
 
 /** Day of the bake. */
 export const PLANTS_BAKED_ON = "${BAKED_ON}";
 
-type Row = readonly [Source, RegionCode, number, number, number, boolean, string];
+type Row = readonly [
+  Source,
+  RegionCode,
+  number,
+  number,
+  number,
+  boolean,
+  string,
+  boolean,
+  boolean,
+];
 
-/** Source, region, x, y, MW, towers, commune. */
+/** Source, region, x, y, MW, towers, commune, exact, offshore. */
 const ROWS: readonly Row[] = [
 ${baked.map(line).join("\n")}
 ];
 
 export const PLANT_SITES: readonly PlantSite[] = ROWS.map(
-  ([source, region, x, y, mw, towers, commune]) => ({ source, region, x, y, mw, towers, commune }),
+  ([source, region, x, y, mw, towers, commune, exact, offshore]) => ({
+    source,
+    region,
+    x,
+    y,
+    mw,
+    towers,
+    commune,
+    exact,
+    offshore,
+  }),
 );
 `,
 );
@@ -281,7 +433,7 @@ console.log(
 );
 console.log(Object.values(FILIERES).map(bySource).join(", "));
 console.log(
-  `left out: ${String(offshore)} offshore units, ${String(outside)} outside the 12 regions`,
+  `placed by BD TOPO: ${String(exact)}; ${String(offshoreUnits.length)} offshore units; ${String(outside)} outside the 12 regions`,
 );
 if (missing.length > 0) console.log(`no chef-lieu: ${missing.join("; ")}`);
 if (off.length > 0) console.log(`not on their region: ${off.join("; ")}`);

@@ -8,7 +8,7 @@ import {
   STALE_AFTER_MS,
 } from "../src/data/eco2mix";
 import { FINE_ROWS_RLE } from "../src/map/france";
-import { decodeRuns, FINE_COLUMNS, kindOfRegion } from "../src/map/grid";
+import { decodeRuns, FINE_COLUMNS, kindOfRegion, kmOf, SEA } from "../src/map/grid";
 import { PLANT_SITES, type PlantSite } from "../src/map/plants";
 import {
   drawBody,
@@ -31,17 +31,48 @@ const site = (source: PlantSite["source"], extra: Partial<PlantSite> = {}): Plan
   mw: 100,
   towers: source === "nuclear",
   commune: "Test",
+  exact: true,
+  offshore: false,
   ...extra,
 });
 
 describe("the baked plants (DS-07, src/map/plants.ts)", () => {
   const kinds = decodeRuns(FINE_ROWS_RLE, FINE_COLUMNS);
 
-  it("stand each on a 1 km cell of its own region", () => {
+  it("stand each on a 1 km cell of its own region, or at sea for an offshore farm", () => {
     for (const p of PLANT_SITES) {
       const kind = kinds[Math.floor(p.y) * FINE_COLUMNS + Math.floor(p.x)];
-      expect(kind, `${p.commune} ${p.source}`).toBe(kindOfRegion(p.region));
+      expect(kind, `${p.commune} ${p.source}`).toBe(p.offshore ? SEA : kindOfRegion(p.region));
     }
+  });
+
+  it("place every nuclear site where it stands (BD TOPO, D-032), Paluel on the coast", () => {
+    for (const p of PLANT_SITES.filter((s) => s.source === "nuclear"))
+      expect(p.exact, p.commune).toBe(true);
+    // Paluel's plant stands on the shore (49.858° N, 0.633° E on IGN's map, S-018),
+    // 2 to 3 km from its town hall.
+    const paluel = PLANT_SITES.find((p) => p.commune === "Paluel" && p.source === "nuclear");
+    const shore = kmOf(49.858, 0.633);
+    expect(Math.hypot((paluel?.x ?? 0) - shore.x, (paluel?.y ?? 0) - shore.y)).toBeLessThan(1.5);
+    // More than half of the sites are placed by BD TOPO.
+    expect(PLANT_SITES.filter((p) => p.exact).length).toBeGreaterThan(PLANT_SITES.length / 2);
+  });
+
+  it("hold the three offshore wind farms in service, at sea, Fécamp off its cliffs", () => {
+    const farms = PLANT_SITES.filter((p) => p.offshore);
+    expect(farms.map((p) => [p.region, p.mw]).sort()).toEqual([
+      ["28", 497],
+      ["52", 480],
+      ["53", 496],
+    ]);
+    for (const p of farms) expect(p).toMatchObject({ source: "wind", exact: true, towers: false });
+    // The Fécamp farm stands 13 to 22 km off the coast, north-west of the town.
+    const fecamp = farms.find((p) => p.region === "28");
+    const town = kmOf(49.757, 0.374);
+    const d = Math.hypot((fecamp?.x ?? 0) - town.x, (fecamp?.y ?? 0) - town.y);
+    expect(d).toBeGreaterThan(10);
+    expect(d).toBeLessThan(25);
+    expect(fecamp?.y ?? 0).toBeLessThan(town.y); // north of the town
   });
 
   it("hold every nuclear site in service: 18 sites, 61 370 MW, Paluel and Penly in Normandie", () => {
@@ -69,7 +100,9 @@ describe("the baked plants (DS-07, src/map/plants.ts)", () => {
   it("keep at most the largest sites per region and technology, above the minimum", () => {
     for (const region of REGION_CODES)
       for (const source of SOURCES) {
-        const list = PLANT_SITES.filter((p) => p.region === region && p.source === source);
+        const list = PLANT_SITES.filter(
+          (p) => p.region === region && p.source === source && !p.offshore,
+        );
         if (source !== "nuclear") expect(list.length).toBeLessThanOrEqual(MAX_SITES);
         for (const p of list) expect(p.mw).toBeGreaterThanOrEqual(MIN_MW[source]);
       }
@@ -249,8 +282,12 @@ describe("the source sprites (src/render/art/plants.ts)", () => {
     expect(picture(0.2)).not.toEqual(picture(0.3));
   });
 
-  it("stand one, two or three turbines for a wind farm, by its capacity", () => {
-    expect([10, 29, 30, 59, 60, 300].map(turbineCount)).toEqual([1, 1, 2, 2, 3, 3]);
+  it("stand one, two or three turbines for a wind farm, by its capacity; five at sea", () => {
+    expect([10, 29, 30, 59, 60, 300].map((mw) => turbineCount({ mw, offshore: false }))).toEqual([
+      1, 1, 2, 2, 3, 3,
+    ]);
+    expect(turbineCount({ mw: 497, offshore: true })).toBe(5);
+    expect(spriteOf(site("wind", { offshore: true }))).toBe("windOffshore");
   });
 
   it("light windows at night only, one by one with the activity", () => {
