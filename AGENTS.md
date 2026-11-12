@@ -14,8 +14,8 @@ either document wrong, update it in the same commit.
 ## 1. Project
 
 **Wattscape**: a browser "screensaver" in minimal pixel art that shows, live, how
-electricity is produced and consumed in the user's region of France. An isometric map
-of France that zooms from the whole country to the region (its landmarks, its power
+electricity is produced and consumed in the user's region of France. A relief map of
+France, north up, that zooms from the whole country to the region (its landmarks, its power
 plants, its towns), whose every moving part is driven by open data: RTE éCO2mix for
 the grid, Open-Meteo for the weather, the sun's real position for day and night, the
 date for the seasons. Inspired by

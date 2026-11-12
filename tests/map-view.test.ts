@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { fineIndexOf } from "../src/map/grid";
-import { drawMapView } from "../src/render/map-view";
+import {
+  COARSE_COLUMNS,
+  decodeHex,
+  decodeRuns,
+  ELEVATION_CLASSES,
+  fineIndexOf,
+} from "../src/map/grid";
+import { COARSE_ROWS_RLE, ELEVATION_ROWS_HEX } from "../src/map/france";
+import { drawMapView, groundColour, heightPx, townCells } from "../src/render/map-view";
 import { COLOUR_NAMES, PALETTE } from "../src/render/palette";
 import { getPixel, hashSurface, type Surface } from "../src/render/surface";
 import { lightAt } from "../src/sky/light";
@@ -65,6 +72,59 @@ describe("drawMapView", () => {
     const atNight = drawMapView({ tile: 2, light: night });
     expect(pixel(atNight, ...belgium)).toBe(pixel(atNight, ...beauce));
     expect(pixel(atNight, ...belgium)).not.toBe(PALETTE.sea.join());
+  });
+
+  it("colours the altitude bands from their documented lower bounds", () => {
+    // Regression: rock and snow started one class too high (1 600 m and 2 800 m).
+    const band = (metres: number): string => groundColour(ELEVATION_CLASSES.indexOf(metres));
+    expect(band(0)).toBe("meadow");
+    expect(band(200)).toBe("meadow");
+    expect(band(300)).toBe("grass");
+    expect(band(800)).toBe("forest");
+    expect(band(1000)).toBe("forest");
+    expect(band(1300)).toBe("rock");
+    expect(band(2000)).toBe("rock");
+    expect(band(2400)).toBe("snow");
+  });
+
+  it("puts every town on French land, Bastia included", () => {
+    // Regression: the prefecture of Haute-Corse fell on a sea cell, off the coast.
+    const kinds = decodeRuns(COARSE_ROWS_RLE, COARSE_COLUMNS);
+    const cells = townCells(kinds);
+    expect(cells.size).toBeGreaterThan(80); // 96 prefectures, a few share a 4 km cell
+    for (const i of cells.keys()) expect(kinds[i], String(i)).toBeGreaterThanOrEqual(2);
+    const bastia = fineIndexOf(42.7, 9.45);
+    if (bastia === null) throw new Error("off the grid");
+    const r = Math.floor(bastia.row / 4);
+    const c = Math.floor(bastia.column / 4);
+    const near = [...cells.keys()].some(
+      (i) =>
+        Math.abs(Math.floor(i / COARSE_COLUMNS) - r) <= 2 &&
+        Math.abs((i % COARSE_COLUMNS) - c) <= 2,
+    );
+    expect(near).toBe(true);
+  });
+
+  it("hides a town behind the relief in front of it (painter's order)", () => {
+    // Regression: towns were drawn after all the terrain, over the hills south of
+    // them (Rodez, Saint-Étienne, Annecy). On the whole map with 2-pixel tiles, a
+    // cell's top face starts at y = row + 9 − height (9: room left for the relief).
+    const kinds = decodeRuns(COARSE_ROWS_RLE, COARSE_COLUMNS);
+    const elevation = decodeHex(ELEVATION_ROWS_HEX, COARSE_COLUMNS);
+    const s = drawMapView({ tile: 2, light: night });
+    const top = (i: number): number =>
+      Math.floor(i / COARSE_COLUMNS) + 9 - heightPx(elevation[i] ?? 0, 2);
+    let hidden = 0;
+    for (const [i, capital] of townCells(kinds)) {
+      if (capital) continue; // one-pixel towns only
+      const x = (i % COARSE_COLUMNS) * 2 + 1;
+      const y = top(i);
+      const south = i + COARSE_COLUMNS;
+      if (kinds[south] === 0 || top(south) > y) continue;
+      hidden++;
+      expect(getPixel(s, x, y).join(), String(i)).not.toBe(PALETTE.lamp.join());
+    }
+    expect(hidden).toBeGreaterThan(0);
   });
 
   it("draws the recorded frames (frame hashes, also checked in Chromium)", () => {

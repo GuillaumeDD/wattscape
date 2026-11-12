@@ -189,7 +189,8 @@ Two directions fit the brief; the zoom between France and a region (§4.3) decid
 between them.
 
 - **A. Isometric map of France (chosen, Guillaume, 2026-11-11).** France as a pixel-art relief model,
-  seen from above at a 2:1 isometric angle, like a board game or a tabletop diorama.
+  seen from above at an angle in 2:1 tiles, like a board game or a tabletop diorama;
+  drawn north up rather than turned 45° (D-017).
   Zoomed out, a small, elegant map with each region tinted; zoomed in, terrain tiles,
   towns, plants and landmarks as small iso sprites. The zoom is natural, plants sit at
   their real place, and Infinite Jungle shows the style holds up. Cost: we need the

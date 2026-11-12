@@ -7,7 +7,6 @@
  */
 import { COARSE_ROWS_RLE, ELEVATION_ROWS_HEX } from "../map/france.ts";
 import {
-  cellCentre,
   COARSE_COLUMNS,
   COARSE_KM,
   COARSE_ROWS,
@@ -96,9 +95,9 @@ function cellHash(r: number, c: number): number {
  * Ground colour of a land cell: one flat colour per altitude band (summer, no season
  * yet), like the tints of a relief map, so the land reads as a few calm shapes.
  */
-function groundColour(elevation: number): ColourName {
-  if (elevation >= 13) return "snow"; // 2 400 m and up
-  if (elevation >= 10) return "rock"; // 1 300 m
+export function groundColour(elevation: number): ColourName {
+  if (elevation >= 12) return "snow"; // 2 400 m and up
+  if (elevation >= 9) return "rock"; // 1 300 m
   if (elevation >= 7) return "forest"; // 800 m
   if (elevation >= 4) return "grass"; // 300 m
   return "meadow";
@@ -120,7 +119,7 @@ function metres(elevation: number): number {
  * Relief height of a cell in pixels: a tile's width per 1 000 m. The plains stay
  * flat and the mountains rise, so the relief reads without striping the lowlands.
  */
-function heightPx(elevation: number, tile: number): number {
+export function heightPx(elevation: number, tile: number): number {
   return Math.floor((metres(elevation) * tile) / 1000);
 }
 
@@ -170,16 +169,36 @@ function bounds(
   ];
 }
 
-/** Towns drawn on the mockups: the prefectures (S-006), regional ones larger. */
-function towns(): { r: number; c: number; capital: boolean }[] {
+let cachedTowns: ReadonlyMap<number, boolean> | null = null;
+
+/**
+ * Towns drawn on the mockups: the prefectures (S-006), by coarse cell index, true for
+ * a regional prefecture. A prefecture whose cell is sea (Bastia, on the coast) moves
+ * to the nearest land cell around it, so no town floats on the water.
+ */
+export function townCells(kinds: Uint8Array = mapData().kinds): ReadonlyMap<number, boolean> {
+  if (cachedTowns !== null) return cachedTowns;
   const capitals = new Set<string>(Object.values(REGION_CAPITALS));
-  return PREFECTURES.flatMap(([dept, , , lat, lon]) => {
+  const found = new Map<number, boolean>();
+  for (const [dept, , , lat, lon] of PREFECTURES) {
     const cell = fineIndexOf(lat, lon);
-    if (cell === null) return [];
+    if (cell === null) continue;
     const r = Math.floor((cell.row * FINE_KM) / COARSE_KM);
     const c = Math.floor((cell.column * FINE_KM) / COARSE_KM);
-    return [{ r, c, capital: capitals.has(dept) }];
-  });
+    let best: number | null = null;
+    for (let ring = 0; ring <= 2 && best === null; ring++)
+      for (let dr = -ring; dr <= ring && best === null; dr++)
+        for (let dc = -ring; dc <= ring && best === null; dc++) {
+          const rr = r + dr;
+          const cc = c + dc;
+          if (rr < 0 || cc < 0 || rr >= COARSE_ROWS || cc >= COARSE_COLUMNS) continue;
+          const k = kinds[rr * COARSE_COLUMNS + cc] ?? SEA;
+          if (k !== SEA && k !== FOREIGN) best = rr * COARSE_COLUMNS + cc;
+        }
+    if (best !== null) found.set(best, (found.get(best) ?? false) || capitals.has(dept));
+  }
+  cachedTowns = found;
+  return found;
 }
 
 export function drawMapView(options: MapViewOptions): Surface {
@@ -216,66 +235,58 @@ export function drawMapView(options: MapViewOptions): Surface {
     for (let x = 0; x < width; x++) setPixel(s, x, y, PALETTE[skyColour(light, level, x, y)]);
   }
 
-  // Painter's order: back to front.
-  const cells: [number, number][] = [];
-  for (let r = top; r <= bottom; r++) for (let c = left; c <= right; c++) cells.push([r, c]);
-
+  // Painter's order, back (north) to front (south): a town is drawn with its cell, so
+  // the relief in front of it hides it as it should.
   const at = (r: number, c: number): number => r * COARSE_COLUMNS + c;
   const focus = options.region === undefined ? null : kindOfRegion(options.region);
-  for (const [r, c] of cells) {
-    const i = at(r, c);
-    const kind = kinds[i] ?? SEA;
-    const [px, py] = project(r, c, tile);
-    const x0 = px - minX;
-    const y0 = py - minY + lift;
-    if (kind === SEA) {
-      const sea = seaColour(seaDistance[i] ?? 255);
-      drawTile(s, x0, y0, tile, (x, y) => tinted(sea, light.darkness, x, y));
-      continue;
-    }
-    const e = kind === FOREIGN ? 0 : (elevation[i] ?? 0);
-    const h = heightPx(e, tile);
-    const ground = groundColour(e);
-    // Hill shading, one light from the north-west: a cell 250 m or more below its
-    // north-west neighbour faces away from it and is one step darker. Smaller drops
-    // stay lit, so the plains stay calm.
-    const nw = kind === FOREIGN ? 0 : (elevation[at(Math.max(r - 1, 0), Math.max(c - 1, 0))] ?? 0);
-    const shade = metres(nw) - metres(e) >= 250 ? 1 : 0;
-    // Abroad, and outside the region on a region view, the land recedes one step by
-    // day. The veil fades as night falls, or the land around would darken into the
-    // sea's blues and read as sea; at night the lamps set France apart.
-    const veiled = kind === FOREIGN || (focus !== null && kind !== focus);
-    const veil = veiled ? Math.max(0, 1 - light.darkness / 2) : 0;
-    const darkness = light.darkness + shade + veil;
-    const side = darken(ground, 1);
-    for (let k = 0; k < h; k++)
-      drawTile(s, x0, y0 - k, tile, (x, y) => tinted(side, darkness, x, y));
-    drawTile(s, x0, y0 - h, tile, (x, y) => tinted(ground, darkness, x, y));
-  }
-
-  // Towns: roofs by day, lamps when emissive.
-  for (const town of towns()) {
-    if (town.r < top || town.r > bottom || town.c < left || town.c > right) continue;
-    const e = elevation[at(town.r, town.c)] ?? 0;
-    const [px, py] = project(town.r, town.c, tile);
-    const cx = px - minX + tile / 2;
-    const cy = py - minY + lift - heightPx(e, tile) + tile / 4;
-    const size = Math.max(1, Math.floor(tile / 4)) + (town.capital ? 1 : 0);
-    for (let dy = 0; dy < size; dy++) {
-      for (let dx = 0; dx < size; dx++) {
-        const x = cx - Math.floor(size / 2) + dx;
-        const y = cy - Math.floor(size / 2) + dy;
-        if (light.emissive) {
-          // Lit windows: a scatter, not a block, so a town glows like a town.
-          if (size === 1 || cellHash(x, y) % 3 !== 0) setPixel(s, x, y, PALETTE.lamp);
-        } else setPixel(s, x, y, PALETTE[tinted("roof", light.darkness, x, y)]);
+  const townAt = townCells(kinds);
+  for (let r = top; r <= bottom; r++)
+    for (let c = left; c <= right; c++) {
+      const i = at(r, c);
+      const kind = kinds[i] ?? SEA;
+      const [px, py] = project(r, c, tile);
+      const x0 = px - minX;
+      const y0 = py - minY + lift;
+      if (kind === SEA) {
+        const sea = seaColour(seaDistance[i] ?? 255);
+        drawTile(s, x0, y0, tile, (x, y) => tinted(sea, light.darkness, x, y));
+        continue;
       }
-    }
-  }
-  return s;
-}
+      const e = kind === FOREIGN ? 0 : (elevation[i] ?? 0);
+      const h = heightPx(e, tile);
+      const ground = groundColour(e);
+      // Hill shading, one light from the north-west: a cell 250 m or more below its
+      // north-west neighbour faces away from it and is one step darker. Smaller drops
+      // stay lit, so the plains stay calm.
+      const nw =
+        kind === FOREIGN ? 0 : (elevation[at(Math.max(r - 1, 0), Math.max(c - 1, 0))] ?? 0);
+      const shade = metres(nw) - metres(e) >= 250 ? 1 : 0;
+      // Abroad, and outside the region on a region view, the land recedes one step by
+      // day. The veil fades as night falls, or the land around would darken into the
+      // sea's blues and read as sea; at night the lamps set France apart.
+      const veiled = kind === FOREIGN || (focus !== null && kind !== focus);
+      const veil = veiled ? Math.max(0, 1 - light.darkness / 2) : 0;
+      const darkness = light.darkness + shade + veil;
+      // The south face shows below the top face: h rows, one step darker.
+      const side = darken(ground, 1);
+      for (let y = y0 - h + tile / 2; y < y0 + tile / 2; y++)
+        for (let x = x0; x < x0 + tile; x++)
+          setPixel(s, x, y, PALETTE[tinted(side, darkness, x, y)]);
+      drawTile(s, x0, y0 - h, tile, (x, y) => tinted(ground, darkness, x, y));
 
-/** Where the centre of a coarse cell is, for tests and captions. */
-export function coarseCellCentre(r: number, c: number): { latitude: number; longitude: number } {
-  return cellCentre(r, c, COARSE_KM);
+      // A town on this cell: a roof by day, lamps once the sun is down.
+      const capital = townAt.get(i);
+      if (capital === undefined) continue;
+      const size = Math.max(1, Math.floor(tile / 4)) + (capital ? 1 : 0);
+      const cx = x0 + tile / 2 - Math.floor(size / 2);
+      const cy = y0 - h + Math.floor(tile / 4) - Math.floor(size / 2);
+      for (let y = cy; y < cy + size; y++)
+        for (let x = cx; x < cx + size; x++) {
+          if (light.emissive) {
+            // Lit windows: a scatter, not a block, so a town glows like a town.
+            if (size === 1 || cellHash(x, y) % 3 !== 0) setPixel(s, x, y, PALETTE.lamp);
+          } else setPixel(s, x, y, PALETTE[tinted("roof", light.darkness, x, y)]);
+        }
+    }
+  return s;
 }

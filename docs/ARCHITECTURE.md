@@ -426,7 +426,7 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
 
 ## Art direction
 
-Direction A, the isometric map, was chosen by Guillaume on 2026-11-11 (PRD Q-1). The
+Direction A, the isometric map (drawn north up, D-017), was chosen by Guillaume on 2026-11-11 (PRD Q-1). The
 palette, the night and the dusk below were validated with the mockups of B-010
 (D-019); the resolution and the level of detail are still **proposed** until B-011.
 
@@ -495,7 +495,9 @@ How it draws, for now, aiming at calm, elegant pixel art (Guillaume, 2026-11-11)
 - sea in three flat bands by distance to the coast;
 - foreign land, and the other regions on a region view, one step darker by day;
   this veil fades as night falls, so that the land around never reads as sea;
-- towns are the prefectures (S-006): roofs by day, lamps at blue hour and night.
+- towns are the prefectures (S-006), each moved to the nearest land cell if its own is
+  sea, drawn with its cell so the relief in front hides it: roofs by day, lamps once
+  the sun is below the horizon.
 
 Its frames are hashed in Node and Chromium like the test card. The 4 km grid makes a
 region blocky at 8-pixel tiles; the 1 km relief comes with the zoom (D-018, B-011).
