@@ -253,6 +253,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |
 | G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | proposed |
 | G-012 | Relief of the neighbouring countries, so the Alps do not end in a cliff at the border  | planned  |
+| G-013 | A soak of 4 hours or more, in one stretch (Guillaume, 2026-11-12; B-013 ran 2 hours)   | proposed |
 
 ## 10. Open questions
 
@@ -277,3 +278,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-14 | Cooling towers at the 11 sites listed (from memory)?            | Yes until a source says otherwise; Tricastin, Saint-Alban, Blayais and the coast have none           | Yes; offshore wind too, Fécamp first (Guillaume, 2026-11-12, D-027)   |
 | Q-15 | Plants at their commune's town hall, a few km off?              | Yes for now: the registry has no coordinates; exact sites with B-017 if a shift shows                | Yes (Guillaume, 2026-11-12, D-027)                                    |
 | Q-16 | Nuclear plants without towers: only lit windows at night?       | Yes; a warm-water shimmer on the sea in front can come with Normandie (B-015)                        | Yes (Guillaume, 2026-11-12, D-027)                                    |
+| Q-17 | Moving camera: accept ~20 ms frames, or add a 2 km layer?       | Accept: smooth at 30 fps, seconds at a time; a 2 km layer changes the picture (D-028)                | Accept (Guillaume, 2026-11-12, D-028)                                 |

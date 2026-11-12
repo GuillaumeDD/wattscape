@@ -647,7 +647,7 @@ photo.
   pixel, the level of detail, the light, the size): a still or drifting scene costs
   almost nothing. Measured in Node at 480 × 270: 3.5 ms for France, 3 ms for
   Normandie, 8 ms for Auvergne-Rhône-Alpes, 10 ms during a crossfade, which lasts
-  about half a second (2026-11-12; B-013 measures it in browsers).
+  about half a second (2026-11-12; in Chromium, § Performance).
 - **Motion** (B-012): the theme draws the still frame (terrain, towns, the plants'
   bodies) once per change, and returns what moves (`Drawn`). Ten times a second,
   while a plant works on screen, the still frame is copied and the plants' motion
@@ -665,11 +665,51 @@ photo.
 
 ## Performance
 
-Budget (**provisional**, to be measured in B-013 and fixed here):
+Measured by `tools/perf.ts` on the built site served by `vite preview` (B-013,
+2026-11-12), in headless Chromium on a shared 2.1 GHz Xeon vCPU of the cloud
+session: not a laptop, so the figures are an order of magnitude, to compare one
+change with the next. A 1920 × 1080 window draws a 480 × 270 buffer (factor 4).
+Frame time is the main-thread time of one animation-frame callback that draws
+(`putImageData` included); busy time is the main thread's whole work per second,
+from the DevTools metrics.
 
-- ≤ 8 ms of main-thread work per frame on a mid-range laptop at 1080p;
-- memory flat over a 4-hour run (no growing caches: every cache has a cap);
-- no network beyond 2 requests every 15 minutes.
+| View (`tools/perf.ts frames`)       | Frame p50 | Frame p95 | Max   | Busy         |
+| ----------------------------------- | --------- | --------- | ----- | ------------ |
+| France, still (markers move)        | 0.3 ms    | 0.6 ms    | 4 ms  | 9–16 ms/s    |
+| Normandie, plants moving, day/night | 0.3 ms    | 0.8 ms    | 3 ms  | 12–15 ms/s   |
+| Idle drift (Normandie)              | 0.3 ms    | 2.4 ms    | 4 ms  | 16–21 ms/s   |
+| Drag pan (Normandie)                | 1.9 ms    | 3.1 ms    | 6 ms  | 63–77 ms/s   |
+| Flight France ↔ Normandie           | 5.3 ms    | 22 ms     | 47 ms | 151–162 ms/s |
+| Wheel zoom in and out (worst case)  | 5.8 ms    | 18 ms     | 24 ms | 155–182 ms/s |
+
+Budget (D-028):
+
+- **Steady state** (still, plants moving, idle drift: what a screensaver does for
+  hours): ≤ 3 ms per frame at p95 and ≤ 30 ms of main-thread work per second
+  (3 % of a core). Met.
+- **Camera moving** (flight, wheel, pinch, drag: seconds at a time): ≤ 25 ms per
+  frame at p95, inside the 33 ms of a frame at 30 fps, so motion stays smooth. Met;
+  the 8 ms first planned is not, which Guillaume
+  accepted (PRD Q-17).
+- **Memory** flat over hours (`tools/perf.ts soak <minutes>`): the live page left
+  alone in Normandie, drifting with its plants moving, for 115 minutes
+  (2026-11-12): JS heap after a forced collection 2.04 to 2.11 MB, 185 DOM nodes
+  and 13 listeners from start to end, 17 to 27 ms of work per second. Met. A leak
+  shows only over several refreshes (every 15 minutes): a soak runs an hour at
+  least.
+- **Network:** no more than 2 requests every 15 minutes. Met: the same soak made 8
+  requests, one every 15 minutes, all to `odre.opendatasoft.com`.
+
+Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
+between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame
+walks 300 000 to 500 000 cells for 130 000 pixels (10 to 20 ms in Node), and the
+crossfade, which draws both layers (12 ms). Three changes that keep every pixel
+were measured on 160 flight frames and dropped, the gain too small for the code
+(2026-11-12): skipping the cells the row in front covers (−4 %), painting the
+ground front to back with a horizon per column, each pixel once (−3 %), walking
+only the columns at least a pixel wide (0 %). The cost follows the cells walked;
+only a coarser layer between 0.5 and 1.4 would cut it, which changes the picture
+(not wanted for now, Q-17).
 
 ## Internationalization
 
