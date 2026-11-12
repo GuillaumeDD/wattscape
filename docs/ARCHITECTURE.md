@@ -689,7 +689,8 @@ Budget (D-028):
   (3 % of a core). Met.
 - **Camera moving** (flight, wheel, pinch, drag: seconds at a time): ≤ 25 ms per
   frame at p95, inside the 33 ms of a frame at 30 fps, so motion stays smooth. Met;
-  the 8 ms first planned is not (PRD Q-17).
+  the 8 ms first planned is not, which Guillaume
+  accepted (PRD Q-17).
 - **Memory** flat over hours (`tools/perf.ts soak <minutes>`): the live page left
   alone in Normandie, drifting with its plants moving, for 115 minutes
   (2026-11-12): JS heap after a forced collection 2.04 to 2.11 MB, 185 DOM nodes
@@ -708,7 +709,7 @@ were measured on 160 flight frames and dropped, the gain too small for the code
 ground front to back with a horizon per column, each pixel once (−3 %), walking
 only the columns at least a pixel wide (0 %). The cost follows the cells walked;
 only a coarser layer between 0.5 and 1.4 would cut it, which changes the picture
-(Q-17).
+(not wanted for now, Q-17).
 
 ## Internationalization
 

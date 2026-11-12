@@ -451,7 +451,8 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   under 8 ms.
 - **Decision:** (b): steady state ≤ 3 ms per frame at p95 and ≤ 30 ms of work per
   second; camera moving ≤ 25 ms per frame at p95; memory and network as before.
-  Proposed by Claude, 2026-11-12; (c) is put to Guillaume as PRD Q-17.
+  Proposed by Claude, 2026-11-12; (c) was put to Guillaume as PRD Q-17, who chose
+  (b): "Oui OK" (Guillaume, 2026-11-12).
 - **Why:** the steady state measures 0.3 ms per frame (2.4 ms at p95) and 9 to
   27 ms of work per second, 1 to 3 % of a core: the battery cost is there, and it
   is small. The moving camera measures 18 to 22 ms at p95, under the 33 ms of a
@@ -459,10 +460,10 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   frame walks, thinner than a pixel between scales 0.55 and 1.35; three changes
   that keep every pixel gained 4 % at most (ARCHITECTURE § Performance). Only a
   coarser layer would cut it, and that changes the picture, which is Guillaume's
-  call. Memory and network held over a 115-minute soak: heap flat at 2.1 MB, one
+  call, and he kept (b). Memory and network held over a 115-minute soak: heap flat at 2.1 MB, one
   request every 15 minutes. Guillaume asked whether 4 hours were needed; the soak
   runs an hour at least, and a 4-hour one waits in PRD Growth (G-013) (Guillaume,
   2026-11-12).
 - **Revisit if:** a laptop shows the flight or the zoom stuttering, a frame of the
   steady state outgrows its budget (`tools/perf.ts frames` after a drawing change),
-  or Guillaume picks the 2 km layer (Q-17).
+  or the moving camera turns out to stutter on Guillaume's laptop.
