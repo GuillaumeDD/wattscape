@@ -386,7 +386,7 @@ bake. The browser never downloads map data: the CSP is unchanged.
   éCO2mix; one site whose commune IGN no longer lists (Lyon 7e, 10 MW of
   bioenergy) and one whose chef-lieu is 5 km or more out of its region (a wind farm
   of Mont Lozère). A nuclear site draws cooling towers if it is in the list of
-  `tools/bake-plants-rules.ts` (11 sites; **provisional**, PRD Q-14). In 2026-11 the
+  `tools/bake-plants-rules.ts` (11 sites, from general knowledge, confirmed by Guillaume, D-027). In 2026-11 the
   registry counts 18 nuclear sites, 61 370 MW, as the tests check.
 
 ## World generation

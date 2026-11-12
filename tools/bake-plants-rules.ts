@@ -31,8 +31,8 @@ export const MAX_SITES = 8;
 /**
  * The nuclear sites cooled by towers (aéroréfrigérants), by commune: the others are
  * cooled by the sea or a river, in an open circuit, and have no towers to steam.
- * **Provisional**: from general knowledge, no source found yet (fr.wikipedia.org is
- * out of the session's reach); listed in the PR for Guillaume to check (PRD Q-14).
+ * From general knowledge, no source found yet (fr.wikipedia.org is out of the
+ * session's reach); confirmed by Guillaume, 2026-11-12 (PRD Q-14, D-027).
  */
 export const COOLING_TOWERS: readonly string[] = [
   "Avoine", // Chinon

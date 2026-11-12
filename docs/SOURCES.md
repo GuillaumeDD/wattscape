@@ -55,7 +55,8 @@ smaller ones; fields `codefiliere` (NUCLE, THERM, EOLIE, SOLAI, HYDLQ, BIOEN…)
 (Saint-Brieuc's farm under Hénansal), not the farm. Reliability high (the publisher
 documents its own data). Also tried: fr.wikipedia.org, for how each nuclear site is
 cooled; out of the session's network reach, so the list of sites with cooling
-towers is from general knowledge (low) until checked (PRD Q-14).
+towers is from general knowledge (low) until checked (PRD Q-14); Guillaume confirmed
+it the same day (D-027).
 
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte

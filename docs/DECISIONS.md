@@ -419,3 +419,21 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   cost of the motion is about 0.05 ms a step, against 5 to 10 ms for a still frame.
 - **Revisit if:** the plants read too small or too busy on a real screen, or B-013
   measures the motion beyond the budget.
+
+## D-027 — Guillaume confirms the plants' open choices (Q-14 to Q-16)
+
+- **Context:** B-012 (PR #13) left three choices open to Guillaume, each with a
+  recommendation (PRD Q-14 to Q-16).
+- **Options:** for each, the recommendation, or another answer.
+- **Decision:** the three recommendations. Q-14: cooling towers at the 11 sites of
+  `tools/bake-plants-rules.ts`, none at Tricastin, Saint-Alban, Blayais and the
+  coast; Guillaume added "ne pas oublier les sites en mer comme à Fécamp
+  (éoliennes)": the offshore wind farms, left out of D-024, are to be drawn at sea,
+  Fécamp first (G-007, with B-015). Q-15: plants at the chef-lieu of their commune
+  for now. Q-16: nuclear plants without towers show their load factor by lit
+  windows at night, and a warm-water shimmer on the sea can come with Normandie
+  (B-015). Guillaume answered "OK" to each, 2026-11-12.
+- **Why:** the reasons of D-024 and D-026; the tower list still has no source
+  (S-016): Guillaume's confirmation is the check it waited for.
+- **Revisit if:** a source contradicts the tower list, or a plant reads in the wrong
+  place on a real screen.

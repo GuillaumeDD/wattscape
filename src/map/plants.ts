@@ -20,7 +20,7 @@ export interface PlantSite {
   readonly y: number;
   /** Installed capacity, MW (the registry's puisMaxInstallee). */
   readonly mw: number;
-  /** A nuclear site cooled by towers, which steam (provisional, PRD Q-14). */
+  /** A nuclear site cooled by towers, which steam (list confirmed by Guillaume, D-027). */
   readonly towers: boolean;
   /** The commune it stands in (IGN's official name). */
   readonly commune: string;
