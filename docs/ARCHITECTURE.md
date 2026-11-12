@@ -315,7 +315,7 @@ bake. The browser never downloads map data: the CSP is unchanged.
 - **Projection:** equirectangular, longitude scaled by cos 46.5° (computed by a
   Taylor series, `cosDeg`), 111.2 km per degree of latitude. A cell is true to scale
   north–south; east–west it is 9 % too wide in the north (51° N) and 9 % too narrow
-  in Corsica (41.3° N), as cos(latitude)/cos 46.5° says; the isometric 2:1 transform of § Art direction comes on top. A Lambert-93
+  in Corsica (41.3° N), as cos(latitude)/cos 46.5° says; the 2:1 tiles of § Art direction come on top. A Lambert-93
   projection could replace it without touching the renderer.
 - **Grid** (`src/map/grid.ts`): north-west corner 51.2° N, 5.4° W; 1 152 × 1 104 cells
   of 1 km (the **fine grid**), grouped 4 × 4 into 288 × 276 cells of 4 km (the
@@ -426,12 +426,12 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
 
 ## Art direction
 
-Direction A, the isometric map, was chosen by Guillaume on 2026-11-11 (PRD Q-1). The
-details below (palette, resolution, level of detail) are still **proposed** until the
-mockups of B-010 are validated.
+Direction A, the isometric map (drawn north up, D-017), was chosen by Guillaume on 2026-11-11 (PRD Q-1). The
+palette, the night and the dusk below were validated with the mockups of B-010
+(D-019); the resolution and the level of detail are still **proposed** until B-011.
 
-- **Projection:** isometric 2:1 (a tile is twice as wide as it is
-  tall), light from the south-east, no perspective.
+- **Projection:** 2:1 tiles (a tile is twice as wide as it is tall), north up, the
+  map seen from the south (D-017); light from the north-west, no perspective.
 - **Resolution:** the scene is drawn at low resolution into a pixel buffer, then
   scaled by an **integer** factor to the screen (nearest-neighbour); the buffer size
   follows the window so that the factor is 3 to 6 on common screens.
@@ -439,7 +439,7 @@ mockups of B-010 are validated.
   frame is drawn at the nearest of a few levels of detail (France, region, close),
   each with its own sprite set; between two levels, a short crossfade. Integer
   scaling keeps pixels crisp; a spike in B-011 checks that this feels smooth enough.
-- **Palette** (`src/render/palette.ts`, proposed until B-010): 24 fixed colours:
+- **Palette** (`src/render/palette.ts`, validated, D-019): 24 fixed colours:
   muted land, sea blues, a sky ramp, a lamp yellow, and **one signature colour per
   source**, also used in the legend. Each colour names the palette colour it
   becomes one step darker (`DARKER`): land darkens towards the sea's blues, as under
@@ -474,6 +474,33 @@ mockups of B-010 are validated.
   rectangles, polygons) and seeded noise; no image files (ASSETS.md).
 - **Motion:** slow and sparse; nothing blinks faster than about 2 Hz; with
   `prefers-reduced-motion`, no camera drift and half-speed animation.
+
+### Mockups (B-010)
+
+`src/render/map-view.ts` draws the baked map (§ Map) as a relief diorama in the
+palette, under a light; `tools/mockups.ts` writes the mockups into
+`docs/screenshots/step-2-mockup-*.png` (France with 2-pixel tiles, Normandie with
+8-pixel tiles, sun at 35°, 2° and −20°). The map is drawn north up (D-017): 2:1
+tiles, the map seen from the south.
+
+How it draws, for now, aiming at calm, elegant pixel art (Guillaume, 2026-11-11):
+
+- each coarse cell is a tile raised by a tile's width per 1 000 m, its south face
+  one palette step darker; the plains stay flat, the mountains rise;
+- one flat ground colour per altitude band, like a relief map's tints: meadow below
+  300 m, grass, forest from 800 m, rock from 1 300 m, snow from 2 400 m; no
+  per-cell texture;
+- hill shading with one light from the north-west: a cell 250 m or more below its
+  north-west neighbour is one step darker;
+- sea in three flat bands by distance to the coast;
+- foreign land, and the other regions on a region view, one step darker by day;
+  this veil fades as night falls, so that the land around never reads as sea;
+- towns are the prefectures (S-006), each moved to the nearest land cell if its own is
+  sea, drawn with its cell so the relief in front hides it: roofs by day, lamps once
+  the sun is below the horizon.
+
+Its frames are hashed in Node and Chromium like the test card. The 4 km grid makes a
+region blocky at 8-pixel tiles; the 1 km relief comes with the zoom (D-018, B-011).
 
 ### Landmarks
 

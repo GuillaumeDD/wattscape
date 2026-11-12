@@ -189,7 +189,8 @@ Two directions fit the brief; the zoom between France and a region (§4.3) decid
 between them.
 
 - **A. Isometric map of France (chosen, Guillaume, 2026-11-11).** France as a pixel-art relief model,
-  seen from above at a 2:1 isometric angle, like a board game or a tabletop diorama.
+  seen from above at an angle in 2:1 tiles, like a board game or a tabletop diorama;
+  drawn north up rather than turned 45° (D-017).
   Zoomed out, a small, elegant map with each region tinted; zoomed in, terrain tiles,
   towns, plants and landmarks as small iso sprites. The zoom is natural, plants sit at
   their real place, and Infinite Jungle shows the style holds up. Cost: we need the
@@ -212,6 +213,8 @@ Shared principles for either (details: ARCHITECTURE § Art direction):
 - **The land carries the season:** one land palette per season, blended cell by
   cell over weeks (§4.7b).
 - **Integer scaling** of a low-resolution canvas: crisp pixels at any screen size.
+- **Calm, made for contemplation** (Guillaume, 2026-11-12), in every visual theme:
+  slow motion, soft contrast, light kept for the energy and the towns.
 
 ## 8. Roadmap
 
@@ -248,6 +251,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-008 | Pumped-storage plants (STEP) pumping water uphill at night, from the `pompage` figure  | proposed |
 | G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |
+| G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | proposed |
 
 ## 10. Open questions
 
@@ -256,10 +260,12 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 
 | Id  | Question                                                        | Recommendation                                                                                       | Answer                                                                |
 | --- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Q-1 | Art direction: isometric map (A) or side panorama (B)?          | A, because the France ↔ region zoom needs a real map                                                 | A (Guillaume, 2026-11-11)                                             |
+| Q-1 | Art direction: isometric map (A) or side panorama (B)?          | A, because the France ↔ region zoom needs a real map                                                 | A; mockups validated (Guillaume, 2026-11-11, D-019)                   |
 | Q-2 | Docs and code in English (like Return of the Runners)?          | Yes; the app itself defaults to French                                                               | Yes (Guillaume, 2026-11-11)                                           |
 | Q-3 | Licence: GPL-3.0-or-later code, CC BY-SA 4.0 art?               | Yes, same as Return of the Runners (already in `LICENSE`)                                            | Yes (Guillaume, 2026-11-11)                                           |
 | Q-4 | Landmarks: only public-domain works, tower lit without sparkle? | Yes (§6); recent works such as the Viaduc de Millau are left out                                     | Yes, and trace each decision (Guillaume, 2026-11-11)                  |
 | Q-5 | First region for step 3?                                        | Normandie: coast, cliffs, a port, three nuclear sites, offshore wind; it exercises the most features | Normandie, Seine-Maritime first (Guillaume, 2026-11-11)               |
 | Q-6 | Idle tour rhythm                                                | Stay on the home region; every 5 minutes, a 1-minute flight elsewhere                                | Yes, plus a home button and a tour off switch (Guillaume, 2026-11-11) |
 | Q-7 | Frame rate cap                                                  | 30 fps: pixel art barely gains from more, and it halves the battery cost                             | Yes (Guillaume, 2026-11-11)                                           |
+| Q-8 | Mockups: true isometric (map turned 45°) or north up?           | North up: France stays recognisable at a glance, from afar                                           | North up (Guillaume, 2026-11-11)                                      |
+| Q-9 | Region level: 4 km cells, or a finer 1 km relief?               | 1 km: at 4 km a region looks blocky (Normandie mockups)                                              | 1 km (Guillaume, 2026-11-11)                                          |

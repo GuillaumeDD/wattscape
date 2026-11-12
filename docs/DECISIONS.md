@@ -245,3 +245,47 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   evenly by dithering, and sources stay recognisable at night.
 - **Revisit if:** the mockups show the night too dark or too flat, or a colour
   reads badly next to its neighbours.
+
+## D-017 — The map is drawn north up
+
+- **Context:** the mockups (B-010) drew the baked map in two 2:1 projections: the
+  true isometric view, which turns France by 45°, and the same tiles with north
+  kept up, seen from the south (ARCHITECTURE § Mockups).
+- **Options:** (a) north up; (b) true isometric.
+- **Decision:** (a). Proposed by Claude, chosen by Guillaume, 2026-11-11 (PRD Q-8,
+  decision card in the project thread).
+- **Why:** a screensaver is watched from afar, for a few seconds: France must be
+  recognisable at a glance; the relief and the 2:1 tiles keep the diorama feel.
+- **Revisit if:** the zoom (B-011) or the sprites read badly without the iso angle.
+
+## D-018 — The region level draws a 1 km relief
+
+- **Context:** the mockups (B-010) drew Normandie from the 4 km grid the national
+  view uses; at the region's zoom each cell is a large block, and coasts and
+  valleys are lost (ARCHITECTURE § Mockups).
+- **Options:** (a) bake a 1 km elevation grid for the region level, next to the
+  1 km regions grid the lookup already uses; (b) keep the 4 km grid at every zoom.
+- **Decision:** (a). Proposed by Claude, chosen by Guillaume, 2026-11-11 (PRD Q-9,
+  in the project thread). It lands with the level of detail of the zoom (B-011);
+  the extra size of the baked data is measured there.
+- **Why:** the region is where the viewer lives: its coast and its relief must be
+  recognisable.
+- **Revisit if:** the 1 km data makes the load or the memory miss the budget
+  (ARCHITECTURE § Performance).
+
+## D-019 — The mockups are validated: calm pixel art, dithered dusk
+
+- **Context:** Guillaume asked for elegant pixel art; the first mockups (B-010) were
+  noisy, and a calmer set was drawn (ARCHITECTURE § Mockups): flat altitude bands,
+  flat sea bands, hill shading from the north-west, mid-mountains moonlit blue at
+  night. It confirms D-016 (palette, darkening chains, 2 steps at night).
+- **Options for dusk:** (a) fine ordered dithering between palette steps, smooth
+  but grainy for about an hour; (b) whole palette steps, crisp but with two or
+  three sudden changes of tone.
+- **Decision:** the calm mockups, and (a). Proposed by Claude; Guillaume found the
+  new mockups better ("oui c'est mieux !") and chose (a) on a decision card,
+  2026-11-11 (PRD Q-1).
+- **Why:** a screensaver runs continuously: a sudden change of tone catches the
+  eye more than a fine grain does.
+- **Revisit if:** the grain at dusk reads as noise on a real screen, at the real
+  scale factor.

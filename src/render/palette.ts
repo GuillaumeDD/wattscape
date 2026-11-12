@@ -1,6 +1,6 @@
 /**
- * The fixed palette of the scene (ARCHITECTURE § Art direction, proposed until the
- * mockups of B-010 are validated): 24 colours, and for each the palette colour it
+ * The fixed palette of the scene (ARCHITECTURE § Art direction, validated with the
+ * mockups of B-010, D-019): 24 colours, and for each the palette colour it
  * becomes one step darker, so that light changes stay in palette. Pure data.
  */
 
@@ -79,7 +79,7 @@ export const DARKER: Readonly<Record<ColourName, ColourName>> = {
   sea: "seaDeep",
   seaShallow: "sea",
   foam: "seaShallow",
-  forest: "seaDeep",
+  forest: "sea",
   grass: "forest",
   meadow: "grass",
   field: "soil",
