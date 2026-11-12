@@ -460,7 +460,9 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   that keep every pixel gained 4 % at most (ARCHITECTURE § Performance). Only a
   coarser layer would cut it, and that changes the picture, which is Guillaume's
   call. Memory and network held over a 115-minute soak: heap flat at 2.1 MB, one
-  request every 15 minutes.
+  request every 15 minutes. Guillaume asked whether 4 hours were needed; the soak
+  runs an hour at least, and a 4-hour one waits in PRD Growth (G-013) (Guillaume,
+  2026-11-12).
 - **Revisit if:** a laptop shows the flight or the zoom stuttering, a frame of the
   steady state outgrows its budget (`tools/perf.ts frames` after a drawing change),
   or Guillaume picks the 2 km layer (Q-17).
