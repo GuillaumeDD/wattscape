@@ -592,11 +592,16 @@ How the terrain draws, aiming at calm, elegant pixel art (Guillaume, 2026-11-11)
 - sea in three flat bands by distance to the coast: up to 4 km, up to 20 km, beyond;
 - foreign land, and the other regions on a region view, one step darker by day;
   this veil fades as night falls, so that the land around never reads as sea;
-- towns are the prefectures (S-006), each moved to the first French land cell
-  within 8 km if its own is not, drawn with its cell so the relief in front hides it:
-  roofs by day, lamps once the sun is below the horizon, more of them the more the
-  region consumes, and none without a figure: unlit roofs, as in Corsica, which the
-  regional éCO2mix leaves out (§ Data-to-scene mapping; real towns come with B-015);
+- towns are the 5 397 communes of 2 000 inhabitants or more (DS-04, baked by
+  `tools/bake-towns.ts` into `src/map/towns.ts`, D-031): each covers population /
+  4 000 km², never more than its commune's area, in whole cells of French land
+  nearest its chef-lieu (`townCellCount`, `townCells`), so at 4 km only towns of
+  32 000 or more show and at 1 km all of them; neighbouring towns merge, a coastal
+  town spreads along the coast; a chef-lieu off French land moves to the first land
+  cell within 8 km. A town cell's top face is roofs by day, lamps once the sun is
+  below the horizon, more of them the more the region consumes, and none without a
+  figure: unlit roofs, as in Corsica, which the regional éCO2mix leaves out (§
+  Data-to-scene mapping);
 - past the grid's west, east and south edges the edge cells go on (sea, the
   neighbours' land), so a wide view never shows the board's edge; north of the grid
   is the sky.

@@ -75,6 +75,23 @@ Re-read on 2026-11-12, S-003, through its export endpoint
 recorded for three hours as `tests/fixtures/eco2mix/2026-11-12-history-3h.json`
 (B-014).
 
+Re-read on 2026-11-12, S-013, layer `ADMINEXPRESS-COG.LATEST:commune` with its
+chef-lieux, by `tools/bake-towns.ts` (B-015, D-031): fields `population` (INSEE,
+`organisme_recenseur`), `date_du_recensement` (2023-01-01 for 5 346 of the 5 397
+metropolitan communes of 2 000 inhabitants or more, 2022-01-01 for 51) and
+`superficie_cadastrale` (hectares: Le Havre 4 700, 166 687 inhabitants; Paris 10 540,
+2 103 778). The WFS answers at most 5 000 features a request: the bake pages with
+`STARTINDEX`.
+
+Consulted on 2026-11-12, **S-018**: [IGN's metadata record for the BD TOPO][s018-csw]
+(`IGNF_BD-TOPO`, version 3.5) and its Géoplateforme WFS (the layers dated
+2026-09-15). Gave: licence "Licence Ouverte / Open License"; the WFS layers
+`BDTOPO_V3:zone_d_activite_ou_d_interet` (nature « Centrale électrique », e.g.
+« Centrale Électrique de Paluel »; « Parc Éolien en Mer de Fécamp », of Saint-Nazaire,
+of Dieppe - le Tréport) and `BDTOPO_V3:construction_ponctuelle` (nature « Eolienne »,
+11 090 turbines), DS-13, GO the same day (Guillaume, on a decision card).
+Reliability high (the national mapping agency documents its own data).
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift
@@ -85,3 +102,4 @@ recorded for three hours as `tests/fixtures/eco2mix/2026-11-12-history-3h.json`
 [s016]: https://odre.opendatasoft.com/explore/dataset/registre-national-installation-production-stockage-electricite-agrege-311224/
 [s015-repo]: https://github.com/nvkelso/natural-earth-vector/tree/ca96624a56bd078437bca8184e78163e5039ad19
 [s017]: https://odre.opendatasoft.com/explore/dataset/eco2mix-regional-cons-def/
+[s018-csw]: https://data.geopf.fr/csw?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&OUTPUTSCHEMA=http://standards.iso.org/iso/19115/-3/mdb/2.0&elementSetName=full&ID=IGNF_BD-TOPO

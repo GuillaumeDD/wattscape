@@ -16,7 +16,7 @@ import { drawTestCard } from "../src/render/test-card.ts";
 import { areaBox, type Camera, fitBox } from "../src/scene/camera.ts";
 import {
   detailForScale,
-  prefectureTowns,
+  bakedTowns,
   type Scene,
   type ScenePlant,
   scenePlants,
@@ -62,7 +62,7 @@ export function referenceScene(
     coarse: coarseLayer(),
     fine: fineLayer(FINE_ELEVATION_RLE),
     detail: detailForScale(camera.scale),
-    towns: prefectureTowns(),
+    towns: bakedTowns(),
     plants: recordedPlants(sunElevation < 0),
     townLights: recordedTownLights(sunElevation < 0),
   };

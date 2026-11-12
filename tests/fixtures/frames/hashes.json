@@ -1,15 +1,15 @@
 {
   "_comment": "Frame hashes (hashSurface) of the reference frames of e2e/reference-frames.ts, which Node (tests/pixel-theme.test.ts) and Chromium (e2e/frame-hash.spec.ts) must both draw. Update only when a drawing change is intended, in the same commit.",
   "test-card": "a828e8bb",
-  "scene-france-day": "7048d5f4",
-  "scene-france-night": "05d7b519",
-  "scene-normandie-golden": "e057204b",
-  "scene-normandie-night": "8ff9ba4e",
-  "scene-auvergne-rhone-alpes-day": "4a774418",
-  "scene-crossfade-day": "49eb9755",
-  "scene-mont-blanc-day": "bf238bc9",
-  "plants-normandie-day-t0": "87fead3f",
-  "plants-normandie-day-t1.3": "f34a3fa7",
-  "plants-normandie-night-t1.3": "402b502f",
-  "plants-rhone-day-t0.7": "575c4c9a"
+  "scene-france-day": "d94d4ec4",
+  "scene-france-night": "4beeb1d5",
+  "scene-normandie-golden": "0fb283fc",
+  "scene-normandie-night": "91e304e1",
+  "scene-auvergne-rhone-alpes-day": "2a70eba1",
+  "scene-crossfade-day": "bb913e13",
+  "scene-mont-blanc-day": "35e63d6e",
+  "plants-normandie-day-t0": "31c798a7",
+  "plants-normandie-day-t1.3": "9e64ed39",
+  "plants-normandie-night-t1.3": "8b67ef18",
+  "plants-rhone-day-t0.7": "8ff540ef"
 }

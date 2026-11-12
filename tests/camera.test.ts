@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PREFECTURES, REGION_CAPITALS } from "../src/geo/regions";
+import { PREFECTURES } from "../src/geo/regions";
 import { KIND_REGIONS, kmOf } from "../src/map/grid";
 import { coarseLayer } from "../src/map/layers";
 import {
@@ -24,7 +24,7 @@ import {
   detailForScale,
   DETAIL_FROM_SCALE,
   DETAIL_FULL_SCALE,
-  prefectureTowns,
+  bakedTowns,
   viewLight,
 } from "../src/scene/scene";
 import { lightAt } from "../src/sky/light";
@@ -267,10 +267,13 @@ describe("the scene model", () => {
     expect(detailForScale(Number.NaN)).toBe(0);
   });
 
-  it("has the 96 prefectures as towns, 12 of them regional capitals", () => {
-    const towns = prefectureTowns();
-    expect(towns).toHaveLength(96);
-    expect(towns.filter((t) => t.capital)).toHaveLength(Object.keys(REGION_CAPITALS).length);
+  it("has the baked towns, largest first: Paris, then Marseille", () => {
+    const towns = bakedTowns();
+    expect(towns.length).toBeGreaterThan(5000);
+    expect(towns[0]?.population).toBeGreaterThan(2_000_000);
+    expect(towns[1]?.population).toBeGreaterThan(800_000);
+    for (let k = 1; k < towns.length; k++)
+      expect(towns[k]?.population ?? 0).toBeLessThanOrEqual(towns[k - 1]?.population ?? 0);
   });
 });
 

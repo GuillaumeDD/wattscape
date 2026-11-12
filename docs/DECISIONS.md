@@ -507,3 +507,25 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   network budget (D-028).
 - **Revisit if:** a longer replay is wanted (a week: 8 MB, too much for one
   request), or the export endpoint changes its limits.
+
+## D-031 — Real towns, sized by their population
+
+- **Context:** B-015: the towns were the 96 prefectures (S-006), one dot each, the
+  regional capitals a pixel larger. The first region (Normandie) needs its real
+  towns: Le Havre, Rouen, Fécamp, Dieppe and the small towns between them.
+- **Options:** (a) the prefectures; (b) every commune above a population, one dot
+  each; (c) every commune above a population, covering an area that grows with it;
+  (d) INSEE urban units, which would need a new source.
+- **Decision:** (c): the communes of metropolitan France with 2 000 inhabitants or
+  more (5 397), from ADMIN EXPRESS COG (DS-04, already GO), at their chef-lieu. A
+  town covers population / 4 000 km² (a dense town's density), never more than its
+  commune's area, in whole cells of French land nearest its chef-lieu; at least one
+  cell when its population alone rounds to one, so a dense suburb shows. At 4 km only
+  towns of 32 000 or more show; at 1 km all of them. Regional capitals are no longer
+  drawn larger: their size now says how big they are. Proposed by Claude,
+  2026-11-12.
+- **Why:** the size of a town on screen is a true figure (INSEE population), and the
+  same rule gives the national view its cities and the region view its small towns;
+  2 000 inhabitants is the INSEE threshold of an urban commune; no new source.
+- **Revisit if:** the national view reads too busy or too sparse, a region view
+  shows towns as noise, or urban units are wanted (one blob per agglomeration).
