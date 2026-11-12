@@ -248,6 +248,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-008 | Pumped-storage plants (STEP) pumping water uphill at night, from the `pompage` figure  | proposed |
 | G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |
+| G-011 | A second, modern visual theme, chosen by the user (Guillaume, 2026-11-12)              | proposed |
 
 ## 10. Open questions
 
