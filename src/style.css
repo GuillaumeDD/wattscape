@@ -162,3 +162,60 @@ body.debug main {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+/* The scene (B-011): the whole window, behind the text, crisp pixels. */
+body.scene {
+  overflow: hidden;
+}
+
+#scene {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  image-rendering: pixelated;
+  /* The scene takes drags and pinches itself, instead of scrolling the page. */
+  touch-action: none;
+  cursor: grab;
+}
+
+#scene:active {
+  cursor: grabbing;
+}
+
+/* Over the scene, the text sits in quiet panels that let the map show around them. */
+body.scene main {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  align-items: flex-start;
+  min-height: 0;
+  max-width: 24rem;
+  margin: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgb(16 19 28 / 75%);
+  text-align: left;
+}
+
+body.scene main h1 {
+  font-size: 1.25rem;
+}
+
+body.scene #tagline,
+body.scene #location-note {
+  font-size: 0.8rem;
+}
+
+body.scene #area-picker {
+  justify-content: flex-start;
+}
+
+body.scene button {
+  margin-top: 0;
+}
+
+body.scene #credits {
+  z-index: 1;
+  background: rgb(16 19 28 / 75%);
+}

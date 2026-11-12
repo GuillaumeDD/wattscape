@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { fixedClock } from "../src/clock/clock";
 import {
   areaFromQuery,
+  atFromQuery,
   initialArea,
   saveArea,
   savedArea,
@@ -98,5 +100,47 @@ describe("initialArea", () => {
     expect(initialArea("?area=bad", storage)).toBe("53");
     expect(initialArea("", memoryStorage())).toBe("FR");
     expect(initialArea("", throwing)).toBe("FR");
+  });
+});
+
+describe("atFromQuery (?at=, the time the scene shows)", () => {
+  it("reads an ISO 8601 instant in UTC or with an offset, to the minute or the second", () => {
+    expect(atFromQuery("?at=2026-06-21T21:30Z")).toBe(Date.UTC(2026, 5, 21, 21, 30));
+    expect(atFromQuery("?at=2026-06-21T21:30:15Z")).toBe(Date.UTC(2026, 5, 21, 21, 30, 15));
+    // %2B is "+" in a URL; a bare "+" would read as a space.
+    expect(atFromQuery("?at=2026-06-21T23:30%2B02:00")).toBe(Date.UTC(2026, 5, 21, 21, 30));
+    expect(atFromQuery("?at=2026-06-21T18:30-03:00&area=28")).toBe(Date.UTC(2026, 5, 21, 21, 30));
+    expect(atFromQuery("?at=2028-02-29T00:00Z")).toBe(Date.UTC(2028, 1, 29));
+  });
+
+  it("ignores a missing, repeated, malformed or impossible instant", () => {
+    for (const search of [
+      "",
+      "?area=28",
+      "?at=",
+      "?at=2026-06-21T21:30Z&at=2026-06-21T21:30Z",
+      "?at=2026-06-21",
+      "?at=2026-06-21 21:30Z",
+      "?at=2026-06-21T21:30", // no zone: the viewer's own would make it ambiguous
+      "?at=2026-02-30T10:00Z", // rolled over to March by some engines, rejected by others
+      "?at=2027-02-29T10:00Z",
+      "?at=2026-13-01T10:00Z",
+      "?at=2026-00-10T10:00Z",
+      "?at=2026-06-21T24:00Z",
+      "?at=2026-06-21T21:60Z",
+      "?at=2026-06-21T21:30:60Z",
+      "?at=2026-06-21T21:30+15:00",
+      "?at=1999-12-31T23:59Z",
+      "?at=2100-01-01T00:00Z",
+      "?at=now",
+      `?at=${"9".repeat(3000)}`,
+    ])
+      expect(atFromQuery(search), search).toBeUndefined();
+  });
+
+  it("gives a clock that stays on that instant", () => {
+    const clock = fixedClock(Date.UTC(2026, 5, 21));
+    expect(clock.now()).toBe(Date.UTC(2026, 5, 21));
+    expect(clock.now()).toBe(clock.now());
   });
 });

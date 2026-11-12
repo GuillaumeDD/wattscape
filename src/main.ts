@@ -1,7 +1,9 @@
 import { detectLocale, translate, type Locale, type MessageKey } from "./i18n";
 import { MAP_BAKED_ON } from "./map/france";
+import { fixedClock, systemClock } from "./clock/clock";
 import { mountAreaPicker, renderAreaOptions, type AreaState } from "./ui/area-picker";
-import { browserStorage, initialArea, savedLocale, saveLocale } from "./ui/settings";
+import { mountSceneView, type SceneView } from "./ui/scene-view";
+import { atFromQuery, browserStorage, initialArea, savedLocale, saveLocale } from "./ui/settings";
 
 function setText(id: string, text: string): void {
   const el = document.getElementById(id);
@@ -34,6 +36,7 @@ function render(locale: Locale): void {
   setText("area-label", t("areaLabel"));
   setText("locate", t("useMyLocation"));
   setText("debug-link", t("debugTitle"));
+  document.getElementById("scene")?.setAttribute("aria-label", t("sceneLabel"));
 }
 
 /** The area list: rebuilt only when the language changes, otherwise just selected. */
@@ -56,8 +59,23 @@ const areaState: AreaState = {
 let locale: Locale = savedLocale(storage) ?? detectLocale(navigator.languages);
 render(locale);
 renderArea(true);
+
+// `?at=` fixes the time of day the scene shows (demos, screenshots).
+const at = atFromQuery(location.search);
+const canvas = document.getElementById("scene");
+const scene: SceneView | null =
+  canvas instanceof HTMLCanvasElement
+    ? mountSceneView(canvas, at === undefined ? systemClock : fixedClock(at), areaState.area)
+    : null;
+
+let shownArea = areaState.area;
 mountAreaPicker(areaState, () => {
   renderArea(false);
+  // The picker also calls back for a new note ("looking for your position…"): the
+  // camera flies only when the area changes.
+  if (areaState.area === shownArea) return;
+  shownArea = areaState.area;
+  scene?.showArea(areaState.area);
 });
 
 document.getElementById("language")?.addEventListener("click", () => {

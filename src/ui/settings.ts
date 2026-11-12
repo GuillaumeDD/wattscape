@@ -70,3 +70,42 @@ export function saveLocale(storage: Pick<Storage, "setItem"> | undefined, locale
     // Storage can be blocked (private mode, settings): the choice then lasts the visit.
   }
 }
+
+/** The earliest and latest instants `?at=` accepts (UTC). */
+const AT_EARLIEST = Date.UTC(2000, 0, 1);
+const AT_LATEST = Date.UTC(2100, 0, 1);
+
+/**
+ * `?at=2026-06-21T21:30Z` (ISO 8601, minutes or seconds, `Z` or an offset): the
+ * instant the scene shows, for demos and screenshots; `undefined` when absent,
+ * repeated, malformed or outside 2000–2099.
+ */
+export function atFromQuery(search: string): number | undefined {
+  if (search.length > 2048) return undefined;
+  const values = new URLSearchParams(search).getAll("at");
+  if (values.length !== 1) return undefined;
+  // Read field by field rather than by Date.parse, which rolls 30 February over to
+  // March in some engines and rejects it in others.
+  const m =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(?:Z|([+-])(\d{2}):(\d{2}))$/.exec(
+      values[0] ?? "",
+    );
+  if (m === null) return undefined;
+  const [year, month, day, hour, minute, second, offsetHours, offsetMinutes] = [
+    m[1],
+    m[2],
+    m[3],
+    m[4],
+    m[5],
+    m[6] ?? "0",
+    m[8] ?? "0",
+    m[9] ?? "0",
+  ].map(Number) as [number, number, number, number, number, number, number, number];
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth) return undefined;
+  if (hour > 23 || minute > 59 || second > 59 || offsetHours > 14 || offsetMinutes > 59)
+    return undefined;
+  const offset = (m[7] === "-" ? -1 : 1) * (offsetHours * 60 + offsetMinutes) * 60_000;
+  const ms = Date.UTC(year, month - 1, day, hour, minute, second) - offset;
+  return ms >= AT_EARLIEST && ms < AT_LATEST ? ms : undefined;
+}
