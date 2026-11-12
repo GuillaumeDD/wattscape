@@ -1,11 +1,14 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  eco2mixRegionsUrl,
   eco2mixUrl,
   fetchEco2mix,
+  fetchEco2mixRegions,
   freshness,
   isEco2mixArea,
   parseEco2mix,
+  parseEco2mixRegions,
   REGION_CODES,
   SOURCES,
   STALE_AFTER_MS,
@@ -440,5 +443,119 @@ describe("fetchEco2mix", () => {
       ok: false,
       reason: "answer too large",
     });
+  });
+});
+
+describe("parseEco2mixRegions (B-012)", () => {
+  const regions = (name: string): Record<string, unknown>[] => {
+    const body = load(name) as { results: Record<string, unknown>[] };
+    return body.results;
+  };
+  // The newest step of the recording: 12 rows at 09:45 UTC (the other 12 are 09:30).
+  const day = (): Record<string, unknown>[] =>
+    regions("2026-11-12-all-regions").filter((r) => r.date_heure === "2026-11-12T09:45:00+00:00");
+
+  it("asks the regional dataset for its 24 newest rows, as the fixture was recorded", () => {
+    const url = new URL(eco2mixRegionsUrl());
+    expect(url.pathname).toMatch(/eco2mix-regional-tr\/records$/);
+    expect(url.searchParams.get("limit")).toBe("24");
+    expect(url.searchParams.get("order_by")).toBe("date_heure desc");
+    expect(url.searchParams.get("where")).toBe("consommation is not null");
+    expect(eco2mixRegionsUrl()).toBe(meta("2026-11-12-all-regions").url);
+  });
+
+  it("reads the recorded step: every region, one time, Normandie's nuclear at 62 %", () => {
+    const parsed = parseEco2mixRegions(load("2026-11-12-all-regions"));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(Object.keys(parsed.reading.byRegion).sort()).toEqual([...REGION_CODES].sort());
+    expect(new Date(parsed.reading.timeMs).toISOString()).toBe("2026-11-12T09:45:00.000Z");
+    expect(parsed.reading.byRegion["28"]?.loadFactorPct.nuclear).toBe(62);
+    expect(parsed.reading.byRegion["11"]?.loadFactorPct.nuclear).toBeNull();
+  });
+
+  it("reads the recorded night step: no sun anywhere", () => {
+    const parsed = parseEco2mixRegions(load("2026-11-12-all-regions-0100z"));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    for (const r of Object.values(parsed.reading.byRegion)) expect(r.loadFactorPct.solar).toBe(0);
+  });
+
+  it("leaves out a region whose row is invalid, and keeps the others", () => {
+    const rows = day().map((r) =>
+      r.code_insee_region === "28" ? { ...r, tch_nucleaire: "62" } : r,
+    );
+    const parsed = parseEco2mixRegions({ results: rows });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.reading.byRegion["28"]).toBeUndefined();
+    expect(Object.keys(parsed.reading.byRegion)).toHaveLength(11);
+  });
+
+  it("leaves out a region late for the newest step, never showing its older figure", () => {
+    const rows = day().map((r) =>
+      r.code_insee_region === "53" ? { ...r, date_heure: "2026-11-12T09:30:00+00:00" } : r,
+    );
+    const parsed = parseEco2mixRegions({ results: rows });
+    expect(parsed.ok && parsed.reading.byRegion["53"]).toBeUndefined();
+    expect(parsed.ok && Object.keys(parsed.reading.byRegion)).toHaveLength(11);
+  });
+
+  it("keeps the step with the most regions while a newer one is still being published", () => {
+    const newer = day()
+      .slice(0, 3)
+      .map((r) => ({ ...r, date_heure: "2026-11-12T10:00:00+00:00" }));
+    const parsed = parseEco2mixRegions({ results: [...newer, ...day()] });
+    expect(parsed.ok && new Date(parsed.reading.timeMs).toISOString()).toBe(
+      "2026-11-12T09:45:00.000Z",
+    );
+    expect(parsed.ok && Object.keys(parsed.reading.byRegion)).toHaveLength(12);
+    // With every region at both steps, the newer one wins.
+    const both = parseEco2mixRegions(load("2026-11-12-all-regions"));
+    expect(both.ok && new Date(both.reading.timeMs).toISOString()).toBe("2026-11-12T09:45:00.000Z");
+  });
+
+  it("rejects what is not the API's shape: a region twice, too many rows, no region", () => {
+    const rows = day();
+    const twice = [...rows.slice(1), { ...rows[1] }];
+    expect(parseEco2mixRegions({ results: twice }).ok).toBe(false);
+    expect(parseEco2mixRegions({ results: [...rows, ...rows] }).ok).toBe(false);
+    expect(
+      parseEco2mixRegions({
+        results: [
+          ...rows,
+          ...rows.map((r) => ({ ...r, date_heure: "2026-11-12T09:30:00+00:00" })),
+          rows[0],
+        ],
+      }).ok,
+    ).toBe(false);
+    expect(parseEco2mixRegions({ results: [{ ...rows[0], code_insee_region: "94" }] }).ok).toBe(
+      false,
+    );
+    expect(parseEco2mixRegions({ results: [{ ...rows[0], code_insee_region: 28 }] }).ok).toBe(
+      false,
+    );
+    expect(parseEco2mixRegions({ results: [] }).ok).toBe(false);
+    expect(parseEco2mixRegions({ results: [null] }).ok).toBe(false);
+    expect(parseEco2mixRegions(load("2026-11-11-error-bad-query")).ok).toBe(false);
+    expect(parseEco2mixRegions(null).ok).toBe(false);
+    expect(parseEco2mixRegions("[]").ok).toBe(false);
+  });
+
+  it("is unavailable when every row is invalid (a step not yet published)", () => {
+    expect(parseEco2mixRegions(load("2026-11-11-regional-empty-step")).ok).toBe(false);
+  });
+
+  it("fetches with the same rules as one region", async () => {
+    let seenUrl = "";
+    const body = readFileSync(`${DIR}/2026-11-12-all-regions.json`, "utf8");
+    const fake: typeof fetch = (input) => {
+      seenUrl = input instanceof Request ? input.url : input.toString();
+      return Promise.resolve(new Response(body));
+    };
+    expect((await fetchEco2mixRegions(fake)).ok).toBe(true);
+    expect(seenUrl).toBe(eco2mixRegionsUrl());
+    const down: typeof fetch = () => Promise.reject(new TypeError("Failed to fetch"));
+    expect(await fetchEco2mixRegions(down)).toEqual({ ok: false, reason: "network error" });
   });
 });

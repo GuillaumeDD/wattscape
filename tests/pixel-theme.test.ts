@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FRAME_HEIGHT, FRAME_WIDTH } from "../e2e/reference-frames";
+import { FRAME_HEIGHT, FRAME_WIDTH, recordedPlants } from "../e2e/reference-frames";
 import {
   ELEVATION_CLASSES,
   FOREIGN,
@@ -16,9 +16,11 @@ import {
   drawPixelScene,
   groundColour,
   heightPx,
+  minPlantMw,
   seaColour,
   tintPattern,
   townCells,
+  visiblePlants,
 } from "../src/render/pixel-theme";
 import { createSurface, getPixel, hashSurface, type Surface } from "../src/render/surface";
 import { DEFAULT_THEME, THEMES } from "../src/render/theme";
@@ -43,6 +45,7 @@ function sceneOf(overrides: Partial<Scene> & { camera: Camera }): Scene {
     fine,
     detail: 16,
     towns: prefectureTowns(),
+    plants: [],
     ...overrides,
   };
 }
@@ -347,5 +350,68 @@ describe("the pixel-art theme", () => {
         if ((k === SEA || k === FOREIGN) && layer.elevation[i] !== 0) throw new Error(String(i));
       });
     expect(kindOfRegion("28")).toBeGreaterThan(FOREIGN);
+  });
+});
+
+describe("plants in the pixel theme (B-012)", () => {
+  const plants = recordedPlants(false);
+  const normandie = sceneOf({ camera: framed("28"), focus: "28", plants });
+
+  it("shows only the giants on the national view, then more as the camera comes close", () => {
+    expect(minPlantMw(0.38)).toBe(1000);
+    expect(minPlantMw(0.8)).toBe(50);
+    expect(minPlantMw(1.5)).toBe(0);
+    const france = visiblePlants(sceneOf({ camera: framed(null), plants }), 0, FRAME_WIDTH);
+    expect(france.length).toBeGreaterThan(10);
+    for (const p of france) expect(p.site.mw).toBeGreaterThanOrEqual(1000);
+  });
+
+  it("never sets two plants on top of each other: the larger one stays", () => {
+    const s = normandie.camera.scale;
+    const shown = visiblePlants(normandie, 0, 1e9);
+    for (const a of shown)
+      for (const b of shown) {
+        if (a === b) continue;
+        const dx = Math.abs(Math.floor(a.site.x * s) - Math.floor(b.site.x * s));
+        const dy = Math.abs(Math.floor((a.site.y * s) / 2) - Math.floor((b.site.y * s) / 2));
+        expect(dx >= 8 || dy >= 4, `${a.site.commune} ${b.site.commune}`).toBe(true);
+      }
+    // Paluel, the largest site of Normandie, is always shown.
+    expect(shown.some((p) => p.site.commune === "Paluel")).toBe(true);
+  });
+
+  it("draws the plants' bodies into the still frame, and nothing when there are none", () => {
+    expect(hashSurface(draw(normandie))).not.toBe(
+      hashSurface(draw(sceneOf({ camera: framed("28"), focus: "28" }))),
+    );
+  });
+
+  it("leaves the frame still when every plant is idle (no figure): nothing to animate", () => {
+    const idle = plants.map((p) => ({ ...p, activity: null }));
+    const out = createSurface(FRAME_WIDTH, FRAME_HEIGHT);
+    const drawn = drawPixelScene(sceneOf({ camera: framed("28"), focus: "28", plants: idle }), out);
+    expect(drawn.moving).toBe(false);
+    const before = hashSurface(out);
+    drawn.animate(out, 2.5);
+    expect(hashSurface(out)).toBe(before);
+  });
+
+  it("animates the same pixels for the same time, other pixels at another", () => {
+    const at = (seconds: number): string => {
+      const out = createSurface(FRAME_WIDTH, FRAME_HEIGHT);
+      const drawn = drawPixelScene(normandie, out);
+      expect(drawn.moving).toBe(true);
+      drawn.animate(out, seconds);
+      return hashSurface(out);
+    };
+    expect(at(1.3)).toBe(at(1.3));
+    expect(at(1.3)).not.toBe(at(1.7));
+  });
+
+  it("draws nothing into a target of another size", () => {
+    const drawn = drawPixelScene(normandie, createSurface(FRAME_WIDTH, FRAME_HEIGHT));
+    const other = createSurface(10, 10);
+    drawn.animate(other, 1);
+    expect(other.data.every((v) => v === 0)).toBe(true);
   });
 });

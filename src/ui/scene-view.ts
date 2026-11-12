@@ -5,10 +5,11 @@
  * DOM, the animation clock and the lazy load of the 1 km relief.
  */
 import { animationClock, type Clock } from "../clock/clock";
-import { type Eco2mixArea } from "../data/eco2mix";
+import { type Eco2mixArea, type RegionalReadings } from "../data/eco2mix";
 import { type CellRegion } from "../map/grid";
 import { coarseLayer, fineLayer, type TerrainLayer } from "../map/layers";
-import { DEFAULT_THEME } from "../render/theme";
+import { PLANT_SITES } from "../map/plants";
+import { DEFAULT_THEME, type Drawn } from "../render/theme";
 import { createSurface, type Surface } from "../render/surface";
 import {
   areaBox,
@@ -23,7 +24,14 @@ import {
   panBy,
   zoomAt,
 } from "../scene/camera";
-import { detailForScale, prefectureTowns, type Scene, viewLight } from "../scene/scene";
+import {
+  detailForScale,
+  prefectureTowns,
+  type Scene,
+  type ScenePlant,
+  scenePlants,
+  viewLight,
+} from "../scene/scene";
 import {
   bufferSize,
   type BufferSize,
@@ -44,10 +52,22 @@ const LOAD_FINE_FROM_SCALE = 0.4;
 const DETAIL_STEP = 1;
 /** How long the national view shows before the camera flies to the viewer's region. */
 const INTRO_MS = 1500;
+/**
+ * The plants move by steps of this long: 10 a second is smooth enough for pixel art
+ * and a third of the frame cap, for the battery (ARCHITECTURE § Performance).
+ */
+const MOTION_STEP_MS = 100;
 
 export interface SceneView {
   /** Flies to an area: the whole of France, or a region. */
   showArea(area: Eco2mixArea): void;
+  /**
+   * The latest step of every region, which drives the plants; null when there is
+   * none (not yet loaded, or unavailable): every plant is then idle. A recorded
+   * `sample` shows whatever the clock says; a live step dated after the clock's time
+   * (`?at=` in the past) does not.
+   */
+  setReadings(readings: RegionalReadings | null, sample?: boolean): void;
 }
 
 interface Flight {
@@ -79,6 +99,12 @@ export function mountSceneView(
 
   let size: BufferSize = bufferSize(window.innerWidth, window.innerHeight, devicePixelRatio);
   let surface: Surface = createSurface(size.width, size.height);
+  /** The still frame, without the plants' motion; `surface` is it plus the motion. */
+  let still: Surface = createSurface(size.width, size.height);
+  let drawn: Drawn | null = null;
+  let lastStep = Number.NaN;
+  let plants: readonly ScenePlant[] = scenePlants(PLANT_SITES, null, clock.now());
+  let plantsVersion = 0;
   let image: ImageData | null = null;
   let area = initialArea;
   let camera = fitBox(areaBox(coarse, null), size.width, size.height);
@@ -99,6 +125,7 @@ export function mountSceneView(
     size = bufferSize(window.innerWidth, window.innerHeight, devicePixelRatio);
     if (surface.width !== size.width || surface.height !== size.height) {
       surface = createSurface(size.width, size.height);
+      still = createSurface(size.width, size.height);
       image = null;
     }
     if (canvas.width !== size.width) canvas.width = size.width;
@@ -198,6 +225,7 @@ export function mountSceneView(
       fine,
       detail,
       towns: prefectureTowns(),
+      plants,
     };
     // Redraw only when what is drawn changes: the drift moves the camera by a pixel
     // every second or two, and a still scene costs nothing.
@@ -216,10 +244,19 @@ export function mountSceneView(
       light.skyHorizon,
       light.emissive,
       scene.focus,
+      plantsVersion,
     ].join();
-    if (key !== lastKey && context !== null) {
-      lastKey = key;
-      DEFAULT_THEME.draw(scene, surface);
+    // The plants' motion, by steps; at half speed with reduced motion.
+    const step = Math.floor(now / MOTION_STEP_MS);
+    const redraw = key !== lastKey;
+    if (context !== null && (redraw || (drawn?.moving === true && step !== lastStep))) {
+      if (redraw) {
+        lastKey = key;
+        drawn = DEFAULT_THEME.draw(scene, still);
+      }
+      lastStep = step;
+      surface.data.set(still.data);
+      drawn?.animate(surface, (step * MOTION_STEP_MS * (reducedMotion ? 0.5 : 1)) / 1000);
       // The image wraps the surface's own bytes: no copy per frame.
       image ??= new ImageData(
         surface.data as Uint8ClampedArray<ArrayBuffer>,
@@ -228,10 +265,11 @@ export function mountSceneView(
       );
       context.putImageData(image, 0, 0);
     }
-    // Keep going while something moves; otherwise sleep until the drift starts, the
-    // light changes or an input comes.
+    // Keep going while the camera moves; the plants wake the loop by their steps only;
+    // otherwise sleep until the drift starts, the light changes or an input comes.
     const untilDrift = lastInput + IDLE_DRIFT_AFTER_MS - now;
     if (flight !== null || detail !== target || (!reducedMotion && untilDrift <= 0)) wake();
+    else if (drawn?.moving === true) sleep((step + 1) * MOTION_STEP_MS - now);
     else sleep(reducedMotion ? LIGHT_EVERY_MS : Math.min(LIGHT_EVERY_MS, untilDrift));
   }
 
@@ -384,6 +422,12 @@ export function mountSceneView(
       area = next;
       lastKey = "";
       flyTo(home);
+    },
+    setReadings(readings: RegionalReadings | null, sample = false): void {
+      const now = sample && readings !== null ? readings.timeMs : clock.now();
+      plants = scenePlants(PLANT_SITES, readings, now);
+      plantsVersion++;
+      wake();
     },
   };
 }

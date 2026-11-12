@@ -38,7 +38,8 @@ p {
   margin: 0;
 }
 
-#status {
+#status,
+#plants-note {
   color: var(--muted);
 }
 

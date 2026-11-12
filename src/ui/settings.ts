@@ -109,3 +109,19 @@ export function atFromQuery(search: string): number | undefined {
   const ms = Date.UTC(year, month - 1, day, hour, minute, second) - offset;
   return ms >= AT_EARLIEST && ms < AT_LATEST ? ms : undefined;
 }
+
+/** The recorded steps `?sample=` can show instead of the live data (B-012). */
+export const SAMPLES = ["day", "night"] as const;
+export type Sample = (typeof SAMPLES)[number];
+
+/**
+ * `?sample=day` or `?sample=night`: the plants show a recorded step of every region
+ * (2026-11-12, 09:45 or 01:00 UTC) instead of the live one, labelled as sample data,
+ * for demos and screenshots; `undefined` when absent, repeated or unknown.
+ */
+export function sampleFromQuery(search: string): Sample | undefined {
+  if (search.length > 2048) return undefined;
+  const values = new URLSearchParams(search).getAll("sample");
+  if (values.length !== 1) return undefined;
+  return SAMPLES.find((s) => s === values[0]);
+}

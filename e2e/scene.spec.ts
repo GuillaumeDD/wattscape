@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
 
 // The scene on a page (B-011): it draws, and the wheel, a drag, the keys and a
 // double-click move the camera. Measured in Chromium only for now (ARCHITECTURE §
@@ -146,4 +147,43 @@ test.describe("on a touch screen", () => {
     await page.mouse.dblclick(480, 270);
     expect(await settled(page)).toBe(doubleClicked);
   });
+});
+
+// The plants (B-012): one request for every region, then motion while the camera is still.
+const DAY_STEP = readFileSync(
+  new URL("../tests/fixtures/eco2mix/2026-11-12-all-regions.json", import.meta.url),
+  "utf8",
+);
+
+test("animates the plants from one answer for every region, the camera still", async ({ page }) => {
+  const asked: string[] = [];
+  await page.route("https://odre.opendatasoft.com/**", (route) => {
+    asked.push(route.request().url());
+    return route.fulfill({ body: DAY_STEP, contentType: "application/json" });
+  });
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html?area=28&plants=live");
+  await expect(page.locator("#plants-note")).toHaveText("live");
+  // Past the intro flight, the picture still changes: the plants move.
+  await page.waitForTimeout(3500);
+  const pictures = new Set<string>();
+  for (let i = 0; i < 6; i++) {
+    pictures.add(await picture(page));
+    await page.waitForTimeout(170);
+  }
+  expect(pictures.size).toBeGreaterThan(1);
+  expect(asked).toHaveLength(1);
+  expect(asked[0]).toContain("eco2mix-regional-tr/records");
+  expect(new URL(asked[0] ?? "").searchParams.get("limit")).toBe("24");
+});
+
+test("leaves the plants idle and still when the data is unavailable", async ({ page }) => {
+  await page.route("https://odre.opendatasoft.com/**", (route) => route.abort());
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html?area=28&plants=live");
+  await expect(page.locator("#plants-note")).toHaveText("unavailable");
+  await page.waitForTimeout(3500);
+  const still = await picture(page);
+  await page.waitForTimeout(600);
+  expect(await picture(page)).toBe(still);
 });

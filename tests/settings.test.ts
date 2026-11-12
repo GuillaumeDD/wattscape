@@ -8,6 +8,7 @@ import {
   savedArea,
   savedLocale,
   saveLocale,
+  sampleFromQuery,
 } from "../src/ui/settings";
 
 function memoryStorage(initial: Record<string, string> = {}): Storage {
@@ -142,5 +143,21 @@ describe("atFromQuery (?at=, the time the scene shows)", () => {
     const clock = fixedClock(Date.UTC(2026, 5, 21));
     expect(clock.now()).toBe(Date.UTC(2026, 5, 21));
     expect(clock.now()).toBe(clock.now());
+  });
+});
+
+describe("sampleFromQuery (B-012)", () => {
+  it("accepts day or night, once, and nothing else", () => {
+    expect(sampleFromQuery("?sample=day")).toBe("day");
+    expect(sampleFromQuery("?area=28&sample=night")).toBe("night");
+    for (const bad of [
+      "",
+      "?sample=",
+      "?sample=Day",
+      "?sample=day&sample=day",
+      "?sample=noon",
+      `?sample=day&x=${"a".repeat(3000)}`,
+    ])
+      expect(sampleFromQuery(bad), bad).toBeUndefined();
   });
 });
