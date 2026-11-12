@@ -4,7 +4,13 @@ A pixel-art browser screensaver of France's live electricity mix, centered on yo
 region: its power plants move with the grid's real numbers (RTE éCO2mix), under the
 real sky (sun, moon and weather).
 
-Work in progress: the project is being specified. Start with:
+**Open it:** <https://guillaumedd.github.io/wattscape/> · live figures:
+[Live data](https://guillaumedd.github.io/wattscape/debug.html)
+
+> A personal toy project, made for fun and learning. It is not affiliated with,
+> endorsed by or connected to EDF or RTE.
+
+Work in progress. Start with:
 
 - [`docs/PRD.md`](docs/PRD.md): what we build, and the open questions;
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): how it is built;
