@@ -45,6 +45,17 @@ const targets: { name: string; url: string; source: string }[] = [
     source: "DS-01, S-003",
   },
   {
+    // Three hours of every region's steps, through the export endpoint the time-lapse
+    // reads a day from (B-014): a bare array of rows.
+    name: `${day}-history-3h`,
+    url: `${API}/eco2mix-regional-tr/exports/json?${new URLSearchParams({
+      where: `consommation is not null and date_heure >= date'${day}T09:00:00Z' and date_heure < date'${day}T12:00:00Z'`,
+      order_by: "date_heure",
+      limit: "200",
+    }).toString()}`,
+    source: "DS-01, S-003",
+  },
+  {
     // A step of the day not yet published: every figure is null.
     name: `${day}-regional-empty-step`,
     url: `${API}/eco2mix-regional-tr/records?${new URLSearchParams({ where: "consommation is null", limit: "1" }).toString()}`,

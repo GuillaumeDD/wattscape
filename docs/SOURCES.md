@@ -68,6 +68,13 @@ ODSQL computes `percentile(consommation, 5)` and `95` per `code_insee_region` in
 request, read by `tools/bake-consumption.ts` (B-014). Reliability high (the
 publisher documents its own data).
 
+Re-read on 2026-11-12, S-003, through its export endpoint
+(`…/eco2mix-regional-tr/exports/json`): it takes the same `where` and `order_by` as
+`records`, is not capped at 100 rows, and answers a bare array of the same rows
+(CORS `*`). A day of every region: 98 steps of 12 rows, 833 KB, 116 KB compressed;
+recorded for three hours as `tests/fixtures/eco2mix/2026-11-12-history-3h.json`
+(B-014).
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift

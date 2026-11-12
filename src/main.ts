@@ -1,9 +1,11 @@
 import { detectLocale, translate, type Locale, type MessageKey } from "./i18n";
 import { MAP_BAKED_ON } from "./map/france";
-import { fixedClock, systemClock } from "./clock/clock";
+import { fixedClock, replayClock, systemClock } from "./clock/clock";
+import { HISTORY_MS } from "./data/eco2mix";
 import { mountAreaPicker, renderAreaOptions, type AreaState } from "./ui/area-picker";
 import { loadSample } from "./data/samples";
 import { feedState, type FeedState, startPlantFeed } from "./ui/plant-feed";
+import { startReplayFeed } from "./ui/replay-feed";
 import { mountSceneView, type SceneView } from "./ui/scene-view";
 import {
   atFromQuery,
@@ -12,7 +14,11 @@ import {
   sampleFromQuery,
   savedLocale,
   saveLocale,
+  timelapseFromQuery,
 } from "./ui/settings";
+
+/** The time-lapse plays a day in this long (PRD § 4.9: a day in a minute). */
+const TIMELAPSE_MS = 60_000;
 
 function setText(id: string, text: string): void {
   const el = document.getElementById(id);
@@ -71,6 +77,7 @@ function renderPlantsNote(): void {
     stale: "plantsStale",
     sample: "plantsSample",
     ahead: "plantsAhead",
+    replay: "plantsReplay",
   } as const satisfies Record<typeof state.kind, MessageKey>;
   setText("plants-note", t(keys[state.kind]).replace("{time}", time));
 }
@@ -96,21 +103,34 @@ let locale: Locale = savedLocale(storage) ?? detectLocale(navigator.languages);
 render(locale);
 renderArea(true);
 
-// `?at=` fixes the time of day the scene shows (demos, screenshots).
+// `?at=` fixes the time of day the scene shows (demos, screenshots); `?timelapse=day`
+// replays the day before it (or before now) in a minute.
 const at = atFromQuery(location.search);
-const clock = at === undefined ? systemClock : fixedClock(at);
+const timelapse = timelapseFromQuery(location.search);
+const end = at ?? systemClock.now();
+const clock =
+  timelapse !== undefined
+    ? replayClock(end - HISTORY_MS, HISTORY_MS, TIMELAPSE_MS)
+    : at === undefined
+      ? systemClock
+      : fixedClock(at);
 const canvas = document.getElementById("scene");
 const scene: SceneView | null =
-  canvas instanceof HTMLCanvasElement ? mountSceneView(canvas, clock, areaState.area) : null;
+  canvas instanceof HTMLCanvasElement
+    ? mountSceneView(canvas, clock, areaState.area, timelapse !== undefined)
+    : null;
 
 // The plants' figures: live, or a recorded sample (`?sample=`), labelled as such.
 const sample = sampleFromQuery(location.search);
 const showPlants = (readings: Parameters<SceneView["setReadings"]>[0], state: FeedState): void => {
   plantsState = state;
   renderPlantsNote();
-  scene?.setReadings(readings, state.kind === "sample");
+  scene?.setReadings(readings, state.kind === "sample" || state.kind === "replay");
 };
-if (sample === undefined) startPlantFeed(clock, (input, init) => fetch(input, init), showPlants);
+if (timelapse !== undefined)
+  startReplayFeed(clock, end, (input, init) => fetch(input, init), showPlants);
+else if (sample === undefined)
+  startPlantFeed(clock, (input, init) => fetch(input, init), showPlants);
 else
   loadSample(sample)
     .then((result) => {

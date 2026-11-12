@@ -187,3 +187,29 @@ test("leaves the plants idle and still when the data is unavailable", async ({ p
   await page.waitForTimeout(600);
   expect(await picture(page)).toBe(still);
 });
+
+// The time-lapse (B-014): one request for the day, then each step in turn.
+const HISTORY = readFileSync(
+  new URL("../tests/fixtures/eco2mix/2026-11-12-history-3h.json", import.meta.url),
+  "utf8",
+);
+
+test("replays the steps of the day from one request, the light moving", async ({ page }) => {
+  const asked: string[] = [];
+  await page.route("https://odre.opendatasoft.com/**", (route) => {
+    asked.push(route.request().url());
+    return route.fulfill({ body: HISTORY, contentType: "application/json" });
+  });
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html?area=28&plants=replay");
+  await expect(page.locator("#plants-note")).toHaveText(/^replay \d+$/);
+  const notes = new Set<string>();
+  for (let i = 0; i < 25; i++) {
+    notes.add((await page.locator("#plants-note").textContent()) ?? "");
+    await page.waitForTimeout(250);
+  }
+  // Twelve steps in 6 seconds: most of them seen in 6 seconds of watching.
+  expect(notes.size).toBeGreaterThan(6);
+  expect(asked).toHaveLength(1);
+  expect(asked[0]).toContain("eco2mix-regional-tr/exports/json");
+});

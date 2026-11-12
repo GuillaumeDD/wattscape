@@ -26,3 +26,24 @@ export function fixedClock(timeMs: number): Clock {
 export const animationClock: Clock = {
   now: () => performance.now(),
 };
+
+/**
+ * A replay, for the time-lapse (B-014): the span [startMs, startMs + spanMs) played
+ * in `periodMs` of animation time, over and over, from the moment it is made. Like
+ * `?at=`, it only ever shows instants that have passed.
+ */
+export function replayClock(
+  startMs: number,
+  spanMs: number,
+  periodMs: number,
+  animation: Clock = animationClock,
+): Clock {
+  const t0 = animation.now();
+  return {
+    now: () => {
+      const elapsed = animation.now() - t0;
+      const phase = (((elapsed % periodMs) + periodMs) % periodMs) / periodMs;
+      return startMs + Math.floor(phase * spanMs);
+    },
+  };
+}

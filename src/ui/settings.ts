@@ -125,3 +125,14 @@ export function sampleFromQuery(search: string): Sample | undefined {
   if (values.length !== 1) return undefined;
   return SAMPLES.find((s) => s === values[0]);
 }
+
+/**
+ * `?timelapse=day`: the time-lapse (B-014), the day before now (or before `?at=`)
+ * replayed in a minute, light and figures together; `undefined` when absent,
+ * repeated or anything else.
+ */
+export function timelapseFromQuery(search: string): "day" | undefined {
+  if (search.length > 2048) return undefined;
+  const values = new URLSearchParams(search).getAll("timelapse");
+  return values.length === 1 && values[0] === "day" ? "day" : undefined;
+}

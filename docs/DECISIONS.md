@@ -489,3 +489,21 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   "no figure" without inventing one.
 - **Revisit if:** real towns (B-015) make the scatter read too busy or too sparse,
   or RTE publishes a new year as definitive (re-bake).
+
+## D-030 — The time-lapse replays the real day
+
+- **Context:** B-014 and PRD § 4.9: a time-lapse, "to watch a day in a minute". The
+  light can follow any clock, but the plants and the towns show figures: with the
+  latest step held while the sun goes round, solar fields would glint at night.
+- **Options:** (a) the light alone, the figures held at the latest step; (b) the
+  light alone, the plants and towns idle; (c) the day before now replayed, light and
+  figures together, from the steps RTE published (one request).
+- **Decision:** (c), `?timelapse=day`: the 24 hours before now (or before `?at=`),
+  in 60 seconds, over and over; one request at load for every region's steps of
+  that day; at each instant the latest step at or before it, labelled "Accéléré"
+  with its date and time. Proposed by Claude, 2026-11-12.
+- **Why:** every figure on screen stays the one published for the instant shown
+  (AGENTS.md § Faithfulness); one request of about 120 KB compressed, once, keeps the
+  network budget (D-028).
+- **Revisit if:** a longer replay is wanted (a week: 8 MB, too much for one
+  request), or the export endpoint changes its limits.

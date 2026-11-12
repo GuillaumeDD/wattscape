@@ -19,9 +19,10 @@ export type FeedState =
   | {
       /**
        * `ahead`: a step dated after the clock's time (a fixed `?at=` in the past, or
-       * a wrong clock): not shown, the plants are idle.
+       * a wrong clock): not shown, the plants are idle. `replay`: a step of the
+       * time-lapse (`?timelapse=day`).
        */
-      readonly kind: "live" | "stale" | "sample" | "ahead";
+      readonly kind: "live" | "stale" | "sample" | "ahead" | "replay";
       readonly timeMs: number;
     };
 

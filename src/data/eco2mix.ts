@@ -231,29 +231,120 @@ export function parseEco2mixRegions(body: unknown): Result<RegionalReadings> {
     if (!isRecord(body) || !Array.isArray(body.results)) throw new Invalid("not a records answer");
     const rows: unknown[] = body.results;
     if (rows.length > REGIONS_ROWS) throw new Invalid("too many rows");
-    const steps = new Map<number, Partial<Record<RegionCode, Eco2mixReading>>>();
-    for (const row of rows) {
-      if (!isRecord(row)) throw new Invalid("not a row");
-      const code = row.code_insee_region;
-      const region = REGION_CODES.find((r) => r === code);
-      if (region === undefined) throw new Invalid("code_insee_region: not a region");
-      const reading = parseEco2mix(region, { results: [row] });
-      if (!reading.ok) continue;
-      const step = steps.get(reading.reading.timeMs) ?? {};
-      if (step[region] !== undefined) throw new Invalid("code_insee_region: twice in one step");
-      step[region] = reading.reading;
-      steps.set(reading.reading.timeMs, step);
-    }
-    let best: { timeMs: number; byRegion: Partial<Record<RegionCode, Eco2mixReading>> } | null =
-      null;
-    for (const [timeMs, byRegion] of steps) {
-      const n = Object.keys(byRegion).length;
+    let best: RegionalReadings | null = null;
+    for (const step of stepsOf(rows)) {
+      const n = Object.keys(step.byRegion).length;
       const m = best === null ? -1 : Object.keys(best.byRegion).length;
-      if (best === null || n > m || (n === m && timeMs > best.timeMs)) best = { timeMs, byRegion };
+      if (best === null || n > m || (n === m && step.timeMs > best.timeMs)) best = step;
     }
     if (best === null) throw new Invalid("no published step");
     return best;
   });
+}
+
+/**
+ * Rows of every region, grouped by step, oldest first. A row that does not parse is
+ * left out, so its region draws idle at that step; a row that is not a region's, or
+ * two rows for one region in one step, throw: that is not the API's shape.
+ */
+function stepsOf(rows: readonly unknown[]): RegionalReadings[] {
+  const steps = new Map<number, Partial<Record<RegionCode, Eco2mixReading>>>();
+  for (const row of rows) {
+    if (!isRecord(row)) throw new Invalid("not a row");
+    const code = row.code_insee_region;
+    const region = REGION_CODES.find((r) => r === code);
+    if (region === undefined) throw new Invalid("code_insee_region: not a region");
+    const reading = parseEco2mix(region, { results: [row] });
+    if (!reading.ok) continue;
+    const step = steps.get(reading.reading.timeMs) ?? {};
+    if (step[region] !== undefined) throw new Invalid("code_insee_region: twice in one step");
+    step[region] = reading.reading;
+    steps.set(reading.reading.timeMs, step);
+  }
+  return [...steps.entries()]
+    .map(([timeMs, byRegion]) => ({ timeMs, byRegion }))
+    .sort((a, b) => a.timeMs - b.timeMs);
+}
+
+/** How far back the time-lapse replays: one day (B-014). */
+export const HISTORY_MS = 24 * 60 * 60 * 1000;
+/**
+ * Rows asked for: every region at every step of a day, plus the hour the regional
+ * steps are published late (S-004), with a step of margin.
+ */
+export const HISTORY_ROWS = REGION_CODES.length * (4 * 25 + 1);
+
+/** An ISO 8601 instant in UTC, to the second, for an ODSQL `date'…'` literal. */
+function isoSecond(ms: number): string {
+  return new Date(Math.floor(ms / 1000) * 1000).toISOString().replace(".000Z", "Z");
+}
+
+/**
+ * The URL of every region's published steps over the day before `endMs` (the
+ * time-lapse, B-014): one request, through the export endpoint, which is not capped
+ * at 100 rows; about 830 KB of JSON, 120 KB compressed (2026-11-12).
+ */
+export function eco2mixHistoryUrl(endMs: number): string {
+  const from = isoSecond(endMs - HISTORY_MS - 60 * 60 * 1000);
+  const to = isoSecond(endMs);
+  const params = new URLSearchParams({
+    where: `consommation is not null and date_heure >= date'${from}' and date_heure <= date'${to}'`,
+    order_by: "date_heure",
+    limit: String(HISTORY_ROWS),
+  });
+  return `${API}/eco2mix-regional-tr/exports/json?${params.toString()}`;
+}
+
+/**
+ * Parses the body of {@link eco2mixHistoryUrl}'s answer (a bare array of rows) into
+ * its steps, oldest first, each with the regions whose row is valid. Never throws;
+ * more rows than asked for, or no valid step, make it unavailable.
+ */
+export function parseEco2mixHistory(body: unknown): Result<readonly RegionalReadings[]> {
+  return safely(() => {
+    if (!Array.isArray(body)) throw new Invalid("not an export answer");
+    const rows: unknown[] = body;
+    if (rows.length > HISTORY_ROWS) throw new Invalid("too many rows");
+    const steps = stepsOf(rows);
+    if (steps.length === 0) throw new Invalid("no published step");
+    return steps;
+  });
+}
+
+/** The day's rows are about 830 KB; anything much larger is not ours. */
+const MAX_HISTORY_CHARS = 2 * 1024 * 1024;
+
+/** Fetches and parses the day before `endMs` (failures: see {@link fetchJson}). */
+export function fetchEco2mixHistory(
+  endMs: number,
+  fetchFn: typeof fetch,
+  signal?: AbortSignal,
+): Promise<Result<readonly RegionalReadings[]>> {
+  return fetchJson(
+    eco2mixHistoryUrl(endMs),
+    MAX_HISTORY_CHARS,
+    parseEco2mixHistory,
+    fetchFn,
+    signal,
+  );
+}
+
+/**
+ * The step a replay shows at `timeMs`: the latest one at or before it, or null
+ * before the first.
+ */
+export function stepAt(
+  steps: readonly RegionalReadings[],
+  timeMs: number,
+): RegionalReadings | null {
+  let lo = 0;
+  let hi = steps.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if ((steps[mid]?.timeMs ?? Number.POSITIVE_INFINITY) <= timeMs) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo === 0 ? null : (steps[lo - 1] ?? null);
 }
 
 /** Fetches and parses the latest step of every region (failures: see {@link fetchJson}). */
