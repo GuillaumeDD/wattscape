@@ -252,7 +252,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |
 | G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | proposed |
-| G-012 | Relief of the neighbouring countries, so the Alps do not end in a cliff at the border  | proposed |
+| G-012 | Relief of the neighbouring countries, so the Alps do not end in a cliff at the border  | planned  |
 
 ## 10. Open questions
 
@@ -270,7 +270,7 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-7  | Frame rate cap                                                  | 30 fps: pixel art barely gains from more, and it halves the battery cost                             | Yes (Guillaume, 2026-11-11)                                           |
 | Q-8  | Mockups: true isometric (map turned 45°) or north up?           | North up: France stays recognisable at a glance, from afar                                           | North up (Guillaume, 2026-11-11)                                      |
 | Q-9  | Region level: 4 km cells, or a finer 1 km relief?               | 1 km: at 4 km a region looks blocky (Normandie mockups)                                              | 1 km (Guillaume, 2026-11-11)                                          |
-| Q-10 | 1 km terrain: cliffs at 250 m drops only, shading over 4 km?    | Yes: every 100 m step drew a dark line on the plains (D-022, step-3 screenshots)                     | open                                                                  |
-| Q-11 | Relief abroad, so border mountains do not end in a cliff?       | Yes, after Normandie (B-015): a GO source in DATA-SOURCES first (G-012)                              | open                                                                  |
-| Q-12 | On load: show France for 1.5 s, then fly to the region?         | Yes: it says where the region is, and it is short                                                    | open                                                                  |
-| Q-13 | Double-click: zoom ×2 there, or fly to the region clicked?      | Zoom ×2 there: it works at every zoom; a region is one pick in the list away                         | open                                                                  |
+| Q-10 | 1 km terrain: cliffs at 250 m drops only, shading over 4 km?    | Yes: every 100 m step drew a dark line on the plains (D-022, step-3 screenshots)                     | Yes (Guillaume, 2026-11-12, D-023)                                    |
+| Q-11 | Relief abroad, so border mountains do not end in a cliff?       | Yes, after Normandie (B-015): a GO source in DATA-SOURCES first (G-012)                              | Yes, after B-015 (Guillaume, 2026-11-12, D-023)                       |
+| Q-12 | On load: show France for 1.5 s, then fly to the region?         | Yes: it says where the region is, and it is short                                                    | Yes (Guillaume, 2026-11-12, D-023)                                    |
+| Q-13 | Double-click: zoom ×2 there, or fly to the region clicked?      | Zoom ×2 there: it works at every zoom; a region is one pick in the list away                         | Zoom ×2 there (Guillaume, 2026-11-12, D-023)                          |

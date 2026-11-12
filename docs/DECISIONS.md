@@ -345,3 +345,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Why:** the plains read flat again and the mountains as slopes, while every cell
   keeps its own elevation from the data.
 - **Revisit if:** the relief reads too flat, or Guillaume prefers the mockups' look.
+
+## D-023 — Guillaume confirms the zoom's open choices (Q-10 to Q-13)
+
+- **Context:** B-011 (PR #12) left four choices open to Guillaume, each with a
+  recommendation (PRD Q-10 to Q-13).
+- **Options:** for each, the recommendation, or another answer.
+- **Decision:** the four recommendations. Q-10: the calm 1 km terrain of D-022
+  stays. Q-11: a relief for the neighbouring countries, after B-015, from a source
+  that is GO in DATA-SOURCES first (G-012, now planned). Q-12: on load, France for
+  1.5 s, then the flight to the viewer's region. Q-13: a double-click or a
+  double-tap zooms ×2 where it lands, rather than flying to the region clicked.
+  Guillaume answered "OK" to each, 2026-11-12.
+- **Why:** D-022 for Q-10; Q-11 because the Alps end in a cliff at the border today;
+  Q-12 because it shows where the region is, briefly; Q-13 because it works at
+  every zoom, and a region is one pick in the list away.
+- **Revisit if:** the deployed build shows otherwise on a real screen; G-012 waits
+  for a relief source that is GO.
