@@ -399,10 +399,18 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
 - **Determinism:** both use `Math.sin` and friends. That is allowed because the sky
   only animates the scene (light, sky colour, the moon's drawing); it never decides
   what the world contains (§ World generation).
-- **Light keyframes** by solar elevation: night (< −12°), blue hour (−12° to −4°),
-  golden hour (−4° to 6°), day (> 6°). Each keyframe sets a sky gradient, a global
-  tint for the land, and whether emissive pixels show. Keyframes interpolate in
-  palette steps, not RGB, to stay in palette (§ Art direction).
+- **Light keyframes** (`src/sky/light.ts`) by geometric solar elevation: night
+  (< −12°), blue hour (−12° to −4°), golden hour (−4° to 6°), day (≥ 6°). The sky
+  gradient, zenith to horizon, has its own keyframes (−12°: skyNight to skyNight;
+  −4°: skyNight to skyBlueHour; 0°: skyBlueHour to skyGolden; 6°: skyDay), each end
+  dithered from one keyframe's colour to the next, so the sky never jumps. Emissive
+  pixels show once the sun is below the horizon (< 0°), when the land is a full step
+  dark. The land's **darkness** is counted in palette steps
+  (`DARKER`, § Art direction), linear between keyframes: 0 at 6° and above, 1 at
+  0°, 1.5 at −4°, 2 at −12° and below (provisional: 2 steps keep the land readable
+  at night). A fractional step is drawn by dithering between the two whole steps,
+  so the land stays in palette. A `NaN` elevation, or a `NaN` darkness, reads as
+  night.
 - **Weather layers:** clouds (count and darkness from `cloud_cover`, drifting with
   the wind), rain and snow particles, fog banks (dithered), lightning flashes for
   storms. Particles are seeded (PRNG) so frames stay reproducible.
@@ -431,22 +439,34 @@ mockups of B-010 are validated.
   frame is drawn at the nearest of a few levels of detail (France, region, close),
   each with its own sprite set; between two levels, a short crossfade. Integer
   scaling keeps pixels crisp; a spike in B-011 checks that this feels smooth enough.
-- **Palette:** about 24 colours, fixed: muted land (greens, ochres, greys), deep
-  sea blues, a sky ramp, and **one signature colour per source**, also used in the
-  legend:
+- **Palette** (`src/render/palette.ts`, proposed until B-010): 24 fixed colours:
+  muted land, sea blues, a sky ramp, a lamp yellow, and **one signature colour per
+  source**, also used in the legend. Each colour names the palette colour it
+  becomes one step darker (`DARKER`): land darkens towards the sea's blues, as under
+  moonlight, and never into a source's colour, so that colour keeps its meaning at
+  night. The test card (`tools/preview-palette.ts`,
+  `docs/screenshots/step-2-test-card.png`) shows them all.
 
-  | Source    | Signature colour (proposed) | Why                           |
-  | --------- | --------------------------- | ----------------------------- |
-  | Nuclear   | warm yellow                 | the usual colour in grid maps |
-  | Hydro     | blue                        | water                         |
-  | Wind      | light teal                  | air                           |
-  | Solar     | orange                      | sun                           |
-  | Thermal   | brown-grey                  | smoke, fossil                 |
-  | Bioenergy | green                       | biomass                       |
+  | Group   | Colours (hex)                                                                                                                               |
+  | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Sea     | seaDeep `1b2a4a`, sea `24406a`, seaShallow `2f5d8a`, foam `9fc0d2`                                                                          |
+  | Land    | forest `2f4a35`, grass `557545`, meadow `86985c`, field `b8a263`, sand `dcca9c`, soil `6e523a`, rock `8b8680`, snow `eef0ee`, roof `a44f3d` |
+  | Sky     | skyNight `0e1122`, skyBlueHour `333466`, skyGolden `e39a6a`, skyDay `9cc6e2`                                                                |
+  | Emitted | lamp `ffdc73`                                                                                                                               |
+
+  | Source    | Signature colour    | Why                           |
+  | --------- | ------------------- | ----------------------------- |
+  | Nuclear   | yellow `f2c14e`     | the usual colour in grid maps |
+  | Hydro     | blue `3f8fd8`       | water                         |
+  | Wind      | teal `82d8c6`       | air                           |
+  | Solar     | orange `f08622`     | sun                           |
+  | Thermal   | brown-grey `8c7666` | smoke, fossil                 |
+  | Bioenergy | green `6fb04a`      | biomass                       |
 
 - **Shapes:** flat colours, a 1-pixel darker edge instead of black outlines, no
   anti-aliasing; gradients (sky, fog, water depth) only by 4×4 ordered (Bayer)
-  dithering between two palette colours.
+  dithering between two palette colours (`src/render/dither.ts`): 17 mix levels,
+  and over any 4×4 block exactly `level` pixels take the second colour.
 - **Night:** the scene is drawn with the day palette, darkened by the light tint,
   then emissive pixels (windows, beacons, illuminated landmarks, lit plumes) are
   drawn on top, untinted.
@@ -464,9 +484,16 @@ photo.
 
 ## Rendering and loop
 
-- The renderer draws into a `Surface` (an RGBA `Uint8ClampedArray` with width and
-  height). In the browser, `ui/` blits it with `putImageData` into a canvas scaled
-  by CSS with `image-rendering: pixelated`; in tests, the same buffer is hashed.
+- The renderer draws into a `Surface` (`src/render/surface.ts`: an RGBA
+  `Uint8ClampedArray` with width and height). In the browser, `ui/` blits it with
+  `putImageData` into a canvas scaled by CSS with `image-rendering: pixelated`; in
+  tests, the same buffer is hashed (FNV-1a over the size and the bytes,
+  `hashSurface`).
+- **Frame hashes:** `tests/fixtures/frames/hashes.json` records the hash of each
+  reference frame (for now the test card). Node checks them in the unit tests, and
+  Chromium in `e2e/frame-hash.spec.ts` (`npm run e2e`: Vite builds `e2e/*.html`
+  into `dist-e2e/`, Playwright opens them). Firefox and WebKit join when the scene
+  renders (B-021). A drawing change updates the hashes in the same commit.
 - Static layers (terrain, buildings) are cached per map chunk and level of detail;
   only animated elements (plumes, rotors, water, weather, lights) are redrawn each
   frame.
@@ -506,7 +533,8 @@ Budget (**provisional**, to be measured in B-013 and fixed here):
 - `npm run build` → `dist/`, served from `/wattscape/` on GitHub Pages
   (`https://guillaumedd.github.io/wattscape/`).
 - CI (`.github/workflows/ci.yml`) on every PR and push to `main`: `npm ci`,
-  typecheck, lint, test, build, `npm audit --omit=dev`, gitleaks over the full
+  typecheck, lint, test, build, `npm audit --omit=dev`; the frame hashes in
+  Chromium (`npm run e2e`, Playwright's own Chromium); gitleaks over the full
   history. Deploy (`deploy.yml`) on push to `main`. Actions pinned by SHA.
 
 ## Browser quirks

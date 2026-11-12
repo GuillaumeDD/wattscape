@@ -19,5 +19,13 @@
     // needs the .ts extension. Remove if the tools move to a bundler-run script.
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "tests", "tools", "vite.config.ts"]
+  "include": [
+    "src",
+    "tests",
+    "tools",
+    "e2e",
+    "vite.config.ts",
+    "vite.e2e.config.ts",
+    "playwright.config.ts"
+  ]
 }

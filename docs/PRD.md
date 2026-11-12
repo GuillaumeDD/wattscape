@@ -207,7 +207,7 @@ Shared principles for either (details: ARCHITECTURE § Art direction):
 - **Colour carries meaning:** each source has one signature colour used for its plants
   and in the legend (nuclear, hydro, wind, solar, thermal, bioenergy); the land
   stays muted so that the energy stands out.
-- **Light carries time:** one global light tint (dawn, day, golden hour, dusk, night)
+- **Light carries time:** one global light tint (night, blue hour, golden hour, day)
   plus emissive pixels (windows, beacons, plumes lit from below) drawn on top at night.
 - **The land carries the season:** one land palette per season, blended cell by
   cell over weeks (§4.7b).
