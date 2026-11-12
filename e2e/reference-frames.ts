@@ -5,6 +5,7 @@
  * only: a 480 × 270 buffer, cameras framed as the app frames an area, fixed lights.
  */
 import { parseEco2mixRegions } from "../src/data/eco2mix.ts";
+import { CONSUMPTION_RANGES } from "../src/map/consumption.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { PLANT_SITES } from "../src/map/plants.ts";
@@ -19,6 +20,8 @@ import {
   type Scene,
   type ScenePlant,
   scenePlants,
+  type TownLights,
+  townLights,
 } from "../src/scene/scene.ts";
 import { lightAt } from "../src/sky/light.ts";
 import dayStep from "../tests/fixtures/eco2mix/2026-11-12-all-regions.json" with { type: "json" };
@@ -35,6 +38,13 @@ export function recordedPlants(night: boolean): ScenePlant[] {
   const parsed = parseEco2mixRegions(night ? nightStep : dayStep);
   if (!parsed.ok) throw new Error(`fixture: ${parsed.reason}`);
   return scenePlants(PLANT_SITES, parsed.reading, parsed.reading.timeMs);
+}
+
+/** The towns' light of the same two steps, against the baked ranges (DS-12). */
+export function recordedTownLights(night: boolean): TownLights {
+  const parsed = parseEco2mixRegions(night ? nightStep : dayStep);
+  if (!parsed.ok) throw new Error(`fixture: ${parsed.reason}`);
+  return townLights(parsed.reading, CONSUMPTION_RANGES, parsed.reading.timeMs);
 }
 
 /** The scene of a reference frame. */
@@ -54,6 +64,7 @@ export function referenceScene(
     detail: detailForScale(camera.scale),
     towns: prefectureTowns(),
     plants: recordedPlants(sunElevation < 0),
+    townLights: recordedTownLights(sunElevation < 0),
   };
 }
 

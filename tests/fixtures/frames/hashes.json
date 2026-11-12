@@ -2,7 +2,7 @@
   "_comment": "Frame hashes (hashSurface) of the reference frames of e2e/reference-frames.ts, which Node (tests/pixel-theme.test.ts) and Chromium (e2e/frame-hash.spec.ts) must both draw. Update only when a drawing change is intended, in the same commit.",
   "test-card": "a828e8bb",
   "scene-france-day": "7048d5f4",
-  "scene-france-night": "2348114d",
+  "scene-france-night": "05d7b519",
   "scene-normandie-golden": "e057204b",
   "scene-normandie-night": "8ff9ba4e",
   "scene-auvergne-rhone-alpes-day": "4a774418",

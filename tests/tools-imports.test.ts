@@ -13,6 +13,7 @@ describe("modules the tools import", () => {
     "src/map/france.ts",
     "src/map/relief.ts",
     "src/map/plants.ts",
+    "src/map/consumption.ts",
     "src/render/art/plants.ts",
     "tools/bake-plants-rules.ts",
     "e2e/reference-frames.ts",

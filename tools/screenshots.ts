@@ -18,7 +18,7 @@ import { createSurface, hashSurface, type Surface } from "../src/render/surface.
 import { areaBox, type Camera, fitBox, flightAt } from "../src/scene/camera.ts";
 import { detailForScale, prefectureTowns, type Scene } from "../src/scene/scene.ts";
 import { lightAt } from "../src/sky/light.ts";
-import { referenceScene } from "../e2e/reference-frames.ts";
+import { recordedTownLights, referenceScene } from "../e2e/reference-frames.ts";
 import { writePng } from "./png.ts";
 
 const OUT = process.argv[2] ?? "docs/screenshots";
@@ -45,6 +45,7 @@ function draw(camera: Camera, focus: CellRegion | null, elevation: number): Surf
     detail: detailForScale(camera.scale),
     towns: prefectureTowns(),
     plants: [],
+    townLights: recordedTownLights(elevation < 0),
   };
   drawPixelScene(scene, surface);
   return surface;
@@ -119,3 +120,40 @@ const drawn = drawPixelScene(referenceScene("28", close, 35), still);
 });
 writePng(`${OUT}/step-3-plants-motion.png`, motion, 1);
 console.log(`${OUT}/step-3-plants-motion.png`);
+
+// Step 3, B-014: the towns lit at night by their region's consumption, from the two
+// recorded steps (DS-01) against the baked ranges (DS-12): Île-de-France and
+// Normandie by day and at night; and Paris close up at four lights, 0, ⅓, ⅔ and 1
+// of its range, 2 × 2.
+for (const [name, focus] of [
+  ["ile-de-france", "11"],
+  ["normandie", "28"],
+] as const)
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+    const surface = createSurface(WIDTH, HEIGHT);
+    drawPixelScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
+    const file = `${OUT}/step-3-towns-${name}-${time}.png`;
+    writePng(file, surface, 2);
+    console.log(
+      `${file}: ${JSON.stringify(referenceScene(focus, camera, elevation).townLights[focus])}`,
+    );
+  }
+const lights = createSurface(WIDTH * 2 + 4, HEIGHT * 2 + 4);
+const paris: Camera = { ...kmOf(48.86, 2.35), scale: 6 };
+[0, 1 / 3, 2 / 3, 1].forEach((light, k) => {
+  const frame = createSurface(WIDTH, HEIGHT);
+  drawPixelScene({ ...referenceScene("11", paris, -20), townLights: { "11": light } }, frame);
+  const left = (k % 2) * (WIDTH + 4);
+  const top = Math.floor(k / 2) * (HEIGHT + 4);
+  for (let y = 0; y < HEIGHT; y++)
+    lights.data.set(
+      frame.data.subarray(y * WIDTH * 4, (y + 1) * WIDTH * 4),
+      ((top + y) * lights.width + left) * 4,
+    );
+});
+writePng(`${OUT}/step-3-towns-paris-lights.png`, lights, 1);
+console.log(`${OUT}/step-3-towns-paris-lights.png`);

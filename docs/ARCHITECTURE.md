@@ -388,6 +388,14 @@ bake. The browser never downloads map data: the CSP is unchanged.
   of Mont Lozère). A nuclear site draws cooling towers if it is in the list of
   `tools/bake-plants-rules.ts` (11 sites, from general knowledge, confirmed by Guillaume, D-027). In 2026-11 the
   registry counts 18 nuclear sites, 61 370 MW, as the tests check.
+- **Ranges of consumption** (B-014): `tools/bake-consumption.ts` bakes
+  `src/map/consumption.ts`, each region's 5th and 95th percentiles of
+  `consommation` over twelve months (2025-09-01 to 2026-09-01), from RTE's
+  consolidated and definitive regional éCO2mix (DS-12, S-017), which ODRÉ computes
+  in one request. Percentiles, not the minimum and maximum: the data holds a few
+  absurd steps (Île-de-France at 0 MW, Centre-Val de Loire at 12 354 MW, four times
+  its usual peak), which they ignore. Re-baked once a year, when RTE publishes a new
+  year as definitive.
 
 ## World generation
 
@@ -421,7 +429,7 @@ checked against real screens.
 | Dams                                | `tch_hydraulique` | ceil(3·a) streams of water falling down the face                                 |
 | Thermal plant chimneys              | `tch_thermique`   | smoke 2 + 7·a px high, a puff every 3 / (0.3 + 0.7·a) s                          |
 | Bioenergy plants                    | `tch_bioenergies` | a small smoke, 2 + 4·a px high; its window lit at night when a > 0               |
-| Town windows lit, power-line pulses | `consommation`    | ∝ position of consumption in the area's typical range (baked p5–p95; B-014)      |
+| Town windows lit; power lines later | `consommation`    | l = (c − p5) / (p95 − p5), clamped 0–1; lamps on 4 + 12·l of 16 town pixels      |
 | Legend: stacked bar and figures     | MW per source     | shares of total production; import if `ech_physiques` > 0, export if < 0 (B-019) |
 
 A missing figure shows the element **idle**: no motion, no glow, never a guessed
@@ -583,7 +591,9 @@ How the terrain draws, aiming at calm, elegant pixel art (Guillaume, 2026-11-11)
   this veil fades as night falls, so that the land around never reads as sea;
 - towns are the prefectures (S-006), each moved to the first French land cell
   within 8 km if its own is not, drawn with its cell so the relief in front hides it:
-  roofs by day, lamps once the sun is below the horizon (real towns come with B-015);
+  roofs by day, lamps once the sun is below the horizon, more of them the more the
+  region consumes, and none without a figure: unlit roofs, as in Corsica, which the
+  regional éCO2mix leaves out (§ Data-to-scene mapping; real towns come with B-015);
 - past the grid's west, east and south edges the edge cells go on (sea, the
   neighbours' land), so a wide view never shows the board's edge; north of the grid
   is the sky.

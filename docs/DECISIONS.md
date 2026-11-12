@@ -467,3 +467,25 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** a laptop shows the flight or the zoom stuttering, a frame of the
   steady state outgrows its budget (`tools/perf.ts frames` after a drawing change),
   or the moving camera turns out to stutter on Guillaume's laptop.
+
+## D-029 — Towns light up with their region's consumption
+
+- **Context:** B-014: town windows are to be lit by `consommation`, "∝ position of
+  consumption in the area's typical range (baked p5–p95)" (ARCHITECTURE §
+  Data-to-scene mapping). The real-time dataset (DS-01) goes back only to
+  2026-09-01: its range would miss the winter.
+- **Options:** for the range, (a) DS-01's ten weeks; (b) twelve months of RTE's
+  consolidated and definitive regional éCO2mix (DS-12), baked; (c) no data, towns
+  lit as before. For the drawing, how many of a town's pixels are lamps.
+- **Decision:** (b): DS-12 GO (Guillaume, 2026-11-12, on a decision card, where it
+  was named DS-08 by mistake: that id was taken). The 5th and 95th percentiles over
+  2025-09-01 to 2026-09-01, per region; l = (c − p5) / (p95 − p5), clamped to 0–1;
+  at night a town lights 4 + 12·l of every 16 of its pixels, its first pixel always,
+  so a lit town never goes dark. A region without a figure lights none: its towns
+  show their roofs, unlit (Corsica, always). Proposed by Claude, 2026-11-12.
+- **Why:** the same publisher and licence as the live figures; percentiles ignore
+  the few absurd steps of the data (0 MW, four times a usual peak); a quarter of
+  the windows at the year's low keeps a town readable at night; an unlit town says
+  "no figure" without inventing one.
+- **Revisit if:** real towns (B-015) make the scatter read too busy or too sparse,
+  or RTE publishes a new year as definitive (re-bake).
