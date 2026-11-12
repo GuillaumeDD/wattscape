@@ -320,9 +320,10 @@ bake. The browser never downloads map data: the CSP is unchanged.
 - **Grid** (`src/map/grid.ts`): north-west corner 51.2° N, 5.4° W; 1 152 × 1 104 cells
   of 1 km (the **fine grid**), grouped 4 × 4 into 288 × 276 cells of 4 km (the
   **coarse grid**). It covers mainland France and Corsica with a margin.
-- **Fine grid:** the region at the centre of each cell, or "not France". Used by the
-  region lookup (§ Geolocation). Baked from the generalised outlines of ADMIN
-  EXPRESS COG CARTO, read from IGN's WFS (S-013).
+- **Fine grid:** the region at the centre of each cell, foreign land, or sea. The
+  region lookup (§ Geolocation) reads only the regions; the close view draws land
+  and sea from it. Baked from the generalised outlines of ADMIN EXPRESS COG CARTO,
+  read from IGN's WFS (S-013), and Natural Earth's countries (S-015) for foreign land.
 - **Coarse grid:** sea, foreign land, or a region. A cell is land when at least 8 of
   its 16 fine cells are land (French, or a neighbouring country in Natural Earth's
   1:10m countries, S-015); it is French when French cells outnumber foreign ones,
@@ -335,9 +336,17 @@ bake. The browser never downloads map data: the CSP is unchanged.
   (−99 999 elsewhere): sea and foreign land are class 0. The highest cell (class 14,
   3 349 m) is on the French side of the Mont Blanc massif; the summit's own cell is
   mostly Italian, so it is foreign land.
-- **Encoding:** one line per grid row: run-length encoded kinds (`a12c40` = 12 cells
-  of kind 0, then 40 of kind 2), one hexadecimal digit per cell for the elevation.
-  The decoder throws on a malformed row; the tests decode the committed file.
+- **1 km relief** (D-018, D-021): each French fine cell gets an elevation class, on
+  the same 16 classes, from the mean of its 4 samples (the same 500 m samples as the
+  4 km relief); sea and foreign land are class 0. It lives in its own file,
+  `src/map/relief.ts` (232 KB, 86 KB compressed), which the browser loads, as a
+  separate chunk from the site itself, only when the camera comes close or the
+  viewer has a region; decoded, the 1 km layer takes about 3.8 MB and 40 ms, once.
+  Its 4 × 4 means agree with the 4 km relief within 2 classes (tests).
+- **Encoding:** one line per grid row: run-length encoded values (`a12c40` = 12 cells
+  of value 0, then 40 of value 2) for the kinds and the 1 km relief, one hexadecimal
+  digit per cell for the 4 km relief. The decoder throws on a malformed row; the
+  tests decode the committed files.
 - **Re-baking:** the regions come from the WFS layer `LATEST`, the countries from a
   pinned commit of Natural Earth; the date of the bake and the WFS time stamp are
   written in the file's header. Region borders have not changed since 2016, so a

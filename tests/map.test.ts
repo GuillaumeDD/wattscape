@@ -7,6 +7,7 @@ import {
   FINE_ROWS_RLE,
   MAP_BAKED_ON,
 } from "../src/map/france";
+import { FINE_ELEVATION_RLE } from "../src/map/relief";
 import {
   cellCentre,
   COARSE_COLUMNS,
@@ -127,7 +128,7 @@ describe("run-length rows", () => {
     expect(() => decodeRuns(["a3"], 4)).toThrow(/3 cells, not 4/);
     expect(() => decodeRuns(["a5"], 4)).toThrow(/5 cells, not 4/);
     expect(() => decodeRuns(["a2-2"], 4)).toThrow(/bad character/);
-    expect(() => decodeRuns(["z4"], 4)).toThrow(/unknown kind/);
+    expect(() => decodeRuns(["z4"], 4)).toThrow(/unknown value/);
     expect(() => decodeHex(["0g"], 2)).toThrow(/malformed/);
     expect(() => decodeHex(["0"], 2)).toThrow(/malformed/);
   });
@@ -155,8 +156,34 @@ describe("the baked map (src/map/france.ts)", () => {
     expect(FINE_ROWS_RLE).toHaveLength(FINE_ROWS);
     expect(COARSE_ROWS_RLE).toHaveLength(COARSE_ROWS);
     expect(ELEVATION_ROWS_HEX).toHaveLength(COARSE_ROWS);
-    // Only "not France" and the regions in the fine grid: no foreign land there.
-    expect(fine.includes(FOREIGN)).toBe(false);
+    expect(FINE_ELEVATION_RLE).toHaveLength(FINE_ROWS);
+  });
+
+  it("marks foreign land on the fine grid, and only off France", () => {
+    // The close view draws land and sea at 1 km; the lookup reads only the regions.
+    const fineAt = (lat: number, lon: number): number => {
+      const cell = fineIndexOf(lat, lon);
+      if (cell === null) throw new Error("off the grid");
+      return fine[cell.row * FINE_COLUMNS + cell.column] ?? -1;
+    };
+    expect(fineAt(46.2, 6.14)).toBe(FOREIGN); // Geneva
+    expect(fineAt(50.4, 4.4)).toBe(FOREIGN); // Charleroi
+    expect(fineAt(46.0, -4.0)).toBe(SEA);
+    expect(regionOfKind(FOREIGN)).toBeNull();
+    // A coarse foreign cell is mostly foreign fine cells.
+    let foreignFine = 0;
+    let cells = 0;
+    coarse.forEach((k, i) => {
+      if (k !== FOREIGN) return;
+      cells++;
+      const r = Math.floor(i / COARSE_COLUMNS);
+      const c = i % COARSE_COLUMNS;
+      for (let dr = 0; dr < COARSE_FACTOR; dr++)
+        for (let dc = 0; dc < COARSE_FACTOR; dc++)
+          if (fine[(r * COARSE_FACTOR + dr) * FINE_COLUMNS + c * COARSE_FACTOR + dc] === FOREIGN)
+            foreignFine++;
+    });
+    expect(foreignFine / (cells * COARSE_FACTOR * COARSE_FACTOR)).toBeGreaterThan(0.8);
   });
 
   it("puts every prefecture in its own region, on the fine grid (S-006)", () => {
@@ -229,5 +256,62 @@ describe("the baked map (src/map/france.ts)", () => {
     expect(Math.abs(top.latitude - 45.833)).toBeLessThan(0.1);
     expect(Math.abs(top.longitude - 6.865)).toBeLessThan(0.1);
     expect(elevation[highest]).toBeGreaterThanOrEqual(elevationClass(3200));
+  });
+});
+
+describe("the 1 km relief (src/map/relief.ts, D-018)", () => {
+  const relief = decodeRuns(FINE_ELEVATION_RLE, FINE_COLUMNS, ELEVATION_CLASSES.length);
+  const at = (lat: number, lon: number): number => {
+    const cell = fineIndexOf(lat, lon);
+    if (cell === null) throw new Error("off the grid");
+    return relief[cell.row * FINE_COLUMNS + cell.column] ?? -1;
+  };
+
+  it("has relief on French land only", () => {
+    relief.forEach((v, i) => {
+      if (v !== 0 && (fine[i] ?? SEA) < 2) throw new Error(`cell ${String(i)}: relief off France`);
+    });
+    expect(at(46.0, -4.0)).toBe(0); // sea
+    expect(at(46.95, 7.45)).toBe(0); // Bern: BD ALTI covers France only
+  });
+
+  it("agrees with the 4 km relief: each coarse cell is near the mean of its fine cells", () => {
+    // Both are means of the same 500 m samples (16 × 4 of them, or 4), so the mean of
+    // a coarse cell's 16 fine altitudes is its own, up to the rounding into classes.
+    let worst = 0;
+    for (let r = 0; r < COARSE_ROWS; r++)
+      for (let c = 0; c < COARSE_COLUMNS; c++) {
+        const i = r * COARSE_COLUMNS + c;
+        if ((coarse[i] ?? SEA) < 2) continue;
+        let sum = 0;
+        let n = 0;
+        for (let dr = 0; dr < COARSE_FACTOR; dr++)
+          for (let dc = 0; dc < COARSE_FACTOR; dc++) {
+            const j = (r * COARSE_FACTOR + dr) * FINE_COLUMNS + c * COARSE_FACTOR + dc;
+            if ((fine[j] ?? SEA) < 2) continue;
+            sum += ELEVATION_CLASSES[relief[j] ?? 0] ?? 0;
+            n++;
+          }
+        if (n < COARSE_FACTOR * COARSE_FACTOR) continue; // coast and borders: fewer samples
+        worst = Math.max(worst, Math.abs(elevationClass(sum / n) - (elevation[i] ?? 0)));
+      }
+    expect(worst).toBeLessThanOrEqual(2);
+  });
+
+  it("resolves what the 4 km cells average away", () => {
+    // Puy de Dôme (1 465 m) stands above the plateau around it; the 4 km cell does not.
+    const coarseAt = (lat: number, lon: number): number => {
+      const cell = fineIndexOf(lat, lon);
+      if (cell === null) throw new Error("off the grid");
+      return (
+        elevation[Math.floor(cell.row / 4) * COARSE_COLUMNS + Math.floor(cell.column / 4)] ?? -1
+      );
+    };
+    expect(at(45.772, 2.964)).toBeGreaterThan(coarseAt(45.772, 2.964));
+    expect(at(45.879, 6.887)).toBeGreaterThanOrEqual(elevationClass(3200)); // Aiguille du Midi
+    expect(at(48.86, 2.35)).toBeLessThanOrEqual(elevationClass(50)); // Paris
+    expect(relief.reduce((a, b) => Math.max(a, b), 0)).toBeGreaterThan(
+      elevation.reduce((a, b) => Math.max(a, b), 0),
+    );
   });
 });

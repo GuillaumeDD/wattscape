@@ -34,6 +34,10 @@ raw page: re-read them in a browser before relying on an exact wording.
 | S-014 | [IGN Géoplateforme WMS][s014-wms], layer `ELEVATION.ELEVATIONGRIDCOVERAGE` ("MNT BDAlti V1", 25 m); [metadata record][s014-csw]                                                                   | Altitudes as raw 32-bit floats (`image/x-bil;bits=32`), −99 999 outside France (sea, abroad), read by `tools/bake-map.ts`; licence "Licence Ouverte / Open License" in the metadata                                                                 | high                | 2026-11-11 |
 | S-015 | [Natural Earth vector][s015-repo], `ne_10m_admin_0_countries.geojson` at commit `ca96624a56bd`, and its `LICENSE.md`                                                                              | Countries at 1:10m, read by `tools/bake-map.ts` for the land around France; "Everything here is public domain", crediting "unnecessary"                                                                                                             | high                | 2026-11-11 |
 
+Re-read on 2026-11-12: S-013, S-014 and S-015, by `tools/bake-map.ts`, to bake the
+1 km relief (D-021) with the same requests; the regions and the 4 km grid came out
+unchanged, cell for cell.
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift
