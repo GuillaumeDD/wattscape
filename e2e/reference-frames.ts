@@ -8,6 +8,7 @@ import { parseEco2mixRegions } from "../src/data/eco2mix.ts";
 import { CONSUMPTION_RANGES } from "../src/map/consumption.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
+import { LANDMARKS } from "../src/map/landmarks.ts";
 import { PLANT_SITES } from "../src/map/plants.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
@@ -65,6 +66,7 @@ export function referenceScene(
     towns: bakedTowns(),
     plants: recordedPlants(sunElevation < 0),
     townLights: recordedTownLights(sunElevation < 0),
+    landmarks: LANDMARKS,
   };
 }
 

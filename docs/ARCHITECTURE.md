@@ -661,6 +661,15 @@ Which landmarks are drawn, and why, is decided in the register
 are drawn; each is drawn in code from public views of the site, never traced from a
 photo.
 
+The first three (B-015, `src/map/landmarks.ts`, `src/render/art/landmarks.ts`), at
+positions read in IGN BD TOPO (DS-13, S-018): Étretat's needle and arch, white chalk
+in the foam (P-001, at « Porte d'Aval »); two ship-to-shore cranes over a row of
+containers at Port 2000, Le Havre, a red light on each at night (P-002); Fécamp's
+jetty and a generic lighthouse, its lantern lit at night (P-005). Like the plants,
+they stand on their cell's top face, drawn with the terrain at the end of their row
+so the relief in front hides them, at full sprite size only (0.7 pixel per km and
+up).
+
 ## Rendering and loop
 
 - The renderer draws into a `Surface` (`src/render/surface.ts`: an RGBA

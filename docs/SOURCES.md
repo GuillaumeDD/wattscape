@@ -93,7 +93,11 @@ of Dieppe - le Tréport) and `BDTOPO_V3:construction_ponctuelle` (nature « Eoli
 Read by `tools/bake-plants.ts` (D-032): 4 361 zones « Centrale électrique » in
 service (nuclear plants have no `nature_detaillee`), and the turbines at sea of the
 Fécamp (72), Saint-Nazaire (80) and Saint-Brieuc (62) farms; the Calvados and
-Dieppe - Le Tréport farms' turbines are « En construction ». Reliability high (the
+Dieppe - Le Tréport farms' turbines are « En construction ». The landmarks of
+`src/map/landmarks.ts` (B-015): « Porte d'Aval » (a cape, `detail_orographique`,
+49.70687° N, 0.19387° E) and « l'Aiguille » 100 m west; Port 2000
+(`equipement_de_transport`, centre 49.46024° N, 0.14785° E); Fécamp's « Avant-Port »
+(centre 49.76154° N, 0.36808° E). Reliability high (the
 national mapping agency documents its own data).
 
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte

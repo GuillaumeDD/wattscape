@@ -16,7 +16,9 @@ import { RISE_METRES_PER_KM } from "../scene/camera.ts";
 import { type RegionCode } from "../data/eco2mix.ts";
 import { type Scene, type ScenePlant, type Town, townCellCount } from "../scene/scene.ts";
 import { skyColour, tinted } from "../sky/light.ts";
+import { drawLandmark } from "./art/landmarks.ts";
 import { drawBody, drawMotion, hasMotion, type Pen, type SpriteSize } from "./art/plants.ts";
+import { type Landmark } from "../map/landmarks.ts";
 import { BAYER_4, DITHER_LEVELS } from "./dither.ts";
 import { COLOUR_NAMES, type ColourName, darken, PALETTE, type Rgb } from "./palette.ts";
 import { createSurface, type Surface } from "./surface.ts";
@@ -161,6 +163,19 @@ export interface PlacedPlant {
   readonly plant: ScenePlant;
   readonly x: number;
   readonly y: number;
+}
+
+/** A landmark placed on the frame: its anchor in buffer pixels. */
+interface PlacedLandmark {
+  readonly landmark: Landmark;
+  readonly x: number;
+  readonly y: number;
+}
+
+/** What a layer placed: the plants and the landmarks, to draw again over a crossfade. */
+interface Placed {
+  readonly plants: PlacedPlant[];
+  readonly landmarks: PlacedLandmark[];
 }
 
 /**
@@ -362,12 +377,7 @@ export function lampLevels(scene: Pick<Scene, "townLights">): Int8Array {
  * neighbours' land, the Mediterranean), so a wide view never shows the board's edge;
  * north of the grid is the sky.
  */
-function drawLayer(
-  frame: Frame,
-  scene: Scene,
-  layer: TerrainLayer,
-  bodies: boolean,
-): PlacedPlant[] {
+function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: boolean): Placed {
   drawSky(frame, scene);
   const { light, camera } = scene;
   const s = camera.scale;
@@ -380,7 +390,7 @@ function drawLayer(
   const c1 = Math.ceil((ox + width) / cellW) + 1;
   const r0 = Math.max(0, Math.floor(oy / cellH) - 1);
   const r1 = Math.ceil((oy + height + rise) / cellH) + 1;
-  if (c0 > c1 || r0 > r1) return [];
+  if (c0 > c1 || r0 > r1) return { plants: [], landmarks: [] };
   // Pixel edges of the visible columns: floor(edge × scale), shifted by the offset.
   const xs = new Int32Array(c1 - c0 + 2);
   for (let c = c0; c <= c1 + 1; c++) xs[c - c0] = Math.floor(c * cellW) - ox;
@@ -409,7 +419,34 @@ function drawLayer(
     .sort((a, b) => a.row - b.row || a.column - b.column);
   let next = 0;
   const placed: PlacedPlant[] = [];
+  // Landmarks, at full sprite size only, in the same painter's order.
+  const marks =
+    size === "full"
+      ? scene.landmarks
+          .map((landmark) => ({
+            landmark,
+            row: Math.floor(landmark.y / km),
+            column: Math.floor(landmark.x / km),
+            x: Math.floor(landmark.x * s) - ox,
+          }))
+          .filter((m) => m.x > -24 && m.x < width + 24)
+          .sort((a, b) => a.row - b.row || a.column - b.column)
+      : [];
+  let nextMark = 0;
+  const placedMarks: PlacedLandmark[] = [];
   const drawPlants = (before: number): void => {
+    for (; nextMark < marks.length && (marks[nextMark]?.row ?? 0) < before; nextMark++) {
+      const m = marks[nextMark];
+      if (m === undefined) continue;
+      const rr = Math.min(Math.max(m.row, 0), rows - 1);
+      const cc = Math.min(Math.max(m.column, 0), columns - 1);
+      const i = rr * columns + cc;
+      const kind = kinds[i] ?? SEA;
+      const h = kind === SEA || kind === FOREIGN ? 0 : (hs[elevation[i] ?? 0] ?? 0);
+      const y = Math.floor((m.row + 0.5) * cellH) - oy - h;
+      if (bodies) drawLandmark(pen, m.landmark, m.x, y);
+      placedMarks.push({ landmark: m.landmark, x: m.x, y });
+    }
     for (; next < queue.length && (queue[next]?.row ?? 0) < before; next++) {
       const q = queue[next];
       if (q === undefined) continue;
@@ -515,7 +552,7 @@ function drawLayer(
   }
   drawTowns();
   drawPlants(Number.POSITIVE_INFINITY);
-  return placed;
+  return { plants: placed, landmarks: placedMarks };
 }
 
 /** One spare buffer for the crossfade, reused while the size stays the same. */
@@ -545,8 +582,9 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
   const detail = scene.fine === null ? 0 : Math.min(DITHER_LEVELS, Math.max(0, scene.detail));
   let placed: PlacedPlant[];
   const size: SpriteSize = scene.camera.scale >= SPRITES_FROM_SCALE ? "full" : "marker";
-  if (!(detail > 0) || scene.fine === null) placed = drawLayer(frame, scene, scene.coarse, true);
-  else if (detail >= DITHER_LEVELS) placed = drawLayer(frame, scene, scene.fine, true);
+  if (!(detail > 0) || scene.fine === null)
+    placed = drawLayer(frame, scene, scene.coarse, true).plants;
+  else if (detail >= DITHER_LEVELS) placed = drawLayer(frame, scene, scene.fine, true).plants;
   else {
     // The plants are not dissolved: they stand once, on the layer that shows the
     // most, drawn over the crossfade (which lasts half a second).
@@ -563,8 +601,10 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
         if ((bayer[(x + ox) & 3] ?? 0) < detail)
           words[y * width + x] = detailed.words[y * width + x] ?? 0;
     }
-    placed = detail * 2 >= DITHER_LEVELS ? finePlaced : coarsePlaced;
+    const shown = detail * 2 >= DITHER_LEVELS ? finePlaced : coarsePlaced;
+    placed = shown.plants;
     const pen = penOf(frame, scene.light.darkness, scene.light.emissive);
+    for (const m of shown.landmarks) drawLandmark(pen, m.landmark, m.x, m.y);
     for (const p of placed) drawBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
   }
   const moving = placed.filter(
