@@ -44,6 +44,7 @@
   "plantsLive": "Power plants driven by RTE éCO2mix, reading of {time}.",
   "plantsStale": "Power plants driven by an old RTE éCO2mix reading, of {time}.",
   "plantsSample": "Sample data: RTE éCO2mix reading of {time}, not live.",
+  "plantsReplay": "Time-lapse: the past day in a minute, RTE éCO2mix reading of {time}.",
   "plantsAhead": "The RTE éCO2mix reading ({time}) is later than the time shown: the power plants are idle.",
   "plantsUnavailable": "RTE éCO2mix data unavailable: the power plants are idle."
 }

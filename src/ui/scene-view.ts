@@ -67,8 +67,8 @@ export interface SceneView {
   /**
    * The latest step of every region, which drives the plants; null when there is
    * none (not yet loaded, or unavailable): every plant is then idle. A recorded
-   * `sample` shows whatever the clock says; a live step dated after the clock's time
-   * (`?at=` in the past) does not.
+   * `sample`, or a step of the time-lapse, shows whatever the clock says; a live step
+   * dated after the clock's time (`?at=` in the past) does not.
    */
   setReadings(readings: RegionalReadings | null, sample?: boolean): void;
 }
@@ -94,6 +94,8 @@ export function mountSceneView(
   canvas: HTMLCanvasElement,
   clock: Clock,
   initialArea: Eco2mixArea,
+  /** The clock runs fast (the time-lapse): the light changes every frame. */
+  fastClock = false,
 ): SceneView {
   const context = canvas.getContext("2d");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -273,7 +275,8 @@ export function mountSceneView(
     // Keep going while the camera moves; the plants wake the loop by their steps only;
     // otherwise sleep until the drift starts, the light changes or an input comes.
     const untilDrift = lastInput + IDLE_DRIFT_AFTER_MS - now;
-    if (flight !== null || detail !== target || (!reducedMotion && untilDrift <= 0)) wake();
+    if (flight !== null || detail !== target || fastClock || (!reducedMotion && untilDrift <= 0))
+      wake();
     else if (drawn?.moving === true) sleep((step + 1) * MOTION_STEP_MS - now);
     else sleep(reducedMotion ? LIGHT_EVERY_MS : Math.min(LIGHT_EVERY_MS, untilDrift));
   }

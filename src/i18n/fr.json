@@ -44,6 +44,7 @@
   "plantsLive": "Centrales animées par RTE éCO2mix, relevé de {time}.",
   "plantsStale": "Centrales animées par un relevé RTE éCO2mix ancien, de {time}.",
   "plantsSample": "Données d'exemple : relevé RTE éCO2mix du {time}, pas le direct.",
+  "plantsReplay": "Accéléré : la journée passée en une minute, relevé RTE éCO2mix du {time}.",
   "plantsAhead": "Le relevé RTE éCO2mix ({time}) est postérieur à l'heure montrée : centrales au repos.",
   "plantsUnavailable": "Données RTE éCO2mix indisponibles : les centrales sont au repos."
 }

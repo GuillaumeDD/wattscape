@@ -150,8 +150,9 @@ idea that the grid can be seen.
 - Full screen (`F`, button), cursor hidden when idle, a Wake Lock request to keep the
   screen on while in full screen (if the browser supports it).
 - Keys: zoom, pan, `R` next region, `H` hide/show the legend, `?` help, `Space`
-  pause the drift. Settings: time-lapse (to watch a day in a minute), weather override
-  and fixed data, for demos and screenshots (also as URL settings).
+  pause the drift. Settings: time-lapse (to watch a day in a minute, with the day's
+  real figures: `?timelapse=day`, B-014), weather override and fixed data, for demos
+  and screenshots (also as URL settings).
 - `prefers-reduced-motion`: no camera drift, slow animations.
 
 ### 4.10 Localization

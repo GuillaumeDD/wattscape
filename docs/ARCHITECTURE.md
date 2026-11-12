@@ -54,6 +54,9 @@ Which sources we use, and under which licence, is decided in the register
 | éCO2mix national (DS-02) | same API, dataset `eco2mix-national-tr`                                               | national view                                      | 15 min  |
 | Open-Meteo (DS-03)       | `api.open-meteo.com/v1/forecast?current=…`                                            | current weather                                    | 15 min  |
 
+The time-lapse (B-014) reads DS-01 too, once, through the same dataset's
+`exports/json` endpoint (§ Camera and controls).
+
 The CSP's `connect-src` lists exactly `https://odre.opendatasoft.com` and
 `https://api.open-meteo.com`. The map's sources (DS-04, DS-05, DS-11) and the plants'
 (DS-07, DS-04) are read once, by hand, when the map is baked (§ Map); the browser
@@ -624,13 +627,22 @@ and the Pyrenees, French mountains end in a cliff (PRD Q-11).
   flights become cuts.
 - **Light:** one light for the view, from the sun at its centre (`viewLight`),
   every frame, its darkness rounded to a sixteenth of a step so the picture changes
-  only when the light visibly does (B-014 brings the rest of day and night).
+  only when the light visibly does.
   `?at=` (ISO 8601 with a zone, e.g. `?at=2026-06-21T21:30Z`, 2000–2099;
   `src/ui/settings.ts`) fixes the time, for demos and screenshots; with it, a live
   reading dated after that time shows nothing (it would be in the future).
   `?sample=day` or `?sample=night` shows a recorded step of every region instead of
   the live one (2026-11-12, 09:45 or 01:00 UTC), labelled "données d'exemple" on the
   page.
+- **Time-lapse** (B-014, `?timelapse=day`): the day before now, or before `?at=`,
+  replayed in a minute, over and over (`replayClock`, `src/clock/clock.ts`). The
+  light follows the replayed time every frame, and the plants and the towns follow
+  the step RTE published for it: one request, at load, for every region's steps of
+  that day and the hour before (`eco2mixHistoryUrl`: the export endpoint, which is
+  not capped at 100 rows; about 1 200 rows, 830 KB of JSON, 120 KB compressed),
+  then the latest step at or before the replayed time (`src/ui/replay-feed.ts`).
+  The page labels it "Accéléré" with the step's date and time. Before the day's
+  first step, or if the request fails, the plants and the towns are idle.
 
 ### Landmarks
 
@@ -707,7 +719,8 @@ Budget (D-028):
   and 13 listeners from start to end, 17 to 27 ms of work per second. Met. A leak
   shows only over several refreshes (every 15 minutes): a soak runs an hour at
   least.
-- **Network:** no more than 2 requests every 15 minutes. Met: the same soak made 8
+- **Network:** no more than 2 requests every 15 minutes (the time-lapse: one, at
+  load). Met: the same soak made 8
   requests, one every 15 minutes, all to `odre.opendatasoft.com`.
 
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
@@ -734,7 +747,9 @@ only a coarser layer between 0.5 and 1.4 would cut it, which changes the picture
   and `src/ui/settings.ts`; they accept only the documented shape, finite numbers in
   range (|MW| ≤ 200 000, load factors 0–200 %), bounded strings, known area codes, a
   `?at=` read field by field and checked against the calendar, `?sample=` among
-  `day` and `night` only (a recorded step, loaded as a chunk from the site itself);
+  `day` and `night` only (a recorded step, loaded as a chunk from the site itself),
+  `?timelapse=` `day` only, and its answer a bare array of at most 1 212 rows and
+  2 MB, each row through the same parser as the live step;
   they never throw past
   the boundary: a bad response is "data unavailable", a bad setting is ignored.
 - No `innerHTML`, `eval` or `new Function` anywhere (lint rules); captions use
