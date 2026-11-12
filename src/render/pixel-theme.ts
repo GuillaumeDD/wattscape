@@ -10,9 +10,10 @@
  * moves the picture without a shimmer (D-020). Pure: additions, multiplications and
  * floors decide every pixel; the light comes in as numbers.
  */
-import { ELEVATION_CLASSES, FOREIGN, kindOfRegion, SEA } from "../map/grid.ts";
+import { ELEVATION_CLASSES, FOREIGN, KIND_COUNT, kindOfRegion, SEA } from "../map/grid.ts";
 import { type TerrainLayer } from "../map/layers.ts";
 import { RISE_METRES_PER_KM } from "../scene/camera.ts";
+import { type RegionCode } from "../data/eco2mix.ts";
 import { type Scene, type ScenePlant, type Town } from "../scene/scene.ts";
 import { skyColour, tinted } from "../sky/light.ts";
 import { drawBody, drawMotion, hasMotion, type Pen, type SpriteSize } from "./art/plants.ts";
@@ -299,6 +300,23 @@ function tintsOf(frame: Frame, scene: Scene): Tints {
   };
 }
 
+/** The fewest lamps a lit town shows, of 16 pixels: at the bottom of its range. */
+export const LAMPS_FLOOR = 4;
+
+/**
+ * Lamps lit per 16 town pixels, by cell kind: LAMPS_FLOOR at the bottom of the
+ * region's range of consumption to all 16 at the top; −1 for a region without a
+ * figure, whose towns show their roofs, unlit.
+ */
+export function lampLevels(scene: Pick<Scene, "townLights">): Int8Array {
+  const levels = new Int8Array(KIND_COUNT).fill(-1);
+  for (const [region, light] of Object.entries(scene.townLights))
+    if (Number.isFinite(light))
+      levels[kindOfRegion(region as RegionCode)] =
+        LAMPS_FLOOR + Math.round((DITHER_LEVELS - LAMPS_FLOOR) * Math.min(1, Math.max(0, light)));
+  return levels;
+}
+
 /**
  * Draws the sky, then one terrain layer, back (north) to front (south). Past the
  * grid's west, east and south edges the edge cells go on (the Atlantic, the
@@ -333,6 +351,7 @@ function drawLayer(
   const focus = scene.focus === null ? -1 : kindOfRegion(scene.focus);
   const { cells: towns, townRows, highest } = layerIndex(layer, scene.towns);
   const townSize = Math.min(3, Math.max(1, Math.floor(s)));
+  const lamps = lampLevels(scene);
   // Hill shading compares a cell with the one 4 km to its north-west, on both layers,
   // so the 1 km layer shades whole slopes, not every bump.
   const reach = Math.max(1, Math.round(4 / km));
@@ -368,17 +387,21 @@ function drawLayer(
     }
   };
   const drawTowns = (): void => {
-    for (let k = 0; k < pending.length; k += 3) {
+    for (let k = 0; k < pending.length; k += 4) {
       const cx = pending[k] ?? 0;
       const cy = pending[k + 1] ?? 0;
       const size = pending[k + 2] ?? 1;
+      const level = pending[k + 3] ?? -1;
       for (let y = Math.max(0, cy); y < Math.min(height, cy + size); y++)
         for (let x = Math.max(0, cx); x < Math.min(width, cx + size); x++) {
           const gx = x + ox;
           const gy = y + oy;
-          if (light.emissive) {
-            // Lit windows: a scatter, not a block, so a town glows like a town.
-            if (size === 1 || pixelHash(gx, gy) % 3 !== 0) frame.words[y * width + x] = PACKED.lamp;
+          if (light.emissive && level >= 0) {
+            // Lit windows: a scatter, not a block, so a town glows like a town; the
+            // more its region consumes, the more of them (ARCHITECTURE § Data-to-scene
+            // mapping). Its first pixel is always lit, so no lit town goes dark.
+            if ((x === cx && y === cy) || pixelHash(gx, gy) % DITHER_LEVELS < level)
+              frame.words[y * width + x] = PACKED.lamp;
           } else frame.words[y * width + x] = tints.roof[(gy & 3) * 4 + (gx & 3)] ?? 0;
         }
     }
@@ -441,6 +464,7 @@ function drawLayer(
         Math.floor((x0 + x1) / 2) - Math.floor(size / 2),
         y0 - h + Math.floor((y1 - y0) / 2) - Math.floor(size / 2),
         size,
+        lamps[kind] ?? -1,
       );
     }
     if (!flat) drawTowns();

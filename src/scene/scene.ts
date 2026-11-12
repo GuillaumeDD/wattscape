@@ -7,6 +7,8 @@
 import {
   type Eco2mixReading,
   freshness,
+  REGION_CODES,
+  type RegionCode,
   type RegionalReadings,
   type Source,
 } from "../data/eco2mix.ts";
@@ -59,6 +61,21 @@ export interface Scene {
   readonly towns: readonly Town[];
   /** The plants that may show, with their activity; the theme picks by size and scale. */
   readonly plants: readonly ScenePlant[];
+  /** How lit each region's towns are at night (`townLights`). */
+  readonly townLights: TownLights;
+}
+
+/**
+ * How lit the towns of each region are at night, 0 to 1: where its consumption stands
+ * in its typical range. A region without a figure is absent, and its towns show no
+ * lamps (ARCHITECTURE § Data-to-scene mapping).
+ */
+export type TownLights = Readonly<Partial<Record<RegionCode, number>>>;
+
+/** A region's typical consumption, MW: its 5th and 95th percentiles over a year. */
+export interface ConsumptionRange {
+  readonly p5: number;
+  readonly p95: number;
 }
 
 /** Below this scale (pixels per km) the 4 km layer shows alone. */
@@ -120,4 +137,39 @@ export function scenePlants(
       reading !== undefined && freshness(reading, nowMs) !== "future" ? reading : undefined;
     return { site, activity: activityOf(shown, site.source) };
   });
+}
+
+/**
+ * Where a reading's consumption stands in its region's typical range: 0 at the 5th
+ * percentile or below, 1 at the 95th or above, linear in between; null without a
+ * figure, or with a range that is not one.
+ */
+export function townLightOf(
+  reading: Eco2mixReading | undefined,
+  range: ConsumptionRange | undefined,
+): number | null {
+  const mw = reading?.consumptionMw;
+  if (mw === undefined || range === undefined || !Number.isFinite(mw)) return null;
+  const { p5, p95 } = range;
+  if (!Number.isFinite(p5) || !Number.isFinite(p95) || !(p95 > p5)) return null;
+  return Math.min(1, Math.max(0, (mw - p5) / (p95 - p5)));
+}
+
+/**
+ * The towns' light of every region from its latest reading, with the same rule as
+ * the plants: a reading dated in the future shows nothing, a stale one still shows.
+ */
+export function townLights(
+  readings: RegionalReadings | null,
+  ranges: Readonly<Partial<Record<RegionCode, ConsumptionRange>>>,
+  nowMs: number,
+): TownLights {
+  const lights: Partial<Record<RegionCode, number>> = {};
+  for (const region of REGION_CODES) {
+    const reading = readings?.byRegion[region];
+    if (reading === undefined || freshness(reading, nowMs) === "future") continue;
+    const light = townLightOf(reading, ranges[region]);
+    if (light !== null) lights[region] = light;
+  }
+  return lights;
 }

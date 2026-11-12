@@ -8,6 +8,7 @@ import { animationClock, type Clock } from "../clock/clock";
 import { type Eco2mixArea, type RegionalReadings } from "../data/eco2mix";
 import { type CellRegion } from "../map/grid";
 import { coarseLayer, fineLayer, type TerrainLayer } from "../map/layers";
+import { CONSUMPTION_RANGES } from "../map/consumption";
 import { PLANT_SITES } from "../map/plants";
 import { DEFAULT_THEME, type Drawn } from "../render/theme";
 import { createSurface, type Surface } from "../render/surface";
@@ -30,6 +31,8 @@ import {
   type Scene,
   type ScenePlant,
   scenePlants,
+  type TownLights,
+  townLights,
   viewLight,
 } from "../scene/scene";
 import {
@@ -104,6 +107,7 @@ export function mountSceneView(
   let drawn: Drawn | null = null;
   let lastStep = Number.NaN;
   let plants: readonly ScenePlant[] = scenePlants(PLANT_SITES, null, clock.now());
+  let lights: TownLights = {};
   let plantsVersion = 0;
   let image: ImageData | null = null;
   let area = initialArea;
@@ -226,6 +230,7 @@ export function mountSceneView(
       detail,
       towns: prefectureTowns(),
       plants,
+      townLights: lights,
     };
     // Redraw only when what is drawn changes: the drift moves the camera by a pixel
     // every second or two, and a still scene costs nothing.
@@ -426,6 +431,7 @@ export function mountSceneView(
     setReadings(readings: RegionalReadings | null, sample = false): void {
       const now = sample && readings !== null ? readings.timeMs : clock.now();
       plants = scenePlants(PLANT_SITES, readings, now);
+      lights = townLights(readings, CONSUMPTION_RANGES, now);
       plantsVersion++;
       wake();
     },

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { REGION_CODES } from "../src/data/eco2mix";
 import { FRAME_HEIGHT, FRAME_WIDTH, recordedPlants } from "../e2e/reference-frames";
 import {
   ELEVATION_CLASSES,
@@ -46,6 +47,8 @@ function sceneOf(overrides: Partial<Scene> & { camera: Camera }): Scene {
     detail: 16,
     towns: prefectureTowns(),
     plants: [],
+    // Every region's towns half lit: half their range of consumption.
+    townLights: Object.fromEntries(REGION_CODES.map((r) => [r, 0.5])),
     ...overrides,
   };
 }
@@ -208,11 +211,12 @@ describe("the pixel-art theme", () => {
   it("draws every town that no relief hides, at any framing of France", () => {
     // Regression: towns on rows or columns narrower than a pixel were skipped with
     // them, 22 of 96 at 480 × 270 and 35 at 427 × 240. Four lie in basins, behind
-    // the relief in front of them (Saint-Étienne, Le Puy-en-Velay, Chambéry, Annecy).
+    // the relief in front of them (Saint-Étienne, Le Puy-en-Velay, Chambéry, Annecy);
+    // the two of Corsica have no figure of consumption, so no lamps (B-014).
     for (const [width, height, visible] of [
-      [480, 270, 92],
-      [427, 240, 92],
-      [293, 633, 96],
+      [480, 270, 90],
+      [427, 240, 90],
+      [293, 633, 94],
     ] as const) {
       const camera = fitBox(areaBox(coarse, null), width, height);
       let seen = 0;

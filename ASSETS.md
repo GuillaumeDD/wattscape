@@ -20,4 +20,5 @@ its author, source and license. Files without an entry are not merged.
 | `src/map/france.ts`             | IGN; Natural Earth     | Baked map (B-008): IGN DS-04, DS-05; Natural Earth DS-11 (public domain)  | Licence Ouverte 2.0 |
 | `src/map/relief.ts`             | IGN                    | Baked 1 km relief (B-011, D-021): IGN BD ALTI, DS-05                      | Licence Ouverte 2.0 |
 | `src/map/plants.ts`             | RTE, ODRÉ; IGN         | Baked plant sites (B-012, D-024): ODRÉ registry DS-07; IGN DS-04          | Licence Ouverte 2.0 |
+| `src/map/consumption.ts`        | RTE, ODRÉ              | Baked ranges of consumption (B-014): éCO2mix consolidated DS-12           | Licence Ouverte 2.0 |
 | `tests/fixtures/frames/*.json`  | Wattscape contributors | Hashes of reference frames drawn by this app (B-009)                      | CC BY-SA 4.0        |

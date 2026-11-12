@@ -58,6 +58,16 @@ cooled; out of the session's network reach, so the list of sites with cooling
 towers is from general knowledge (low) until checked (PRD Q-14); Guillaume confirmed
 it the same day (D-027).
 
+Consulted on 2026-11-12, **S-017**: [ODRÉ, dataset `eco2mix-regional-cons-def`][s017]
+(« Données éCO2mix régionales consolidées et définitives »), its API and metadata.
+Gave: publisher RTE, licence "Licence Ouverte v2.0 (Etalab)", 2 874 816 rows, one
+per region and half-hour from 2012-12-31T23:30Z to 2026-08-31T21:30Z (consolidated
+then definitive figures; the real-time dataset S-003 takes over from 2026-09-01,
+which is as far back as it goes); field `consommation` (MW), the same as in S-003.
+ODSQL computes `percentile(consommation, 5)` and `95` per `code_insee_region` in one
+request, read by `tools/bake-consumption.ts` (B-014). Reliability high (the
+publisher documents its own data).
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift
@@ -67,3 +77,4 @@ it the same day (D-027).
 [s014-csw]: https://data.geopf.fr/csw?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&OUTPUTSCHEMA=http://standards.iso.org/iso/19115/-3/mdb/2.0&elementSetName=full&ID=IGNF_BD-ALTI
 [s016]: https://odre.opendatasoft.com/explore/dataset/registre-national-installation-production-stockage-electricite-agrege-311224/
 [s015-repo]: https://github.com/nvkelso/natural-earth-vector/tree/ca96624a56bd078437bca8184e78163e5039ad19
+[s017]: https://odre.opendatasoft.com/explore/dataset/eco2mix-regional-cons-def/
