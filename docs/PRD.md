@@ -255,6 +255,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | proposed |
 | G-012 | Relief of the neighbouring countries, so the Alps do not end in a cliff at the border  | planned  |
 | G-013 | A soak of 4 hours or more, in one stretch (Guillaume, 2026-11-12; B-013 ran 2 hours)   | proposed |
+| G-014 | Warm water shimmering on the sea off the coastal nuclear plants (PRD Q-16, Q-20)       | proposed |
 
 ## 10. Open questions
 
@@ -280,3 +281,8 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-15 | Plants at their commune's town hall, a few km off?              | Yes for now: the registry has no coordinates; exact sites with B-017 if a shift shows                | Yes (Guillaume, 2026-11-12, D-027)                                    |
 | Q-16 | Nuclear plants without towers: only lit windows at night?       | Yes; a warm-water shimmer on the sea in front can come with Normandie (B-015)                        | Yes (Guillaume, 2026-11-12, D-027)                                    |
 | Q-17 | Moving camera: accept ~20 ms frames, or add a 2 km layer?       | Accept: smooth at 30 fps, seconds at a time; a 2 km layer changes the picture (D-028)                | Accept (Guillaume, 2026-11-12, D-028)                                 |
+| Q-18 | Towns: communes of 2 000+, drawn at 4 000 people per km²?       | Yes: true sizes, one rule for both views; INSEE urban units later if blobs read badly (D-031)        |                                                                       |
+| Q-19 | Offshore farms turned by their region's wind load factor?       | Yes: RTE splits onshore and offshore nationally only; revisit if a regional figure comes             |                                                                       |
+| Q-20 | Warm-water shimmer off Paluel, Penly, Flamanville now?          | Later (G-014): which side the sea lies needs data per site; lit windows suffice for now              |                                                                       |
+| Q-21 | Sites with no BD TOPO zone stay at their town hall?             | Yes: 131 of 307, mostly biomass (52) and wind (40) farms; B-017 can revisit                          |                                                                       |
+| Q-22 | Étretat, the cranes, the lighthouse: do they read as such?      | Yes at a region's scale (about 2 px per km); refine with B-016 if one does not                       |                                                                       |
