@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'"
+      content="default-src 'self'; script-src 'self'; connect-src https://odre.opendatasoft.com; object-src 'none'; base-uri 'self'"
     />
     <title>Scene</title>
     <style>
@@ -23,6 +23,7 @@
   </head>
   <body>
     <canvas id="scene"></canvas>
+    <p id="plants-note"></p>
     <script type="module" src="./scene.ts"></script>
   </body>
 </html>

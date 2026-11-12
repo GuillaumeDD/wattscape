@@ -1,7 +1,7 @@
 {
   "title": "Wattscape",
   "tagline": "L'électricité de votre région, en direct et en pixel art.",
-  "status": "En construction : la carte est là, les centrales arrivent.",
+  "status": "En construction : les centrales suivent les données, la légende arrive.",
   "switchLanguage": "English",
   "switchLanguageLabel": "Switch to English",
   "creditsData": "Données :",
@@ -9,6 +9,8 @@
   "creditsWeatherLicence": "(CC BY 4.0)",
   "creditsMap": "· Carte :",
   "creditsMapLicence": "(ADMIN EXPRESS et BD ALTI, Licence Ouverte 2.0, {date}) et",
+  "creditsPlants": "· Centrales :",
+  "creditsPlantsLicence": "(registre national des installations au 31/12/2024, Licence Ouverte 2.0)",
   "areaLabel": "Région :",
   "areaFrance": "France entière",
   "useMyLocation": "Utiliser ma position",
@@ -37,5 +39,11 @@
   "debugLoading": "chargement…",
   "debugNoPoint": "pas de point de référence pour la France entière",
   "debugComputed": "calculé",
-  "sceneLabel": "Carte de France en relief, en pixel art. Molette, pincement, flèches ou + et − pour zoomer et se déplacer ; Origine pour revenir à la région."
+  "sceneLabel": "Carte de France en relief, en pixel art. Molette, pincement, flèches ou + et − pour zoomer et se déplacer ; Origine pour revenir à la région.",
+  "plantsLoading": "Centrales : chargement des données RTE éCO2mix…",
+  "plantsLive": "Centrales animées par RTE éCO2mix, relevé de {time}.",
+  "plantsStale": "Centrales animées par un relevé RTE éCO2mix ancien, de {time}.",
+  "plantsSample": "Données d'exemple : relevé RTE éCO2mix du {time}, pas le direct.",
+  "plantsAhead": "Le relevé RTE éCO2mix ({time}) est postérieur à l'heure montrée : centrales au repos.",
+  "plantsUnavailable": "Données RTE éCO2mix indisponibles : les centrales sont au repos."
 }

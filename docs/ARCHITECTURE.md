@@ -30,7 +30,7 @@ Provisional; each folder lands with the backlog item that needs it.
 | `src/geo/`    | Regions, offline position → area lookup, map projection                                    | no                                 |
 | `src/data/`   | éCO2mix and Open-Meteo clients: URL building, strict parsers, refresh and staleness        | network (fetchers only)            |
 | `src/sky/`    | Sun and moon position, moon phase, light keyframes                                         | no                                 |
-| `src/map/`    | The baked map of France (land, sea, regions, relief) and its grid                          | no                                 |
+| `src/map/`    | The baked map of France (land, sea, regions, relief, plant sites) and its grid             | no                                 |
 | `src/scene/`  | The scene model (what a frame shows) and the camera (zoom, pan, flights, drift)            | no                                 |
 | `src/world/`  | Seeded PRNG; placement of plants, towns, trees and landmarks                               | no                                 |
 | `src/render/` | Themes (how a scene looks), palette, dithering, sprites drawn in code, `Surface`           | no (the canvas blit is in `ui/`)   |
@@ -55,8 +55,9 @@ Which sources we use, and under which licence, is decided in the register
 | Open-Meteo (DS-03)       | `api.open-meteo.com/v1/forecast?current=…`                                            | current weather                                    | 15 min  |
 
 The CSP's `connect-src` lists exactly `https://odre.opendatasoft.com` and
-`https://api.open-meteo.com`. The map's sources (DS-04, DS-05, DS-11) are read once,
-by hand, when the map is baked (§ Map); the browser never calls them.
+`https://api.open-meteo.com`. The map's sources (DS-04, DS-05, DS-11) and the plants'
+(DS-07, DS-04) are read once, by hand, when the map is baked (§ Map); the browser
+never calls them.
 
 > 💡 **éCO2mix** is RTE's public view of the French grid: RTE runs the high-voltage
 > network and publishes, every 15 minutes, how much each technology produces and how
@@ -95,6 +96,22 @@ sequenceDiagram
         App->>App: aborted: dropped, not shown as an outage
     end
 ```
+
+The plants ask for more (B-012, D-025): the latest step of **every region at once**
+(`eco2mixRegionsUrl`: the 24 newest rows of the regional dataset, two steps' worth;
+the regions published each step together when checked, at 09:45 and 01:00 UTC on
+2026-11-12), so that each plant follows its own region's figures, whatever the view,
+the national one included. `parseEco2mixRegions` keeps one step: the one with the
+most valid regions, the newest among equals, so that a step still being published
+region by region does not leave most regions out; a region whose row is missing or
+invalid at that step is left out, so its plants are idle, while the others still
+show theirs; two rows for one region in one step, or more than 24 rows, make the
+whole answer unavailable. `src/ui/plant-feed.ts` asks every 15 minutes while the
+page is visible, stops when it is hidden, drops an answer that lands after that,
+keeps the last good step when a refresh fails (and redraws nothing then) and tries
+again a minute later. The page says where the plants' figures come from and their
+time: "relevé de 10:45", an older reading with its date, sample data, a reading later
+than the time shown (`?at=`), or unavailable.
 
 What one step says: the area's consumption is met by its own production, plus
 what it imports, minus what its pumps and batteries draw. The sign of each field
@@ -169,8 +186,8 @@ Caveats (provenance in brackets):
   capacity reference lags new installations (not confirmed). The parser accepts
   0–200 %; the scene clamps (B-012).
 - **No load factors nationally:** the national dataset has no `tch_*` column
-  (S-009), so the national view needs installed capacities to animate plants
-  (DS-07, B-012).
+  (S-009). The national view animates each plant by its own region's load factor
+  instead (D-025), so it needs no installed capacities.
 - **Delay:** at 08:48 UTC on 2026-11-11 the latest regional step was 07:45 UTC
   (63 min old) and the latest national one 08:30 UTC (18 min). The datasets keep
   about 10 weeks: from 2026-08-31 22:00 UTC that day (S-003, S-009). A reading is
@@ -356,6 +373,21 @@ bake. The browser never downloads map data: the CSP is unchanged.
   Ouverte asks for the date of the data.
 - Real places (plants, landmarks, towns) are stored as latitude/longitude and
   projected the same way.
+- **Plant sites** (B-012, D-024): `tools/bake-plants.ts` bakes `src/map/plants.ts`
+  (304 sites, 33 KB) from the national registry of installations at 31/12/2024
+  (DS-07, S-016): every unit in service of 10 MW or more, summed per technology and
+  commune; per region and technology, every nuclear site and the largest of the
+  others (at most 8; at least 50 MW for hydro, 100 MW for thermal, 10 MW for the
+  rest). Each site stands at the chef-lieu of its commune (IGN, DS-04, S-013),
+  moved onto the nearest 1 km cell of its region within 5 km when that falls on the
+  sea or across a border; the registry has no coordinates, so a site can be a few
+  kilometres off (PRD Q-15). Left out: offshore wind, whose commune is where the
+  farm lands on the grid (G-007); Corsica and overseas, not in the regional
+  éCO2mix; one site whose commune IGN no longer lists (Lyon 7e, 10 MW of
+  bioenergy) and one whose chef-lieu is 5 km or more out of its region (a wind farm
+  of Mont Lozère). A nuclear site draws cooling towers if it is in the list of
+  `tools/bake-plants-rules.ts` (11 sites; **provisional**, PRD Q-14). In 2026-11 the
+  registry counts 18 nuclear sites, 61 370 MW, as the tests check.
 
 ## World generation
 
@@ -372,23 +404,32 @@ bake. The browser never downloads map data: the CSP is unchanged.
 ## Data-to-scene mapping
 
 The acceptance criterion for the scene (AGENTS.md § Faithfulness). Every row names
-its figure and its formula. **Provisional** until B-012: the formulas will be tuned on
-real recorded data, then fixed here.
+its figure and its formula. Each plant is driven by its **activity**, the load
+factor of its technology in its own region, `tch_* / 100` clamped to 0–1 (the API
+sends up to 125 %), from the latest step of every region (D-025;
+`src/scene/scene.ts`, `src/render/art/plants.ts`). **Provisional** (D-026): tuned on
+the two recorded steps of 2026-11-12 (`tests/fixtures/eco2mix/2026-11-12-all-regions*`:
+nuclear 50–97 %, wind 2–44 %, solar 0 at night and up to 18 % that morning), to be
+checked against real screens.
 
-| On screen                           | Figure                         | Formula (provisional)                                                |
-| ----------------------------------- | ------------------------------ | -------------------------------------------------------------------- |
-| Steam plumes of cooling towers      | `tch_nucleaire`                | plume height and puff rate ∝ load factor; no plume at 0              |
-| Seaside nuclear plants (no towers)  | `tch_nucleaire`                | warm-water shimmer and lit buildings ∝ load factor                   |
-| Wind turbine rotors                 | `tch_eolien`                   | rotation speed ∝ load factor; stopped at 0                           |
-| Solar fields                        | `tch_solaire`                  | glint density ∝ load factor (so 0 at night, low under clouds)        |
-| Dams and weirs                      | `tch_hydraulique`              | spillway flow ∝ load factor                                          |
-| Thermal plant chimneys              | `tch_thermique`                | smoke rate ∝ load factor                                             |
-| Bioenergy plants                    | `tch_bioenergies`              | small smoke and a lit furnace ∝ load factor                          |
-| Town windows lit, power-line pulses | `consommation`                 | ∝ position of consumption in the area's typical range (baked p5–p95) |
-| Legend: stacked bar and figures     | MW per source, `ech_physiques` | shares of total production; import if > 0, export if < 0             |
+| On screen                           | Figure            | Formula (provisional)                                                            |
+| ----------------------------------- | ----------------- | -------------------------------------------------------------------------------- |
+| Steam puffs over cooling towers     | `tch_nucleaire`   | height 3 + 9·a px, a puff every 3 / (0.4 + 0.6·a) s per tower; none at 0         |
+| Nuclear plants without towers       | `tch_nucleaire`   | lit windows at night, round(3·a) of 3; nothing moves (PRD Q-16)                  |
+| Wind turbine rotors                 | `tch_eolien`      | 0.5·a turn a second (blades pass at 1.5·a Hz); stopped at 0; 1–3 turbines by MW  |
+| Solar fields                        | `tch_solaire`     | glints on a·33 % of the panel cells, a new draw every 0.5 s (so none at night)   |
+| Dams                                | `tch_hydraulique` | ceil(3·a) streams of water falling down the face                                 |
+| Thermal plant chimneys              | `tch_thermique`   | smoke 2 + 7·a px high, a puff every 3 / (0.3 + 0.7·a) s                          |
+| Bioenergy plants                    | `tch_bioenergies` | a small smoke, 2 + 4·a px high; its window lit at night when a > 0               |
+| Town windows lit, power-line pulses | `consommation`    | ∝ position of consumption in the area's typical range (baked p5–p95; B-014)      |
+| Legend: stacked bar and figures     | MW per source     | shares of total production; import if `ech_physiques` > 0, export if < 0 (B-019) |
 
-A missing figure shows the element **idle** (no motion, no glow) and the caption says
-"no data", never a guessed value.
+A missing figure shows the element **idle**: no motion, no glow, never a guessed
+value. That is a region without a reading (not loaded, unavailable, late for the
+newest step), a reading dated more than 15 minutes in the future, or a technology
+éCO2mix gives no load factor for (`null`). The page note says why ("données
+indisponibles"); the captions (B-020) will say it per plant. A stale reading (over
+3 hours) still drives the plants and is labelled as stale.
 
 ## Sky, light and weather
 
@@ -438,8 +479,9 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
 
 Direction A, the isometric map (drawn north up, D-017), was chosen by Guillaume on 2026-11-11 (PRD Q-1). The
 palette, the night and the dusk below were validated with the mockups of B-010
-(D-019); the zoom, the level of detail and the 1 km terrain (B-011, D-020 to D-022)
-are **proposed** until Guillaume validates them.
+(D-019); the 1 km terrain was confirmed (D-023); the zoom and the level of detail
+(D-020, D-021) and the plants' sprites (B-012, D-026) are **proposed** until Guillaume
+validates them on the deployed build.
 
 - **Projection:** 2:1 tiles (a tile is twice as wide as it is tall), north up, the
   map seen from the south (D-017); light from the north-west, no perspective.
@@ -491,7 +533,20 @@ are **proposed** until Guillaume validates them.
   then emissive pixels (windows, beacons, illuminated landmarks, lit plumes) are
   drawn on top, untinted.
 - **Sprites** are drawn in code (`src/render/art/`), from simple primitives (spans,
-  rectangles, polygons) and seeded noise; no image files (ASSETS.md).
+  rectangles, polygons, small pixel maps written as strings) and seeded noise; no
+  image files (ASSETS.md).
+- **Plants** (B-012, `src/render/art/plants.ts`): one sprite per source, in the
+  palette with the source's signature colour as an accent, 6 to 15 pixels wide, its
+  foot on its cell's top face and drawn with the terrain, at the end of its row, so
+  the relief in front hides it. Nuclear: two cooling towers and the reactor's dome,
+  or, without towers, the dome and the turbine hall; wind: one to three turbines;
+  solar: a field of panels; hydro: a dam; thermal: a hall and its chimney;
+  bioenergy: a shed with a small chimney. Full sprites from 0.7 pixel per km; below,
+  on the national view, a 3-pixel marker of the source's colour for the sites of
+  1 000 MW or more (the nuclear sites and the largest dams), the towers' steam
+  still rising. Between 0.7 and 1.2 only the sites of 50 MW or more show. Two
+  plants closer than 8 pixels across or 4 down would overlap: the smaller one is
+  left out. Their motion is drawn on top (§ Rendering and loop).
 - **Motion:** slow and sparse; nothing blinks faster than about 2 Hz; with
   `prefers-reduced-motion`, no camera drift and half-speed animation.
 
@@ -506,7 +561,9 @@ come without touching the model (PRD G-011). The step-2 mockups
 theme; `tools/screenshots.ts` writes the step-3 frames (`step-3-*.png`): France,
 Normandie and Auvergne-Rhône-Alpes as the app frames them, the Mont Blanc massif
 close up, by day, at the golden hour and at night, and the flight from France to
-Normandie. The map is drawn north up (D-017): 2:1 tiles, the map seen from the
+Normandie; and the plants (`step-3-plants-*.png`, B-012) from the two recorded steps
+of 2026-11-12, by day and at night: France, Normandie, Auvergne-Rhône-Alpes, the
+Rhône valley and the Seine-Maritime coast, and four moments of their motion. The map is drawn north up (D-017): 2:1 tiles, the map seen from the
 south.
 
 How the terrain draws, aiming at calm, elegant pixel art (Guillaume, 2026-11-11):
@@ -559,7 +616,11 @@ and the Pyrenees, French mountains end in a cliff (PRD Q-11).
   every frame, its darkness rounded to a sixteenth of a step so the picture changes
   only when the light visibly does (B-014 brings the rest of day and night).
   `?at=` (ISO 8601 with a zone, e.g. `?at=2026-06-21T21:30Z`, 2000–2099;
-  `src/ui/settings.ts`) fixes the time, for demos and screenshots.
+  `src/ui/settings.ts`) fixes the time, for demos and screenshots; with it, a live
+  reading dated after that time shows nothing (it would be in the future).
+  `?sample=day` or `?sample=night` shows a recorded step of every region instead of
+  the live one (2026-11-12, 09:45 or 01:00 UTC), labelled "données d'exemple" on the
+  page.
 
 ### Landmarks
 
@@ -586,8 +647,18 @@ photo.
   pixel, the level of detail, the light, the size): a still or drifting scene costs
   almost nothing. Measured in Node at 480 × 270: 3.5 ms for France, 3 ms for
   Normandie, 8 ms for Auvergne-Rhône-Alpes, 10 ms during a crossfade, which lasts
-  about half a second (2026-11-12; B-013 measures it in browsers). Animated elements (plumes, rotors, water,
-  weather) will need cached terrain (B-012, B-013).
+  about half a second (2026-11-12; B-013 measures it in browsers).
+- **Motion** (B-012): the theme draws the still frame (terrain, towns, the plants'
+  bodies) once per change, and returns what moves (`Drawn`). Ten times a second,
+  while a plant works on screen, the still frame is copied and the plants' motion
+  drawn over it, at an animation time from the animation clock (half speed with
+  `prefers-reduced-motion`): about 0.05 ms at 480 × 270 in Node, against 5 to 10 ms
+  for a still frame (2026-11-12). With every plant idle, or none on screen
+  that moves, nothing is redrawn. The motion is drawn over the relief in front,
+  which is rarely in the way; and a rotor's angle is its speed times the animation
+  time, so a new reading can turn it at once to another angle, at most every 15
+  minutes. During a crossfade the plants stand once, on the layer that shows the
+  most, over the dissolve.
 - `requestAnimationFrame`, capped at 30 fps (PRD Q-7); paused when the tab is hidden
   (Page Visibility API), which also pauses data refreshes; asleep while nothing
   moves, until the drift starts, the light changes or an input comes.
@@ -612,7 +683,9 @@ Budget (**provisional**, to be measured in B-013 and fixed here):
 - **Untrusted input:** API responses and URL settings. Parsers live in `src/data/`
   and `src/ui/settings.ts`; they accept only the documented shape, finite numbers in
   range (|MW| ≤ 200 000, load factors 0–200 %), bounded strings, known area codes, a
-  `?at=` read field by field and checked against the calendar; they never throw past
+  `?at=` read field by field and checked against the calendar, `?sample=` among
+  `day` and `night` only (a recorded step, loaded as a chunk from the site itself);
+  they never throw past
   the boundary: a bad response is "data unavailable", a bad setting is ignored.
 - No `innerHTML`, `eval` or `new Function` anywhere (lint rules); captions use
   `textContent`.

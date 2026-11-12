@@ -86,6 +86,24 @@ export function eco2mixUrl(area: Eco2mixArea): string {
   return `${API}/${dataset}/records?${params.toString()}`;
 }
 
+/** Rows asked for every region at once: two steps' worth (see {@link parseEco2mixRegions}). */
+export const REGIONS_ROWS = 2 * REGION_CODES.length;
+
+/**
+ * The URL of the latest published steps of every region at once (B-012, D-025): the
+ * scene animates each plant by its own region's figures, whatever the view. Two
+ * steps' worth of rows, so that a step still being published region by region does
+ * not leave most regions out.
+ */
+export function eco2mixRegionsUrl(): string {
+  const params = new URLSearchParams({
+    where: "consommation is not null",
+    order_by: "date_heure desc",
+    limit: String(REGIONS_ROWS),
+  });
+  return `${API}/eco2mix-regional-tr/records?${params.toString()}`;
+}
+
 // Bounds of the security boundary (ARCHITECTURE § Security).
 const MAX_ABS_MW = 200_000;
 const MAX_LOAD_FACTOR_PCT = 200;
@@ -189,6 +207,61 @@ export function parseEco2mix(area: Eco2mixArea, body: unknown): Eco2mixResult {
     if (!isRecord(row)) throw new Invalid("no published step");
     return parseRow(area, row);
   });
+}
+
+/** One step of every region that published it: one reading per region, or none. */
+export interface RegionalReadings {
+  /** Start of the step, ms since the epoch. */
+  readonly timeMs: number;
+  /** The regions with a valid row at that step; a region missing here draws idle. */
+  readonly byRegion: Readonly<Partial<Record<RegionCode, Eco2mixReading>>>;
+}
+
+/**
+ * Parses the body of {@link eco2mixRegionsUrl}'s answer. Never throws. One step is
+ * kept: the one with the most valid regions, the newest among equals, so that a step
+ * still being published (3 regions at 10:00, 12 at 09:45) does not leave nine regions
+ * out. A region whose row is missing or invalid at that step is left out, so that it
+ * draws idle, never with a made-up or older figure, and the other regions still show
+ * theirs. Two rows for one region in one step, or more rows than asked for, make the
+ * whole answer unavailable: it is not the API's shape.
+ */
+export function parseEco2mixRegions(body: unknown): Result<RegionalReadings> {
+  return safely(() => {
+    if (!isRecord(body) || !Array.isArray(body.results)) throw new Invalid("not a records answer");
+    const rows: unknown[] = body.results;
+    if (rows.length > REGIONS_ROWS) throw new Invalid("too many rows");
+    const steps = new Map<number, Partial<Record<RegionCode, Eco2mixReading>>>();
+    for (const row of rows) {
+      if (!isRecord(row)) throw new Invalid("not a row");
+      const code = row.code_insee_region;
+      const region = REGION_CODES.find((r) => r === code);
+      if (region === undefined) throw new Invalid("code_insee_region: not a region");
+      const reading = parseEco2mix(region, { results: [row] });
+      if (!reading.ok) continue;
+      const step = steps.get(reading.reading.timeMs) ?? {};
+      if (step[region] !== undefined) throw new Invalid("code_insee_region: twice in one step");
+      step[region] = reading.reading;
+      steps.set(reading.reading.timeMs, step);
+    }
+    let best: { timeMs: number; byRegion: Partial<Record<RegionCode, Eco2mixReading>> } | null =
+      null;
+    for (const [timeMs, byRegion] of steps) {
+      const n = Object.keys(byRegion).length;
+      const m = best === null ? -1 : Object.keys(best.byRegion).length;
+      if (best === null || n > m || (n === m && timeMs > best.timeMs)) best = { timeMs, byRegion };
+    }
+    if (best === null) throw new Invalid("no published step");
+    return best;
+  });
+}
+
+/** Fetches and parses the latest step of every region (failures: see {@link fetchJson}). */
+export function fetchEco2mixRegions(
+  fetchFn: typeof fetch,
+  signal?: AbortSignal,
+): Promise<Result<RegionalReadings>> {
+  return fetchJson(eco2mixRegionsUrl(), MAX_BODY_CHARS, parseEco2mixRegions, fetchFn, signal);
 }
 
 /**

@@ -36,7 +36,26 @@ raw page: re-read them in a browser before relying on an exact wording.
 
 Re-read on 2026-11-12: S-013, S-014 and S-015, by `tools/bake-map.ts`, to bake the
 1 km relief (D-021) with the same requests; the regions and the 4 km grid came out
-unchanged, cell for cell.
+unchanged, cell for cell. The same day, S-013's layer
+`ADMINEXPRESS-COG.LATEST:chef_lieu_de_commune` (the chef-lieu of each commune, by
+INSEE code) gave `tools/bake-plants.ts` where to place each plant (D-024); and S-003
+gave the latest steps of every region in one request (the 12 regions publish each
+step together: 12 rows a step, checked at 09:45 and 01:00 UTC), recorded as `tests/fixtures/eco2mix/2026-11-12-all-regions*`.
+
+Consulted on 2026-11-12, **S-016**: [ODRÉ, dataset
+`registre-national-installation-production-stockage-electricite-agrege-311224`][s016]
+(« Registre national des installations de production et de stockage d'électricité
+(au 31/12/2024) »), its API and metadata. Gave: licence "Licence Ouverte v2.0
+(Etalab)"; 101 097 rows, one per unit of 36 kW or more and one per commune for the
+smaller ones; fields `codefiliere` (NUCLE, THERM, EOLIE, SOLAI, HYDLQ, BIOEN…),
+`technologie` ("En mer posé" for offshore wind), `puismaxinstallee` (kW), `regime`
+("En service"), `coderegion` and the INSEE code of the commune
+(`codeinseecommuneimplantation`). 2 318 units in service of 10 MW or more; Paluel is
+4 × 1 330 MW. For an offshore farm the commune is where it lands on the grid
+(Saint-Brieuc's farm under Hénansal), not the farm. Reliability high (the publisher
+documents its own data). Also tried: fr.wikipedia.org, for how each nuclear site is
+cooled; out of the session's network reach, so the list of sites with cooling
+towers is from general knowledge (low) until checked (PRD Q-14).
 
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
@@ -45,4 +64,5 @@ unchanged, cell for cell.
 [s013-csw]: https://data.geopf.fr/csw?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&OUTPUTSCHEMA=http://standards.iso.org/iso/19115/-3/mdb/2.0&elementSetName=full&ID=IGNF_ADMIN-EXPRESS
 [s014-wms]: https://data.geopf.fr/wms-r/wms?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0
 [s014-csw]: https://data.geopf.fr/csw?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&OUTPUTSCHEMA=http://standards.iso.org/iso/19115/-3/mdb/2.0&elementSetName=full&ID=IGNF_BD-ALTI
+[s016]: https://odre.opendatasoft.com/explore/dataset/registre-national-installation-production-stockage-electricite-agrege-311224/
 [s015-repo]: https://github.com/nvkelso/natural-earth-vector/tree/ca96624a56bd078437bca8184e78163e5039ad19

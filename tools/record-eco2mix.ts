@@ -1,14 +1,14 @@
 /**
  * Records real éCO2mix answers as test fixtures (B-005). Run by hand, never in CI:
  *
- *   node --experimental-strip-types tools/record-eco2mix.ts
+ *   node --experimental-strip-types tools/record-eco2mix.ts [name filter]
  *
  * Each answer is saved byte for byte as `<name>.json`, next to `<name>.meta.json`
  * (URL, HTTP status, recording time, source id). A fixture is dated, never refreshed
  * in place: re-recording writes new names.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
-import { eco2mixUrl, type Eco2mixArea } from "../src/data/eco2mix.ts";
+import { eco2mixRegionsUrl, eco2mixUrl, type Eco2mixArea } from "../src/data/eco2mix.ts";
 
 const OUT = "tests/fixtures/eco2mix";
 const API = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets";
@@ -28,6 +28,22 @@ const targets: { name: string; url: string; source: string }[] = [
     url: eco2mixUrl(area),
     source: area === "FR" ? "DS-02, S-009" : "DS-01, S-003",
   })),
+  {
+    // The latest step of every region at once (B-012).
+    name: `${day}-all-regions`,
+    url: eco2mixRegionsUrl(),
+    source: "DS-01, S-003",
+  },
+  {
+    // Every region at a step of the night before, for night frames (B-012).
+    name: `${day}-all-regions-0100z`,
+    url: `${API}/eco2mix-regional-tr/records?${new URLSearchParams({
+      where: `date_heure = date'${day}T01:00:00+00:00' and consommation is not null`,
+      order_by: "date_heure desc",
+      limit: "12",
+    }).toString()}`,
+    source: "DS-01, S-003",
+  },
   {
     // A step of the day not yet published: every figure is null.
     name: `${day}-regional-empty-step`,
@@ -54,8 +70,10 @@ async function get(url: string): Promise<Response> {
   }
 }
 
+// `… record-eco2mix.ts all-regions` records only the targets whose name holds that.
+const only = process.argv[2];
 mkdirSync(OUT, { recursive: true });
-for (const target of targets) {
+for (const target of targets.filter((t) => only === undefined || t.name.includes(only))) {
   const response = await get(target.url);
   const body = await response.text();
   writeFileSync(`${OUT}/${target.name}.json`, body);

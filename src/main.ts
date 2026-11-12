@@ -2,8 +2,17 @@ import { detectLocale, translate, type Locale, type MessageKey } from "./i18n";
 import { MAP_BAKED_ON } from "./map/france";
 import { fixedClock, systemClock } from "./clock/clock";
 import { mountAreaPicker, renderAreaOptions, type AreaState } from "./ui/area-picker";
+import { loadSample } from "./data/samples";
+import { feedState, type FeedState, startPlantFeed } from "./ui/plant-feed";
 import { mountSceneView, type SceneView } from "./ui/scene-view";
-import { atFromQuery, browserStorage, initialArea, savedLocale, saveLocale } from "./ui/settings";
+import {
+  atFromQuery,
+  browserStorage,
+  initialArea,
+  sampleFromQuery,
+  savedLocale,
+  saveLocale,
+} from "./ui/settings";
 
 function setText(id: string, text: string): void {
   const el = document.getElementById(id);
@@ -32,11 +41,38 @@ function render(locale: Locale): void {
   setText("credits-weather-licence", t("creditsWeatherLicence"));
   setText("credits-map", t("creditsMap"));
   setText("credits-map-licence", t("creditsMapLicence").replace("{date}", mapDate(locale)));
+  setText("credits-plants", t("creditsPlants"));
+  setText("credits-plants-licence", t("creditsPlantsLicence"));
   document.getElementById("language")?.setAttribute("aria-label", t("switchLanguageLabel"));
   setText("area-label", t("areaLabel"));
   setText("locate", t("useMyLocation"));
   setText("debug-link", t("debugTitle"));
   document.getElementById("scene")?.setAttribute("aria-label", t("sceneLabel"));
+  renderPlantsNote();
+}
+
+let plantsState: FeedState = { kind: "loading" };
+
+/** Where the plants' figures come from, and their time: every animated figure is traceable. */
+function renderPlantsNote(): void {
+  const t = (key: MessageKey): string => translate(locale, key);
+  const state = plantsState;
+  if (state.kind === "loading" || state.kind === "unavailable") {
+    setText("plants-note", t(state.kind === "loading" ? "plantsLoading" : "plantsUnavailable"));
+    return;
+  }
+  // A live step is under 3 hours old: its time says enough. Any other gets its date.
+  const time = new Intl.DateTimeFormat(locale, {
+    ...(state.kind === "live" ? {} : { dateStyle: "short" as const }),
+    timeStyle: "short",
+  }).format(new Date(state.timeMs));
+  const keys = {
+    live: "plantsLive",
+    stale: "plantsStale",
+    sample: "plantsSample",
+    ahead: "plantsAhead",
+  } as const satisfies Record<typeof state.kind, MessageKey>;
+  setText("plants-note", t(keys[state.kind]).replace("{time}", time));
 }
 
 /** The area list: rebuilt only when the language changes, otherwise just selected. */
@@ -62,11 +98,29 @@ renderArea(true);
 
 // `?at=` fixes the time of day the scene shows (demos, screenshots).
 const at = atFromQuery(location.search);
+const clock = at === undefined ? systemClock : fixedClock(at);
 const canvas = document.getElementById("scene");
 const scene: SceneView | null =
-  canvas instanceof HTMLCanvasElement
-    ? mountSceneView(canvas, at === undefined ? systemClock : fixedClock(at), areaState.area)
-    : null;
+  canvas instanceof HTMLCanvasElement ? mountSceneView(canvas, clock, areaState.area) : null;
+
+// The plants' figures: live, or a recorded sample (`?sample=`), labelled as such.
+const sample = sampleFromQuery(location.search);
+const showPlants = (readings: Parameters<SceneView["setReadings"]>[0], state: FeedState): void => {
+  plantsState = state;
+  renderPlantsNote();
+  scene?.setReadings(readings, state.kind === "sample");
+};
+if (sample === undefined) startPlantFeed(clock, (input, init) => fetch(input, init), showPlants);
+else
+  loadSample(sample)
+    .then((result) => {
+      const readings = result.ok ? result.reading : null;
+      showPlants(readings, feedState(readings, true, clock.now()));
+    })
+    .catch(() => {
+      // The sample's chunk did not load (offline, or a newer deploy): say so.
+      showPlants(null, { kind: "unavailable" });
+    });
 
 let shownArea = areaState.area;
 mountAreaPicker(areaState, () => {

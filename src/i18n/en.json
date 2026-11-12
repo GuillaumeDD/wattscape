@@ -1,7 +1,7 @@
 {
   "title": "Wattscape",
   "tagline": "Your region's electricity, live, in pixel art.",
-  "status": "Under construction: the map is here, the power plants are coming.",
+  "status": "Under construction: the power plants follow the data, the legend is coming.",
   "switchLanguage": "Français",
   "switchLanguageLabel": "Passer en français",
   "creditsData": "Data:",
@@ -9,6 +9,8 @@
   "creditsWeatherLicence": "(CC BY 4.0)",
   "creditsMap": "· Map:",
   "creditsMapLicence": "(ADMIN EXPRESS and BD ALTI, Open Licence 2.0, {date}) and",
+  "creditsPlants": "· Power plants:",
+  "creditsPlantsLicence": "(national registry of installations at 31/12/2024, Open Licence 2.0)",
   "areaLabel": "Region:",
   "areaFrance": "All of France",
   "useMyLocation": "Use my location",
@@ -37,5 +39,11 @@
   "debugLoading": "loading…",
   "debugNoPoint": "no reference point for the whole of France",
   "debugComputed": "computed",
-  "sceneLabel": "Pixel-art relief map of France. Wheel, pinch, arrows or + and − to zoom and move; Home to go back to the region."
+  "sceneLabel": "Pixel-art relief map of France. Wheel, pinch, arrows or + and − to zoom and move; Home to go back to the region.",
+  "plantsLoading": "Power plants: loading RTE éCO2mix data…",
+  "plantsLive": "Power plants driven by RTE éCO2mix, reading of {time}.",
+  "plantsStale": "Power plants driven by an old RTE éCO2mix reading, of {time}.",
+  "plantsSample": "Sample data: RTE éCO2mix reading of {time}, not live.",
+  "plantsAhead": "The RTE éCO2mix reading ({time}) is later than the time shown: the power plants are idle.",
+  "plantsUnavailable": "RTE éCO2mix data unavailable: the power plants are idle."
 }

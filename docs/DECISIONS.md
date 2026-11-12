@@ -362,3 +362,60 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   every zoom, and a region is one pick in the list away.
 - **Revisit if:** the deployed build shows otherwise on a real screen; G-012 waits
   for a relief source that is GO.
+
+## D-024 — Plants from the national registry, at the chef-lieu of their commune
+
+- **Context:** B-012 draws the plants, and PRD § 4.5 wants the major ones at their
+  real places. The plants need positions, and a source that is GO.
+- **Options:** (a) the ODRÉ national registry of installations (DS-07): every unit,
+  its technology, capacity and commune, but no coordinates; (b) OpenStreetMap
+  (DS-06): coordinates, but share-alike on a baked database; (c) a hand-made list of
+  sites with coordinates looked up one by one.
+- **Decision:** (a). Guillaume set DS-07 to GO on a decision card, 2026-11-12. Units
+  in service of 10 MW or more are summed per technology and commune; per region and
+  technology, every nuclear site and the largest of the others are kept (rules in
+  ARCHITECTURE § Map); each stands at the chef-lieu of its commune (IGN, DS-04),
+  moved onto its region if needed. Offshore wind waits for real positions (G-007).
+  Which nuclear sites have cooling towers is a provisional list (PRD Q-14).
+  Proposed by Claude, 2026-11-12.
+- **Why:** official and open, the same publisher as the live figures, and it covers
+  every technology; (b) would bind the repository to ODbL; (c) does not scale to
+  wind and solar. A chef-lieu is within a few kilometres of the site, which shows at
+  the region's zoom only as a small shift.
+- **Revisit if:** a shift reads wrong on a real screen (B-017 can store exact sites),
+  or a newer registry is published (re-bake).
+
+## D-025 — Each plant follows its own region's load factor, in every view
+
+- **Context:** the national dataset has no load factor (S-009), so ARCHITECTURE
+  planned installed capacities (DS-07) to animate plants on the national view; and
+  on a region view, the plants of the regions around would have no figure.
+- **Options:** (a) one request per shown area, national figures divided by baked
+  capacities on the national view, plants of other regions idle; (b) one request
+  for the latest steps of every region (24 rows, about 17 KB), each plant driven by its
+  own region's `tch_*`.
+- **Decision:** (b). Proposed by Claude, 2026-11-12.
+- **Why:** one figure per plant, published by RTE for that region, with no
+  arithmetic of ours in between; every plant on screen moves truly, whatever the
+  view; one request every 15 minutes, the same rate as before.
+- **Revisit if:** the regions stop publishing their steps together, or the legend
+  (B-019) needs the national row anyway (a second request then).
+
+## D-026 — The six sprites and their motion
+
+- **Context:** B-012: six source sprites, each animated by its figure, idle without
+  one (ARCHITECTURE § Data-to-scene mapping), in the calm pixel art of D-019.
+- **Options:** for each source, which motion carries the load factor; and how often
+  to draw it, for a screensaver that runs for hours on battery.
+- **Decision:** steam over cooling towers, rotors, glints on the panels, water down
+  a dam, smoke from chimneys, a furnace window; the formulas of ARCHITECTURE §
+  Data-to-scene mapping, provisional, tuned on the two recorded steps of 2026-11-12.
+  The still frame is cached and the motion drawn over a copy ten times a second;
+  markers on the national view; `?sample=day|night` shows the recorded steps,
+  labelled as sample data, for demos and screenshots. Nuclear plants without towers
+  show their load factor by lit windows at night only (PRD Q-16). Proposed by
+  Claude, 2026-11-12; to be validated by Guillaume on the deployed build.
+- **Why:** one motion per figure, slow (nothing faster than 2 Hz) and sparse; the
+  cost of the motion is about 0.05 ms a step, against 5 to 10 ms for a still frame.
+- **Revisit if:** the plants read too small or too busy on a real screen, or B-013
+  measures the motion beyond the budget.

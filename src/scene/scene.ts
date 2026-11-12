@@ -4,9 +4,16 @@
  * the first, and a second one can come later without touching the model (PRD
  * G-011). Pure: a scene is plain data, built from the map, the camera and the light.
  */
+import {
+  type Eco2mixReading,
+  freshness,
+  type RegionalReadings,
+  type Source,
+} from "../data/eco2mix.ts";
 import { PREFECTURES, REGION_CAPITALS } from "../geo/regions.ts";
 import { type CellRegion, kmOf, positionOfKm } from "../map/grid.ts";
 import { type TerrainLayer } from "../map/layers.ts";
+import { type PlantSite } from "../map/plants.ts";
 import { ditherLevel } from "../render/dither.ts";
 import { type Light, lightAt } from "../sky/light.ts";
 import { sunPosition } from "../sky/sun.ts";
@@ -18,6 +25,18 @@ export interface Town {
   readonly y: number;
   /** A regional prefecture, drawn a little larger. */
   readonly capital: boolean;
+}
+
+/** A plant as the scene shows it: where, and how hard it works (ARCHITECTURE § Data-to-scene mapping). */
+export interface ScenePlant {
+  readonly site: PlantSite;
+  /**
+   * The load factor of its technology in its region, 0 to 1 (`tch_*` / 100, clamped:
+   * the API sends up to 125 %), or null when there is no figure to show (no reading,
+   * a reading dated in the future, or no such capacity in éCO2mix): the plant is then
+   * drawn idle, with no motion and no glow, never with a guessed value.
+   */
+  readonly activity: number | null;
 }
 
 export interface Scene {
@@ -38,6 +57,8 @@ export interface Scene {
    */
   readonly detail: number;
   readonly towns: readonly Town[];
+  /** The plants that may show, with their activity; the theme picks by size and scale. */
+  readonly plants: readonly ScenePlant[];
 }
 
 /** Below this scale (pixels per km) the 4 km layer shows alone. */
@@ -74,4 +95,29 @@ export function viewLight(camera: Camera, timeMs: number): Light {
   const sun = sunPosition(timeMs, at.latitude, at.longitude);
   const light = lightAt(sun?.geometricElevationDeg ?? Number.NaN);
   return { ...light, darkness: Math.round(light.darkness * 16) / 16 };
+}
+
+/** The figure that drives a source's plants: its regional load factor (`tch_*`). */
+export function activityOf(reading: Eco2mixReading | undefined, source: Source): number | null {
+  const pct = reading?.loadFactorPct[source];
+  if (pct === null || pct === undefined || !Number.isFinite(pct)) return null;
+  return Math.min(1, Math.max(0, pct / 100));
+}
+
+/**
+ * Every plant with the activity its region's latest reading gives it. A reading dated
+ * in the future (a wrong clock, or a bad answer) shows nothing; a stale one still
+ * shows, labelled as such by the page (ARCHITECTURE § Data sources).
+ */
+export function scenePlants(
+  sites: readonly PlantSite[],
+  readings: RegionalReadings | null,
+  nowMs: number,
+): ScenePlant[] {
+  return sites.map((site) => {
+    const reading = readings?.byRegion[site.region];
+    const shown =
+      reading !== undefined && freshness(reading, nowMs) !== "future" ? reading : undefined;
+    return { site, activity: activityOf(shown, site.source) };
+  });
 }

@@ -19,4 +19,5 @@ its author, source and license. Files without an entry are not merged.
 | `tests/fixtures/sky/*.json`     | Wattscape contributors | Sun and moon reference values computed with Astronomy Engine (S-012)      | CC BY-SA 4.0        |
 | `src/map/france.ts`             | IGN; Natural Earth     | Baked map (B-008): IGN DS-04, DS-05; Natural Earth DS-11 (public domain)  | Licence Ouverte 2.0 |
 | `src/map/relief.ts`             | IGN                    | Baked 1 km relief (B-011, D-021): IGN BD ALTI, DS-05                      | Licence Ouverte 2.0 |
+| `src/map/plants.ts`             | RTE, ODRÉ; IGN         | Baked plant sites (B-012, D-024): ODRÉ registry DS-07; IGN DS-04          | Licence Ouverte 2.0 |
 | `tests/fixtures/frames/*.json`  | Wattscape contributors | Hashes of reference frames drawn by this app (B-009)                      | CC BY-SA 4.0        |

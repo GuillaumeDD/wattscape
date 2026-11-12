@@ -13,12 +13,13 @@
 import { ELEVATION_CLASSES, FOREIGN, kindOfRegion, SEA } from "../map/grid.ts";
 import { type TerrainLayer } from "../map/layers.ts";
 import { RISE_METRES_PER_KM } from "../scene/camera.ts";
-import { type Scene, type Town } from "../scene/scene.ts";
+import { type Scene, type ScenePlant, type Town } from "../scene/scene.ts";
 import { skyColour, tinted } from "../sky/light.ts";
+import { drawBody, drawMotion, hasMotion, type Pen, type SpriteSize } from "./art/plants.ts";
 import { BAYER_4, DITHER_LEVELS } from "./dither.ts";
 import { COLOUR_NAMES, type ColourName, darken, PALETTE, type Rgb } from "./palette.ts";
 import { createSurface, type Surface } from "./surface.ts";
-import type { Theme } from "./theme.ts";
+import type { Drawn, Theme } from "./theme.ts";
 
 /** Whether this engine stores a Uint32 with its low byte first (every common one does). */
 const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
@@ -119,6 +120,70 @@ function fill(frame: Frame, x0: number, y0: number, x1: number, y1: number, p: U
     let i = y * width + left;
     for (let x = left; x < right; x++) words[i++] = p[row + ((x + ox) & 3)] ?? 0;
   }
+}
+
+/** A pen on a frame: palette colours under the light, anchored to the ground; lamps untinted. */
+function penOf(frame: Frame, darkness: number, emissive: boolean): Pen {
+  const { words, width, height, ox, oy } = frame;
+  return {
+    emissive,
+    put(x, y, colour) {
+      if (x < 0 || y < 0 || x >= width || y >= height) return;
+      const p = pattern(frame, colour, darkness);
+      words[y * width + x] = p[((y + oy) & 3) * 4 + ((x + ox) & 3)] ?? 0;
+    },
+    glow(x, y) {
+      if (x < 0 || y < 0 || x >= width || y >= height) return;
+      words[y * width + x] = PACKED.lamp;
+    },
+  };
+}
+
+/** Full sprites from this scale (pixels per km); below, the national view's markers. */
+export const SPRITES_FROM_SCALE = 0.7;
+
+/**
+ * The smallest plant shown at a scale, MW: on the national view the giants only
+ * (nuclear sites, the largest dams), then the large plants, then every baked site.
+ */
+export function minPlantMw(scale: number): number {
+  if (scale < SPRITES_FROM_SCALE) return 1000;
+  if (scale < 1.2) return 50;
+  return 0;
+}
+
+/** Two plants closer than this, in pixels, would overlap: the smaller is left out. */
+const SPRITE_SPACING: Readonly<Record<SpriteSize, number>> = { full: 8, marker: 4 };
+
+/** A plant placed on the frame: its anchor in buffer pixels. */
+export interface PlacedPlant {
+  readonly plant: ScenePlant;
+  readonly x: number;
+  readonly y: number;
+}
+
+/**
+ * The plants a frame shows, largest first: big enough for the scale, inside the
+ * buffer's width, and not on top of a larger one. Pure and cheap (a few hundred
+ * sites): worked out per frame.
+ */
+export function visiblePlants(scene: Scene, ox: number, width: number): ScenePlant[] {
+  const s = scene.camera.scale;
+  const size: SpriteSize = s >= SPRITES_FROM_SCALE ? "full" : "marker";
+  const spacing = SPRITE_SPACING[size];
+  const min = minPlantMw(s);
+  const kept: { plant: ScenePlant; x: number; y: number }[] = [];
+  const sorted = scene.plants
+    .filter((p) => p.site.mw >= min)
+    .sort((a, b) => b.site.mw - a.site.mw || a.site.x - b.site.x || a.site.y - b.site.y);
+  for (const plant of sorted) {
+    const x = Math.floor(plant.site.x * s) - ox;
+    const y = Math.floor((plant.site.y * s) / 2);
+    if (x < -16 || x > width + 16) continue;
+    if (kept.some((k) => Math.abs(k.x - x) < spacing && Math.abs(k.y - y) < spacing / 2)) continue;
+    kept.push({ plant, x, y });
+  }
+  return kept.map((k) => k.plant);
 }
 
 /** The sky's gradient, zenith to horizon, over the whole buffer (anchored to the screen). */
@@ -240,7 +305,12 @@ function tintsOf(frame: Frame, scene: Scene): Tints {
  * neighbours' land, the Mediterranean), so a wide view never shows the board's edge;
  * north of the grid is the sky.
  */
-function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer): void {
+function drawLayer(
+  frame: Frame,
+  scene: Scene,
+  layer: TerrainLayer,
+  bodies: boolean,
+): PlacedPlant[] {
   drawSky(frame, scene);
   const { light, camera } = scene;
   const s = camera.scale;
@@ -253,7 +323,7 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer): void {
   const c1 = Math.ceil((ox + width) / cellW) + 1;
   const r0 = Math.max(0, Math.floor(oy / cellH) - 1);
   const r1 = Math.ceil((oy + height + rise) / cellH) + 1;
-  if (c0 > c1 || r0 > r1) return;
+  if (c0 > c1 || r0 > r1) return [];
   // Pixel edges of the visible columns: floor(edge × scale), shifted by the offset.
   const xs = new Int32Array(c1 - c0 + 2);
   for (let c = c0; c <= c1 + 1; c++) xs[c - c0] = Math.floor(c * cellW) - ox;
@@ -270,6 +340,33 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer): void {
   // drawn: a town then shows whatever the zoom, on top of the ground around it, and
   // the relief of the rows in front (south) still hides it.
   const pending: number[] = [];
+  // Plants wait for the end of their row too, so the relief in front hides their foot.
+  const size: SpriteSize = s >= SPRITES_FROM_SCALE ? "full" : "marker";
+  const pen = penOf(frame, light.darkness, light.emissive);
+  const queue = visiblePlants(scene, ox, width)
+    .map((plant) => ({
+      plant,
+      row: Math.floor(plant.site.y / km),
+      column: Math.floor(plant.site.x / km),
+    }))
+    .sort((a, b) => a.row - b.row || a.column - b.column);
+  let next = 0;
+  const placed: PlacedPlant[] = [];
+  const drawPlants = (before: number): void => {
+    for (; next < queue.length && (queue[next]?.row ?? 0) < before; next++) {
+      const q = queue[next];
+      if (q === undefined) continue;
+      const rr = Math.min(Math.max(q.row, 0), rows - 1);
+      const cc = Math.min(Math.max(q.column, 0), columns - 1);
+      const i = rr * columns + cc;
+      const kind = kinds[i] ?? SEA;
+      const h = kind === SEA || kind === FOREIGN ? 0 : (hs[elevation[i] ?? 0] ?? 0);
+      const x = Math.floor(q.plant.site.x * s) - ox;
+      const y = Math.floor((q.row + 0.5) * cellH) - oy - h;
+      if (bodies) drawBody(pen, q.plant.site, q.plant.activity, x, y, size);
+      placed.push({ plant: q.plant, x, y });
+    }
+  };
   const drawTowns = (): void => {
     for (let k = 0; k < pending.length; k += 3) {
       const cx = pending[k] ?? 0;
@@ -288,6 +385,7 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer): void {
     pending.length = 0;
   };
   for (let r = r0; r <= r1; r++) {
+    drawPlants(r);
     const y0 = Math.floor(r * cellH) - oy;
     const y1 = Math.floor((r + 1) * cellH) - oy;
     const rr = Math.min(r, rows - 1);
@@ -348,6 +446,8 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer): void {
     if (!flat) drawTowns();
   }
   drawTowns();
+  drawPlants(Number.POSITIVE_INFINITY);
+  return placed;
 }
 
 /** One spare buffer for the crossfade, reused while the size stays the same. */
@@ -365,33 +465,55 @@ function frameOf(scene: Scene, out: Surface): Frame {
   };
 }
 
-/** Draws a scene: the 4 km layer, the 1 km one, or a dithered crossfade of both. */
-export function drawPixelScene(scene: Scene, out: Surface): void {
+/**
+ * Draws a scene: the 4 km layer, the 1 km one, or a dithered crossfade of both, with
+ * the plants' still bodies. Returns what moves: the plants' motion, drawn on top of
+ * a copy of this frame at any animation time.
+ */
+export function drawPixelScene(scene: Scene, out: Surface): Drawn {
   if (out.width !== scene.width || out.height !== scene.height)
     throw new Error("the surface does not have the scene's size");
   const frame = frameOf(scene, out);
   const detail = scene.fine === null ? 0 : Math.min(DITHER_LEVELS, Math.max(0, scene.detail));
-  if (!(detail > 0) || scene.fine === null) {
-    drawLayer(frame, scene, scene.coarse);
-    return;
+  let placed: PlacedPlant[];
+  const size: SpriteSize = scene.camera.scale >= SPRITES_FROM_SCALE ? "full" : "marker";
+  if (!(detail > 0) || scene.fine === null) placed = drawLayer(frame, scene, scene.coarse, true);
+  else if (detail >= DITHER_LEVELS) placed = drawLayer(frame, scene, scene.fine, true);
+  else {
+    // The plants are not dissolved: they stand once, on the layer that shows the
+    // most, drawn over the crossfade (which lasts half a second).
+    const coarsePlaced = drawLayer(frame, scene, scene.coarse, false);
+    if (spare?.width !== out.width || spare.height !== out.height)
+      spare = createSurface(out.width, out.height);
+    const detailed = frameOf(scene, spare);
+    const finePlaced = drawLayer(detailed, scene, scene.fine, false);
+    // The dissolve is anchored to the ground too, so it does not crawl during a pan.
+    const { words, width, height, ox, oy } = frame;
+    for (let y = 0; y < height; y++) {
+      const bayer = BAYER_4[(y + oy) & 3] ?? [];
+      for (let x = 0; x < width; x++)
+        if ((bayer[(x + ox) & 3] ?? 0) < detail)
+          words[y * width + x] = detailed.words[y * width + x] ?? 0;
+    }
+    placed = detail * 2 >= DITHER_LEVELS ? finePlaced : coarsePlaced;
+    const pen = penOf(frame, scene.light.darkness, scene.light.emissive);
+    for (const p of placed) drawBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
   }
-  if (detail >= DITHER_LEVELS) {
-    drawLayer(frame, scene, scene.fine);
-    return;
-  }
-  drawLayer(frame, scene, scene.coarse);
-  if (spare?.width !== out.width || spare.height !== out.height)
-    spare = createSurface(out.width, out.height);
-  const detailed = frameOf(scene, spare);
-  drawLayer(detailed, scene, scene.fine);
-  // The dissolve is anchored to the ground too, so it does not crawl during a pan.
-  const { words, width, height, ox, oy } = frame;
-  for (let y = 0; y < height; y++) {
-    const bayer = BAYER_4[(y + oy) & 3] ?? [];
-    for (let x = 0; x < width; x++)
-      if ((bayer[(x + ox) & 3] ?? 0) < detail)
-        words[y * width + x] = detailed.words[y * width + x] ?? 0;
-  }
+  const moving = placed.filter(
+    (p) => p.plant.activity !== null && p.plant.activity > 0 && hasMotion(p.plant.site, size),
+  );
+  const { ox, oy } = frame;
+  const { darkness, emissive } = scene.light;
+  return {
+    moving: moving.length > 0,
+    animate(target: Surface, seconds: number): void {
+      if (target.width !== out.width || target.height !== out.height) return;
+      const onTarget: Frame = { ...frameOf(scene, target), ox, oy };
+      const pen = penOf(onTarget, darkness, emissive);
+      for (const p of moving)
+        drawMotion(pen, p.plant.site, p.plant.activity, p.x, p.y, size, seconds);
+    },
+  };
 }
 
 export const pixelTheme: Theme = { id: "pixel", draw: drawPixelScene };
