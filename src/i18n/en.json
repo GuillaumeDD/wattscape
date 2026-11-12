@@ -1,7 +1,7 @@
 {
   "title": "Wattscape",
   "tagline": "Your region's electricity, live, in pixel art.",
-  "status": "Under construction: the scene is coming soon.",
+  "status": "Under construction: the map is here, the power plants are coming.",
   "switchLanguage": "Français",
   "switchLanguageLabel": "Passer en français",
   "creditsData": "Data:",
@@ -36,5 +36,6 @@
   "debugUnavailable": "unavailable",
   "debugLoading": "loading…",
   "debugNoPoint": "no reference point for the whole of France",
-  "debugComputed": "computed"
+  "debugComputed": "computed",
+  "sceneLabel": "Pixel-art relief map of France. Wheel, pinch, arrows or + and − to zoom and move; Home to go back to the region."
 }

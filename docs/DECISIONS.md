@@ -289,3 +289,76 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   eye more than a fine grain does.
 - **Revisit if:** the grain at dusk reads as noise on a real screen, at the real
   scale factor.
+
+## D-020 — A continuous zoom, drawn crisp at any scale
+
+- **Context:** B-011 brings the zoom between France and a region. ARCHITECTURE
+  proposed a continuous camera drawn at the nearest of a few integer levels of
+  detail, and a spike to check it felt smooth.
+- **Options:** (a) the scale snapped to integer tile widths (2, 4, 6, 8 pixels), each
+  zoom step a jump; (b) a continuous scale with each cell spanning the pixels
+  between floor(edge × scale) of its edges, tiles differing by at most a pixel while
+  the zoom moves; (c) draw at an integer level and scale the image smoothly
+  (blurred, off-palette pixels).
+- **Decision:** (b), with the camera rounded to whole pixels and every pattern
+  (dithering, lamps, crossfade) anchored to the ground, so that a pan moves the
+  picture by whole pixels without a shimmer; the 4 km layer below 0.5 pixel per km,
+  the 1 km one from 0.7, a dithered crossfade in between (ARCHITECTURE § Art
+  direction). Proposed by Claude, 2026-11-12; to be validated by Guillaume on the
+  deployed build.
+- **Why:** a zoom by jumps reads as a slideshow; (b) keeps the pixel art crisp and
+  in palette at every scale, and its cost follows the pixels, not the cells. The
+  scales put France on the 4 km map and every region, as framed on a landscape
+  screen, on the 1 km one (tested).
+- **Revisit if:** the one-pixel wobble of tiles during a zoom shows on a real screen,
+  or the crossfade reads as noise.
+
+## D-021 — The 1 km relief: baked next to the map, loaded when needed
+
+- **Context:** D-018 chose a 1 km relief for the region level and asked for its size
+  to be measured.
+- **Options:** (a) one more grid in `src/map/france.ts`, downloaded with the page;
+  (b) its own file, a separate chunk the browser fetches from the site when the
+  camera comes close or the viewer has a region; (c) per-region files.
+- **Decision:** (b). `src/map/relief.ts`: 232 KB, 86 KB compressed; decoded, 3.8 MB
+  and about 40 ms, once. The fine grid also marks foreign land now (Natural Earth,
+  DS-11), so the close view knows land from sea at 1 km; the region lookup reads
+  only the regions and is unchanged, and the re-bake left the regions and the 4 km
+  grid identical, cell for cell. Proposed by Claude, 2026-11-12.
+- **Why:** the national view, the first thing everyone sees, does not wait for it;
+  (c) would save little (most of the size is the mountains) and complicate the
+  crossfade at regional borders.
+- **Revisit if:** B-013 measures the load or the memory beyond the budget.
+
+## D-022 — The 1 km terrain stays calm: cliffs and shading at the scale of slopes
+
+- **Context:** drawn like the 4 km mockups (D-019), the 1 km layer turned every
+  100 m step of the plains into a dark line, and shaded every bump of the
+  mountains: busy, not the calm pixel art Guillaume asked for.
+- **Options:** (a) draw it like the mockups; (b) a south face is a darker cliff only
+  where the land drops by 250 m or more to the cell in front of it, or to the sea,
+  and hill shading compares a cell with the one 4 km to its north-west, on both
+  layers; (c) smooth the relief itself (it would no longer be the data).
+- **Decision:** (b), on both layers, so the national view changes little (a few
+  lowland faces lose their darker line). Proposed by Claude, 2026-11-12; open to
+  Guillaume (PRD Q-10, step-3 screenshots).
+- **Why:** the plains read flat again and the mountains as slopes, while every cell
+  keeps its own elevation from the data.
+- **Revisit if:** the relief reads too flat, or Guillaume prefers the mockups' look.
+
+## D-023 — Guillaume confirms the zoom's open choices (Q-10 to Q-13)
+
+- **Context:** B-011 (PR #12) left four choices open to Guillaume, each with a
+  recommendation (PRD Q-10 to Q-13).
+- **Options:** for each, the recommendation, or another answer.
+- **Decision:** the four recommendations. Q-10: the calm 1 km terrain of D-022
+  stays. Q-11: a relief for the neighbouring countries, after B-015, from a source
+  that is GO in DATA-SOURCES first (G-012, now planned). Q-12: on load, France for
+  1.5 s, then the flight to the viewer's region. Q-13: a double-click or a
+  double-tap zooms ×2 where it lands, rather than flying to the region clicked.
+  Guillaume answered "OK" to each, 2026-11-12.
+- **Why:** D-022 for Q-10; Q-11 because the Alps end in a cliff at the border today;
+  Q-12 because it shows where the region is, briefly; Q-13 because it works at
+  every zoom, and a region is one pick in the list away.
+- **Revisit if:** the deployed build shows otherwise on a real screen; G-012 waits
+  for a relief source that is GO.

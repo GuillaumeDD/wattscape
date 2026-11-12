@@ -1,7 +1,7 @@
 {
   "title": "Wattscape",
   "tagline": "L'électricité de votre région, en direct et en pixel art.",
-  "status": "En construction : la scène arrive bientôt.",
+  "status": "En construction : la carte est là, les centrales arrivent.",
   "switchLanguage": "English",
   "switchLanguageLabel": "Switch to English",
   "creditsData": "Données :",
@@ -36,5 +36,6 @@
   "debugUnavailable": "indisponible",
   "debugLoading": "chargement…",
   "debugNoPoint": "pas de point de référence pour la France entière",
-  "debugComputed": "calculé"
+  "debugComputed": "calculé",
+  "sceneLabel": "Carte de France en relief, en pixel art. Molette, pincement, flèches ou + et − pour zoomer et se déplacer ; Origine pour revenir à la région."
 }

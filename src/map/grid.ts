@@ -46,9 +46,8 @@ export const SOUTH = NORTH - (FINE_ROWS * FINE_KM) / KM_PER_DEGREE;
 export const EAST = WEST + (FINE_COLUMNS * FINE_KM) / KM_PER_DEGREE_LON;
 
 /**
- * What a cell holds. Index 0 is "not France" in the fine grid, and sea in the coarse
- * grid; 1 is foreign land (coarse grid only); then the 12 regions of the éCO2mix data
- * and Corsica, by INSEE code.
+ * What a cell holds, in both grids: 0 is sea, 1 is foreign land, then the 12 regions
+ * of the éCO2mix data and Corsica, by INSEE code.
  */
 export const CORSICA = "94" as const;
 export type CellRegion = RegionCode | typeof CORSICA;
@@ -100,6 +99,19 @@ export function fineIndexOf(
   };
 }
 
+/**
+ * A position in map kilometres: east and south of the grid's north-west corner, in
+ * the projection (ARCHITECTURE § Map). The camera and the scene work in these.
+ */
+export function kmOf(latitude: number, longitude: number): { x: number; y: number } {
+  return { x: (longitude - WEST) * KM_PER_DEGREE_LON, y: (NORTH - latitude) * KM_PER_DEGREE };
+}
+
+/** The latitude and longitude of a point in map kilometres (the inverse of `kmOf`). */
+export function positionOfKm(x: number, y: number): { latitude: number; longitude: number } {
+  return { latitude: NORTH - y / KM_PER_DEGREE, longitude: WEST + x / KM_PER_DEGREE_LON };
+}
+
 /** Whether a row and column fall on the fine grid. */
 export function onFineGrid(row: number, column: number): boolean {
   return row >= 0 && row < FINE_ROWS && column >= 0 && column < FINE_COLUMNS;
@@ -120,7 +132,10 @@ export function cellCentre(
 /** One character per kind in the run-length encoded rows: `a` is kind 0. */
 const KIND_CHAR_BASE = "a".charCodeAt(0);
 
-/** Run-length encodes one row of kinds: `a12c40` is 12 cells of kind 0, 40 of kind 2. */
+/**
+ * Run-length encodes one row of small values (kinds, or elevation classes): `a12c40`
+ * is 12 cells of value 0, then 40 of value 2.
+ */
 export function encodeRuns(row: ArrayLike<number>): string {
   let out = "";
   let i = 0;
@@ -135,11 +150,16 @@ export function encodeRuns(row: ArrayLike<number>): string {
 }
 
 /**
- * Decodes run-length encoded rows into one byte per cell, row after row. Throws on a
- * malformed row: the file is ours and committed, so this is a build error, caught by
- * the tests, never a runtime state.
+ * Decodes run-length encoded rows into one byte per cell, row after row; every value
+ * must be below `limit` (the kinds by default). Throws on a malformed row: the files
+ * are ours and committed, so this is a build error, caught by the tests, never a
+ * runtime state.
  */
-export function decodeRuns(rows: readonly string[], columns: number): Uint8Array {
+export function decodeRuns(
+  rows: readonly string[],
+  columns: number,
+  limit: number = KIND_COUNT,
+): Uint8Array {
   const out = new Uint8Array(rows.length * columns);
   rows.forEach((text, r) => {
     let column = 0;
@@ -147,7 +167,7 @@ export function decodeRuns(rows: readonly string[], columns: number): Uint8Array
       if (match[3] !== undefined) throw new Error(`map row ${r}: bad character`);
       const kind = (match[1] ?? "a").charCodeAt(0) - KIND_CHAR_BASE;
       const length = Number(match[2]);
-      if (kind >= KIND_COUNT) throw new Error(`map row ${r}: unknown kind`);
+      if (kind >= limit) throw new Error(`map row ${r}: unknown value`);
       out.fill(kind, r * columns + column, r * columns + column + length);
       column += length;
     }

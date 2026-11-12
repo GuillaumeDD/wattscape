@@ -10,3 +10,19 @@ export interface Clock {
 export const systemClock: Clock = {
   now: () => Date.now(),
 };
+
+/**
+ * A fixed clock, for `?at=` (demos, screenshots): the scene shows that instant, and
+ * nothing that depends on the time of day moves.
+ */
+export function fixedClock(timeMs: number): Clock {
+  return { now: () => timeMs };
+}
+
+/**
+ * Monotonic milliseconds for animation only (camera flights, idle drift): never the
+ * time of day, and unaffected by `?at=`.
+ */
+export const animationClock: Clock = {
+  now: () => performance.now(),
+};

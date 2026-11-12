@@ -31,8 +31,9 @@ Provisional; each folder lands with the backlog item that needs it.
 | `src/data/`   | éCO2mix and Open-Meteo clients: URL building, strict parsers, refresh and staleness        | network (fetchers only)            |
 | `src/sky/`    | Sun and moon position, moon phase, light keyframes                                         | no                                 |
 | `src/map/`    | The baked map of France (land, sea, regions, relief) and its grid                          | no                                 |
-| `src/world/`  | Seeded PRNG; placement of plants, towns, trees and landmarks; level of detail              | no                                 |
-| `src/render/` | Palette, dithering, sprites drawn in code, layers, camera, `Surface` (pixel buffer)        | no (the canvas blit is in `ui/`)   |
+| `src/scene/`  | The scene model (what a frame shows) and the camera (zoom, pan, flights, drift)            | no                                 |
+| `src/world/`  | Seeded PRNG; placement of plants, towns, trees and landmarks                               | no                                 |
+| `src/render/` | Themes (how a scene looks), palette, dithering, sprites drawn in code, `Surface`           | no (the canvas blit is in `ui/`)   |
 | `src/i18n/`   | FR and EN catalogs (`fr.json`, `en.json`), language detection                              | no                                 |
 | `src/ui/`     | Canvas blit and scaling, input (zoom, pan, keys), legend, captions, settings               | DOM                                |
 | `tools/`      | Scripts run by hand: fixture recording, map baking, mockups, screenshots                   | files                              |
@@ -320,9 +321,10 @@ bake. The browser never downloads map data: the CSP is unchanged.
 - **Grid** (`src/map/grid.ts`): north-west corner 51.2° N, 5.4° W; 1 152 × 1 104 cells
   of 1 km (the **fine grid**), grouped 4 × 4 into 288 × 276 cells of 4 km (the
   **coarse grid**). It covers mainland France and Corsica with a margin.
-- **Fine grid:** the region at the centre of each cell, or "not France". Used by the
-  region lookup (§ Geolocation). Baked from the generalised outlines of ADMIN
-  EXPRESS COG CARTO, read from IGN's WFS (S-013).
+- **Fine grid:** the region at the centre of each cell, foreign land, or sea. The
+  region lookup (§ Geolocation) reads only the regions; the close view draws land
+  and sea from it. Baked from the generalised outlines of ADMIN EXPRESS COG CARTO,
+  read from IGN's WFS (S-013), and Natural Earth's countries (S-015) for foreign land.
 - **Coarse grid:** sea, foreign land, or a region. A cell is land when at least 8 of
   its 16 fine cells are land (French, or a neighbouring country in Natural Earth's
   1:10m countries, S-015); it is French when French cells outnumber foreign ones,
@@ -335,9 +337,17 @@ bake. The browser never downloads map data: the CSP is unchanged.
   (−99 999 elsewhere): sea and foreign land are class 0. The highest cell (class 14,
   3 349 m) is on the French side of the Mont Blanc massif; the summit's own cell is
   mostly Italian, so it is foreign land.
-- **Encoding:** one line per grid row: run-length encoded kinds (`a12c40` = 12 cells
-  of kind 0, then 40 of kind 2), one hexadecimal digit per cell for the elevation.
-  The decoder throws on a malformed row; the tests decode the committed file.
+- **1 km relief** (D-018, D-021): each French fine cell gets an elevation class, on
+  the same 16 classes, from the mean of its 4 samples (the same 500 m samples as the
+  4 km relief); sea and foreign land are class 0. It lives in its own file,
+  `src/map/relief.ts` (232 KB, 86 KB compressed), which the browser loads, as a
+  separate chunk from the site itself, only when the camera comes close or the
+  viewer has a region; decoded, the 1 km layer takes about 3.8 MB and 40 ms, once.
+  Its 4 × 4 means agree with the 4 km relief within 2 classes (tests).
+- **Encoding:** one line per grid row: run-length encoded values (`a12c40` = 12 cells
+  of value 0, then 40 of value 2) for the kinds and the 1 km relief, one hexadecimal
+  digit per cell for the 4 km relief. The decoder throws on a malformed row; the
+  tests decode the committed files.
 - **Re-baking:** the regions come from the WFS layer `LATEST`, the countries from a
   pinned commit of Natural Earth; the date of the bake and the WFS time stamp are
   written in the file's header. Region borders have not changed since 2016, so a
@@ -428,17 +438,27 @@ A missing figure shows the element **idle** (no motion, no glow) and the caption
 
 Direction A, the isometric map (drawn north up, D-017), was chosen by Guillaume on 2026-11-11 (PRD Q-1). The
 palette, the night and the dusk below were validated with the mockups of B-010
-(D-019); the resolution and the level of detail are still **proposed** until B-011.
+(D-019); the zoom, the level of detail and the 1 km terrain (B-011, D-020 to D-022)
+are **proposed** until Guillaume validates them.
 
 - **Projection:** 2:1 tiles (a tile is twice as wide as it is tall), north up, the
   map seen from the south (D-017); light from the north-west, no perspective.
 - **Resolution:** the scene is drawn at low resolution into a pixel buffer, then
-  scaled by an **integer** factor to the screen (nearest-neighbour); the buffer size
-  follows the window so that the factor is 3 to 6 on common screens.
-- **Zoom and level of detail (provisional):** the camera zoom is continuous, but each
-  frame is drawn at the nearest of a few levels of detail (France, region, close),
-  each with its own sprite set; between two levels, a short crossfade. Integer
-  scaling keeps pixels crisp; a spike in B-011 checks that this feels smooth enough.
+  scaled by an **integer** factor to the screen (nearest-neighbour): about 270
+  buffer pixels on the window's shorter side, so a factor of 3 to 6 on common
+  screens (`bufferSize`, `src/ui/controls.ts`; 480 × 270 on a 1080p screen).
+- **Zoom (D-020):** the scale, in buffer pixels per kilometre, is continuous, from
+  0.15 to 8. A cell spans the pixels between floor(edge × scale) of its two edges, so
+  every pixel stays one palette colour and tiles differ by at most a pixel while the
+  zoom moves. A cell narrower or flatter than a pixel draws only what still shows:
+  its town and a rising relief (the next cell covers its ground), so the work
+  follows the pixels and no town drops out at any zoom (tested). The camera is rounded to whole pixels and
+  every pattern (dithering, lamps, crossfade) is anchored to the ground, so a pan
+  moves the picture by whole pixels, without a shimmer, even at dusk (tested).
+- **Level of detail (D-021):** the 4 km layer below 0.5 pixel per km (France), the
+  1 km layer from 0.7 (every region, as the app frames it on a landscape screen), and
+  in between a crossfade by ordered dithering (`detail`, 0–16), which also eases in
+  over half a second when the 1 km relief arrives while the camera is already close.
 - **Palette** (`src/render/palette.ts`, validated, D-019): 24 fixed colours:
   muted land, sea blues, a sky ramp, a lamp yellow, and **one signature colour per
   source**, also used in the legend. Each colour names the palette colour it
@@ -475,32 +495,71 @@ palette, the night and the dusk below were validated with the mockups of B-010
 - **Motion:** slow and sparse; nothing blinks faster than about 2 Hz; with
   `prefers-reduced-motion`, no camera drift and half-speed animation.
 
-### Mockups (B-010)
+### Scene and themes (B-010, B-011)
 
-`src/render/map-view.ts` draws the baked map (§ Map) as a relief diorama in the
-palette, under a light; `tools/mockups.ts` writes the mockups into
-`docs/screenshots/step-2-mockup-*.png` (France with 2-pixel tiles, Normandie with
-8-pixel tiles, sun at 35°, 2° and −20°). The map is drawn north up (D-017): 2:1
-tiles, the map seen from the south.
+The scene model (`src/scene/scene.ts`) says what a frame shows: its size, the
+camera, the light, the region in focus, the terrain layers, the level of detail and
+the towns. A **theme** (`src/render/theme.ts`) turns it into pixels; the pixel-art
+theme (`src/render/pixel-theme.ts`) is the only one so far, and a second one can
+come without touching the model (PRD G-011). The step-2 mockups
+(`docs/screenshots/step-2-mockup-*.png`) were drawn by the first version of this
+theme; `tools/screenshots.ts` writes the step-3 frames (`step-3-*.png`): France,
+Normandie and Auvergne-Rhône-Alpes as the app frames them, the Mont Blanc massif
+close up, by day, at the golden hour and at night, and the flight from France to
+Normandie. The map is drawn north up (D-017): 2:1 tiles, the map seen from the
+south.
 
-How it draws, for now, aiming at calm, elegant pixel art (Guillaume, 2026-11-11):
+How the terrain draws, aiming at calm, elegant pixel art (Guillaume, 2026-11-11):
 
-- each coarse cell is a tile raised by a tile's width per 1 000 m, its south face
-  one palette step darker; the plains stay flat, the mountains rise;
+- each cell is a tile raised by 4 km of width per 1 000 m, on both layers; its
+  south face is a **cliff**, one palette step darker, only where the land drops by
+  250 m or more to the cell in front of it, or to the sea; a gentler step keeps the
+  ground's colour (D-022); the plains stay flat, the mountains rise;
 - one flat ground colour per altitude band, like a relief map's tints: meadow below
   300 m, grass, forest from 800 m, rock from 1 300 m, snow from 2 400 m; no
   per-cell texture;
-- hill shading with one light from the north-west: a cell 250 m or more below its
-  north-west neighbour is one step darker;
-- sea in three flat bands by distance to the coast;
+- hill shading with one light from the north-west: a cell 250 m or more below the
+  cell 4 km to its north-west is one step darker, on both layers, so the 1 km layer
+  shades whole slopes rather than every bump (D-022);
+- sea in three flat bands by distance to the coast: up to 4 km, up to 20 km, beyond;
 - foreign land, and the other regions on a region view, one step darker by day;
   this veil fades as night falls, so that the land around never reads as sea;
-- towns are the prefectures (S-006), each moved to the nearest land cell if its own is
-  sea, drawn with its cell so the relief in front hides it: roofs by day, lamps once
-  the sun is below the horizon.
+- towns are the prefectures (S-006), each moved to the first French land cell
+  within 8 km if its own is not, drawn with its cell so the relief in front hides it:
+  roofs by day, lamps once the sun is below the horizon (real towns come with B-015);
+- past the grid's west, east and south edges the edge cells go on (sea, the
+  neighbours' land), so a wide view never shows the board's edge; north of the grid
+  is the sky.
 
-Its frames are hashed in Node and Chromium like the test card. The 4 km grid makes a
-region blocky at 8-pixel tiles; the 1 km relief comes with the zoom (D-018, B-011).
+BD ALTI covers France only, so the land abroad is flat: at the borders of the Alps
+and the Pyrenees, French mountains end in a cliff (PRD Q-11).
+
+### Camera and controls (B-011)
+
+`src/scene/camera.ts` is pure; `src/ui/scene-view.ts` wires it to the page.
+
+- **Framing:** an area is framed whole with a 6 % margin and room above for the
+  highest relief (`fitBox`); the centre stays within France plus 60 km.
+- **Controls:** the wheel zooms around the cursor (about ×1.2 a notch, at most ×2
+  an event), two fingers pinch around their midpoint, a drag pans, a double-click or
+  a double-tap zooms ×2 on the point (a tap: under 300 ms and 10 px of movement; a
+  double-tap: two taps within 300 ms and 24 px). `+`/`−` zoom, the arrows and WASD
+  (ZQSD on a French keyboard, by key position) pan by 15 % of the view, `Home` flies
+  back to the viewer's area. Keys typed into the region list or a button are left
+  to them. Any input takes the camera from where it is on screen, mid-flight or
+  drifting.
+- **Flights:** a change of area, a key or a double-click flies the camera, 0.6 to
+  3 s, the scale moving evenly in log space. On load, a viewer with a region sees
+  France for 1.5 s, then flies to it, unless they took the camera first (PRD Q-12).
+- **Idle drift:** 20 s after the last input, the camera drifts on a slow ellipse
+  around where it stopped (4 % of the view's width, one loop in 4 minutes, under 2
+  pixels a second), fading in over 10 s. None with `prefers-reduced-motion`, where
+  flights become cuts.
+- **Light:** one light for the view, from the sun at its centre (`viewLight`),
+  every frame, its darkness rounded to a sixteenth of a step so the picture changes
+  only when the light visibly does (B-014 brings the rest of day and night).
+  `?at=` (ISO 8601 with a zone, e.g. `?at=2026-06-21T21:30Z`, 2000–2099;
+  `src/ui/settings.ts`) fixes the time, for demos and screenshots.
 
 ### Landmarks
 
@@ -517,15 +576,21 @@ photo.
   tests, the same buffer is hashed (FNV-1a over the size and the bytes,
   `hashSurface`).
 - **Frame hashes:** `tests/fixtures/frames/hashes.json` records the hash of each
-  reference frame (for now the test card). Node checks them in the unit tests, and
-  Chromium in `e2e/frame-hash.spec.ts` (`npm run e2e`: Vite builds `e2e/*.html`
-  into `dist-e2e/`, Playwright opens them). Firefox and WebKit join when the scene
-  renders (B-021). A drawing change updates the hashes in the same commit.
-- Static layers (terrain, buildings) are cached per map chunk and level of detail;
-  only animated elements (plumes, rotors, water, weather, lights) are redrawn each
-  frame.
+  reference frame of `e2e/reference-frames.ts` (the test card, France, Normandie,
+  Auvergne-Rhône-Alpes, the Mont Blanc massif and a crossfade). Node checks them in
+  the unit tests, and Chromium in `e2e/frame-hash.spec.ts` (`npm run e2e`: Vite
+  builds `e2e/*.html` into `dist-e2e/`, Playwright opens them);
+  `e2e/scene.spec.ts` drives the scene with the mouse and the keys. Firefox and
+  WebKit join with B-021. A drawing change updates the hashes in the same commit.
+- A frame is drawn whole, and only when something drawn changes (the camera by a
+  pixel, the level of detail, the light, the size): a still or drifting scene costs
+  almost nothing. Measured in Node at 480 × 270: 3.5 ms for France, 3 ms for
+  Normandie, 8 ms for Auvergne-Rhône-Alpes, 10 ms during a crossfade, which lasts
+  about half a second (2026-11-12; B-013 measures it in browsers). Animated elements (plumes, rotors, water,
+  weather) will need cached terrain (B-012, B-013).
 - `requestAnimationFrame`, capped at 30 fps (PRD Q-7); paused when the tab is hidden
-  (Page Visibility API), which also pauses data refreshes.
+  (Page Visibility API), which also pauses data refreshes; asleep while nothing
+  moves, until the drift starts, the light changes or an input comes.
 
 ## Performance
 
@@ -546,8 +611,9 @@ Budget (**provisional**, to be measured in B-013 and fixed here):
 
 - **Untrusted input:** API responses and URL settings. Parsers live in `src/data/`
   and `src/ui/settings.ts`; they accept only the documented shape, finite numbers in
-  range (|MW| ≤ 200 000, load factors 0–200 %), bounded strings, known area codes; they
-  never throw past the boundary: a bad response is "data unavailable".
+  range (|MW| ≤ 200 000, load factors 0–200 %), bounded strings, known area codes, a
+  `?at=` read field by field and checked against the calendar; they never throw past
+  the boundary: a bad response is "data unavailable", a bad setting is ignored.
 - No `innerHTML`, `eval` or `new Function` anywhere (lint rules); captions use
   `textContent`.
 - **CSP** (in `index.html`):
@@ -574,3 +640,7 @@ All **unverified** until measured in Chromium, Firefox and WebKit (AGENTS.md §5
 - The Screen Wake Lock API is missing in some browsers and is released when the tab
   is hidden: request it again on `visibilitychange`.
 - The Fullscreen API is limited on iPhone Safari; the scene must work without it.
+- The controls (B-011) were measured in Chromium only (`e2e/scene.spec.ts`): wheel,
+  drag, keys, double-click. Pinch and double-tap use Pointer Events and
+  `touch-action: none`; some browsers also send `dblclick` after a double-tap, which
+  the view ignores. Firefox, WebKit and real touch screens are unverified.

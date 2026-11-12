@@ -14,7 +14,10 @@ export default defineConfig({
     emptyOutDir: true,
     // Resolved from this file, so the build works from any working directory.
     rolldownOptions: {
-      input: { "frame-hash": fileURLToPath(new URL("./e2e/frame-hash.html", import.meta.url)) },
+      input: {
+        "frame-hash": fileURLToPath(new URL("./e2e/frame-hash.html", import.meta.url)),
+        scene: fileURLToPath(new URL("./e2e/scene.html", import.meta.url)),
+      },
     },
   },
   preview: { port: 4180, strictPort: true },

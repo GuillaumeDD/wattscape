@@ -11,6 +11,12 @@ describe("modules the tools import", () => {
     "src/geo/regions.ts",
     "src/map/grid.ts",
     "src/map/france.ts",
+    "src/map/relief.ts",
+    "src/map/layers.ts",
+    "src/render/pixel-theme.ts",
+    "src/render/theme.ts",
+    "src/scene/camera.ts",
+    "src/scene/scene.ts",
   ])("%s loads under plain Node", (file) => {
     const out = execFileSync(
       process.execPath,

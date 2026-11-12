@@ -26,6 +26,7 @@ import {
   skyColour,
   tinted,
 } from "../src/sky/light";
+import { REFERENCE_FRAMES } from "../e2e/reference-frames";
 import hashes from "./fixtures/frames/hashes.json";
 
 const SOURCES: readonly ColourName[] = [
@@ -275,5 +276,12 @@ describe("frame hashes (AGENTS.md § Determinism)", () => {
   it("draws the test card the same way twice, and as recorded", () => {
     expect(hashSurface(drawTestCard())).toBe(hashSurface(drawTestCard()));
     expect(hashSurface(drawTestCard())).toBe(hashes["test-card"]);
+  });
+
+  it("draws every reference frame as recorded (also checked in Chromium)", () => {
+    const names = Object.keys(hashes).filter((name) => name !== "_comment");
+    expect(Object.keys(REFERENCE_FRAMES).sort()).toEqual(names.sort());
+    for (const [name, draw] of Object.entries(REFERENCE_FRAMES))
+      expect(hashSurface(draw()), name).toBe((hashes as Record<string, string>)[name]);
   });
 });
