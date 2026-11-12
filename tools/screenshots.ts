@@ -16,7 +16,7 @@ import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, hashSurface, type Surface } from "../src/render/surface.ts";
 import { areaBox, type Camera, fitBox, flightAt } from "../src/scene/camera.ts";
-import { detailForScale, prefectureTowns, type Scene } from "../src/scene/scene.ts";
+import { detailForScale, bakedTowns, type Scene } from "../src/scene/scene.ts";
 import { lightAt } from "../src/sky/light.ts";
 import { recordedTownLights, referenceScene } from "../e2e/reference-frames.ts";
 import { writePng } from "./png.ts";
@@ -43,7 +43,7 @@ function draw(camera: Camera, focus: CellRegion | null, elevation: number): Surf
     coarse,
     fine,
     detail: detailForScale(camera.scale),
-    towns: prefectureTowns(),
+    towns: bakedTowns(),
     plants: [],
     townLights: recordedTownLights(elevation < 0),
   };

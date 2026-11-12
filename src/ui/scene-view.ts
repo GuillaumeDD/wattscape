@@ -27,7 +27,7 @@ import {
 } from "../scene/camera";
 import {
   detailForScale,
-  prefectureTowns,
+  bakedTowns,
   type Scene,
   type ScenePlant,
   scenePlants,
@@ -230,7 +230,7 @@ export function mountSceneView(
       coarse,
       fine,
       detail,
-      towns: prefectureTowns(),
+      towns: bakedTowns(),
       plants,
       townLights: lights,
     };

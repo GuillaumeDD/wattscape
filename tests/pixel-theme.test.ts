@@ -26,7 +26,7 @@ import {
 import { createSurface, getPixel, hashSurface, type Surface } from "../src/render/surface";
 import { DEFAULT_THEME, THEMES } from "../src/render/theme";
 import { areaBox, type Camera, fitBox } from "../src/scene/camera";
-import { prefectureTowns, type Scene } from "../src/scene/scene";
+import { bakedTowns, type Scene } from "../src/scene/scene";
 import { type Light, lightAt, tinted } from "../src/sky/light";
 import { mulberry32 } from "./random";
 
@@ -45,7 +45,7 @@ function sceneOf(overrides: Partial<Scene> & { camera: Camera }): Scene {
     coarse,
     fine,
     detail: 16,
-    towns: prefectureTowns(),
+    towns: bakedTowns(),
     plants: [],
     // Every region's towns half lit: half their range of consumption.
     townLights: Object.fromEntries(REGION_CODES.map((r) => [r, 0.5])),
@@ -189,14 +189,14 @@ describe("the pixel-art theme", () => {
   it("puts every town on French land, Bastia included, on both layers", () => {
     // Regression: the prefecture of Haute-Corse fell on a sea cell, off the coast.
     for (const layer of [coarse, fine] as TerrainLayer[]) {
-      const cells = townCells(layer, prefectureTowns());
+      const cells = townCells(layer, bakedTowns());
       let count = 0;
       cells.forEach((t, i) => {
         if (t === 0) return;
         count++;
         expect(layer.kinds[i], String(i)).toBeGreaterThanOrEqual(2);
       });
-      expect(count).toBeGreaterThan(80); // 96 prefectures, a few share a 4 km cell
+      expect(count).toBeGreaterThan(layer.km === 1 ? 5000 : 250);
       const bastia = kmOf(42.7, 9.45);
       const r = Math.floor(bastia.y / layer.km);
       const c = Math.floor(bastia.x / layer.km);
@@ -210,17 +210,18 @@ describe("the pixel-art theme", () => {
 
   it("draws every town that no relief hides, at any framing of France", () => {
     // Regression: towns on rows or columns narrower than a pixel were skipped with
-    // them, 22 of 96 at 480 × 270 and 35 at 427 × 240. Four lie in basins, behind
-    // the relief in front of them (Saint-Étienne, Le Puy-en-Velay, Chambéry, Annecy);
-    // the two of Corsica have no figure of consumption, so no lamps (B-014).
+    // them, 22 of 96 prefectures at 480 × 270 and 35 at 427 × 240. Of the 100 largest
+    // towns, Ajaccio has no figure of consumption, so no lamps (B-014), and Chambéry
+    // lies behind the relief in front of it, except on the tall framing.
+    const largest = bakedTowns().slice(0, 100);
     for (const [width, height, visible] of [
-      [480, 270, 90],
-      [427, 240, 90],
-      [293, 633, 94],
+      [480, 270, 98],
+      [427, 240, 98],
+      [293, 633, 99],
     ] as const) {
       const camera = fitBox(areaBox(coarse, null), width, height);
       let seen = 0;
-      for (const town of prefectureTowns()) {
+      for (const town of largest) {
         const s = draw(
           sceneOf({ width, height, camera, light: night, fine: null, detail: 0, towns: [town] }),
         );
@@ -246,9 +247,9 @@ describe("the pixel-art theme", () => {
     const top = (i: number): number =>
       Math.floor(i / coarse.columns) + 9 - heightPx(coarse.elevation[i] ?? 0, 0.5);
     let hidden = 0;
-    townCells(coarse, prefectureTowns()).forEach((town, i) => {
-      if (town !== 1) return; // one-pixel towns only
-      const x = (i % coarse.columns) * 2 + 1;
+    townCells(coarse, bakedTowns()).forEach((town, i) => {
+      if (town === 0) return;
+      const x = (i % coarse.columns) * 2;
       const y = top(i);
       const south = i + coarse.columns;
       if (coarse.kinds[south] === SEA || top(south) > y) return;

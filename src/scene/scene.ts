@@ -12,21 +12,25 @@ import {
   type RegionalReadings,
   type Source,
 } from "../data/eco2mix.ts";
-import { PREFECTURES, REGION_CAPITALS } from "../geo/regions.ts";
-import { type CellRegion, kmOf, positionOfKm } from "../map/grid.ts";
+import { type CellRegion, positionOfKm } from "../map/grid.ts";
 import { type TerrainLayer } from "../map/layers.ts";
 import { type PlantSite } from "../map/plants.ts";
+import { URBAN_DENSITY } from "../map/town-rules.ts";
+import { TOWNS_PACKED } from "../map/towns.ts";
 import { ditherLevel } from "../render/dither.ts";
 import { type Light, lightAt } from "../sky/light.ts";
 import { sunPosition } from "../sky/sun.ts";
 import { type Camera } from "./camera.ts";
 
-/** A town, in map kilometres. For now the prefectures (S-006); real towns come with B-015. */
+/** A town: a commune of 2 000 inhabitants or more, at its chef-lieu (B-015, D-031). */
 export interface Town {
+  /** Map kilometres (src/map/grid.ts), to 0.1 km. */
   readonly x: number;
   readonly y: number;
-  /** A regional prefecture, drawn a little larger. */
-  readonly capital: boolean;
+  /** INSEE population. */
+  readonly population: number;
+  /** The commune's cadastral area, km². */
+  readonly areaKm2: number;
 }
 
 /** A plant as the scene shows it: where, and how hard it works (ARCHITECTURE § Data-to-scene mapping). */
@@ -90,15 +94,28 @@ export function detailForScale(scale: number): number {
 
 let towns: readonly Town[] | null = null;
 
-/** The prefectures, as towns (computed once). */
-export function prefectureTowns(): readonly Town[] {
+/** The baked towns (src/map/towns.ts), largest first, decoded once. */
+export function bakedTowns(): readonly Town[] {
   if (towns !== null) return towns;
-  const capitals = new Set<string>(Object.values(REGION_CAPITALS));
-  towns = PREFECTURES.map(([dept, , , lat, lon]) => ({
-    ...kmOf(lat, lon),
-    capital: capitals.has(dept),
-  }));
+  towns = TOWNS_PACKED.split(";").map((entry) => {
+    const [x = 0, y = 0, population = 0, hectares = 0] = entry.split(" ").map(Number);
+    return { x: x / 10, y: y / 10, population, areaKm2: hectares / 100 };
+  });
   return towns;
+}
+
+/**
+ * How many cells of `km` kilometres a town covers: its population at URBAN_DENSITY,
+ * never more than its commune's area, rounded to the nearest cell; and at least one
+ * when its population alone would round to one, so a dense suburb on a small commune
+ * still shows. At 4 km, towns under 32 000 inhabitants cover none and do not show; at
+ * 1 km, every town shows.
+ */
+export function townCellCount(town: Town, km: number): number {
+  const cell = km * km;
+  const built = town.population / URBAN_DENSITY;
+  const cells = Math.floor(Math.min(built, town.areaKm2) / cell + 0.5);
+  return cells === 0 && built >= cell / 2 ? 1 : cells;
 }
 
 /**

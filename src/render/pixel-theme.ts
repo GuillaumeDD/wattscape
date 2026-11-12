@@ -14,7 +14,7 @@ import { ELEVATION_CLASSES, FOREIGN, KIND_COUNT, kindOfRegion, SEA } from "../ma
 import { type TerrainLayer } from "../map/layers.ts";
 import { RISE_METRES_PER_KM } from "../scene/camera.ts";
 import { type RegionCode } from "../data/eco2mix.ts";
-import { type Scene, type ScenePlant, type Town } from "../scene/scene.ts";
+import { type Scene, type ScenePlant, type Town, townCellCount } from "../scene/scene.ts";
 import { skyColour, tinted } from "../sky/light.ts";
 import { drawBody, drawMotion, hasMotion, type Pen, type SpriteSize } from "./art/plants.ts";
 import { BAYER_4, DITHER_LEVELS } from "./dither.ts";
@@ -201,7 +201,7 @@ function drawSky(frame: Frame, scene: Scene): void {
 /** What the theme works out once per layer and town list. */
 interface LayerIndex {
   readonly towns: readonly Town[];
-  /** One byte per cell: 0 no town, 1 a town, 2 a regional prefecture. */
+  /** One byte per cell: `townCells`. */
   readonly cells: Uint8Array;
   /** One byte per row: whether it holds a town. */
   readonly townRows: Uint8Array;
@@ -227,28 +227,67 @@ function layerIndex(layer: TerrainLayer, towns: readonly Town[]): LayerIndex {
   return index;
 }
 
+/** Cell offsets around a centre, nearest first (then north first, then west first). */
+let spiral: Int16Array | null = null;
+const SPIRAL_REACH = 24;
+function spiralOffsets(): Int16Array {
+  if (spiral !== null) return spiral;
+  const offsets: [number, number][] = [];
+  for (let dr = -SPIRAL_REACH; dr <= SPIRAL_REACH; dr++)
+    for (let dc = -SPIRAL_REACH; dc <= SPIRAL_REACH; dc++) offsets.push([dr, dc]);
+  offsets.sort(
+    ([ar, ac], [br, bc]) => ar * ar + ac * ac - (br * br + bc * bc) || ar - br || ac - bc,
+  );
+  spiral = Int16Array.from(offsets.flat());
+  return spiral;
+}
+
+/** A cell value of `townCells`: a cell of a town. */
+export const TOWN_CELL = 1;
+/** A cell value of `townCells`: the cell of a town's chef-lieu. */
+export const TOWN_CENTRE = 2;
+
 /**
- * The towns of a layer, one byte per cell: 0 none, 1 a town, 2 a regional
- * prefecture. A town whose cell is not French land (Bastia, on the coast) moves to
- * the first French land cell around it within 8 km, so no town floats on the water.
+ * The towns of a layer, one byte per cell: 0 none, TOWN_CELL, or TOWN_CENTRE. A town
+ * covers `townCellCount` cells of French land, the nearest to its chef-lieu first, so
+ * a town on the coast spreads along it, not into the sea; neighbouring towns merge.
+ * A chef-lieu whose cell is not French land (Bastia, on the coast) moves to the first
+ * French land cell around it within 8 km, so no town floats on the water.
  */
 export function townCells(layer: TerrainLayer, towns: readonly Town[]): Uint8Array {
   const found = new Uint8Array(layer.kinds.length);
+  const land = (r: number, c: number): boolean => {
+    if (r < 0 || c < 0 || r >= layer.rows || c >= layer.columns) return false;
+    const k = layer.kinds[r * layer.columns + c] ?? SEA;
+    return k !== SEA && k !== FOREIGN;
+  };
+  const offsets = spiralOffsets();
   const reach = Math.round(8 / layer.km);
   for (const town of towns) {
+    const n = townCellCount(town, layer.km);
+    if (n === 0) continue;
     const r = Math.floor(town.y / layer.km);
     const c = Math.floor(town.x / layer.km);
-    let best: number | null = null;
-    for (let ring = 0; ring <= reach && best === null; ring++)
-      for (let dr = -ring; dr <= ring && best === null; dr++)
-        for (let dc = -ring; dc <= ring && best === null; dc++) {
-          const rr = r + dr;
-          const cc = c + dc;
-          if (rr < 0 || cc < 0 || rr >= layer.rows || cc >= layer.columns) continue;
-          const k = layer.kinds[rr * layer.columns + cc] ?? SEA;
-          if (k !== SEA && k !== FOREIGN) best = rr * layer.columns + cc;
-        }
-    if (best !== null) found[best] = Math.max(found[best] ?? 0, town.capital ? 2 : 1);
+    let centre = -1;
+    for (let k = 0; k < offsets.length && centre === -1; k += 2) {
+      const dr = offsets[k] ?? 0;
+      const dc = offsets[k + 1] ?? 0;
+      if (Math.max(Math.abs(dr), Math.abs(dc)) > reach) continue;
+      if (land(r + dr, c + dc)) centre = (r + dr) * layer.columns + c + dc;
+    }
+    if (centre === -1) continue;
+    const cr = Math.floor(centre / layer.columns);
+    const ccol = centre % layer.columns;
+    found[centre] = TOWN_CENTRE;
+    let covered = 1;
+    for (let k = 2; k < offsets.length && covered < n; k += 2) {
+      const rr = cr + (offsets[k] ?? 0);
+      const cc = ccol + (offsets[k + 1] ?? 0);
+      if (!land(rr, cc)) continue;
+      const i = rr * layer.columns + cc;
+      if (found[i] === 0) found[i] = TOWN_CELL;
+      covered++;
+    }
   }
   return found;
 }
@@ -350,7 +389,6 @@ function drawLayer(
   const tints = tintsOf(frame, scene);
   const focus = scene.focus === null ? -1 : kindOfRegion(scene.focus);
   const { cells: towns, townRows, highest } = layerIndex(layer, scene.towns);
-  const townSize = Math.min(3, Math.max(1, Math.floor(s)));
   const lamps = lampLevels(scene);
   // Hill shading compares a cell with the one 4 km to its north-west, on both layers,
   // so the 1 km layer shades whole slopes, not every bump.
@@ -387,20 +425,23 @@ function drawLayer(
     }
   };
   const drawTowns = (): void => {
-    for (let k = 0; k < pending.length; k += 4) {
+    for (let k = 0; k < pending.length; k += 6) {
       const cx = pending[k] ?? 0;
       const cy = pending[k + 1] ?? 0;
-      const size = pending[k + 2] ?? 1;
-      const level = pending[k + 3] ?? -1;
-      for (let y = Math.max(0, cy); y < Math.min(height, cy + size); y++)
-        for (let x = Math.max(0, cx); x < Math.min(width, cx + size); x++) {
+      const w = pending[k + 2] ?? 1;
+      const hgt = pending[k + 3] ?? 1;
+      const level = pending[k + 4] ?? -1;
+      const centre = pending[k + 5] === 1;
+      for (let y = Math.max(0, cy); y < Math.min(height, cy + hgt); y++)
+        for (let x = Math.max(0, cx); x < Math.min(width, cx + w); x++) {
           const gx = x + ox;
           const gy = y + oy;
           if (light.emissive && level >= 0) {
             // Lit windows: a scatter, not a block, so a town glows like a town; the
             // more its region consumes, the more of them (ARCHITECTURE § Data-to-scene
-            // mapping). Its first pixel is always lit, so no lit town goes dark.
-            if ((x === cx && y === cy) || pixelHash(gx, gy) % DITHER_LEVELS < level)
+            // mapping). The first pixel of its chef-lieu's cell is always lit, so no
+            // lit town goes dark.
+            if ((centre && x === cx && y === cy) || pixelHash(gx, gy) % DITHER_LEVELS < level)
               frame.words[y * width + x] = PACKED.lamp;
           } else frame.words[y * width + x] = tints.roof[(gy & 3) * 4 + (gx & 3)] ?? 0;
         }
@@ -438,7 +479,8 @@ function drawLayer(
       }
       const e = kind === FOREIGN ? 0 : (elevation[i] ?? 0);
       const h = hs[e] ?? 0;
-      if (y1 <= 0 || y0 - h >= height) continue; // wholly off the buffer
+      // Wholly off the buffer. A town on a flat row still covers a pixel row: y0 - h.
+      if ((town === 0 ? y1 : Math.max(y1, y0 - h + 1)) <= 0 || y0 - h >= height) continue;
       // Hill shading, one light from the north-west: a cell 250 m or more below its
       // north-west neighbour faces away from it and is one step darker. Smaller drops
       // stay lit, so the plains stay calm.
@@ -457,14 +499,16 @@ function drawLayer(
         fill(frame, x0, y1 - h, x1, y1, (cliff ? tints.side[t] : tints.top[t]) ?? tints.roof);
       fill(frame, x0, y0 - h, x1, y1 - h, tints.top[t] ?? tints.roof);
 
-      // A town on this cell, on its top face: a roof by day, lamps once the sun is down.
+      // A town on this cell covers its top face, at least a pixel: roofs by day,
+      // lamps once the sun is down.
       if (town === 0) continue;
-      const size = townSize + (town === 2 ? 1 : 0);
       pending.push(
-        Math.floor((x0 + x1) / 2) - Math.floor(size / 2),
-        y0 - h + Math.floor((y1 - y0) / 2) - Math.floor(size / 2),
-        size,
+        x0,
+        y0 - h,
+        Math.max(1, x1 - x0),
+        Math.max(1, y1 - y0),
         lamps[kind] ?? -1,
+        town === TOWN_CENTRE ? 1 : 0,
       );
     }
     if (!flat) drawTowns();
