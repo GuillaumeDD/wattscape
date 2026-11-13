@@ -652,3 +652,31 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   placement improvable point by point, and auditable.
 - **Revisit if:** the register repeats ARCHITECTURE, or grows past what one table
   can hold (then one table per region).
+
+## D-039 — Rivers: baked lines from BD TOPO, kept by their reach
+
+- **Context:** Guillaume asked for the main rivers of France on the map
+  (2026-11-13: "Possible d'ajouter les fleuves et rivières principales de
+  France ?"; Growth G-015, B-023). The map had no water but the sea.
+- **Options:** for the source, BD TOPO's `cours_d_eau` (DS-13, already GO and
+  baked for the plants), or a new dataset (Natural Earth's rivers, BD CARTHAGE),
+  which needs a GO first. For the form, cells baked per layer, or lines turned into
+  cells by each layer. For which rivers, BD TOPO's `importance`, a hand-written
+  list, or a measure of length.
+- **Decision:** BD TOPO, as lines (0.1 km points, thinned to 0.3 km) that each
+  layer turns into cells with integers only. The stretches of one name that touch
+  are joined; a river is measured by its **reach**, the 1 km cells it crosses, and
+  kept from 100; the lines of a river that cross no cell of their own are dropped;
+  canals and aqueducts are left out by their name. The rivers of reach 300 or more
+  (17) show on the national view and load with the page; the others (75) show from
+  close and load with the 1 km relief. A river is drawn in the shallow sea's
+  colour, through the towns but for their chef-lieu's cell, and is veiled with the land around the viewer's region.
+  Proposed by Claude, 2026-11-13.
+- **Why:** no new source; lines stay independent of the grid and of the theme
+  (G-011), and are smaller than cells (104 KB for both files). `importance` does
+  not rank the rivers usably (S-018); summed lengths counted every side arm (the
+  Seine 932 km), which the reach does not (710 cells). Two thresholds keep the
+  national view readable and the first download small (16 KB compressed).
+- **Revisit if:** a river is missing or cut on screen (a stretch under another
+  name, a stretch with no name), the national view reads as a web (raise 300), or
+  a canal worth showing is asked for (the Canal du Midi).

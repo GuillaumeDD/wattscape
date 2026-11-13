@@ -30,3 +30,4 @@ Statuses: `todo` / `wip` / `done`.
 | B-020 | Captions                          | Hover/tap a plant or landmark: name, what it is, live figure; every fact sourced                                                                                    | todo   |
 | B-021 | Screensaver mode                  | Fullscreen, idle cursor hidden, wake lock, idle tour with off switch, home button, reduced motion; checked in 3 engines                                             | todo   |
 | B-022 | Seasons                           | Four seasonal land palettes and props; continuous, per-cell transitions by date; live snow cover; frame snapshots for each season                                   | todo   |
+| B-023 | Rivers on the map                 | Rivers of reach 100 or more baked from BD TOPO (DS-13, D-039): the great ones on the national view, all from close; day and night; frame snapshots                  | done   |

@@ -8,11 +8,13 @@
  * frames it in a 480 × 270 buffer, by day (sun at 35°), at the golden hour (2°) and
  * at night (−20°); a close view of the Mont Blanc massif; and four moments of the
  * flight from France to Normandie, the crossfade between the 4 km and 1 km layers
- * among them, in one picture.
+ * among them, in one picture. Then the plants (B-012), the towns (B-014) and the
+ * rivers (B-023), as each section says.
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
+import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, hashSurface, type Surface } from "../src/render/surface.ts";
 import { areaBox, type Camera, fitBox, flightAt } from "../src/scene/camera.ts";
@@ -26,7 +28,7 @@ const OUT = process.argv[2] ?? "docs/screenshots";
 const WIDTH = 480;
 const HEIGHT = 270;
 const coarse = coarseLayer();
-const fine = fineLayer(FINE_ELEVATION_RLE);
+const fine = fineLayer(FINE_ELEVATION_RLE, LESSER_RIVERS_PACKED);
 const views: [string, CellRegion | null, Camera][] = [
   ["france", null, fitBox(areaBox(coarse, null), WIDTH, HEIGHT)],
   ["normandie", "28", fitBox(areaBox(coarse, "28"), WIDTH, HEIGHT)],
@@ -159,3 +161,24 @@ const paris: Camera = { ...kmOf(48.86, 2.35), scale: 6 };
 });
 writePng(`${OUT}/step-3-towns-paris-lights.png`, lights, 1);
 console.log(`${OUT}/step-3-towns-paris-lights.png`);
+
+// Step 4, B-023: the rivers. The great ones on France seen whole; all of them in
+// two regions and close up on the Loire between Orléans and Tours, by day and at
+// night, with the plants and towns of the same two recorded steps.
+const riverViews: [string, CellRegion | null, Camera][] = [
+  ["france", null, france],
+  ["normandie", "28", normandie],
+  ["auvergne-rhone-alpes", "84", fitBox(areaBox(coarse, "84"), WIDTH, HEIGHT)],
+  ["loire", "24", { ...kmOf(47.6, 1.3), scale: 3 }],
+];
+for (const [name, focus, camera] of riverViews)
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const surface = createSurface(WIDTH, HEIGHT);
+    drawPixelScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
+    const file = `${OUT}/step-4-rivers-${name}-${time}.png`;
+    writePng(file, surface, 2);
+    console.log(`${file}: scale ${camera.scale.toFixed(2)}, ${hashSurface(surface)}`);
+  }

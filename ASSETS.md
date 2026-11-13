@@ -22,4 +22,6 @@ its author, source and license. Files without an entry are not merged.
 | `src/map/plants.ts`             | RTE, ODRÉ; IGN         | Baked plant sites (B-012, D-032): ODRÉ registry DS-07; IGN DS-04, DS-13   | Licence Ouverte 2.0 |
 | `src/map/consumption.ts`        | RTE, ODRÉ              | Baked ranges of consumption (B-014): éCO2mix consolidated DS-12           | Licence Ouverte 2.0 |
 | `src/map/towns.ts`              | IGN; INSEE             | Baked towns (B-015, D-031): IGN ADMIN EXPRESS COG DS-04, INSEE population | Licence Ouverte 2.0 |
+| `src/map/rivers.ts`             | IGN                    | Baked great rivers (B-023, D-039): IGN BD TOPO, DS-13                     | Licence Ouverte 2.0 |
+| `src/map/rivers-fine.ts`        | IGN                    | Baked lesser rivers (B-023, D-039): IGN BD TOPO, DS-13                    | Licence Ouverte 2.0 |
 | `tests/fixtures/frames/*.json`  | Wattscape contributors | Hashes of reference frames drawn by this app (B-009)                      | CC BY-SA 4.0        |

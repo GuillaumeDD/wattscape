@@ -11,6 +11,7 @@ import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { LANDMARKS } from "../src/map/landmarks.ts";
 import { PLANT_SITES } from "../src/map/plants.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
+import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, type Surface } from "../src/render/surface.ts";
 import { drawTestCard } from "../src/render/test-card.ts";
@@ -61,7 +62,7 @@ export function referenceScene(
     light: lightAt(sunElevation),
     focus,
     coarse: coarseLayer(),
-    fine: fineLayer(FINE_ELEVATION_RLE),
+    fine: fineLayer(FINE_ELEVATION_RLE, LESSER_RIVERS_PACKED),
     detail: detailForScale(camera.scale),
     towns: bakedTowns(),
     plants: recordedPlants(sunElevation < 0),

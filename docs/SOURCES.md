@@ -57,7 +57,7 @@ used (fields, caveats) is in ARCHITECTURE § Data sources.
 | DS-10 | geo.api.gouv.fr (reverse geocoding)                         | Position → région                       | Licence Ouverte 2.0                                                                   | NO-GO    | Would send the user's exact position to a third party; the lookup runs offline instead (ARCHITECTURE § Privacy) | proposed, to confirm |
 | DS-11 | Natural Earth, admin-0 countries 1:10m (S-015)              | Baked map: neighbouring countries       | Public domain; credit welcome, not required (S-015)                                   | GO       | 2026-11-11: the land around France, so that it does not float alone; pinned commit (D-014)                      | Guillaume 2026-11-11 |
 | DS-12 | RTE éCO2mix regional consolidated, via ODRÉ (S-017)         | Baked ranges of consumption (B-014)     | Licence Ouverte 2.0 (S-017)                                                           | GO       | Same publisher and licence as DS-01; 12 months baked into the repo (p5, p95 per region)                         | Guillaume 2026-11-12 |
-| DS-13 | IGN BD TOPO, via WFS (S-018)                                | Baked: plants and offshore wind places  | Licence Ouverte 2.0 (IGN metadata IGNF_BD-TOPO)                                       | GO       | Real places of power plants and offshore farms (B-015, G-007); baked, never fetched at runtime                  | Guillaume 2026-11-12 |
+| DS-13 | IGN BD TOPO, via WFS (S-018)                                | Baked: plants, offshore wind, rivers    | Licence Ouverte 2.0 (IGN metadata IGNF_BD-TOPO)                                       | GO       | Real places of plants and offshore farms (B-015, G-007); rivers (B-023): to confirm, PRD Q-24; baked only       | Guillaume 2026-11-12 |
 
 "proposed, to confirm" means Claude proposed the decision; it becomes final when
 Guillaume confirms it, and the cell then reads "Guillaume date".
@@ -169,7 +169,14 @@ Rhinau », « Centrale Thermique de Montereau ») and the dams of
 (46.0521° N, 5.8127° E in `BDTOPO_V3:toponymie`). No zone or dam names Montézic,
 Revin, Sisteron, Oraison, Caderousse, Saint-Estève, nor the thermal plants of Fos-sur-Mer,
 Grande-Synthe (« Braek »), Landivisiau, Tavaux, Gonfreville, Condat, La Chapelle-Darblay or
-Gardanne.
+Gardanne. Read again on 2026-11-13 for B-023 (D-039), by `tools/bake-rivers.ts`: the
+layer `BDTOPO_V3:cours_d_eau` (155 748 watercourses, each a name and its lines, the
+side arms included); 647 of them are longer than 0.5° in the map's box
+(`geomLength`), in pages of 200 (about 25 MB each). A long river comes as several
+watercourses (« la Loire », « Fleuve la Loire »; « la Moselle » and « la
+Moselle Canalisée »); canals and aqueducts are in the same layer (« Canal du Midi »,
+« Aqueduc de la Vanne »); the attribute `importance` does not rank the rivers
+usably.
 Reliability high (the
 national mapping agency documents its own data).
 

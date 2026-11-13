@@ -14,8 +14,11 @@ import {
   FINE_COLUMNS,
   FINE_KM,
   FINE_ROWS,
+  FOREIGN,
   SEA,
 } from "./grid.ts";
+import { type River, riverCells, unpackRiver } from "./river-lines.ts";
+import { GREAT_RIVERS_PACKED } from "./rivers.ts";
 
 /** One resolution of the map: what each cell holds, its relief, and the sea's depth. */
 export interface TerrainLayer {
@@ -29,6 +32,32 @@ export interface TerrainLayer {
   readonly elevation: Uint8Array;
   /** For a sea cell, its distance to the nearest land in cells (4-neighbours, capped at 255). */
   readonly seaDistance: Uint8Array;
+  /** One byte per cell: 1 where a river of the layer crosses French land (B-023). */
+  readonly rivers: Uint8Array;
+}
+
+let great: readonly River[] | null = null;
+
+/** The great rivers (src/map/rivers.ts), longest first, unpacked once. */
+export function greatRivers(): readonly River[] {
+  great ??= GREAT_RIVERS_PACKED.map(unpackRiver);
+  return great;
+}
+
+/**
+ * The river cells of a layer: the cells that `rivers` cross, on French land only (an
+ * estuary is sea already, and the map stops at the border).
+ */
+export function riversOf(
+  kinds: Uint8Array,
+  km: number,
+  columns: number,
+  rows: number,
+  rivers: readonly River[],
+): Uint8Array {
+  const cells = riverCells(rivers, km, columns, rows);
+  for (let i = 0; i < cells.length; i++) if (kinds[i] === SEA || kinds[i] === FOREIGN) cells[i] = 0;
+  return cells;
 }
 
 /** Breadth-first distance from land over the sea, in cells, capped at 255. */
@@ -76,19 +105,29 @@ export function coarseLayer(): TerrainLayer {
     kinds,
     elevation: decodeHex(ELEVATION_ROWS_HEX, COARSE_COLUMNS),
     seaDistance: seaDistances(kinds, COARSE_COLUMNS, COARSE_ROWS),
+    // The great rivers alone: on the national view, more would be a web.
+    rivers: riversOf(kinds, COARSE_KM, COARSE_COLUMNS, COARSE_ROWS, greatRivers()),
   };
   return coarse;
 }
 
-let fine: { readonly rows: readonly string[]; readonly layer: TerrainLayer } | null = null;
+let fine: {
+  readonly rows: readonly string[];
+  readonly rivers: readonly string[];
+  readonly layer: TerrainLayer;
+} | null = null;
 
 /**
- * The 1 km layer, from the relief rows of `src/map/relief.ts` (passed in, so that the
- * browser loads that file only when the camera comes close). Decoded once for the
- * same rows (about 3.8 MB, never grows); throws on malformed rows, like the 4 km one.
+ * The 1 km layer, from the relief rows of `src/map/relief.ts` and the lesser rivers
+ * of `src/map/rivers-fine.ts` (passed in, so that the browser loads those files only
+ * when the camera comes close). Decoded once for the same rows and rivers (about
+ * 5 MB, never grows); throws on malformed rows or rivers, like the 4 km one.
  */
-export function fineLayer(reliefRows: readonly string[]): TerrainLayer {
-  if (fine?.rows === reliefRows) return fine.layer;
+export function fineLayer(
+  reliefRows: readonly string[],
+  lesserRivers: readonly string[],
+): TerrainLayer {
+  if (fine?.rows === reliefRows && fine.rivers === lesserRivers) return fine.layer;
   if (reliefRows.length !== FINE_ROWS) throw new Error(`relief: ${reliefRows.length} rows`);
   const kinds = decodeRuns(FINE_ROWS_RLE, FINE_COLUMNS);
   const layer: TerrainLayer = {
@@ -98,7 +137,11 @@ export function fineLayer(reliefRows: readonly string[]): TerrainLayer {
     kinds,
     elevation: decodeRuns(reliefRows, FINE_COLUMNS, ELEVATION_CLASSES.length),
     seaDistance: seaDistances(kinds, FINE_COLUMNS, FINE_ROWS),
+    rivers: riversOf(kinds, FINE_KM, FINE_COLUMNS, FINE_ROWS, [
+      ...greatRivers(),
+      ...lesserRivers.map(unpackRiver),
+    ]),
   };
-  fine = { rows: reliefRows, layer };
+  fine = { rows: reliefRows, rivers: lesserRivers, layer };
   return layer;
 }

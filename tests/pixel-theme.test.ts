@@ -11,6 +11,7 @@ import {
 } from "../src/map/grid";
 import { coarseLayer, fineLayer, type TerrainLayer } from "../src/map/layers";
 import { FINE_ELEVATION_RLE } from "../src/map/relief";
+import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine";
 import { BAYER_4 } from "../src/render/dither";
 import { COLOUR_NAMES, type ColourName, PALETTE } from "../src/render/palette";
 import {
@@ -34,7 +35,7 @@ const day = lightAt(35);
 const golden = lightAt(2);
 const night = lightAt(-20);
 const coarse = coarseLayer();
-const fine = fineLayer(FINE_ELEVATION_RLE);
+const fine = fineLayer(FINE_ELEVATION_RLE, LESSER_RIVERS_PACKED);
 
 function sceneOf(overrides: Partial<Scene> & { camera: Camera }): Scene {
   return {
