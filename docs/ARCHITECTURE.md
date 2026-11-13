@@ -45,7 +45,7 @@ output. That is what makes frames reproducible (§ World generation).
 ## Data sources
 
 Which sources we use, and under which licence, is decided in the register
-[`DATA-SOURCES.md`](DATA-SOURCES.md) (GO / NO-GO with a comment for each); only
+[`SOURCES.md` § 1](SOURCES.md#1-data-register) (GO / NO-GO with a comment for each); only
 **GO** sources appear here.
 
 | Source                   | Endpoint                                                                              | Used for                                           | Refresh |

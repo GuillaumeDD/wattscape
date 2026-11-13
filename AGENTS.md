@@ -33,7 +33,7 @@ date for the seasons. Inspired by
 | draw a sprite, landmark, palette or animation    | `docs/ARCHITECTURE.md` § Art direction, `ASSETS.md`      |
 | add or draw a landmark                           | `docs/POI.md`                                            |
 | place or move a power plant                      | `docs/PLANTS.md`                                         |
-| use a new data source or dataset                 | `docs/DATA-SOURCES.md`                                   |
+| use a new data source or dataset                 | `docs/SOURCES.md` § 1 Data register                      |
 | touch geolocation, network calls or URL settings | `docs/ARCHITECTURE.md` § Privacy and § Security          |
 | rely on a web API (geolocation, fullscreen, …)   | `docs/ARCHITECTURE.md` § Browser quirks                  |
 
@@ -56,7 +56,7 @@ you haven't read it.
   `innerHTML`/`eval` (ARCHITECTURE § Security).
 - **No third-party art, and landmarks are drawn in code.** Every asset has an
   `ASSETS.md` entry; a landmark is drawn only when it is GO in `docs/POI.md`, and a
-  data source is used only when it is GO in `docs/DATA-SOURCES.md` (PRD § Content
+  data source is used only when it is GO in `docs/SOURCES.md` § 1 (PRD § Content
   and licensing).
 - **Public repo.** Every commit is published: apply §5 "Privacy, secrets &
   publishing" before every push.
