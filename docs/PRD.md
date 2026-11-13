@@ -256,6 +256,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-012 | Relief of the neighbouring countries, so the Alps do not end in a cliff at the border  | planned  |
 | G-013 | A soak of 4 hours or more, in one stretch (Guillaume, 2026-11-12; B-013 ran 2 hours)   | proposed |
 | G-014 | Warm water shimmering on the sea off the coastal nuclear plants (PRD Q-16, Q-20)       | proposed |
+| G-015 | The main rivers of France on the map (Guillaume, 2026-11-13; B-023, D-039)             | done     |
 
 ## 10. Open questions
 
@@ -287,3 +288,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-21 | Sites with no BD TOPO zone stay at their town hall?             | Yes: 131 of 307, mostly biomass (52) and wind (40) farms; B-017 can revisit                          | Yes (Guillaume, 2026-11-13, D-034)                                    |
 | Q-22 | Étretat, the cranes, the lighthouse: do they read as such?      | Yes at a region's scale (about 2 px per km); refine with B-016 if one does not                       | Yes (Guillaume, 2026-11-13, D-034)                                    |
 | Q-23 | 14 large plants BD TOPO does not name stay at their town hall?  | Yes: a GO source of coordinates first (e.g. Wikidata, CC0), if a shift shows on screen               |                                                                       |
+| Q-24 | Rivers from BD TOPO (DS-13), kept and drawn as D-039 says?      | Yes: the source is GO already for plants, same licence; 17 great rivers on France, 92 from close     |                                                                       |

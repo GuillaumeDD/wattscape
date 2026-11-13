@@ -3,6 +3,7 @@ import { COARSE_COLUMNS, COARSE_ROWS, decodeHex, FINE_ROWS, FOREIGN, SEA } from 
 import { ELEVATION_ROWS_HEX } from "../src/map/france";
 import { coarseLayer, fineLayer, seaDistances } from "../src/map/layers";
 import { FINE_ELEVATION_RLE } from "../src/map/relief";
+import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine";
 import { mulberry32 } from "./random";
 
 /** The distance of each sea cell to the nearest land cell, by trying them all. */
@@ -59,18 +60,19 @@ describe("terrain layers", () => {
   });
 
   it("decodes the 1 km layer once for the same relief, with sea and foreign land", () => {
-    const layer = fineLayer(FINE_ELEVATION_RLE);
-    expect(fineLayer(FINE_ELEVATION_RLE)).toBe(layer);
+    const layer = fineLayer(FINE_ELEVATION_RLE, LESSER_RIVERS_PACKED);
+    expect(fineLayer(FINE_ELEVATION_RLE, LESSER_RIVERS_PACKED)).toBe(layer);
     expect(layer.km).toBe(1);
     expect(layer.rows).toBe(FINE_ROWS);
     expect(layer.kinds.includes(FOREIGN)).toBe(true);
     expect(layer.kinds.includes(SEA)).toBe(true);
   });
 
-  it("rejects relief rows of the wrong count or shape", () => {
-    expect(() => fineLayer(FINE_ELEVATION_RLE.slice(1))).toThrow(/rows/);
+  it("rejects relief rows of the wrong count or shape, and a malformed river", () => {
+    expect(() => fineLayer(FINE_ELEVATION_RLE.slice(1), LESSER_RIVERS_PACKED)).toThrow(/rows/);
     const bad = [...FINE_ELEVATION_RLE];
     bad[3] = "q1152"; // class 16 does not exist
-    expect(() => fineLayer(bad)).toThrow(/unknown value/);
+    expect(() => fineLayer(bad, LESSER_RIVERS_PACKED)).toThrow(/unknown value/);
+    expect(() => fineLayer(FINE_ELEVATION_RLE, ["la Test|120|0 0 1"])).toThrow(/bad line/);
   });
 });

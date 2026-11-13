@@ -362,7 +362,8 @@ bake. The browser never downloads map data: the CSP is unchanged.
   4 km relief); sea and foreign land are class 0. It lives in its own file,
   `src/map/relief.ts` (232 KB, 86 KB compressed), which the browser loads, as a
   separate chunk from the site itself, only when the camera comes close or the
-  viewer has a region; decoded, the 1 km layer takes about 3.8 MB and 40 ms, once.
+  viewer has a region; decoded, the 1 km layer takes about 5 MB (its rivers
+  included) and 70 ms in Node, once.
   Its 4 × 4 means agree with the 4 km relief within 2 classes (tests).
 - **Encoding:** one line per grid row: run-length encoded values (`a12c40` = 12 cells
   of value 0, then 40 of value 2) for the kinds and the 1 km relief, one hexadecimal
@@ -406,6 +407,30 @@ bake. The browser never downloads map data: the CSP is unchanged.
   of Mont Lozère). A nuclear site draws cooling towers if it is in the list of
   `tools/bake-plants-rules.ts` (11 sites, from general knowledge, confirmed by Guillaume, D-027). In 2026-11 the
   registry counts 18 nuclear sites, 61 370 MW, as the tests check.
+- **Rivers** (B-023, D-039): `tools/bake-rivers.ts` bakes the named watercourses
+  of BD TOPO's layer `cours_d_eau` (DS-13, S-018) as lines, each projected, thinned
+  to 0.3 km (Douglas–Peucker) and rounded to 0.1 km. BD TOPO gives a long river as
+  several watercourses (« la Loire », « Fleuve la Loire »): those of one name that
+  touch are joined. A river's **reach** is the number of 1 km cells it crosses,
+  close to its length; of its lines, only those that cross a cell no longer line
+  crosses are kept, which drops the side arms within a kilometre of the main
+  course. Kept: the rivers of reach 100 or more, canals and aqueducts left out (by
+  their name). On the bake of 2026-11-13: 647 watercourses read, 92 rivers kept
+  (14 canals and aqueducts and 2 unnamed watercourses left out), 3.5 million points
+  thinned to 15 228. The 17 **great rivers**, of reach 300 or more (the Loire,
+  1 106, to the Durance, 309), are in `src/map/rivers.ts` (40 KB, 16 KB
+  compressed), in the main bundle; the 75 others in `src/map/rivers-fine.ts`
+  (64 KB, 25 KB compressed), a separate chunk loaded with the 1 km relief. Each
+  layer marks the cells its rivers cross (`src/map/river-lines.ts`: Bresenham's
+  line between the cells of a line's points, integers only), on French land only:
+  the great rivers on the 4 km layer (2 004 cells), all of them on the 1 km layer
+  (18 702 cells). The theme draws a river cell in the shallow sea's colour, over
+  the ground and through the towns (never over a chef-lieu's cell, whose lamp always
+  shows), at least a pixel wide so that it shows on the national view; where cells
+  share a pixel, a town shows over the water beside it. With the rivers, two runs of
+  `tools/perf.ts frames` (2026-11-13) gave 17 to 21 ms at p95 for the flight and 18
+  to 22 ms for the wheel zoom, inside the budget of § Performance; the steady
+  views are unchanged. A river is scenery: no figure drives it.
 - **Ranges of consumption** (B-014): `tools/bake-consumption.ts` bakes
   `src/map/consumption.ts`, each region's 5th and 95th percentiles of
   `consommation` over twelve months (2025-09-01 to 2026-09-01), from RTE's
@@ -589,7 +614,9 @@ Normandie and Auvergne-Rhône-Alpes as the app frames them, the Mont Blanc massi
 close up, by day, at the golden hour and at night, and the flight from France to
 Normandie; and the plants (`step-3-plants-*.png`, B-012) from the two recorded steps
 of 2026-11-12, by day and at night: France, Normandie, Auvergne-Rhône-Alpes, the
-Rhône valley and the Seine-Maritime coast, and four moments of their motion. The map is drawn north up (D-017): 2:1 tiles, the map seen from the
+Rhône valley and the Seine-Maritime coast, and four moments of their motion; and
+the rivers (`step-4-rivers-*.png`, B-023): France, the same two regions and the
+Loire close up. The map is drawn north up (D-017): 2:1 tiles, the map seen from the
 south.
 
 How the terrain draws, aiming at calm, elegant pixel art (Guillaume, 2026-11-11):

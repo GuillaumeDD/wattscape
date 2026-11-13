@@ -7,6 +7,7 @@ import { decodeRuns, FINE_COLUMNS, FINE_ROWS, kmOf, SEA } from "../src/map/grid"
 import { LANDMARKS } from "../src/map/landmarks";
 import { coarseLayer, fineLayer } from "../src/map/layers";
 import { FINE_ELEVATION_RLE } from "../src/map/relief";
+import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine";
 import { drawLandmark, LANDMARK_SPRITES } from "../src/render/art/landmarks";
 import { type Pen } from "../src/render/art/plants";
 import { type ColourName, PALETTE } from "../src/render/palette";
@@ -87,7 +88,7 @@ describe("the landmarks' sprites (src/render/art/landmarks.ts)", () => {
 
 describe("the landmarks in a frame", () => {
   const coarse = coarseLayer();
-  const fine = fineLayer(FINE_ELEVATION_RLE);
+  const fine = fineLayer(FINE_ELEVATION_RLE, LESSER_RIVERS_PACKED);
   const etretat = LANDMARKS.find((l) => l.id === "P-001");
   const sceneAt = (camera: Camera, landmarks: Scene["landmarks"]): Scene => ({
     width: FRAME_WIDTH,

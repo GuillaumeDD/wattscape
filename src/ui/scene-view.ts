@@ -52,6 +52,8 @@ const FRAME_MS = 1000 / 30;
 const LIGHT_EVERY_MS = 60_000;
 /** Below this scale the 1 km relief is not needed yet; from it, it is loaded. */
 const LOAD_FINE_FROM_SCALE = 0.4;
+/** The lesser rivers when their chunk could not be loaded: none. */
+const NO_RIVERS: readonly string[] = [];
 /** Dither levels the crossfade moves by per frame: 16 levels in about half a second. */
 const DETAIL_STEP = 1;
 /** How long the national view shows before the camera flies to the viewer's region. */
@@ -190,11 +192,19 @@ export function mountSceneView(
   function loadFine(): void {
     if (fineRequested) return;
     fineRequested = true;
-    // A separate chunk (about 86 KB compressed), fetched from this site only. Decoding
-    // it takes about 40 ms, once: with a region, during the still France of the intro.
-    import("../map/relief")
-      .then((m) => {
-        fine = fineLayer(m.FINE_ELEVATION_RLE);
+    // Two separate chunks (the relief, about 86 KB compressed, and the lesser rivers,
+    // 25 KB), fetched from this site only. Decoding them takes some tens of
+    // milliseconds, once: with a region, during the still France of the intro.
+    // Without the lesser rivers the relief still shows, with the great rivers alone.
+    Promise.all([
+      import("../map/relief"),
+      import("../map/rivers-fine").then(
+        (m) => m.LESSER_RIVERS_PACKED,
+        () => NO_RIVERS,
+      ),
+    ])
+      .then(([relief, rivers]) => {
+        fine = fineLayer(relief.FINE_ELEVATION_RLE, rivers);
         wake();
       })
       .catch(() => {

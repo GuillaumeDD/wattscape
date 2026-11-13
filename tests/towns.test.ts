@@ -20,6 +20,7 @@ import {
 import { coarseLayer, fineLayer, type TerrainLayer } from "../src/map/layers";
 import { MIN_POPULATION } from "../src/map/town-rules";
 import { FINE_ELEVATION_RLE } from "../src/map/relief";
+import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine";
 import { PALETTE } from "../src/render/palette";
 import {
   drawPixelScene,
@@ -128,7 +129,7 @@ describe("lampLevels", () => {
 
 describe("the towns at night (src/render/pixel-theme.ts)", () => {
   const coarse = coarseLayer();
-  const fine = fineLayer(FINE_ELEVATION_RLE);
+  const fine = fineLayer(FINE_ELEVATION_RLE, LESSER_RIVERS_PACKED);
   const camera = fitBox(areaBox(coarse, "11"), FRAME_WIDTH, FRAME_HEIGHT);
   const count = (lights: TownLights, elevation: number, colour: keyof typeof PALETTE): number => {
     const scene: Scene = {
@@ -222,7 +223,7 @@ describe("townCellCount (D-031)", () => {
 
 describe("townCells", () => {
   const coarse = coarseLayer();
-  const fine = fineLayer(FINE_ELEVATION_RLE);
+  const fine = fineLayer(FINE_ELEVATION_RLE, LESSER_RIVERS_PACKED);
   const isLand = (layer: TerrainLayer, i: number): boolean =>
     (layer.kinds[i] ?? SEA) !== SEA && layer.kinds[i] !== FOREIGN;
 

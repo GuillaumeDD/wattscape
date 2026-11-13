@@ -218,8 +218,11 @@ interface LayerIndex {
   readonly towns: readonly Town[];
   /** One byte per cell: `townCells`. */
   readonly cells: Uint8Array;
-  /** One byte per row: whether it holds a town. */
-  readonly townRows: Uint8Array;
+  /**
+   * One byte per row: whether it holds a town or a river (B-023), which show even on
+   * a row flatter than a pixel.
+   */
+  readonly markedRows: Uint8Array;
   /** One byte per row: its highest elevation class. */
   readonly highest: Uint8Array;
 }
@@ -230,14 +233,14 @@ function layerIndex(layer: TerrainLayer, towns: readonly Town[]): LayerIndex {
   const known = indexCache.get(layer);
   if (known?.towns === towns) return known;
   const cells = townCells(layer, towns);
-  const townRows = new Uint8Array(layer.rows);
+  const markedRows = new Uint8Array(layer.rows);
   const highest = new Uint8Array(layer.rows);
   for (let i = 0; i < cells.length; i++) {
     const r = Math.floor(i / layer.columns);
-    if (cells[i] !== 0) townRows[r] = 1;
+    if (cells[i] !== 0 || layer.rivers[i] === 1) markedRows[r] = 1;
     highest[r] = Math.max(highest[r] ?? 0, layer.elevation[i] ?? 0);
   }
-  const index = { towns, cells, townRows, highest };
+  const index = { towns, cells, markedRows, highest };
   indexCache.set(layer, index);
   return index;
 }
@@ -322,6 +325,9 @@ interface Tints {
   readonly side: Uint32Array[];
   readonly sea: Record<"seaShallow" | "sea" | "seaDeep", Uint32Array>;
   readonly roof: Uint32Array;
+  /** A river: the shallow sea's blue; one step back where the land is veiled. */
+  readonly river: Uint32Array;
+  readonly riverVeiled: Uint32Array;
 }
 
 function tintsOf(frame: Frame, scene: Scene): Tints {
@@ -351,6 +357,8 @@ function tintsOf(frame: Frame, scene: Scene): Tints {
       seaDeep: pattern(frame, "seaDeep", base),
     },
     roof: pattern(frame, "roof", base),
+    river: pattern(frame, "seaShallow", base),
+    riverVeiled: pattern(frame, "seaShallow", base + veil),
   };
 }
 
@@ -398,7 +406,8 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
   const hs = ELEVATION_CLASSES.map((_, e) => heightPx(e, s));
   const tints = tintsOf(frame, scene);
   const focus = scene.focus === null ? -1 : kindOfRegion(scene.focus);
-  const { cells: towns, townRows, highest } = layerIndex(layer, scene.towns);
+  const { cells: towns, markedRows, highest } = layerIndex(layer, scene.towns);
+  const { rivers } = layer;
   const lamps = lampLevels(scene);
   // Hill shading compares a cell with the one 4 km to its north-west, on both layers,
   // so the 1 km layer shades whole slopes, not every bump.
@@ -407,6 +416,8 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
   // drawn: a town then shows whatever the zoom, on top of the ground around it, and
   // the relief of the rows in front (south) still hides it.
   const pending: number[] = [];
+  // River cells wait with them (x, y, width, height, veiled), and are drawn first.
+  const water: number[] = [];
   // Plants wait for the end of their row too, so the relief in front hides their foot.
   const size: SpriteSize = s >= SPRITES_FROM_SCALE ? "full" : "marker";
   const pen = penOf(frame, light.darkness, light.emissive);
@@ -462,6 +473,22 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
     }
   };
   const drawTowns = (): void => {
+    // The rivers first: where cells share a pixel (France seen whole), a town's roof
+    // or lamp shows over the water beside it. Water, by day and by night: it lights
+    // nothing.
+    for (let k = 0; k < water.length; k += 5) {
+      const cx = water[k] ?? 0;
+      const cy = water[k + 1] ?? 0;
+      fill(
+        frame,
+        cx,
+        cy,
+        cx + (water[k + 2] ?? 1),
+        cy + (water[k + 3] ?? 1),
+        water[k + 4] === 0 ? tints.river : tints.riverVeiled,
+      );
+    }
+    water.length = 0;
     for (let k = 0; k < pending.length; k += 6) {
       const cx = pending[k] ?? 0;
       const cy = pending[k + 1] ?? 0;
@@ -495,7 +522,7 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
     // is drawn only for what still shows: the south faces of its relief, its towns.
     // Skipping the rest keeps the work in step with the pixels, not the cells.
     const flat = y1 <= y0;
-    if (flat && (hs[highest[rr] ?? 0] ?? 0) === 0 && !(inGrid && townRows[rr] === 1)) continue;
+    if (flat && (hs[highest[rr] ?? 0] ?? 0) === 0 && !(inGrid && markedRows[rr] === 1)) continue;
     const north = Math.max(rr - reach, 0) * columns;
     const south = Math.min(rr + 1, rows - 1) * columns;
     const row = rr * columns;
@@ -505,9 +532,13 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
       const cc = Math.min(Math.max(c, 0), columns - 1);
       const i = row + cc;
       const town = inGrid && c === cc ? (towns[i] ?? 0) : 0;
-      // A column narrower than a pixel: only its town, if any, still shows; in a flat
-      // row, only its town and a relief that rises.
-      if (town === 0 && (x1 <= x0 || (flat && (hs[elevation[i] ?? 0] ?? 0) === 0))) continue;
+      // A river runs through a town, but never over the cell of its chef-lieu, whose
+      // lamp always shows.
+      const river = inGrid && c === cc && rivers[i] === 1 && town !== TOWN_CENTRE;
+      // A column narrower than a pixel: only its town or river, if any, still shows; in
+      // a flat row, only its town, its river and a relief that rises.
+      if (town === 0 && !river && (x1 <= x0 || (flat && (hs[elevation[i] ?? 0] ?? 0) === 0)))
+        continue;
       const kind = kinds[i] ?? SEA;
       if (kind === SEA) {
         if (flat || y0 >= height) continue;
@@ -517,7 +548,7 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
       const e = kind === FOREIGN ? 0 : (elevation[i] ?? 0);
       const h = hs[e] ?? 0;
       // Wholly off the buffer. A town on a flat row still covers a pixel row: y0 - h.
-      if ((town === 0 ? y1 : Math.max(y1, y0 - h + 1)) <= 0 || y0 - h >= height) continue;
+      if ((town === 0 && !river ? y1 : Math.max(y1, y0 - h + 1)) <= 0 || y0 - h >= height) continue;
       // Hill shading, one light from the north-west: a cell 250 m or more below its
       // north-west neighbour faces away from it and is one step darker. Smaller drops
       // stay lit, so the plains stay calm.
@@ -536,8 +567,12 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
         fill(frame, x0, y1 - h, x1, y1, (cliff ? tints.side[t] : tints.top[t]) ?? tints.roof);
       fill(frame, x0, y0 - h, x1, y1 - h, tints.top[t] ?? tints.roof);
 
-      // A town on this cell covers its top face, at least a pixel: roofs by day,
-      // lamps once the sun is down.
+      // A river or a town on this cell covers its top face, at least a pixel: water;
+      // roofs by day, lamps once the sun is down.
+      if (river) {
+        water.push(x0, y0 - h, Math.max(1, x1 - x0), Math.max(1, y1 - y0), veiled);
+        continue;
+      }
       if (town === 0) continue;
       pending.push(
         x0,
