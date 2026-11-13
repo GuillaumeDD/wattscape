@@ -143,6 +143,7 @@ describe("the towns at night (src/render/pixel-theme.ts)", () => {
       towns: bakedTowns(),
       plants: [],
       townLights: lights,
+      landmarks: [],
     };
     const out = createSurface(FRAME_WIDTH, FRAME_HEIGHT);
     drawPixelScene(scene, out);

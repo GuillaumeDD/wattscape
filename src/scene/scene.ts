@@ -14,6 +14,7 @@ import {
 } from "../data/eco2mix.ts";
 import { type CellRegion, positionOfKm } from "../map/grid.ts";
 import { type TerrainLayer } from "../map/layers.ts";
+import { type Landmark } from "../map/landmarks.ts";
 import { type PlantSite } from "../map/plants.ts";
 import { URBAN_DENSITY } from "../map/town-rules.ts";
 import { TOWNS_PACKED } from "../map/towns.ts";
@@ -67,6 +68,8 @@ export interface Scene {
   readonly plants: readonly ScenePlant[];
   /** How lit each region's towns are at night (`townLights`). */
   readonly townLights: TownLights;
+  /** The landmarks that may show (GO in docs/POI.md), drawn at full sprite size only. */
+  readonly landmarks: readonly Landmark[];
 }
 
 /**

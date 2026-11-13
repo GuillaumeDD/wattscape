@@ -9,6 +9,7 @@ import { type Eco2mixArea, type RegionalReadings } from "../data/eco2mix";
 import { type CellRegion } from "../map/grid";
 import { coarseLayer, fineLayer, type TerrainLayer } from "../map/layers";
 import { CONSUMPTION_RANGES } from "../map/consumption";
+import { LANDMARKS } from "../map/landmarks";
 import { PLANT_SITES } from "../map/plants";
 import { DEFAULT_THEME, type Drawn } from "../render/theme";
 import { createSurface, type Surface } from "../render/surface";
@@ -233,6 +234,7 @@ export function mountSceneView(
       towns: bakedTowns(),
       plants,
       townLights: lights,
+      landmarks: LANDMARKS,
     };
     // Redraw only when what is drawn changes: the drift moves the camera by a pixel
     // every second or two, and a still scene costs nothing.

@@ -553,3 +553,18 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** RTE publishes a regional offshore figure; a new farm comes into
   service (Calvados, Dieppe - Le Tréport, Yeu - Noirmoutier: re-bake with the next
   registry); or a zone is matched to the wrong plant.
+
+## D-033 — The first landmarks: Étretat, Port 2000, Fécamp's harbour
+
+- **Context:** B-015 draws Seine-Maritime's landmarks. In `POI.md`, P-001 (Étretat's
+  arch and needle), P-002 (Le Havre's container cranes) and P-005 (Fécamp's cliffs
+  and harbour) were GO as proposed by Claude, to confirm.
+- **Options:** the three; Étretat only; none until B-016.
+- **Decision:** the three (Guillaume, 2026-11-12, on a decision card), drawn in code
+  at positions read in BD TOPO (S-018): the arch and the needle; two ship-to-shore
+  cranes over containers, a red light on each at night; a jetty and a generic
+  lighthouse, its lantern lit at night.
+- **Why:** a natural site and two generic scenes, with no author's rights; they give
+  the first region its coast, its port and the town of the offshore farm.
+- **Revisit if:** a sprite does not read as its place at the region's scale, or a
+  landmark of Seine-Maritime is found in the public domain (P-003, P-004).

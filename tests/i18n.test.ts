@@ -23,6 +23,13 @@ describe("i18n catalogs", () => {
     }
   });
 
+  it("credits every IGN product the map is baked from, in every locale", () => {
+    // Regression: BD TOPO placed the plants and landmarks (DS-13) uncredited.
+    for (const locale of LOCALES)
+      for (const product of ["ADMIN EXPRESS", "BD ALTI", "BD TOPO"])
+        expect(translate(locale, "creditsMapLicence"), locale).toContain(product);
+  });
+
   it("translate returns the locale's string", () => {
     expect(translate("fr", "switchLanguage")).toBe("English");
     expect(translate("en", "switchLanguage")).toBe("Français");
