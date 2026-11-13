@@ -4,6 +4,7 @@
  * the baked file against them.
  */
 import { type Source } from "../src/data/eco2mix.ts";
+import { type DiffuseSource, type MajorSource } from "../src/map/sources.ts";
 
 /** The registry's technologies (`codefiliere`), as the scene's sources. */
 export const FILIERES: Readonly<Record<string, Source>> = {
@@ -15,18 +16,40 @@ export const FILIERES: Readonly<Record<string, Source>> = {
   BIOEN: "bioenergy",
 };
 
-/** The smallest site kept, MW: every nuclear site; the large dams and thermal plants. */
-export const MIN_MW: Readonly<Record<Source, number>> = {
+/** The smallest major site kept, MW: every nuclear site; the large dams and thermal plants. */
+export const MIN_MW: Readonly<Record<MajorSource, number>> = {
   nuclear: 0,
   hydro: 50,
   thermal: 100,
-  bioenergy: 10,
-  wind: 10,
-  solar: 10,
 };
 
-/** At most this many sites per region and technology (nuclear: all of them). */
+/** At most this many hydro or thermal sites per region (nuclear: all of them). */
 export const MAX_SITES = 8;
+
+/**
+ * The installed capacity one site of a diffuse source stands for, MW (B-017, D-041):
+ * a region shows one site per so many MW of its units in service, of any size, so
+ * that the map tells where the wind farms and the solar fields are (27 wind sites in
+ * Hauts-de-France, 1 in Provence-Alpes-Côte d'Azur).
+ */
+export const MW_PER_SITE: Readonly<Record<DiffuseSource, number>> = {
+  wind: 250,
+  solar: 250,
+  bioenergy: 50,
+};
+
+/**
+ * How many sites of a diffuse source a region shows, from its installed capacity in
+ * kW: one per MW_PER_SITE, rounded (half up), and one at least where there is any, so
+ * that the region's figure always has something to move. Integers only.
+ */
+export function diffuseSiteCount(regionKw: number, source: DiffuseSource): number {
+  if (!Number.isFinite(regionKw)) throw new Error(`capacity: ${String(regionKw)}`);
+  const kw = Math.round(regionKw);
+  if (kw <= 0) return 0;
+  const perKw = MW_PER_SITE[source] * 1000;
+  return Math.max(1, Math.floor((2 * kw + perKw) / (2 * perKw)));
+}
 
 /**
  * The nuclear sites cooled by towers (aéroréfrigérants), by commune: the others are

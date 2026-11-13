@@ -24,7 +24,7 @@ does not repeat the rules.
 
 ## Register
 
-Figures are from the bake of 2026-11-13 (307 sites). "Town hall" means the
+Figures are from the second bake of 2026-11-13 (308 sites, D-041). "Town hall" means the
 chef-lieu of the commune the registry files the site under.
 
 | Id    | Site (commune, source, MW)               | Stands at | Point                                                      | Status | Comment                                                  |
@@ -42,14 +42,14 @@ chef-lieu of the commune the registry files the site under.
 | PL-11 | Abergement-la-Ronce, thermal, 167        | town hall | « Tavaux » in the registry (Solvay's site); not in BD TOPO | OPEN   | PRD Q-23                                                 |
 | PL-12 | Saint-Étienne-du-Rouvray, thermal, 132   | town hall | « Chapelle (La) » in the registry; not in BD TOPO          | OPEN   | PRD Q-23                                                 |
 | PL-13 | Le Lardin-Saint-Lazare, thermal, 102     | town hall | « Condat-le-Lardin », a paper mill's cogeneration          | OPEN   | PRD Q-23                                                 |
-| PL-14 | Gardanne, bioenergy, 150                 | town hall | « Provence » in the registry; no such zone in BD TOPO      | OPEN   | PRD Q-23                                                 |
+| PL-14 | Gardanne, bioenergy, 151                 | town hall | « Provence » in the registry; no such zone in BD TOPO      | OPEN   | PRD Q-23; 150 before D-041 counted every unit            |
 | PL-15 | Every site                               | —         | A site sums a commune's units: several plants, one place   | OPEN   | Brommat's site stands at Sarrans's dam (its other plant) |
-| PL-16 | Morchies, wind, 154; Jametz, solar, 110  | town hall | Wind and solar are not matched by name (D-036)             | WAIT   | Farms are spread out: revisit with B-017's diffuse part  |
-| PL-17 | 40 wind, 12 solar, 52 bioenergy sites    | town hall | No BD TOPO zone of their kind in their commune             | WAIT   | Guillaume, 2026-11-13: stay (PRD Q-21, D-034)            |
+| PL-16 | Morchies, wind, 162; Jametz, solar, 137  | town hall | Wind and solar are not matched by name (D-036)             | WAIT   | 2026-11-13, D-041: every unit counted (were 154, 110)    |
+| PL-17 | 32 wind, 9 solar, 46 bioenergy sites     | town hall | No BD TOPO zone of their kind in their commune             | WAIT   | Stay (Q-21, D-034); 40, 12 and 52 before D-041           |
 | PL-18 | Laruns, hydro, 199                       | BD TOPO   | Moved 6 km onto « Miégebat » by its name: right plant?     | OPEN   | The largest move of D-036; check on screen               |
 | PL-19 | The 11 nuclear sites with cooling towers | BD TOPO   | The list is from general knowledge, with no source         | OPEN   | Confirmed by Guillaume (D-027); a source can now be read |
-| PL-20 | Lyon 7e, bioenergy, 10                   | left out  | IGN lists no chef-lieu for the arrondissement              | WAIT   | Small; revisit if arrondissements get a rule             |
-| PL-21 | Mont Lozère et Goulet, wind              | left out  | Its town hall is 5 km or more out of its region            | WAIT   | Revisit with the map's next bake                         |
+| PL-20 | Lyon 7e, bioenergy, 10                   | left out  | IGN lists no chef-lieu for the arrondissement              | DONE   | D-041 (2026-11-13): not among its region's 4 sites       |
+| PL-21 | Mont Lozère et Goulet, wind              | left out  | Its town hall is 5 km or more out of its region            | DONE   | D-041 (2026-11-13): not among its region's 7 sites       |
 | PL-22 | Faraman, floating offshore wind, 25      | left out  | Its turbines are not in BD TOPO yet                        | WAIT   | Re-check at the next bake (D-032)                        |
 | PL-23 | Calvados, Dieppe - Le Tréport, offshore  | left out  | « En construction » at the registry's date (31/12/2024)    | WAIT   | Re-bake with the next registry (D-032)                   |
 | PL-24 | Hydro sites placed at a dam (7)          | BD TOPO   | The powerhouse can stand below the dam, not on it          | OPEN   | Fine at 1 km per cell so far; check Génissiat, L'Aigle   |

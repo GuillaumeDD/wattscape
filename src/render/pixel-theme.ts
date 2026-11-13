@@ -19,6 +19,7 @@ import { skyColour, tinted } from "../sky/light.ts";
 import { drawLandmark } from "./art/landmarks.ts";
 import { drawBody, drawMotion, hasMotion, type Pen, type SpriteSize } from "./art/plants.ts";
 import { type Landmark } from "../map/landmarks.ts";
+import { isDiffuse } from "../map/sources.ts";
 import { BAYER_4, DITHER_LEVELS } from "./dither.ts";
 import { COLOUR_NAMES, type ColourName, darken, PALETTE, type Rgb } from "./palette.ts";
 import { createSurface, type Surface } from "./surface.ts";
@@ -148,6 +149,8 @@ export const SPRITES_FROM_SCALE = 0.7;
 /**
  * The smallest plant shown at a scale, MW: on the national view the giants only
  * (nuclear sites, the largest dams), then the large plants, then every baked site.
+ * A site of a diffuse source on land shows whatever its size once the sprites are
+ * drawn: how many a region has already tells its capacity (D-041).
  */
 export function minPlantMw(scale: number): number {
   if (scale < SPRITES_FROM_SCALE) return 1000;
@@ -190,7 +193,9 @@ export function visiblePlants(scene: Scene, ox: number, width: number): ScenePla
   const min = minPlantMw(s);
   const kept: { plant: ScenePlant; x: number; y: number }[] = [];
   const sorted = scene.plants
-    .filter((p) => p.site.mw >= min)
+    .filter((p) =>
+      isDiffuse(p.site.source) && !p.site.offshore ? size === "full" : p.site.mw >= min,
+    )
     .sort((a, b) => b.site.mw - a.site.mw || a.site.x - b.site.x || a.site.y - b.site.y);
   for (const plant of sorted) {
     const x = Math.floor(plant.site.x * s) - ox;

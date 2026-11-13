@@ -100,8 +100,8 @@ idea that the grid can be seen.
 
 - Major plants are placed at their real location (nuclear sites, large dams, large
   thermal plants, offshore wind farms); diffuse sources (onshore wind, solar,
-  bioenergy, small hydro) are scattered procedurally where they are, in proportion to
-  the region's installed mix.
+  bioenergy) stand where the most of them is installed, their number in proportion
+  to the region's installed capacity (D-041); small hydro is not drawn.
 - Each source has one animation driven by one documented figure (ARCHITECTURE §
   Data-to-scene mapping), e.g. the steam plume of cooling towers follows the regional
   nuclear load factor.
@@ -289,3 +289,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-22 | Étretat, the cranes, the lighthouse: do they read as such?      | Yes at a region's scale (about 2 px per km); refine with B-016 if one does not                       | Yes (Guillaume, 2026-11-13, D-034)                                    |
 | Q-23 | 14 large plants BD TOPO does not name stay at their town hall?  | Yes: a GO source of coordinates first (e.g. Wikidata, CC0), if a shift shows on screen               |                                                                       |
 | Q-24 | Rivers from BD TOPO (DS-13), kept and drawn as D-039 says?      | Yes: the source is GO already for plants, same licence; 17 great rivers on France, 92 from close     | Yes (Guillaume, 2026-11-13, D-040)                                    |
+| Q-25 | One site per 250 MW of wind or solar, 50 MW of bioenergy?       | Yes: 95 wind, 78 solar and 50 bioenergy sites, as many as before, now where the capacity is (D-041)  |                                                                       |

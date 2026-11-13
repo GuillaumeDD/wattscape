@@ -692,3 +692,27 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Why:** the recommendation: the same source and licence (Licence Ouverte 2.0)
   as for the plants, already credited.
 - **Revisit if:** the conditions of D-039 arise.
+
+## D-041 — Diffuse sources: sites in proportion to a region's installed capacity
+
+- **Context:** B-017's second part. Since D-024 every region showed its 8 largest
+  wind, solar and bioenergy sites of 10 MW or more: Hauts-de-France (6 858 MW of
+  wind) and Auvergne-Rhône-Alpes (735 MW) both had 7 or 8 wind sites, so the map
+  did not tell where the wind and the sun are harvested (PRD § 4.5).
+- **Options:** keep the 8 largest; sites scattered by a seeded PRNG with a density
+  per region (ARCHITECTURE § World generation, provisional until now); a number of
+  sites per region in proportion to its capacity, at its real communes.
+- **Decision:** the last. From the registry (DS-07), every unit in service on land
+  is counted, of any size; a region shows one site per 250 MW of wind, per 250 MW
+  of solar, per 50 MW of bioenergy (rounded, one at least), at the communes that
+  hold the most, placed as before (BD TOPO zone, else town hall). Small hydro is
+  not drawn: hydro stays the large dams. A diffuse site shows in every region view
+  (from 0.7 pixel per km) whatever its size; the national view keeps the giants
+  only, as before. Proposed by Claude, 2026-11-13; the three thresholds are PRD
+  Q-25.
+- **Why:** real places need no random draw and stay traceable; the thresholds give
+  about as many sites as before (95, 78 and 50 against 87, 80 and 55), so the
+  scene is no busier, only truer: 27 wind sites in Hauts-de-France, 1 in
+  Provence-Alpes-Côte d'Azur.
+- **Revisit if:** a region reads as crowded or empty on screen (change a
+  threshold), or the registry is re-baked.

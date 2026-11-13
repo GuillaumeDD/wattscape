@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { mulberry32 } from "./random";
 import { recordedPlants } from "../e2e/reference-frames";
 import {
   type Eco2mixReading,
@@ -10,7 +11,8 @@ import {
 } from "../src/data/eco2mix";
 import { FINE_ROWS_RLE } from "../src/map/france";
 import { decodeRuns, FINE_COLUMNS, kindOfRegion, kmOf, SEA } from "../src/map/grid";
-import { PLANT_SITES, type PlantSite } from "../src/map/plants";
+import { DIFFUSE_MW, PLANT_SITES, type PlantSite } from "../src/map/plants";
+import { DIFFUSE_SOURCES, isDiffuse } from "../src/map/sources";
 import {
   drawBody,
   drawMotion,
@@ -24,8 +26,10 @@ import { type ColourName } from "../src/render/palette";
 import { activityOf, scenePlants } from "../src/scene/scene";
 import {
   COOLING_TOWERS,
+  diffuseSiteCount,
   MAX_SITES,
   MIN_MW,
+  MW_PER_SITE,
   NAMED_KM,
   nameFits,
   namesPlant,
@@ -129,15 +133,41 @@ describe("the baked plants (DS-07, src/map/plants.ts)", () => {
     expect(PLANT_SITES.filter((p) => p.towers)).toHaveLength(COOLING_TOWERS.length);
   });
 
-  it("keep at most the largest sites per region and technology, above the minimum", () => {
+  it("keep at most the largest major sites per region and technology, above the minimum", () => {
     for (const region of REGION_CODES)
-      for (const source of SOURCES) {
-        const list = PLANT_SITES.filter(
-          (p) => p.region === region && p.source === source && !p.offshore,
-        );
+      for (const source of ["nuclear", "hydro", "thermal"] as const) {
+        const list = PLANT_SITES.filter((p) => p.region === region && p.source === source);
         if (source !== "nuclear") expect(list.length).toBeLessThanOrEqual(MAX_SITES);
         for (const p of list) expect(p.mw).toBeGreaterThanOrEqual(MIN_MW[source]);
       }
+  });
+
+  it("show one diffuse site per MW_PER_SITE of a region's capacity, one at least (D-041)", () => {
+    for (const region of REGION_CODES)
+      for (const source of DIFFUSE_SOURCES) {
+        const list = PLANT_SITES.filter(
+          (p) => p.region === region && p.source === source && !p.offshore,
+        );
+        const mw = DIFFUSE_MW[region][source];
+        expect(mw, `${region} ${source}`).toBeGreaterThan(0);
+        // The baked capacity is rounded to the MW: a count on the edge of a half may
+        // differ by one from the bake's, which counts in kW.
+        const counts = [mw - 0.5, mw + 0.5].map((v) => diffuseSiteCount(v * 1000, source));
+        expect(list.length, `${region} ${source}`).toBeGreaterThanOrEqual(counts[0] ?? 0);
+        expect(list.length, `${region} ${source}`).toBeLessThanOrEqual(counts[1] ?? 0);
+        // The sites are communes of the region: together they hold a part of its capacity.
+        expect(list.reduce((t, p) => t + p.mw, 0)).toBeLessThanOrEqual(mw + list.length);
+      }
+    // The map tells where the wind and the sun are harvested: Hauts-de-France has the
+    // most wind sites, Nouvelle-Aquitaine the most solar ones.
+    const most = (source: string): string =>
+      [...REGION_CODES].sort(
+        (a, b) =>
+          PLANT_SITES.filter((p) => p.region === b && p.source === source).length -
+          PLANT_SITES.filter((p) => p.region === a && p.source === source).length,
+      )[0] ?? "";
+    expect(most("wind")).toBe("32");
+    expect(most("solar")).toBe("75");
   });
 
   it("hold one site per technology and commune, with sane figures", () => {
@@ -445,6 +475,44 @@ describe("the plant names that tie a site to BD TOPO (B-017, tools/bake-plants-r
       { name: "Centrale du Pouget", x: 5, y: 0 },
     ];
     expect(nearestNamed(tied, [{ name: "pouget", mw: 1 }], near)).toBe(tied[1]);
+  });
+});
+
+describe("the diffuse sources' rule (D-041, tools/bake-plants-rules.ts)", () => {
+  it("tells the diffuse sources from the major ones", () => {
+    expect(SOURCES.filter(isDiffuse).sort()).toEqual([...DIFFUSE_SOURCES].sort());
+    expect(Object.keys(MW_PER_SITE).sort()).toEqual([...DIFFUSE_SOURCES].sort());
+    expect(SOURCES.filter((s) => !isDiffuse(s)).sort()).toEqual(Object.keys(MIN_MW).sort());
+  });
+
+  it("counts one site per MW_PER_SITE, rounded half up, one at least where there is any", () => {
+    expect(MW_PER_SITE.wind).toBe(250);
+    const cases: [number, number][] = [
+      [0, 0],
+      [-5, 0],
+      [1, 1],
+      [96_000, 1],
+      [374_999, 1],
+      [375_000, 2],
+      [624_999, 2],
+      [625_000, 3],
+      [6_858_000, 27],
+    ];
+    for (const [kw, count] of cases) expect(diffuseSiteCount(kw, "wind"), String(kw)).toBe(count);
+    expect(diffuseSiteCount(377_000, "bioenergy")).toBe(8);
+    // A capacity that is no number is a broken answer, not a region without sites.
+    expect(() => diffuseSiteCount(Number.NaN, "wind")).toThrow();
+  });
+
+  it("agrees with rounding the capacity over MW_PER_SITE (randomized)", () => {
+    const random = mulberry32(41);
+    for (let n = 0; n < 500; n++) {
+      const kw = Math.floor(random() * 8_000_000);
+      for (const source of DIFFUSE_SOURCES)
+        expect(diffuseSiteCount(kw, source)).toBe(
+          Math.max(1, Math.round(kw / 1000 / MW_PER_SITE[source])),
+        );
+    }
   });
 });
 
