@@ -680,3 +680,15 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** a river is missing or cut on screen (a stretch under another
   name, a stretch with no name), the national view reads as a web (raise 300), or
   a canal worth showing is asked for (the Canal du Midi).
+
+## D-040 — BD TOPO also used for the rivers (PRD Q-24)
+
+- **Context:** DS-13 (IGN BD TOPO) was GO for the places of plants and offshore
+  farms (Guillaume, 2026-11-12). B-023 baked the rivers from the same source
+  (D-039), a use the register marked "to confirm" (PRD Q-24).
+- **Options:** yes, as D-039 says; another source for the rivers; no rivers.
+- **Decision:** yes: Guillaume, 2026-11-13 ("Q-24 : OK"). DS-13's row in
+  `docs/SOURCES.md` § 1 now lists the rivers.
+- **Why:** the recommendation: the same source and licence (Licence Ouverte 2.0)
+  as for the plants, already credited.
+- **Revisit if:** the conditions of D-039 arise.
