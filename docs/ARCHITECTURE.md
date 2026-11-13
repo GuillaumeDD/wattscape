@@ -683,7 +683,8 @@ up).
   the unit tests, and Chromium in `e2e/frame-hash.spec.ts` (`npm run e2e`: Vite
   builds `e2e/*.html` into `dist-e2e/`, Playwright opens them);
   `e2e/scene.spec.ts` drives the scene with the mouse and the keys. Firefox and
-  WebKit join with B-021. A drawing change updates the hashes in the same commit.
+  WebKit join with B-021. A drawing change updates the hashes in the same commit,
+  re-recorded by `tools/record-frames.ts`.
 - A frame is drawn whole, and only when something drawn changes (the camera by a
   pixel, the level of detail, the light, the size): a still or drifting scene costs
   almost nothing. Measured in Node at 480 × 270: 3.5 ms for France, 3 ms for

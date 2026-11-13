@@ -14,7 +14,10 @@ Data sources; where its facts come from is in `docs/SOURCES.md`.
   terms that a free, non-commercial, keyless static site can respect (rate limits,
   attribution), and no privacy cost beyond ARCHITECTURE § Privacy.
 - The **attribution** each licence asks for is shown in the app's credits and in the
-  README, with the source's name and the date of the data shown.
+  README, with the source's name and the date of the data shown. Setting a source
+  to **GO** for code adds, in the same PR, its credit in both languages and its
+  README line, and adds the product to the list `tests/i18n.test.ts` checks the
+  credits against.
 - Data **baked into the repository** (map, capacities, fixtures) also gets an
   `ASSETS.md` entry; a licence that would force a different licence on the repo
   (e.g. share-alike on a database) is a reason for NO-GO unless the data stays

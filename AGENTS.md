@@ -118,7 +118,9 @@ Format:
   without a comment explaining why it is safe.
 - ESLint + Prettier, enforced in CI; formatting is never mixed into a feature diff.
   When a Markdown table cell outgrows its column, Prettier realigns the whole table:
-  reword the cell to fit, or realign the table in a commit of its own.
+  reword the cell to fit, or realign the table in a commit of its own. Keep values
+  short so that they fit: a status `wip` rather than `in-progress`, ids padded to a
+  fixed width when a register will pass ten (`Q-01`).
 - Every exception in a config file (a Dependabot `ignore`, a pinned version, a lint
   rule turned off) carries a comment next to it: why it is there, and when to remove
   it.
@@ -130,6 +132,28 @@ Format:
 - In shell chains that gate a commit, never pipe the test runner into a filter
   (`npm test | tail && git commit` masks failures).
 - Check exit codes directly, or use `set -o pipefail`.
+- Edit a file with an editor tool or a patch, never by reading it into a script and
+  writing it back: a bad read truncates it silently (`tools/bake-plants.ts` lost its
+  end that way in B-015).
+
+### Git
+
+- One working branch at a time (D-035): the next PR starts once the previous one is
+  merged.
+- Never rewrite published history (no force-push, no amend of a pushed commit). When
+  the branch's PR has merged, bring the branch up to date by merging `main` into it.
+- Push every local commit before ending a session: a commit that lives only in the
+  container is lost with it.
+
+### End-to-end tests and frame hashes
+
+- `npm run e2e` drives Playwright's Chromium. Where a Chromium is preinstalled
+  instead (the cloud sessions), point at it:
+  `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run e2e`.
+- After an intended drawing change, re-record the reference frames with
+  `node --experimental-strip-types tools/record-frames.ts` (it prints which frames
+  changed), commit `tests/fixtures/frames/hashes.json` with the change, and run
+  `npm run e2e` to check that Chromium draws the same pixels.
 
 ---
 
@@ -150,6 +174,9 @@ Format:
 
 - Every change goes through a **pull request**; nothing is pushed directly to `main`.
   A pushed branch is not done: open its PR in the same step and share the link.
+- Check a PR's state (open or merged) before pushing to it or announcing it ready:
+  a push after its merge lands nowhere. The answers to a questionnaire always go in
+  a docs PR of their own.
 - Before opening or updating a PR, run a self-review of the diff (`/code-review`)
   and fix confirmed findings first. Always ask:
   - can an async result (a fetch, a geolocation answer, a timer) land after the state
@@ -218,6 +245,8 @@ specific. Focus on it:
 - API parsers are tested against **recorded real responses** committed as fixtures
   (with their date and source), plus malformed and hostile variants. A fixture typed
   from documentation instead of recorded is labelled as such.
+- A unit test stays under ~5 s. An exhaustive check (every town, every region) runs
+  on a deterministic sample in the suite, or in a tool run by hand.
 
 ### Determinism & reproducibility
 
@@ -252,6 +281,12 @@ specific. Focus on it:
   in the PR for Guillaume to check.
 - Before saying where a value comes from, read its provenance in ARCHITECTURE: a
   field name read in a spec is not a field name seen in a live response.
+- A figure written in a question, a PR or a message follows the same rule as a
+  figure on screen: measured by a script or a query before it is written, never from
+  memory (in B-015, Q-21 first said "mostly wind and solar"; the count gave biomass
+  and wind).
+- Before citing a register id (`DS-`, `P-`, `Q-`, `D-`) in a question or on a
+  decision card, re-read its row in the register.
 - At the end of a step, put every provisional choice still open to Guillaume in one
   questionnaire: each with a recommendation and room for a free answer. Record the
   answers with their provenance ("Guillaume, date") in one PR.

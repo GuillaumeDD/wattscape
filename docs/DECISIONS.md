@@ -584,3 +584,28 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Why:** each was the recommendation, with its reason in PRD § Open questions.
 - **Revisit if:** the conditions in D-031, D-032 and D-033 arise, or a region of
   B-016 shows a rule reading badly.
+
+## D-035 — Lessons of step 3 in AGENTS.md; one working branch
+
+- **Context:** the review of step 3 (B-011 to B-015, PRs #12 to #21) listed what
+  caused rework: PRs merged while a push was still on its way, a single allowed
+  branch with no force-push, two figures written before they were measured, a wrong
+  register id on a decision card, a new source left out of the credits, tables
+  realigned by Prettier, a 52 s unit test, a file truncated by a scripted edit, and
+  undocumented e2e tooling.
+- **Options:** eight rules for AGENTS.md and `docs/DATA-SOURCES.md`, all, some or
+  none; for the branches, one working branch, or a second one to prepare the next PR
+  while the previous one waits for its merge.
+- **Decision:** the eight rules (Guillaume, 2026-11-13, "OK pour les 8
+  modifications"), and one working branch, "pour éviter les conflits (on pourra
+  revoir plus tard)" (Guillaume, 2026-11-13). The rules: measure a figure before
+  writing it anywhere; re-read a register id before citing it; check a PR's state
+  before pushing to it, and answer a questionnaire in a docs PR of its own; the Git
+  rules (one branch, no history rewrite, merge `main` after a merge, push before the
+  session ends); the e2e and frame-hash tooling, with `tools/record-frames.ts`; a
+  source set to GO lands with its credits; unit tests under ~5 s; short values in
+  Markdown tables.
+- **Why:** each rule answers a friction measured in step 3; one branch avoids
+  conflicts between stacked PRs.
+- **Revisit if:** waiting for a merge stalls the work for long, or a rule turns out
+  to cost more than the rework it prevents.
