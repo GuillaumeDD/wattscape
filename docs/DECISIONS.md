@@ -568,3 +568,19 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   the first region its coast, its port and the town of the offshore farm.
 - **Revisit if:** a sprite does not read as its place at the region's scale, or a
   landmark of Seine-Maritime is found in the public domain (P-003, P-004).
+
+## D-034 — Answers to the B-015 questionnaire (PRD Q-18 to Q-22)
+
+- **Context:** the end of B-015: its provisional choices, each asked with a
+  recommendation (PRD Q-18 to Q-22).
+- **Options:** for each, the recommendation or a free answer.
+- **Decision:** every recommendation, Guillaume, 2026-11-13 ("OK pour toutes les
+  questions"): Q-18, the towns as communes of 2 000 inhabitants or more, drawn at
+  4 000 per km² (D-031) stay; Q-19, the offshore farms turn with their region's wind
+  load factor (D-032); Q-20, the warm-water shimmer off the coastal nuclear plants
+  waits, as Growth G-014; Q-21, the 131 sites with no BD TOPO zone stay at their
+  town hall; Q-22, Étretat, the cranes and the lighthouse read as their places
+  (D-033).
+- **Why:** each was the recommendation, with its reason in PRD § Open questions.
+- **Revisit if:** the conditions in D-031, D-032 and D-033 arise, or a region of
+  B-016 shows a rule reading badly.
