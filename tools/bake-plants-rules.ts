@@ -111,8 +111,8 @@ export const OFFSHORE_FARMS: readonly OffshoreFarm[] = [
 /**
  * The plant's own name in a unit's registry name (B-017), e.g. « BATHIE (LA) » in
  * « BATHIEH-CENTRALE HYDRAULIQUE DE BATHIE (LA)-7 », as words to look for in a BD
- * TOPO name: lower case, no accents, the article in brackets put back in front,
- * other brackets (an owner, a unit) dropped. Null when the name has no plant name.
+ * TOPO name (wordsOf): « bathie ». The article in brackets and any other brackets (an
+ * owner, a unit) are dropped. Null when the name has no plant name.
  */
 export function plantNameOf(nominstallation: string | null): string | null {
   const m = /CENTRALE (?:HYDRAULIQUE|THERMIQUE) DE (.+?)(?:-\d+)?$/.exec(nominstallation ?? "");
@@ -125,15 +125,19 @@ export function plantNameOf(nominstallation: string | null): string | null {
   return name.replace(/ /g, "").length < 4 ? null : name;
 }
 
-/** Lower case, no accents, letters only, one space between words, articles dropped. */
+/**
+ * Lower case, no accents, letters only, one space between words, articles dropped,
+ * the registry's \u00ab ST \u00bb and \u00ab STE \u00bb spelt out as BD TOPO spells them.
+ */
 export function wordsOf(text: string): string {
   return text
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z]+/g, " ")
     .split(" ")
     .filter((w) => w !== "" && !["le", "la", "les", "l", "d", "de", "du", "des"].includes(w))
+    .map((w) => (w === "st" ? "saint" : w === "ste" ? "sainte" : w))
     .join(" ");
 }
 
@@ -167,4 +171,44 @@ export function nameFits(toponyme: string | null, source: Source): boolean {
       (other === "bioenergy" && source === "thermal") ||
       NAME_WORDS[other].every((w) => !words.includes(` ${w} `)),
   );
+}
+
+/**
+ * Whether a BD TOPO plant zone found by its name can be a site of a source (B-017):
+ * of the source's kind or of no kind, and not named for another technology.
+ */
+export function zoneFits(kind: string | null, toponyme: string | null, source: Source): boolean {
+  return (kind === null || ZONE_KINDS[source].includes(kind)) && nameFits(toponyme, source);
+}
+
+/** Something BD TOPO names, in map kilometres. */
+export interface NamedPlace {
+  readonly name: string;
+  readonly x: number;
+  readonly y: number;
+}
+
+/** How far from its town hall a plant named in BD TOPO may stand, km (B-017). */
+export const NAMED_KM = 15;
+
+/**
+ * The nearest place, within NAMED_KM of `near` (the town hall), whose name holds one
+ * of a site's plant names, the names of its largest units tried first (B-017, D-036).
+ * Ties go to the name in alphabetical order, so the bake is reproducible.
+ */
+export function nearestNamed<T extends NamedPlace>(
+  places: readonly T[],
+  names: readonly { readonly name: string; readonly mw: number }[],
+  near: { readonly x: number; readonly y: number },
+): T | undefined {
+  const order = [...names].sort((a, b) => b.mw - a.mw || a.name.localeCompare(b.name));
+  for (const { name } of order) {
+    const found = places
+      .filter((p) => namesPlant(p.name, name))
+      .map((p) => ({ p, km: Math.hypot(p.x - near.x, p.y - near.y) }))
+      .filter((c) => c.km <= NAMED_KM)
+      .sort((a, b) => a.km - b.km || a.p.name.localeCompare(b.p.name))[0];
+    if (found !== undefined) return found.p;
+  }
+  return undefined;
 }

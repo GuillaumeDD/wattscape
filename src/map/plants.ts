@@ -25,7 +25,10 @@ export interface PlantSite {
   readonly towers: boolean;
   /** The commune it stands in (IGN's official name), or an offshore farm's name. */
   readonly commune: string;
-  /** Placed where it stands (BD TOPO, D-032); false: at its commune's town hall. */
+  /**
+   * Placed where it stands, by BD TOPO: its named zone or dam, or its commune's zone
+   * (D-032, D-036); false: at its commune's town hall.
+   */
   readonly exact: boolean;
   /** An offshore wind farm, at sea (G-007). */
   readonly offshore: boolean;

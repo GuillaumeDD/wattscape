@@ -390,11 +390,13 @@ bake. The browser never downloads map data: the CSP is unchanged.
   common); else at the centre of the largest zone of its kind in its commune (by
   `nature_detaillee`, DS-13, S-018); else, for hydro, at the nearest named BD TOPO
   dam within 15 km that holds its plant's name (« Barrage du Chastang »); else at
-  the chef-lieu of its commune (IGN, DS-04, S-013). On the bake of 2026-11-13: 186
-  sites by BD TOPO, all 18 nuclear ones, 1 to 5 km from their town hall; 118 at
-  their town hall, mostly biomass (52) and wind (40) farms; of those of 100 MW or
-  more, 14 hydro and thermal plants that BD TOPO does not name (PRD Q-23). Then each is moved onto the nearest 1 km cell of its region within 5 km when that falls on
-  the sea or across a border (D-032). The offshore wind farms in service (Fécamp,
+  the chef-lieu of its commune (IGN, DS-04, S-013). Each is moved onto the nearest
+  1 km cell of its region within 5 km when it falls on the sea or across a border
+  (D-032); a place with no such cell gives way to the next in the order. On the bake
+  of 2026-11-13: 186 sites by BD TOPO, all 18 nuclear ones, 1 to 5 km from their
+  town hall; 118 at their town hall, mostly biomass (52) and wind (40) farms, and
+  among them 14 hydro, thermal and biomass plants of 100 MW or more that BD TOPO does
+  not name (PRD Q-23). The offshore wind farms in service (Fécamp,
   Saint-Nazaire, Saint-Brieuc; G-007) are the registry's units that share a farm's
   name, at the centre of its BD TOPO turbines at sea (`OFFSHORE_FARMS`), driven by
   the region where they land. Left out: Corsica and overseas, not in the regional

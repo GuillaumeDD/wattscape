@@ -25,10 +25,13 @@ import {
   COOLING_TOWERS,
   MAX_SITES,
   MIN_MW,
+  NAMED_KM,
   nameFits,
   namesPlant,
+  nearestNamed,
   plantNameOf,
   wordsOf,
+  zoneFits,
 } from "../tools/bake-plants-rules";
 
 const site = (source: PlantSite["source"], extra: Partial<PlantSite> = {}): PlantSite => ({
@@ -342,7 +345,14 @@ describe("the plant names that tie a site to BD TOPO (B-017, tools/bake-plants-r
   it("reads the plant's name in a unit's registry name", () => {
     expect(plantNameOf("BATHIEH-CENTRALE HYDRAULIQUE DE BATHIE (LA)-7")).toBe("bathie");
     expect(plantNameOf("AIGLEH-CENTRALE HYDRAULIQUE DE AIGLE (L )-6")).toBe("aigle");
-    expect(plantNameOf("SSESTH-CENTRALE HYDRAULIQUE DE ST-ESTEVE-6")).toBe("st esteve");
+    // The registry's « ST » is spelt out, as BD TOPO spells it.
+    expect(plantNameOf("SSESTH-CENTRALE HYDRAULIQUE DE ST-ESTEVE-6")).toBe("saint esteve");
+    expect(
+      namesPlant(
+        "Barrage de Sainte-Croix",
+        plantNameOf("X-CENTRALE HYDRAULIQUE DE STE-CROIX-6") ?? "",
+      ),
+    ).toBe(true);
     // An owner or a unit in brackets is dropped.
     expect(
       plantNameOf(
@@ -382,5 +392,57 @@ describe("the plant names that tie a site to BD TOPO (B-017, tools/bake-plants-r
     expect(nameFits("Centrale Thermique de Gardanne", "bioenergy")).toBe(true);
     expect(nameFits("Centrale Biomasse de Gardanne", "thermal")).toBe(true);
     expect(nameFits(null, "hydro")).toBe(true);
+  });
+
+  it("takes a zone found by name of the site's kind or of none, never one named for another", () => {
+    expect(zoneFits("Centrale hydroélectrique", "Centrale de Curbans", "hydro")).toBe(true);
+    expect(zoneFits(null, "Centrale Électrique de la Bâthie", "hydro")).toBe(true);
+    expect(zoneFits("Parc éolien", "Parc de la Bâthie", "hydro")).toBe(false);
+    // Thermal zones may have no kind: the name still rules a hydro plant out (a
+    // review finding: the kind alone used to let it through).
+    expect(zoneFits(null, "Usine Hydroélectrique de Strasbourg", "thermal")).toBe(false);
+    expect(zoneFits("Centrale thermique", "Centrale Biomasse de Strasbourg", "hydro")).toBe(false);
+  });
+
+  it("finds the nearest place that bears a name, largest units first, within 15 km", () => {
+    const places = [
+      { name: "Barrage de Sarrans", x: 10, y: 0 },
+      { name: "Barrage de Brommat", x: 14, y: 0 },
+      { name: "Barrage de Brommat", x: 3, y: 4 },
+      { name: "Usine de Brommat", x: 20, y: 0 },
+    ];
+    const near = { x: 0, y: 0 };
+    // Brommat's units are the largest: its nearest place, 5 km off.
+    expect(
+      nearestNamed(
+        places,
+        [
+          { name: "sarrans", mw: 183 },
+          { name: "brommat", mw: 405 },
+        ],
+        near,
+      ),
+    ).toBe(places[2]);
+    // Sarrans's units first: Sarrans's dam, 10 km off.
+    expect(
+      nearestNamed(
+        places,
+        [
+          { name: "sarrans", mw: 500 },
+          { name: "brommat", mw: 405 },
+        ],
+        near,
+      ),
+    ).toBe(places[0]);
+    // Beyond NAMED_KM, nothing.
+    expect(NAMED_KM).toBe(15);
+    expect(nearestNamed(places, [{ name: "brommat", mw: 1 }], { x: 40, y: 0 })).toBeUndefined();
+    expect(nearestNamed(places, [], near)).toBeUndefined();
+    // Ties at the same distance go to the name in alphabetical order.
+    const tied = [
+      { name: "Usine du Pouget", x: 0, y: 5 },
+      { name: "Centrale du Pouget", x: 5, y: 0 },
+    ];
+    expect(nearestNamed(tied, [{ name: "pouget", mw: 1 }], near)).toBe(tied[1]);
   });
 });

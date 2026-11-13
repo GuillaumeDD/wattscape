@@ -34,11 +34,11 @@ import {
   FILIERES,
   MAX_SITES,
   MIN_MW,
-  nameFits,
-  namesPlant,
+  nearestNamed,
   OFFSHORE_FARMS,
   plantNameOf,
   ZONE_KINDS,
+  zoneFits,
 } from "./bake-plants-rules.ts";
 import {
   decodeRuns,
@@ -62,8 +62,6 @@ const WFS = "https://data.geopf.fr/wfs/ows";
 
 /** How far a site may move to land on a cell of its region, km. */
 const SNAP_KM = 5;
-/** How far from its town hall a plant named in BD TOPO may stand, km (B-017). */
-const NAMED_KM = 15;
 
 async function get(url: string): Promise<Buffer> {
   for (let attempt = 1; ; attempt++) {
@@ -260,29 +258,14 @@ for (const f of zonesJson.features) {
 const allZones = [...zones.values()].flat();
 
 /**
- * The nearest BD TOPO zone, within NAMED_KM of the town hall, whose name holds the
- * name of the site's largest named units (B-017): the registry often files a plant
- * under the commune of its operator, or a zone has no `nature_detaillee`. A zone of
- * another source's kind is skipped; one without a kind is taken, except for wind and
- * solar farms, whose names are too common.
+ * The BD TOPO zone that bears the site's plant name (B-017, D-036): the registry often
+ * files a plant under another commune, or a zone has no `nature_detaillee`. Not for
+ * wind and solar farms, whose names are too common.
  */
 function namedZoneOf(site: Site, near: { x: number; y: number }): Zone | undefined {
   if (site.source === "wind" || site.source === "solar") return undefined;
-  const names = [...site.names].sort((a, b) => b.mw - a.mw || a.name.localeCompare(b.name));
-  for (const { name } of names) {
-    const found = allZones
-      .filter(
-        (z) =>
-          ZONE_KINDS[site.source].includes(z.kind) ||
-          (z.kind === null && nameFits(z.name, site.source)),
-      )
-      .filter((z) => namesPlant(z.name, name))
-      .map((z) => ({ z, d: Math.hypot(z.x - near.x, z.y - near.y) }))
-      .filter((c) => c.d <= NAMED_KM)
-      .sort((a, b) => a.d - b.d || a.z.name.localeCompare(b.z.name))[0];
-    if (found !== undefined) return found.z;
-  }
-  return undefined;
+  const fit = allZones.filter((z) => zoneFits(z.kind, z.name, site.source));
+  return nearestNamed(fit, site.names, near);
 }
 
 // The named dams of BD TOPO (DS-13), where a reservoir plant stands at the dam's foot.
@@ -326,20 +309,9 @@ for (const layer of ["construction_surfacique", "construction_lineaire"]) {
 }
 if (dams.length < 100) throw new Error("BD TOPO: too few named dams");
 
-/** The nearest named dam, within NAMED_KM, of a hydro site's largest named units. */
-function damOf(site: Site, near: { x: number; y: number }): Dam | undefined {
-  if (site.source !== "hydro") return undefined;
-  const names = [...site.names].sort((a, b) => b.mw - a.mw || a.name.localeCompare(b.name));
-  for (const { name } of names) {
-    const found = dams
-      .filter((d) => namesPlant(d.name, name))
-      .map((d) => ({ d, km: Math.hypot(d.x - near.x, d.y - near.y) }))
-      .filter((c) => c.km <= NAMED_KM)
-      .sort((a, b) => a.km - b.km || a.d.name.localeCompare(b.d.name))[0];
-    if (found !== undefined) return found.d;
-  }
-  return undefined;
-}
+/** The named dam of a hydro site, where its plant stands at the dam's foot. */
+const damOf = (site: Site, near: { x: number; y: number }): Dam | undefined =>
+  site.source === "hydro" ? nearestNamed(dams, site.names, near) : undefined;
 
 /** The largest zone of a source's kind in a commune, if any. */
 const zoneOf = (insee: string, source: Source): Zone | undefined =>
@@ -365,6 +337,19 @@ interface Baked {
   readonly exact: boolean;
   readonly offshore: boolean;
 }
+/** The nearest 1 km cell of a region within SNAP_KM of a point, or null. */
+function snap(at: { x: number; y: number }, region: RegionCode): [number, number] | null {
+  const r0 = Math.floor(at.y / FINE_KM);
+  const c0 = Math.floor(at.x / FINE_KM);
+  const want = kindOfRegion(region);
+  for (let ring = 0; ring <= SNAP_KM; ring++)
+    for (let dr = -ring; dr <= ring; dr++)
+      for (let dc = -ring; dc <= ring; dc++)
+        if (Math.max(Math.abs(dr), Math.abs(dc)) === ring && kindAt(r0 + dr, c0 + dc) === want)
+          return [r0 + dr, c0 + dc];
+  return null;
+}
+
 const baked: Baked[] = [];
 let exact = 0;
 const byName: string[] = [];
@@ -377,38 +362,39 @@ for (const site of kept) {
     missing.push(`${site.insee} ${site.source} ${site.mw.toFixed(0)} MW`);
     continue;
   }
-  // Where it stands: its named zone, else the largest zone of its kind in its commune,
-  // else its named dam (B-017); else its town hall.
+  // Where it stands, in this order (B-017, D-036): its named zone; the largest zone of
+  // its kind in its commune; its named dam; its town hall. A place found by its name
+  // that lies out of the site's region (up to 15 km away) gives way to the next.
   const hall = kmOf(chef.lat, chef.lon);
   const named = namedZoneOf(site, hall);
-  const dam = named === undefined ? damOf(site, hall) : undefined;
-  const zone = named ?? zoneOf(site.insee, site.source) ?? dam;
-  if (zone !== undefined) exact++;
-  placedBy[
-    named !== undefined
-      ? "name"
-      : zone === dam && dam !== undefined
-        ? "dam"
-        : zone !== undefined
-          ? "commune"
-          : "town hall"
-  ]++;
-  if (named !== undefined || zone === dam)
-    if (zone !== undefined) byName.push(`${chef.name} ${site.source} → ${zone.name}`);
-  const at = zone ?? hall;
-  const r0 = Math.floor(at.y / FINE_KM);
-  const c0 = Math.floor(at.x / FINE_KM);
-  const want = kindOfRegion(site.region);
+  const commune = zoneOf(site.insee, site.source);
+  const dam = damOf(site, hall);
+  const choices: { by: keyof typeof placedBy; at: { x: number; y: number }; name: string }[] = [];
+  if (named !== undefined) choices.push({ by: "name", at: named, name: named.name });
+  if (commune !== undefined) choices.push({ by: "commune", at: commune, name: commune.name });
+  if (dam !== undefined) choices.push({ by: "dam", at: dam, name: dam.name });
+  choices.push({ by: "town hall", at: hall, name: chef.name });
+  let chosen: { by: keyof typeof placedBy; at: { x: number; y: number }; name: string } | null =
+    null;
   let cell: [number, number] | null = null;
-  for (let ring = 0; ring <= SNAP_KM && cell === null; ring++)
-    for (let dr = -ring; dr <= ring && cell === null; dr++)
-      for (let dc = -ring; dc <= ring && cell === null; dc++)
-        if (Math.max(Math.abs(dr), Math.abs(dc)) === ring && kindAt(r0 + dr, c0 + dc) === want)
-          cell = [r0 + dr, c0 + dc];
-  if (cell === null) {
+  for (const choice of choices) {
+    cell = snap(choice.at, site.region);
+    if (cell !== null) {
+      chosen = choice;
+      break;
+    }
+  }
+  if (cell === null || chosen === null) {
     off.push(`${chef.name} ${site.source}`);
     continue;
   }
+  placedBy[chosen.by]++;
+  if (chosen.by !== "town hall") exact++;
+  if (chosen.by === "name" || chosen.by === "dam")
+    byName.push(`${chef.name} ${site.source} → ${chosen.name}`);
+  const at = chosen.at;
+  const r0 = Math.floor(at.y / FINE_KM);
+  const c0 = Math.floor(at.x / FINE_KM);
   const [r, c] = cell;
   const moved = r !== r0 || c !== c0;
   baked.push({
@@ -420,7 +406,7 @@ for (const site of kept) {
     mw: Math.round(site.mw),
     towers: site.source === "nuclear" && COOLING_TOWERS.includes(chef.name),
     commune: chef.name,
-    exact: zone !== undefined,
+    exact: chosen.by !== "town hall",
     offshore: false,
   });
 }
@@ -497,7 +483,10 @@ export interface PlantSite {
   readonly towers: boolean;
   /** The commune it stands in (IGN's official name), or an offshore farm's name. */
   readonly commune: string;
-  /** Placed where it stands (BD TOPO, D-032); false: at its commune's town hall. */
+  /**
+   * Placed where it stands, by BD TOPO: its named zone or dam, or its commune's zone
+   * (D-032, D-036); false: at its commune's town hall.
+   */
   readonly exact: boolean;
   /** An offshore wind farm, at sea (G-007). */
   readonly offshore: boolean;
