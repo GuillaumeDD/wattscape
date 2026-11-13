@@ -12,6 +12,7 @@ import {
 import { coarseLayer, fineLayer, type TerrainLayer } from "../src/map/layers";
 import { FINE_ELEVATION_RLE } from "../src/map/relief";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine";
+import { isDiffuse } from "../src/map/sources";
 import { BAYER_4 } from "../src/render/dither";
 import { COLOUR_NAMES, type ColourName, PALETTE } from "../src/render/palette";
 import {
@@ -27,7 +28,7 @@ import {
 import { createSurface, getPixel, hashSurface, type Surface } from "../src/render/surface";
 import { DEFAULT_THEME, THEMES } from "../src/render/theme";
 import { areaBox, type Camera, fitBox } from "../src/scene/camera";
-import { bakedTowns, type Scene } from "../src/scene/scene";
+import { bakedTowns, type Scene, type ScenePlant } from "../src/scene/scene";
 import { type Light, lightAt, tinted } from "../src/sky/light";
 import { mulberry32 } from "./random";
 
@@ -371,6 +372,22 @@ describe("plants in the pixel theme (B-012)", () => {
     const france = visiblePlants(sceneOf({ camera: framed(null), plants }), 0, FRAME_WIDTH);
     expect(france.length).toBeGreaterThan(10);
     for (const p of france) expect(p.site.mw).toBeGreaterThanOrEqual(1000);
+  });
+
+  it("shows a region's diffuse sites whatever their size, the major ones from 50 MW (D-041)", () => {
+    // Occitanie, framed as the app frames it: a scale between 0.7 and 1.2.
+    const camera = framed("76");
+    expect(minPlantMw(camera.scale)).toBe(50);
+    const shown = visiblePlants(sceneOf({ camera, focus: "76", plants }), 0, 1e9);
+    for (const p of shown)
+      if (!isDiffuse(p.site.source)) expect(p.site.mw).toBeGreaterThanOrEqual(50);
+    // Regression: only 1 of Occitanie's 15 solar sites showed, the others being under
+    // 50 MW. Now all show, but for those within a sprite of a larger plant.
+    const solar = (list: readonly ScenePlant[]): number =>
+      list.filter((p) => p.site.region === "76" && p.site.source === "solar").length;
+    expect(solar(plants)).toBe(15);
+    expect(solar(shown)).toBeGreaterThanOrEqual(12);
+    expect(shown.some((p) => isDiffuse(p.site.source) && p.site.mw < 50)).toBe(true);
   });
 
   it("never sets two plants on top of each other: the larger one stays", () => {

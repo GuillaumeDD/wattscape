@@ -116,7 +116,11 @@ smaller ones; fields `codefiliere` (NUCLE, THERM, EOLIE, SOLAI, HYDLQ, BIOEN…)
 ("En service"), `coderegion` and the INSEE code of the commune
 (`codeinseecommuneimplantation`). 2 318 units in service of 10 MW or more; Paluel is
 4 × 1 330 MW. For an offshore farm the commune is where it lands on the grid
-(Saint-Brieuc's farm under Hénansal), not the farm. Reliability high (the publisher
+(Saint-Brieuc's farm under Hénansal), not the farm. Read again on 2026-11-13 for
+B-017 (D-041): the API sums `puismaxinstallee` per region and commune
+(`group_by`: 1 421 rows for wind, 17 427 for solar, 1 062 for bioenergy, the whole
+registry); in service on land in the 12 regions, 23 570 MW of wind, 19 617 MW of
+solar and 2 545 MW of bioenergy. Reliability high (the publisher
 documents its own data). Also tried: fr.wikipedia.org, for how each nuclear site is
 cooled; out of the session's network reach, so the list of sites with cooling
 towers is from general knowledge (low) until checked (PRD Q-14); Guillaume confirmed

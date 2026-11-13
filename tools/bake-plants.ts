@@ -9,21 +9,26 @@
  *
  * - DS-07, ODRÉ « Registre national des installations de production et de stockage
  *   d'électricité » at 31/12/2024 (S-016): every unit in service of 10 MW or more,
- *   with its technology, capacity and the INSEE code of its commune;
+ *   with its technology, capacity and the INSEE code of its commune; and the capacity
+ *   of every wind, solar and bioenergy unit in service, summed per commune;
  * - DS-13, IGN BD TOPO (S-018): the zones of the power plants (« Centrale
  *   électrique »), the named dams and the wind turbines, where the plant really
  *   stands (B-015, D-032, D-036);
  * - DS-04, IGN ADMIN EXPRESS COG, the chef-lieu (town hall) of each commune (S-013),
  *   where a plant is placed when BD TOPO has no zone or dam for it.
  *
- * A **site** is the units of one technology in one commune. Per region and
- * technology, the largest sites are kept (`MIN_MW`, `MAX_SITES`), each at the BD TOPO
+ * A **site** is the units of one technology in one commune. Per region, the largest
+ * nuclear, hydro and thermal sites are kept (`MIN_MW`, `MAX_SITES`), from the units of
+ * 10 MW or more; of wind, solar and bioenergy, one site per `MW_PER_SITE` of the
+ * region's capacity, every unit counted, at the communes that hold the most (D-041).
+ * Each stands at the BD TOPO
  * zone that bears its plant's name, else at the centre of the largest zone of its kind
  * in its commune, else (hydro) at the dam that bears its name, else at the commune's
  * chef-lieu (B-017, D-036), and moved onto the nearest 1 km cell of its region if it
  * falls elsewhere (the coast, a border). An offshore wind farm (`OFFSHORE_FARMS`) is the units of the
  * registry that share its name, at the centre of its BD TOPO turbines at sea (G-007).
  */
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -31,6 +36,7 @@ import { execFileSync } from "node:child_process";
 import { REGION_CODES, type RegionCode, type Source } from "../src/data/eco2mix.ts";
 import {
   COOLING_TOWERS,
+  diffuseSiteCount,
   FILIERES,
   MAX_SITES,
   MIN_MW,
@@ -50,6 +56,7 @@ import {
   SEA,
 } from "../src/map/grid.ts";
 import { FINE_ROWS_RLE } from "../src/map/france.ts";
+import { DIFFUSE_SOURCES, type DiffuseSource, isDiffuse } from "../src/map/sources.ts";
 
 const OUT = "src/map/plants.ts";
 const BAKED_ON = new Date().toISOString().slice(0, 10);
@@ -111,6 +118,8 @@ const unitsUrl = `${REGISTRY}/exports/json?${new URLSearchParams({
 const units = JSON.parse((await cached("units-named.json", unitsUrl)).toString("utf8")) as Unit[];
 if (!Array.isArray(units) || units.length < 1000) throw new Error("registry: unexpected answer");
 
+/** An INSEE commune code (2A and 2B for Corsica). */
+const INSEE = /^[0-9][0-9AB][0-9]{3}$/;
 const isRegion = (code: string): code is RegionCode => REGION_CODES.some((r) => r === code);
 
 interface Site {
@@ -137,7 +146,7 @@ for (const u of units) {
     continue;
   }
   const insee = u.codeinseecommuneimplantation ?? u.codeinseecommune;
-  if (insee === null || !/^[0-9][0-9AB][0-9]{3}$/.test(insee)) continue;
+  if (insee === null || !INSEE.test(insee)) continue;
   if (!(u.puismaxinstallee > 0)) continue;
   const key = `${u.coderegion}|${source}|${insee}`;
   const site = sites.get(key) ?? { source, region: u.coderegion, insee, mw: 0, names: [] };
@@ -151,15 +160,87 @@ for (const u of units) {
   sites.set(key, site);
 }
 
-// The largest sites of each region and technology, largest first; ties by commune.
+// The largest major sites of each region and technology, largest first; ties by commune.
 const kept: Site[] = [];
 for (const region of REGION_CODES)
   for (const source of Object.values(FILIERES)) {
+    if (isDiffuse(source)) continue;
     const all = [...sites.values()]
       .filter((s) => s.region === region && s.source === source && s.mw >= MIN_MW[source])
       .sort((a, b) => b.mw - a.mw || a.insee.localeCompare(b.insee));
     kept.push(...(source === "nuclear" ? all : all.slice(0, MAX_SITES)));
   }
+
+// The diffuse sources (B-017, D-041): every unit in service on land, of any size,
+// summed per commune by the registry's API. A region shows one site per MW_PER_SITE
+// of its capacity, at the communes that hold the most.
+interface CommuneSum {
+  readonly coderegion: string | null;
+  readonly implantation: string | null;
+  readonly commune: string | null;
+  readonly kw: number;
+}
+/** Per region and diffuse source: its capacity, kW, and its communes, largest first. */
+const diffuse: {
+  region: RegionCode;
+  source: DiffuseSource;
+  kw: number;
+  count: number;
+  communes: Site[];
+}[] = [];
+/** Spare communes fetched beyond a region's count, should one have no place. */
+const SPARE = 5;
+for (const [filiere, source] of Object.entries(FILIERES)) {
+  if (!isDiffuse(source)) continue;
+  const url = `${REGISTRY}/exports/json?${new URLSearchParams({
+    select:
+      "coderegion,codeinseecommuneimplantation as implantation,codeinseecommune as commune,sum(puismaxinstallee) as kw",
+    where: `regime = "En service" and codefiliere = "${filiere}" and not (technologie like "En mer")`,
+    group_by: "coderegion,codeinseecommuneimplantation,codeinseecommune",
+  }).toString()}`;
+  const sums: unknown = JSON.parse(
+    (await cached(`communes-by-both-${filiere}.json`, url)).toString("utf8"),
+  );
+  const isSum = (v: unknown): v is CommuneSum => {
+    if (typeof v !== "object" || v === null) return false;
+    const { coderegion, implantation, commune, kw } = v as Record<string, unknown>;
+    return (
+      (coderegion === null || typeof coderegion === "string") &&
+      (implantation === null || typeof implantation === "string") &&
+      (commune === null || typeof commune === "string") &&
+      typeof kw === "number" &&
+      Number.isFinite(kw) &&
+      kw >= 0
+    );
+  };
+  if (!Array.isArray(sums) || sums.length < 500 || !sums.every(isSum))
+    throw new Error(`registry: ${filiere} communes`);
+  for (const region of REGION_CODES) {
+    const rows = sums.filter((s) => s.coderegion === region && s.kw > 0);
+    // The region's capacity counts every unit, also the few filed under no commune.
+    const kw = rows.reduce((t, s) => t + s.kw, 0);
+    // Per commune, the one the units stand in, else the one they are filed under (as
+    // for the units above).
+    const perCommune = new Map<string, number>();
+    for (const s of rows) {
+      const insee = s.implantation ?? s.commune;
+      if (insee === null || !INSEE.test(insee)) continue;
+      perCommune.set(insee, (perCommune.get(insee) ?? 0) + s.kw);
+    }
+    const communes = [...perCommune]
+      .map(([insee, communeKw]): Site => ({
+        source,
+        region,
+        insee,
+        mw: communeKw / 1000,
+        // The plant names of its units of 10 MW or more, if any (D-036).
+        names: sites.get(`${region}|${source}|${insee}`)?.names ?? [],
+      }))
+      .sort((a, b) => b.mw - a.mw || a.insee.localeCompare(b.insee));
+    const count = diffuseSiteCount(kw, source);
+    diffuse.push({ region, source, kw, count, communes: communes.slice(0, count + SPARE) });
+  }
+}
 
 // The chef-lieu of each commune, from IGN, by batches of codes.
 interface ChefLieu {
@@ -168,7 +249,9 @@ interface ChefLieu {
   readonly name: string;
 }
 const chefLieux = new Map<string, ChefLieu>();
-const codes = [...new Set(kept.map((s) => s.insee))].sort();
+const codes = [
+  ...new Set([...kept, ...diffuse.flatMap((d) => d.communes)].map((s) => s.insee)),
+].sort();
 for (let i = 0; i < codes.length; i += 80) {
   const batch = codes.slice(i, i + 80);
   const url = `${WFS}?${new URLSearchParams({
@@ -179,7 +262,9 @@ for (let i = 0; i < codes.length; i += 80) {
     OUTPUTFORMAT: "application/json",
     CQL_FILTER: `code_insee_de_la_commune IN (${batch.map((c) => `'${c}'`).join(",")})`,
   }).toString()}`;
-  const json = JSON.parse((await cached(`chef-lieux-${String(i)}.json`, url)).toString("utf8")) as {
+  // Named by a hash of its codes, so that a cached batch is never read for another list.
+  const name = `chef-lieux-${createHash("sha256").update(batch.join(",")).digest("hex").slice(0, 16)}.json`;
+  const json = JSON.parse((await cached(name, url)).toString("utf8")) as {
     features: {
       geometry: { coordinates: [number, number] };
       properties: { code_insee_de_la_commune: string; nom_officiel: string };
@@ -356,11 +441,12 @@ const byName: string[] = [];
 const placedBy = { name: 0, commune: 0, dam: 0, "town hall": 0 };
 const missing: string[] = [];
 const off: string[] = [];
-for (const site of kept) {
+/** Places a site and bakes it; false when it has no place on its region. */
+function place(site: Site): boolean {
   const chef = chefLieux.get(site.insee);
   if (chef === undefined) {
     missing.push(`${site.insee} ${site.source} ${site.mw.toFixed(0)} MW`);
-    continue;
+    return false;
   }
   // Where it stands, in this order (B-017, D-036): its named zone; the largest zone of
   // its kind in its commune; its named dam; its town hall. A place found by its name
@@ -386,7 +472,7 @@ for (const site of kept) {
   }
   if (cell === null || chosen === null) {
     off.push(`${chef.name} ${site.source}`);
-    continue;
+    return false;
   }
   placedBy[chosen.by]++;
   if (chosen.by !== "town hall") exact++;
@@ -409,6 +495,18 @@ for (const site of kept) {
     exact: chosen.by !== "town hall",
     offshore: false,
   });
+  return true;
+}
+for (const site of kept) place(site);
+// A region's diffuse sites: its largest communes, the next one when one has no place.
+for (const d of diffuse) {
+  let placed = 0;
+  for (const site of d.communes) {
+    if (placed === d.count) break;
+    if (place(site)) placed++;
+  }
+  if (placed < d.count)
+    throw new Error(`${d.region} ${d.source}: ${String(placed)} of ${String(d.count)} sites`);
 }
 
 // The offshore wind farms (G-007): their units, and their BD TOPO turbines at sea.
@@ -460,14 +558,17 @@ writeFileSync(
  * The power plants the scene draws (B-012, D-024). GENERATED by tools/bake-plants.ts on
  * ${BAKED_ON}: do not edit, re-bake. Sources and licences: ASSETS.md.
  *
- * - Units in service of 10 MW or more: ODRÉ « Registre national des installations de
- *   production et de stockage d'électricité » at 31/12/2024 (DS-07, S-016), Licence
- *   Ouverte 2.0.
+ * - Units in service: ODRÉ « Registre national des installations de production et de
+ *   stockage d'électricité » at 31/12/2024 (DS-07, S-016), Licence Ouverte 2.0. Nuclear,
+ *   hydro and thermal: the units of 10 MW or more, the largest sites. Wind, solar and
+ *   bioenergy (D-041): every unit, one site per MW_PER_SITE of a region's capacity
+ *   (tools/bake-plants-rules.ts), at the communes that hold the most.
  * - Each site at the centre of its zone, or of its turbines at sea, in IGN BD TOPO
  *   (DS-13, S-018), else at the chef-lieu of its commune, IGN ADMIN EXPRESS COG
  *   (DS-04, S-013); both Licence Ouverte 2.0.
  */
 import { type RegionCode, type Source } from "../data/eco2mix.ts";
+import { type DiffuseSource } from "./sources.ts";
 
 /** One technology in one commune: the sum of its units. */
 export interface PlantSite {
@@ -477,7 +578,10 @@ export interface PlantSite {
   /** Map kilometres (src/map/grid.ts), to 0.1 km. */
   readonly x: number;
   readonly y: number;
-  /** Installed capacity, MW (the registry's puisMaxInstallee). */
+  /**
+   * Installed capacity, MW (the registry's puisMaxInstallee): of its units of 10 MW or
+   * more; for wind, solar and bioenergy, of every unit in its commune.
+   */
   readonly mw: number;
   /** A nuclear site cooled by towers, which steam (list confirmed by Guillaume, D-027). */
   readonly towers: boolean;
@@ -494,6 +598,22 @@ export interface PlantSite {
 
 /** Day of the bake. */
 export const PLANTS_BAKED_ON = "${BAKED_ON}";
+
+/**
+ * The installed capacity of the diffuse sources per region, MW: every unit in service
+ * on land (DS-07). It decides how many of their sites a region shows (D-041).
+ */
+export const DIFFUSE_MW: Readonly<
+  Record<RegionCode, Readonly<Record<DiffuseSource, number>>>
+> = {
+${REGION_CODES.map(
+  (region) =>
+    `  "${region}": { ${DIFFUSE_SOURCES.map(
+      (source) =>
+        `${source}: ${String(Math.round((diffuse.find((d) => d.region === region && d.source === source)?.kw ?? 0) / 1000))}`,
+    ).join(", ")} },`,
+).join("\n")}
+};
 
 type Row = readonly [
   Source,

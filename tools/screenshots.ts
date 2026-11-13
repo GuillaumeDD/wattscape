@@ -162,23 +162,38 @@ const paris: Camera = { ...kmOf(48.86, 2.35), scale: 6 };
 writePng(`${OUT}/step-3-towns-paris-lights.png`, lights, 1);
 console.log(`${OUT}/step-3-towns-paris-lights.png`);
 
+/** Writes each view by day and at night, with the plants of the two recorded steps. */
+function dayAndNight(prefix: string, views: readonly [string, CellRegion | null, Camera][]): void {
+  for (const [name, focus, camera] of views)
+    for (const [time, elevation] of [
+      ["day", 35],
+      ["night", -20],
+    ] as const) {
+      const surface = createSurface(WIDTH, HEIGHT);
+      drawPixelScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
+      const file = `${OUT}/${prefix}-${name}-${time}.png`;
+      writePng(file, surface, 2);
+      console.log(`${file}: scale ${camera.scale.toFixed(2)}, ${hashSurface(surface)}`);
+    }
+}
+
 // Step 4, B-023: the rivers. The great ones on France seen whole; all of them in
-// two regions and close up on the Loire between Orléans and Tours, by day and at
-// night, with the plants and towns of the same two recorded steps.
-const riverViews: [string, CellRegion | null, Camera][] = [
+// two regions and close up on the Loire between Orléans and Tours.
+dayAndNight("step-4-rivers", [
   ["france", null, france],
   ["normandie", "28", normandie],
   ["auvergne-rhone-alpes", "84", fitBox(areaBox(coarse, "84"), WIDTH, HEIGHT)],
   ["loire", "24", { ...kmOf(47.6, 1.3), scale: 3 }],
-];
-for (const [name, focus, camera] of riverViews)
-  for (const [time, elevation] of [
-    ["day", 35],
-    ["night", -20],
-  ] as const) {
-    const surface = createSurface(WIDTH, HEIGHT);
-    drawPixelScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
-    const file = `${OUT}/step-4-rivers-${name}-${time}.png`;
-    writePng(file, surface, 2);
-    console.log(`${file}: scale ${camera.scale.toFixed(2)}, ${hashSurface(surface)}`);
-  }
+]);
+
+// Step 4, B-017: the diffuse sources by installed capacity (D-041), in the regions
+// that hold the most wind and the most solar, and one with little wind: Hauts-de-France,
+// Nouvelle-Aquitaine and Occitanie.
+dayAndNight(
+  "step-4-diffuse",
+  (["32", "75", "76"] as const).map((region, k) => [
+    ["hauts-de-france", "nouvelle-aquitaine", "occitanie"][k] ?? region,
+    region,
+    fitBox(areaBox(coarse, region), WIDTH, HEIGHT),
+  ]),
+);

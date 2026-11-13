@@ -378,11 +378,20 @@ bake. The browser never downloads map data: the CSP is unchanged.
 - Real places (plants, landmarks, towns) are stored as latitude/longitude and
   projected the same way.
 - **Plant sites** (B-012, D-024): `tools/bake-plants.ts` bakes `src/map/plants.ts`
-  (307 sites, 37 KB) from the national registry of installations at 31/12/2024
-  (DS-07, S-016): every unit in service of 10 MW or more, summed per technology and
-  commune; per region and technology, every nuclear site and the largest of the
-  others (at most 8; at least 50 MW for hydro, 100 MW for thermal, 10 MW for the
-  rest). The registry has no coordinates (PRD Q-15). Each site stands, in this
+  (308 sites, 26 KB) from the national registry of installations at 31/12/2024
+  (DS-07, S-016). A site is the units of one technology in one commune. For the
+  **major sources**, every unit in service of 10 MW or more: per region, every
+  nuclear site and the largest hydro and thermal ones (at most 8; at least 50 MW
+  for hydro, 100 MW for thermal). For the **diffuse sources** (B-017, D-041), every
+  unit in service on land, of any size: a region shows one site per 250 MW of its
+  wind, per 250 MW of its solar and per 50 MW of its bioenergy capacity (rounded,
+  one at least), at the communes that hold the most, so the map tells where each is
+  harvested: 27 wind sites in Hauts-de-France (6 858 MW) and 1 in
+  Provence-Alpes-Côte d'Azur (96 MW); 19 solar sites in Nouvelle-Aquitaine
+  (4 873 MW) and 1 in Normandie (289 MW). In all, 95 wind sites on land for
+  the 23 570 MW of the 12 regions, 78 solar ones for 19 617 MW and 50 bioenergy
+  ones for 2 545 MW (`DIFFUSE_MW`); the sites themselves hold 5 341, 3 469 and
+  1 354 MW of them. The registry has no coordinates (PRD Q-15). Each site stands, in this
   order (B-017, D-036): at the nearest BD TOPO zone « Centrale électrique » within
   15 km of its town hall whose name holds its plant's name, read in the units'
   `nominstallation` (« … CENTRALE HYDRAULIQUE DE BATHIE (LA)-7 » → « Centrale
@@ -393,18 +402,18 @@ bake. The browser never downloads map data: the CSP is unchanged.
   dam within 15 km that holds its plant's name (« Barrage du Chastang »); else at
   the chef-lieu of its commune (IGN, DS-04, S-013). Each is moved onto the nearest
   1 km cell of its region within 5 km when it falls on the sea or across a border
-  (D-032); a place with no such cell gives way to the next in the order. On the bake
-  of 2026-11-13: 186 sites by BD TOPO, all 18 nuclear ones, 1 to 5 km from their
-  town hall; 118 at their town hall, mostly biomass (52) and wind (40) farms, and
+  (D-032); a place with no such cell gives way to the next in the order. On the second
+  bake of 2026-11-13: 204 sites by BD TOPO, all 18 nuclear ones, 1 to 5 km from their
+  town hall; 101 at their town hall, mostly biomass (46) and wind (32) farms, and
   among them 14 hydro, thermal and biomass plants of 100 MW or more that BD TOPO does
   not name (PRD Q-23). The known weak points are in `docs/PLANTS.md` (D-037). The
   offshore wind farms in service (Fécamp, Saint-Nazaire, Saint-Brieuc; G-007) are the registry's units that share a farm's
   name, at the centre of its BD TOPO turbines at sea (`OFFSHORE_FARMS`), driven by
   the region where they land. Left out: Corsica and overseas, not in the regional
-  éCO2mix; Faraman's floating turbines (25 MW), not yet in BD TOPO; one site whose
-  commune IGN no longer lists (Lyon 7e, 10 MW of
-  bioenergy) and one whose chef-lieu is 5 km or more out of its region (a wind farm
-  of Mont Lozère). A nuclear site draws cooling towers if it is in the list of
+  éCO2mix; Faraman's floating turbines (25 MW), not yet in BD TOPO. A site with no
+  place on its region (a commune IGN no longer lists, a chef-lieu 5 km or more out
+  of the region) is left out, and for a diffuse source gives way to the region's
+  next commune; none on this bake. A nuclear site draws cooling towers if it is in the list of
   `tools/bake-plants-rules.ts` (11 sites, from general knowledge, confirmed by Guillaume, D-027). In 2026-11 the
   registry counts 18 nuclear sites, 61 370 MW, as the tests check.
 - **Rivers** (B-023, D-039): `tools/bake-rivers.ts` bakes the named watercourses
@@ -448,9 +457,10 @@ bake. The browser never downloads map data: the CSP is unchanged.
 - Placement decides **what** is where (trees, houses, wind turbines, solar fields)
   with integer and rational arithmetic only; transcendental functions are allowed
   for **how** things move (a turbine's angle), never for placement.
-- Diffuse sources are placed with a density per region proportional to its installed
-  capacity per technology (candidate source: DS-07, aggregated by region and baked at
-  build time; **provisional**).
+- Diffuse sources (wind, solar, bioenergy) are placed with a number of sites per
+  region proportional to its installed capacity per technology, at the communes
+  that hold the most of it (DS-07, baked; § Map, "Plant sites", D-041): real places,
+  so no draw of the PRNG is needed.
 
 ## Data-to-scene mapping
 
@@ -595,7 +605,9 @@ validates them on the deployed build.
   bioenergy: a shed with a small chimney. Full sprites from 0.7 pixel per km; below,
   on the national view, a 3-pixel marker of the source's colour for the sites of
   1 000 MW or more (the nuclear sites and the largest dams), the towers' steam
-  still rising. Between 0.7 and 1.2 only the sites of 50 MW or more show. Two
+  still rising. Between 0.7 and 1.2 only the major sites of 50 MW or more show; a
+  diffuse site on land shows from 0.7 whatever its size, their number telling the
+  region's capacity (D-041). Two
   plants closer than 8 pixels across or 4 down would overlap: the smaller one is
   left out. Their motion is drawn on top (§ Rendering and loop).
 - **Motion:** slow and sparse; nothing blinks faster than about 2 Hz; with
@@ -769,7 +781,11 @@ Budget (D-028):
 - **Camera moving** (flight, wheel, pinch, drag: seconds at a time): ≤ 25 ms per
   frame at p95, inside the 33 ms of a frame at 30 fps, so motion stays smooth. Met;
   the 8 ms first planned is not, which Guillaume
-  accepted (PRD Q-17).
+  accepted (PRD Q-17). On the evening of 2026-11-13 the same shared machine ran
+  slower: `main` gave 21 ms for the flight and 24 to 25 ms for the wheel zoom at
+  p95, and the diffuse sites of D-041 22 to 24 ms and 25 to 27 ms, within the noise
+  of two runs each; the worst case sits at the budget's edge, to be measured again
+  on a quiet machine (B-024).
 - **Memory** flat over hours (`tools/perf.ts soak <minutes>`): the live page left
   alone in Normandie, drifting with its plants moving, for 115 minutes
   (2026-11-12): JS heap after a forced collection 2.04 to 2.11 MB, 185 DOM nodes
