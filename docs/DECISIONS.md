@@ -716,3 +716,27 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   Provence-Alpes-Côte d'Azur.
 - **Revisit if:** a region reads as crowded or empty on screen (change a
   threshold), or the registry is re-baked.
+
+## D-042 — The landmarks' register, sourced for the 12 regions (B-016)
+
+- **Context:** `docs/POI.md` held 21 landmarks TO CHECK, most waiting for the death
+  year of an author; B-016 draws a landmark only when it is GO. The session can
+  now read Wikidata (Guillaume, 2026-11-13, on the environment's card).
+- **Options:** for each landmark, GO, NO-GO or TO CHECK; for the belfry (P-013) and
+  the lighthouse (P-024), which one.
+- **Decision:** 19 landmarks proposed GO, each in its row with its basis: authors
+  dead for 70 years or more, their death years read in Wikidata (S-019), or works
+  too old for any right to run. The belfry is Lille's (Émile Dubuisson, d. 1947);
+  the lighthouse is a generic one, no real lighthouse copied. Two stay TO CHECK:
+  Saint-Joseph of Le Havre (Marguerite Huré's glass is protected until 2038, and
+  Raymond Audigier, d. 1987, is said to have finished the church) and the
+  Sacré-Cœur (its last architects were not found). Every region has two or more
+  landmarks GO. Proposed by Claude, 2026-11-13; final when Guillaume confirms (PRD
+  Q-26 to Q-28).
+- **Why:** the rule of D-004 (public domain or nothing), applied row by row with a
+  source.
+- **Revisit if:** a source contradicts a death year or names another author (who
+  restored Mont-Saint-Michel's spire, Carcassonne, the roofs of Beaune and
+  Haut-Kœnigsbourg is still from general knowledge); or the war-time extensions
+  of the term of protection apply to an author dead in 1942–1947, which was not
+  examined.

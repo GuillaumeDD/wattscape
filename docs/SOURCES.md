@@ -184,6 +184,34 @@ usably.
 Reliability high (the
 national mapping agency documents its own data).
 
+Consulted on 2026-11-13, **S-019**: [Wikidata][s019], through its API
+(`wbsearchentities`, `wbgetentities`), for `docs/POI.md` (B-016, D-042): the
+architects it gives a monument (property P84 and the like) and each person's date of
+death (P570). Gave, by item: Saint-Joseph church of Le Havre (Q588555): Auguste
+Perret, d. 1954-02-25; its creator Marguerite Huré, d. 1967-10-27. Palais
+Bénédictine (Q3360832): Camille Albert, d. 1942. Eiffel Tower (Q243): Stéphen
+Sauvestre, d. 1919-06-18; Émile Nouguier, d. 1897-11-13; Maurice Koechlin, d. 1946
+(three dates given, all in 1946); Gustave Eiffel (Q20882), d. 1923-12-27. Sacré-Cœur
+(Q28785): Paul Abadie, d. 1884. Arc de Triomphe (Q64436): Chalgrin, d. 1811-01-21;
+Goust, d. 1838; Huyot, d. 1840; Blouet, d. 1853. Belfry of Lille's town hall
+(Q1996107): Émile Dubuisson, d. 1947-08-06. Fourvière (Q1516): Pierre Bossan,
+d. 1888-07-23; Louis Sainte-Marie-Perrin, d. 1917-07-20. Notre-Dame de la Garde
+(Q975925): Henri-Jacques Espérandieu, d. 1874-11-11; Henri Révoil, d. 1900-03-20.
+Fort Boyard (Q92089): begun in 1801, by the military engineers. Persons searched by
+name: Bodo Ebhardt (Q85804), d. 1945-02-13; Viollet-le-Duc (Q272912), d. 1879;
+Paul Boeswillwald (Q3370673), d. 1931-07-17; Victor Petitgrand (Q29982577),
+d. 1898-02-23; Emmanuel Frémiet (Q499022), d. 1910-09-10; Lucien Magne (Q1873405),
+d. 1916-07-25; Honoré Daumet (Q3140221), d. 1911-12-12; Charles Laisné (Q2959551),
+d. 1891-01-14; Raymond Audigier (Q136674857), d. 1987-03-29; Jacques Gabriel
+(Q3158954), d. 1742-04-23; Ange-Jacques Gabriel (Q352451), d. 1782-01-04; Vauban
+(Q192839), d. 1707-03-30; Louis Sauvageot (Q3263095), d. 1908-01-14; Eugène-Louis
+Lequesne (Q2719726), d. 1887-06-03. Not found: Jean-Louis Hulot, Henri Rauline. It
+gives no architect for Haut-Kœnigsbourg, the Cité de Carcassonne or the abbey of
+Mont-Saint-Michel: who restored them is still from general knowledge. The API
+limits the rate (HTTP 429): one request every 6 s passed. Reliability medium (a
+community database; a date of death there is rarely wrong, an attribution can be
+incomplete). Used as a reference only, nothing baked: no row in § 1.
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift
@@ -194,4 +222,5 @@ national mapping agency documents its own data).
 [s016]: https://odre.opendatasoft.com/explore/dataset/registre-national-installation-production-stockage-electricite-agrege-311224/
 [s015-repo]: https://github.com/nvkelso/natural-earth-vector/tree/ca96624a56bd078437bca8184e78163e5039ad19
 [s017]: https://odre.opendatasoft.com/explore/dataset/eco2mix-regional-cons-def/
+[s019]: https://www.wikidata.org/
 [s018-csw]: https://data.geopf.fr/csw?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&OUTPUTSCHEMA=http://standards.iso.org/iso/19115/-3/mdb/2.0&elementSetName=full&ID=IGNF_BD-TOPO
