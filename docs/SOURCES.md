@@ -97,7 +97,16 @@ Dieppe - Le Tréport farms' turbines are « En construction ». The landmarks of
 `src/map/landmarks.ts` (B-015): « Porte d'Aval » (a cape, `detail_orographique`,
 49.70687° N, 0.19387° E) and « l'Aiguille » 100 m west; Port 2000
 (`equipement_de_transport`, centre 49.46024° N, 0.14785° E); Fécamp's « Avant-Port »
-(centre 49.76154° N, 0.36808° E). Reliability high (the
+(centre 49.76154° N, 0.36808° E). Read again on 2026-11-13 for B-017 (D-036): the
+names of the zones (« Centrale Électrique de la Bâthie », « Usine Hydroélectrique de
+Rhinau », « Centrale Thermique de Montereau ») and the dams of
+`BDTOPO_V3:construction_surfacique` (145 named, in service) and
+`construction_lineaire` (439), nature « Barrage », e.g. « Barrage de Génissiat »
+(46.0521° N, 5.8127° E in `BDTOPO_V3:toponymie`). No zone or dam names Montézic,
+Revin, Sisteron, Oraison, Caderousse, Saint-Estève, nor the thermal plants of Fos-sur-Mer,
+Grande-Synthe (« Braek »), Landivisiau, Tavaux, Gonfreville, Condat, La Chapelle-Darblay or
+Gardanne.
+Reliability high (the
 national mapping agency documents its own data).
 
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte

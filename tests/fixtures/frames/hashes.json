@@ -1,15 +1,15 @@
 {
   "_comment": "Frame hashes (hashSurface) of the reference frames of e2e/reference-frames.ts, which Node (tests/pixel-theme.test.ts) and Chromium (e2e/frame-hash.spec.ts) must both draw. Update only when a drawing change is intended, in the same commit.",
   "test-card": "a828e8bb",
-  "scene-france-day": "42ede9d5",
-  "scene-france-night": "ee7e4fa4",
+  "scene-france-day": "748f105c",
+  "scene-france-night": "24b2fe5c",
   "scene-normandie-golden": "b5c14f0d",
   "scene-normandie-night": "8e851738",
-  "scene-auvergne-rhone-alpes-day": "f5d2eec4",
+  "scene-auvergne-rhone-alpes-day": "8f433715",
   "scene-crossfade-day": "050f43a6",
-  "scene-mont-blanc-day": "e1f6388a",
+  "scene-mont-blanc-day": "b78f8e74",
   "plants-normandie-day-t0": "01591786",
   "plants-normandie-day-t1.3": "fdd4bbb0",
   "plants-normandie-night-t1.3": "0c396ac6",
-  "plants-rhone-day-t0.7": "ce16da15"
+  "plants-rhone-day-t0.7": "20a0fa78"
 }

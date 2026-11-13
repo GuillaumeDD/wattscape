@@ -4,7 +4,7 @@ Scoped work items. Ideas start in the Growth section of `docs/PRD.md`.
 Each item lands in its own commit, which also flips its status here. Steps are in
 PRD § Roadmap.
 
-Statuses: `todo` / `in-progress` / `done`.
+Statuses: `todo` / `wip` / `done`.
 
 | ID    | Item                              | Acceptance criteria                                                                                                                                                 | Status |
 | ----- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
@@ -24,7 +24,7 @@ Statuses: `todo` / `in-progress` / `done`.
 | B-014 | Day and night                     | Sky, tint and emissive lights from the sun; towns lit by consumption; time-lapse for demos (`?at=` landed with B-011)                                               | done   |
 | B-015 | First region end to end           | Normandie (Seine-Maritime first: Le Havre, Fécamp, Étretat, Paluel, Penly, Fécamp offshore wind) and the national view, live data, deployed                         | done   |
 | B-016 | Landmarks for the 12 regions      | Each landmark GO in `docs/POI.md` (basis + source) before it is drawn; drawn and placed; captions sourced                                                           | todo   |
-| B-017 | Major plants at their real places | Nuclear sites, large dams and thermal plants with coordinates logged in SOURCES; diffuse sources placed by installed capacity                                       | todo   |
+| B-017 | Major plants at their real places | Nuclear sites, large dams and thermal plants with coordinates logged in SOURCES; diffuse sources placed by installed capacity                                       | wip    |
 | B-018 | Weather effects                   | Clouds, rain, snow, fog, storm from the grouped WMO code; weather override setting                                                                                  | todo   |
 | B-019 | Legend                            | Stacked mix bar, consumption, import/export, reading time and staleness, sample label; auto-hide                                                                    | todo   |
 | B-020 | Captions                          | Hover/tap a plant or landmark: name, what it is, live figure; every fact sourced                                                                                    | todo   |

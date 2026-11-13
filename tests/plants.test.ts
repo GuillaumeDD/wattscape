@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { recordedPlants } from "../e2e/reference-frames";
 import {
@@ -21,7 +22,18 @@ import {
 } from "../src/render/art/plants";
 import { type ColourName } from "../src/render/palette";
 import { activityOf, scenePlants } from "../src/scene/scene";
-import { COOLING_TOWERS, MAX_SITES, MIN_MW } from "../tools/bake-plants-rules";
+import {
+  COOLING_TOWERS,
+  MAX_SITES,
+  MIN_MW,
+  NAMED_KM,
+  nameFits,
+  namesPlant,
+  nearestNamed,
+  plantNameOf,
+  wordsOf,
+  zoneFits,
+} from "../tools/bake-plants-rules";
 
 const site = (source: PlantSite["source"], extra: Partial<PlantSite> = {}): PlantSite => ({
   source,
@@ -73,6 +85,26 @@ describe("the baked plants (DS-07, src/map/plants.ts)", () => {
     expect(d).toBeGreaterThan(10);
     expect(d).toBeLessThan(25);
     expect(fecamp?.y ?? 0).toBeLessThan(town.y); // north of the town
+  });
+
+  it("place the large dams and thermal plants that BD TOPO names where they stand (B-017)", () => {
+    // Génissiat's plant stands at the foot of its dam (46.052° N, 5.813° E, « barrage
+    // de Génissiat » in BD TOPO, S-018); the registry files it under Injoux-Génissiat.
+    const genissiat = PLANT_SITES.find((p) => p.commune === "Injoux-Génissiat");
+    const dam = kmOf(46.0521, 5.8127);
+    expect(genissiat?.exact).toBe(true);
+    expect(Math.hypot((genissiat?.x ?? 0) - dam.x, (genissiat?.y ?? 0) - dam.y)).toBeLessThan(1.5);
+    // Of the hydro sites of 100 MW or more, only those BD TOPO does not name stay at
+    // their town hall (PRD Q-23).
+    const atHall = PLANT_SITES.filter((p) => p.source === "hydro" && p.mw >= 100 && !p.exact);
+    expect(atHall.map((p) => p.commune).sort()).toEqual([
+      "Caderousse",
+      "Les Mazures",
+      "Montézic",
+      "Oraison",
+      "Saint-Estève-Janson",
+      "Sisteron",
+    ]);
   });
 
   it("hold every nuclear site in service: 18 sites, 61 370 MW, Paluel and Penly in Normandie", () => {
@@ -306,6 +338,140 @@ describe("the source sprites (src/render/art/plants.ts)", () => {
       drawBody(pen, p, 0.5, 10, 10, "marker");
       expect(pen.pixels.size).toBe(7);
       expect([...pen.pixels.values()]).toContain(p.source);
+    }
+  });
+});
+
+describe("the plant names that tie a site to BD TOPO (B-017, tools/bake-plants-rules.ts)", () => {
+  it("reads the plant's name in a unit's registry name", () => {
+    expect(plantNameOf("BATHIEH-CENTRALE HYDRAULIQUE DE BATHIE (LA)-7")).toBe("bathie");
+    expect(plantNameOf("AIGLEH-CENTRALE HYDRAULIQUE DE AIGLE (L )-6")).toBe("aigle");
+    // The registry's « ST » is spelt out, as BD TOPO spells it.
+    expect(plantNameOf("SSESTH-CENTRALE HYDRAULIQUE DE ST-ESTEVE-6")).toBe("saint esteve");
+    expect(
+      namesPlant(
+        "Barrage de Sainte-Croix",
+        plantNameOf("X-CENTRALE HYDRAULIQUE DE STE-CROIX-6") ?? "",
+      ),
+    ).toBe(true);
+    // An owner or a unit in brackets is dropped.
+    expect(
+      plantNameOf(
+        "CHAPET10 - GROUPE 10 DE LA CENTRALE THERMIQUE DE CHAPELLE (LA)(CHAPELLE D ARBLAY) (TAG2)",
+      ),
+    ).toBe("chapelle");
+    expect(plantNameOf("PROV5TG4 - GROUPE G4 DE LA CENTRALE THERMIQUE DE PROVENCE(EX GARD5)")).toBe(
+      "provence",
+    );
+    expect(
+      plantNameOf("G.ORCT11 - GROUPE 11 DE LA CENTRALE THERMIQUE DE GONFREVILLE-L ORCHER (GTA 11)"),
+    ).toBe("gonfreville orcher");
+  });
+
+  it("finds no name where there is none, or one too short to tell", () => {
+    expect(plantNameOf(null)).toBeNull();
+    expect(plantNameOf("PARC EOLIEN DES HAUTS")).toBeNull();
+    expect(plantNameOf("XH-CENTRALE HYDRAULIQUE DE EY-6")).toBeNull();
+    expect(plantNameOf("XH-CENTRALE HYDRAULIQUE DE (LA)-6")).toBeNull();
+  });
+
+  it("matches whole words, without accents, case or articles", () => {
+    expect(wordsOf("Centrale Électrique de la Bâthie")).toBe("centrale electrique bathie");
+    expect(namesPlant("Barrage de l'Aigle", "aigle")).toBe(true);
+    expect(namesPlant("Centrale Électrique de la Bâthie", "bathie")).toBe(true);
+    // Not inside another word: Baratier is not Ratier.
+    expect(namesPlant("Micro-Centrale Hydroélectrique de Baratier", "ratier")).toBe(false);
+    expect(namesPlant(null, "aigle")).toBe(false);
+  });
+
+  it("does not take a zone whose name tells another technology", () => {
+    expect(nameFits("Centrale Biomasse de Strasbourg", "hydro")).toBe(false);
+    expect(nameFits("Usine Hydroélectrique de Strasbourg", "hydro")).toBe(true);
+    expect(nameFits("Centrale Électrique de la Bâthie", "hydro")).toBe(true);
+    expect(nameFits("Centrale Hydroélectrique de Pragnères", "thermal")).toBe(false);
+    // Thermal and bioenergy plants share « centrale thermique ».
+    expect(nameFits("Centrale Thermique de Gardanne", "bioenergy")).toBe(true);
+    expect(nameFits("Centrale Biomasse de Gardanne", "thermal")).toBe(true);
+    expect(nameFits(null, "hydro")).toBe(true);
+  });
+
+  it("takes a zone found by name of the site's kind or of none, never one named for another", () => {
+    expect(zoneFits("Centrale hydroélectrique", "Centrale de Curbans", "hydro")).toBe(true);
+    expect(zoneFits(null, "Centrale Électrique de la Bâthie", "hydro")).toBe(true);
+    expect(zoneFits("Parc éolien", "Parc de la Bâthie", "hydro")).toBe(false);
+    // Thermal zones may have no kind: the name still rules a hydro plant out (a
+    // review finding: the kind alone used to let it through).
+    expect(zoneFits(null, "Usine Hydroélectrique de Strasbourg", "thermal")).toBe(false);
+    expect(zoneFits("Centrale thermique", "Centrale Biomasse de Strasbourg", "hydro")).toBe(false);
+  });
+
+  it("finds the nearest place that bears a name, largest units first, within 15 km", () => {
+    const places = [
+      { name: "Barrage de Sarrans", x: 10, y: 0 },
+      { name: "Barrage de Brommat", x: 14, y: 0 },
+      { name: "Barrage de Brommat", x: 3, y: 4 },
+      { name: "Usine de Brommat", x: 20, y: 0 },
+    ];
+    const near = { x: 0, y: 0 };
+    // Brommat's units are the largest: its nearest place, 5 km off.
+    expect(
+      nearestNamed(
+        places,
+        [
+          { name: "sarrans", mw: 183 },
+          { name: "brommat", mw: 405 },
+        ],
+        near,
+      ),
+    ).toBe(places[2]);
+    // Sarrans's units first: Sarrans's dam, 10 km off.
+    expect(
+      nearestNamed(
+        places,
+        [
+          { name: "sarrans", mw: 500 },
+          { name: "brommat", mw: 405 },
+        ],
+        near,
+      ),
+    ).toBe(places[0]);
+    // Beyond NAMED_KM, nothing.
+    expect(NAMED_KM).toBe(15);
+    expect(nearestNamed(places, [{ name: "brommat", mw: 1 }], { x: 40, y: 0 })).toBeUndefined();
+    expect(nearestNamed(places, [], near)).toBeUndefined();
+    // Ties at the same distance go to the name in alphabetical order.
+    const tied = [
+      { name: "Usine du Pouget", x: 0, y: 5 },
+      { name: "Centrale du Pouget", x: 5, y: 0 },
+    ];
+    expect(nearestNamed(tied, [{ name: "pouget", mw: 1 }], near)).toBe(tied[1]);
+  });
+});
+
+describe("the placement register (docs/PLANTS.md, D-037)", () => {
+  const rows = readFileSync(new URL("../docs/PLANTS.md", import.meta.url), "utf8")
+    .split("\n")
+    .filter((l) => l.startsWith("| PL-"))
+    .map((l) => l.split("|").map((c) => c.trim()));
+
+  it("gives each point its own id, in order, and a known status", () => {
+    expect(rows.length).toBeGreaterThan(0);
+    rows.forEach((cells, i) => {
+      expect(cells[1]).toBe(`PL-${String(i + 1).padStart(2, "0")}`);
+      expect(["OPEN", "WAIT", "DONE"], cells[1]).toContain(cells[5]);
+    });
+  });
+
+  it("holds every site of 100 MW or more that stands at its town hall, with its capacity", () => {
+    const sites = rows.map((cells) => cells[2] ?? "");
+    for (const p of PLANT_SITES.filter((s) => !s.exact && s.mw >= 100)) {
+      // As the register writes it: « Fos-sur-Mer, thermal, 1 181 ».
+      const mw = String(p.mw).replace(/(\d)(?=(\d{3})+$)/g, "$1 ");
+      const entry = `${p.commune}, ${p.source}, ${mw}`;
+      expect(
+        sites.some((s) => s.includes(entry)),
+        entry,
+      ).toBe(true);
     }
   });
 });

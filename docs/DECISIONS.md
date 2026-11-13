@@ -609,3 +609,46 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   conflicts between stacked PRs.
 - **Revisit if:** waiting for a merge stalls the work for long, or a rule turns out
   to cost more than the rework it prevents.
+
+## D-036 — Large plants found by their name in BD TOPO
+
+- **Context:** B-017 places the major plants at their real places. After B-015, 28
+  sites of 100 MW or more stood at their commune's town hall (PRD Q-21): the registry
+  (DS-07) often files a plant under another commune than the one BD TOPO puts its
+  zone in (Curbans under Venterol), and many hydro zones have no `nature_detaillee`
+  (« Centrale Électrique de la Bâthie »), which the rule of D-032 skipped.
+- **Options:** keep the town hall; take the nearest unnamed zone of the right kind
+  (a guess: Montézic's nearest is another plant); match the plant's name, read in
+  the registry's `nominstallation`, against the names of BD TOPO's zones and dams;
+  a new source of coordinates (Wikidata, OpenStreetMap), which needs a GO in
+  `DATA-SOURCES.md` first.
+- **Decision:** match the name, within 15 km of the town hall, before the rule of
+  D-032; for hydro, a named dam after it (ARCHITECTURE § Map, the order). A zone with
+  no kind is not taken when its name tells another technology (Strasbourg's hydro
+  plant is not « Centrale Biomasse de Strasbourg »); wind and solar farms are left
+  out, their names being too common. Proposed by Claude, 2026-11-13.
+- **Why:** BD TOPO is already GO (DS-13) and baked; a name is evidence, a nearest
+  zone is a guess. The bake of 2026-11-13 places 13 more sites (186 of 304 on land),
+  12 of the 28 large ones among them, and moves 5 already placed ones 0.4 to 6 km
+  onto their named plant (Montereau, Émile Huchet at Saint-Avold, Strasbourg,
+  Miégebat at Laruns, Villarodin at Avrieux).
+- **Revisit if:** a name matches the wrong plant on screen, or a GO source of
+  coordinates places the 14 large plants BD TOPO does not name (PRD Q-23).
+
+## D-037 — A register of plant placement points
+
+- **Context:** the places of the plants come from rules that sometimes guess (a town
+  hall, a name match), and their known weak points were spread over the PRD's
+  questions, ARCHITECTURE and PR descriptions.
+- **Options:** keep them in the PRD's open questions; add them to `POI.md`; a
+  register of their own.
+- **Decision:** `docs/PLANTS.md` (Guillaume, 2026-11-13: "loguer […] toutes les
+  questions pertinentes et décisions sur le placement des centrales & co. Cela
+  permettra d'améliorer en continue"): one row per point (a misplaced site, a rule
+  that guesses, a site left out), with a status, OPEN, WAIT or DONE. The rules stay
+  in ARCHITECTURE and their reasons here; a test keeps a row for every site of
+  100 MW or more that stands at its town hall.
+- **Why:** `POI.md` is about authors' rights, another matter; one list makes the
+  placement improvable point by point, and auditable.
+- **Revisit if:** the register repeats ARCHITECTURE, or grows past what one table
+  can hold (then one table per region).
