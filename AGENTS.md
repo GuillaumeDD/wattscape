@@ -32,6 +32,7 @@ date for the seasons. Inspired by
 | read, show or explain a figure from an API       | `docs/ARCHITECTURE.md` § Data sources, `docs/SOURCES.md` |
 | draw a sprite, landmark, palette or animation    | `docs/ARCHITECTURE.md` § Art direction, `ASSETS.md`      |
 | add or draw a landmark                           | `docs/POI.md`                                            |
+| place or move a power plant                      | `docs/PLANTS.md`                                         |
 | use a new data source or dataset                 | `docs/DATA-SOURCES.md`                                   |
 | touch geolocation, network calls or URL settings | `docs/ARCHITECTURE.md` § Privacy and § Security          |
 | rely on a web API (geolocation, fullscreen, …)   | `docs/ARCHITECTURE.md` § Browser quirks                  |

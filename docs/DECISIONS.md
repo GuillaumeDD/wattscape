@@ -634,3 +634,21 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   Miégebat at Laruns, Villarodin at Avrieux).
 - **Revisit if:** a name matches the wrong plant on screen, or a GO source of
   coordinates places the 14 large plants BD TOPO does not name (PRD Q-23).
+
+## D-037 — A register of plant placement points
+
+- **Context:** the places of the plants come from rules that sometimes guess (a town
+  hall, a name match), and their known weak points were spread over the PRD's
+  questions, ARCHITECTURE and PR descriptions.
+- **Options:** keep them in the PRD's open questions; add them to `POI.md`; a
+  register of their own.
+- **Decision:** `docs/PLANTS.md` (Guillaume, 2026-11-13: "loguer […] toutes les
+  questions pertinentes et décisions sur le placement des centrales & co. Cela
+  permettra d'améliorer en continue"): one row per point (a misplaced site, a rule
+  that guesses, a site left out), with a status, OPEN, WAIT or DONE. The rules stay
+  in ARCHITECTURE and their reasons here; a test keeps a row for every site of
+  100 MW or more that stands at its town hall.
+- **Why:** `POI.md` is about authors' rights, another matter; one list makes the
+  placement improvable point by point, and auditable.
+- **Revisit if:** the register repeats ARCHITECTURE, or grows past what one table
+  can hold (then one table per region).

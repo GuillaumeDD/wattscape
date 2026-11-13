@@ -104,7 +104,7 @@ Rhinau », « Centrale Thermique de Montereau ») and the dams of
 `construction_lineaire` (439), nature « Barrage », e.g. « Barrage de Génissiat »
 (46.0521° N, 5.8127° E in `BDTOPO_V3:toponymie`). No zone or dam names Montézic,
 Revin, Sisteron, Oraison, Caderousse, Saint-Estève, nor the thermal plants of Fos-sur-Mer,
-Grande-Synthe (DK6), Landivisiau, Tavaux, Gonfreville, Condat, La Chapelle-Darblay or
+Grande-Synthe (« Braek »), Landivisiau, Tavaux, Gonfreville, Condat, La Chapelle-Darblay or
 Gardanne.
 Reliability high (the
 national mapping agency documents its own data).

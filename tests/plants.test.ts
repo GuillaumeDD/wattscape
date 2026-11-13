@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { recordedPlants } from "../e2e/reference-frames";
 import {
@@ -444,5 +445,33 @@ describe("the plant names that tie a site to BD TOPO (B-017, tools/bake-plants-r
       { name: "Centrale du Pouget", x: 5, y: 0 },
     ];
     expect(nearestNamed(tied, [{ name: "pouget", mw: 1 }], near)).toBe(tied[1]);
+  });
+});
+
+describe("the placement register (docs/PLANTS.md, D-037)", () => {
+  const rows = readFileSync(new URL("../docs/PLANTS.md", import.meta.url), "utf8")
+    .split("\n")
+    .filter((l) => l.startsWith("| PL-"))
+    .map((l) => l.split("|").map((c) => c.trim()));
+
+  it("gives each point its own id, in order, and a known status", () => {
+    expect(rows.length).toBeGreaterThan(0);
+    rows.forEach((cells, i) => {
+      expect(cells[1]).toBe(`PL-${String(i + 1).padStart(2, "0")}`);
+      expect(["OPEN", "WAIT", "DONE"], cells[1]).toContain(cells[5]);
+    });
+  });
+
+  it("holds every site of 100 MW or more that stands at its town hall, with its capacity", () => {
+    const sites = rows.map((cells) => cells[2] ?? "");
+    for (const p of PLANT_SITES.filter((s) => !s.exact && s.mw >= 100)) {
+      // As the register writes it: « Fos-sur-Mer, thermal, 1 181 ».
+      const mw = String(p.mw).replace(/(\d)(?=(\d{3})+$)/g, "$1 ");
+      const entry = `${p.commune}, ${p.source}, ${mw}`;
+      expect(
+        sites.some((s) => s.includes(entry)),
+        entry,
+      ).toBe(true);
+    }
   });
 });

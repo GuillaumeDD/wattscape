@@ -396,8 +396,8 @@ bake. The browser never downloads map data: the CSP is unchanged.
   of 2026-11-13: 186 sites by BD TOPO, all 18 nuclear ones, 1 to 5 km from their
   town hall; 118 at their town hall, mostly biomass (52) and wind (40) farms, and
   among them 14 hydro, thermal and biomass plants of 100 MW or more that BD TOPO does
-  not name (PRD Q-23). The offshore wind farms in service (Fécamp,
-  Saint-Nazaire, Saint-Brieuc; G-007) are the registry's units that share a farm's
+  not name (PRD Q-23). The known weak points are in `docs/PLANTS.md` (D-037). The
+  offshore wind farms in service (Fécamp, Saint-Nazaire, Saint-Brieuc; G-007) are the registry's units that share a farm's
   name, at the centre of its BD TOPO turbines at sea (`OFFSHORE_FARMS`), driven by
   the region where they land. Left out: Corsica and overseas, not in the regional
   éCO2mix; Faraman's floating turbines (25 MW), not yet in BD TOPO; one site whose
