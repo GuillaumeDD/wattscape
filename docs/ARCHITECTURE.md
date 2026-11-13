@@ -381,11 +381,19 @@ bake. The browser never downloads map data: the CSP is unchanged.
   (DS-07, S-016): every unit in service of 10 MW or more, summed per technology and
   commune; per region and technology, every nuclear site and the largest of the
   others (at most 8; at least 50 MW for hydro, 100 MW for thermal, 10 MW for the
-  rest). The registry has no coordinates (PRD Q-15): each site stands at the centre
-  of the largest BD TOPO zone of its kind in its commune (« Centrale électrique »,
-  by `nature_detaillee`, DS-13, S-018; 173 sites, all 18 nuclear ones, 1 to 5 km
-  from their town hall), else at the chef-lieu of its commune (IGN, DS-04, S-013);
-  then moved onto the nearest 1 km cell of its region within 5 km when that falls on
+  rest). The registry has no coordinates (PRD Q-15). Each site stands, in this
+  order (B-017, D-036): at the nearest BD TOPO zone « Centrale électrique » within
+  15 km of its town hall whose name holds its plant's name, read in the units'
+  `nominstallation` (« … CENTRALE HYDRAULIQUE DE BATHIE (LA)-7 » → « Centrale
+  Électrique de la Bâthie »; a zone with no `nature_detaillee` is taken unless its
+  name tells another technology; not for wind and solar, whose names are too
+  common); else at the centre of the largest zone of its kind in its commune (by
+  `nature_detaillee`, DS-13, S-018); else, for hydro, at the nearest named BD TOPO
+  dam within 15 km that holds its plant's name (« Barrage du Chastang »); else at
+  the chef-lieu of its commune (IGN, DS-04, S-013). On the bake of 2026-11-13: 186
+  sites by BD TOPO, all 18 nuclear ones, 1 to 5 km from their town hall; 118 at
+  their town hall, mostly biomass (52) and wind (40) farms; of those of 100 MW or
+  more, 14 hydro and thermal plants that BD TOPO does not name (PRD Q-23). Then each is moved onto the nearest 1 km cell of its region within 5 km when that falls on
   the sea or across a border (D-032). The offshore wind farms in service (Fécamp,
   Saint-Nazaire, Saint-Brieuc; G-007) are the registry's units that share a farm's
   name, at the centre of its BD TOPO turbines at sea (`OFFSHORE_FARMS`), driven by

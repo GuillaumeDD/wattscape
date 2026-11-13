@@ -21,7 +21,15 @@ import {
 } from "../src/render/art/plants";
 import { type ColourName } from "../src/render/palette";
 import { activityOf, scenePlants } from "../src/scene/scene";
-import { COOLING_TOWERS, MAX_SITES, MIN_MW } from "../tools/bake-plants-rules";
+import {
+  COOLING_TOWERS,
+  MAX_SITES,
+  MIN_MW,
+  nameFits,
+  namesPlant,
+  plantNameOf,
+  wordsOf,
+} from "../tools/bake-plants-rules";
 
 const site = (source: PlantSite["source"], extra: Partial<PlantSite> = {}): PlantSite => ({
   source,
@@ -73,6 +81,26 @@ describe("the baked plants (DS-07, src/map/plants.ts)", () => {
     expect(d).toBeGreaterThan(10);
     expect(d).toBeLessThan(25);
     expect(fecamp?.y ?? 0).toBeLessThan(town.y); // north of the town
+  });
+
+  it("place the large dams and thermal plants that BD TOPO names where they stand (B-017)", () => {
+    // Génissiat's plant stands at the foot of its dam (46.052° N, 5.813° E, « barrage
+    // de Génissiat » in BD TOPO, S-018); the registry files it under Injoux-Génissiat.
+    const genissiat = PLANT_SITES.find((p) => p.commune === "Injoux-Génissiat");
+    const dam = kmOf(46.0521, 5.8127);
+    expect(genissiat?.exact).toBe(true);
+    expect(Math.hypot((genissiat?.x ?? 0) - dam.x, (genissiat?.y ?? 0) - dam.y)).toBeLessThan(1.5);
+    // Of the hydro sites of 100 MW or more, only those BD TOPO does not name stay at
+    // their town hall (PRD Q-23).
+    const atHall = PLANT_SITES.filter((p) => p.source === "hydro" && p.mw >= 100 && !p.exact);
+    expect(atHall.map((p) => p.commune).sort()).toEqual([
+      "Caderousse",
+      "Les Mazures",
+      "Montézic",
+      "Oraison",
+      "Saint-Estève-Janson",
+      "Sisteron",
+    ]);
   });
 
   it("hold every nuclear site in service: 18 sites, 61 370 MW, Paluel and Penly in Normandie", () => {
@@ -307,5 +335,52 @@ describe("the source sprites (src/render/art/plants.ts)", () => {
       expect(pen.pixels.size).toBe(7);
       expect([...pen.pixels.values()]).toContain(p.source);
     }
+  });
+});
+
+describe("the plant names that tie a site to BD TOPO (B-017, tools/bake-plants-rules.ts)", () => {
+  it("reads the plant's name in a unit's registry name", () => {
+    expect(plantNameOf("BATHIEH-CENTRALE HYDRAULIQUE DE BATHIE (LA)-7")).toBe("bathie");
+    expect(plantNameOf("AIGLEH-CENTRALE HYDRAULIQUE DE AIGLE (L )-6")).toBe("aigle");
+    expect(plantNameOf("SSESTH-CENTRALE HYDRAULIQUE DE ST-ESTEVE-6")).toBe("st esteve");
+    // An owner or a unit in brackets is dropped.
+    expect(
+      plantNameOf(
+        "CHAPET10 - GROUPE 10 DE LA CENTRALE THERMIQUE DE CHAPELLE (LA)(CHAPELLE D ARBLAY) (TAG2)",
+      ),
+    ).toBe("chapelle");
+    expect(plantNameOf("PROV5TG4 - GROUPE G4 DE LA CENTRALE THERMIQUE DE PROVENCE(EX GARD5)")).toBe(
+      "provence",
+    );
+    expect(
+      plantNameOf("G.ORCT11 - GROUPE 11 DE LA CENTRALE THERMIQUE DE GONFREVILLE-L ORCHER (GTA 11)"),
+    ).toBe("gonfreville orcher");
+  });
+
+  it("finds no name where there is none, or one too short to tell", () => {
+    expect(plantNameOf(null)).toBeNull();
+    expect(plantNameOf("PARC EOLIEN DES HAUTS")).toBeNull();
+    expect(plantNameOf("XH-CENTRALE HYDRAULIQUE DE EY-6")).toBeNull();
+    expect(plantNameOf("XH-CENTRALE HYDRAULIQUE DE (LA)-6")).toBeNull();
+  });
+
+  it("matches whole words, without accents, case or articles", () => {
+    expect(wordsOf("Centrale Électrique de la Bâthie")).toBe("centrale electrique bathie");
+    expect(namesPlant("Barrage de l'Aigle", "aigle")).toBe(true);
+    expect(namesPlant("Centrale Électrique de la Bâthie", "bathie")).toBe(true);
+    // Not inside another word: Baratier is not Ratier.
+    expect(namesPlant("Micro-Centrale Hydroélectrique de Baratier", "ratier")).toBe(false);
+    expect(namesPlant(null, "aigle")).toBe(false);
+  });
+
+  it("does not take a zone whose name tells another technology", () => {
+    expect(nameFits("Centrale Biomasse de Strasbourg", "hydro")).toBe(false);
+    expect(nameFits("Usine Hydroélectrique de Strasbourg", "hydro")).toBe(true);
+    expect(nameFits("Centrale Électrique de la Bâthie", "hydro")).toBe(true);
+    expect(nameFits("Centrale Hydroélectrique de Pragnères", "thermal")).toBe(false);
+    // Thermal and bioenergy plants share « centrale thermique ».
+    expect(nameFits("Centrale Thermique de Gardanne", "bioenergy")).toBe(true);
+    expect(nameFits("Centrale Biomasse de Gardanne", "thermal")).toBe(true);
+    expect(nameFits(null, "hydro")).toBe(true);
   });
 });

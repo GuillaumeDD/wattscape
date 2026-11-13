@@ -107,3 +107,64 @@ export const OFFSHORE_FARMS: readonly OffshoreFarm[] = [
     box: [48.75, -2.85, 49.05, -2.35],
   },
 ];
+
+/**
+ * The plant's own name in a unit's registry name (B-017), e.g. « BATHIE (LA) » in
+ * « BATHIEH-CENTRALE HYDRAULIQUE DE BATHIE (LA)-7 », as words to look for in a BD
+ * TOPO name: lower case, no accents, the article in brackets put back in front,
+ * other brackets (an owner, a unit) dropped. Null when the name has no plant name.
+ */
+export function plantNameOf(nominstallation: string | null): string | null {
+  const m = /CENTRALE (?:HYDRAULIQUE|THERMIQUE) DE (.+?)(?:-\d+)?$/.exec(nominstallation ?? "");
+  const raw = m?.[1];
+  if (raw === undefined) return null;
+  const article = /^([^(]+?)\s*\((LA|LE|LES|L)\s*\)/.exec(raw);
+  const base = article?.[1] ?? raw.replace(/\(.*$/, "");
+  const name = wordsOf(base);
+  // An article alone does not name anything, nor a name of fewer than four letters.
+  return name.replace(/ /g, "").length < 4 ? null : name;
+}
+
+/** Lower case, no accents, letters only, one space between words, articles dropped. */
+export function wordsOf(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z]+/g, " ")
+    .split(" ")
+    .filter((w) => w !== "" && !["le", "la", "les", "l", "d", "de", "du", "des"].includes(w))
+    .join(" ");
+}
+
+/** True when a BD TOPO name holds a plant's name, as whole words. */
+export function namesPlant(toponyme: string | null, plantName: string): boolean {
+  return ` ${wordsOf(toponyme ?? "")} `.includes(` ${plantName} `);
+}
+
+/**
+ * Words of a BD TOPO zone's name that tell its technology (B-017): a zone with no
+ * `nature_detaillee` is not taken for a site of another source when its name holds
+ * one of these (Strasbourg's hydro plant is not « Centrale Biomasse de Strasbourg »).
+ */
+export const NAME_WORDS: Readonly<Record<Source, readonly string[]>> = {
+  nuclear: ["nucleaire", "cnpe"],
+  thermal: ["thermique", "combustion", "cycle", "cogeneration", "charbon", "gaz"],
+  bioenergy: ["biomasse", "biogaz", "incineration", "valorisation", "dechets"],
+  hydro: ["hydroelectrique", "hydraulique", "barrage", "maremotrice", "hydrolienne"],
+  wind: ["eolien", "eolienne", "eoliennes"],
+  solar: ["photovoltaique", "solaire", "photovaoltaique"],
+};
+
+/** False when a zone's name tells another technology than the site's (NAME_WORDS). */
+export function nameFits(toponyme: string | null, source: Source): boolean {
+  const words = ` ${wordsOf(toponyme ?? "")} `;
+  return (Object.keys(NAME_WORDS) as Source[]).every(
+    (other) =>
+      other === source ||
+      // Thermal and bioenergy plants share their names (« centrale thermique »).
+      (other === "thermal" && source === "bioenergy") ||
+      (other === "bioenergy" && source === "thermal") ||
+      NAME_WORDS[other].every((w) => !words.includes(` ${w} `)),
+  );
+}

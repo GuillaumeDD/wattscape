@@ -11,15 +11,17 @@
  *   d'électricité » at 31/12/2024 (S-016): every unit in service of 10 MW or more,
  *   with its technology, capacity and the INSEE code of its commune;
  * - DS-13, IGN BD TOPO (S-018): the zones of the power plants (« Centrale
- *   électrique ») and the wind turbines, where the plant really stands (B-015, D-032);
+ *   électrique »), the named dams and the wind turbines, where the plant really
+ *   stands (B-015, D-032, D-036);
  * - DS-04, IGN ADMIN EXPRESS COG, the chef-lieu (town hall) of each commune (S-013),
- *   where a plant is placed when BD TOPO has no zone of its kind in its commune.
+ *   where a plant is placed when BD TOPO has no zone or dam for it.
  *
  * A **site** is the units of one technology in one commune. Per region and
- * technology, the largest sites are kept (`MIN_MW`, `MAX_SITES`), each at the centre
- * of the largest BD TOPO zone of its kind in its commune, else at the commune's
- * chef-lieu, and moved onto the nearest 1 km cell of its region if it falls elsewhere
- * (the coast, a border). An offshore wind farm (`OFFSHORE_FARMS`) is the units of the
+ * technology, the largest sites are kept (`MIN_MW`, `MAX_SITES`), each at the BD TOPO
+ * zone that bears its plant's name, else at the centre of the largest zone of its kind
+ * in its commune, else (hydro) at the dam that bears its name, else at the commune's
+ * chef-lieu (B-017, D-036), and moved onto the nearest 1 km cell of its region if it
+ * falls elsewhere (the coast, a border). An offshore wind farm (`OFFSHORE_FARMS`) is the units of the
  * registry that share its name, at the centre of its BD TOPO turbines at sea (G-007).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -32,7 +34,10 @@ import {
   FILIERES,
   MAX_SITES,
   MIN_MW,
+  nameFits,
+  namesPlant,
   OFFSHORE_FARMS,
+  plantNameOf,
   ZONE_KINDS,
 } from "./bake-plants-rules.ts";
 import {
@@ -57,6 +62,8 @@ const WFS = "https://data.geopf.fr/wfs/ows";
 
 /** How far a site may move to land on a cell of its region, km. */
 const SNAP_KM = 5;
+/** How far from its town hall a plant named in BD TOPO may stand, km (B-017). */
+const NAMED_KM = 15;
 
 async function get(url: string): Promise<Buffer> {
   for (let attempt = 1; ; attempt++) {
@@ -113,6 +120,8 @@ interface Site {
   readonly region: RegionCode;
   readonly insee: string;
   mw: number;
+  /** The plant names of its units (plantNameOf), largest unit first. */
+  readonly names: { name: string; mw: number }[];
 }
 const sites = new Map<string, Site>();
 const offshoreUnits: Unit[] = [];
@@ -133,8 +142,14 @@ for (const u of units) {
   if (insee === null || !/^[0-9][0-9AB][0-9]{3}$/.test(insee)) continue;
   if (!(u.puismaxinstallee > 0)) continue;
   const key = `${u.coderegion}|${source}|${insee}`;
-  const site = sites.get(key) ?? { source, region: u.coderegion, insee, mw: 0 };
+  const site = sites.get(key) ?? { source, region: u.coderegion, insee, mw: 0, names: [] };
   site.mw += u.puismaxinstallee / 1000;
+  const name = plantNameOf(u.nominstallation);
+  if (name !== null) {
+    const known = site.names.find((n) => n.name === name);
+    if (known === undefined) site.names.push({ name, mw: u.puismaxinstallee / 1000 });
+    else known.mw += u.puismaxinstallee / 1000;
+  }
   sites.set(key, site);
 }
 
@@ -242,6 +257,90 @@ for (const f of zonesJson.features) {
   list.push({ kind: f.properties.nature_detaillee, name: f.properties.toponyme ?? "", ...best });
   zones.set(insee, list);
 }
+const allZones = [...zones.values()].flat();
+
+/**
+ * The nearest BD TOPO zone, within NAMED_KM of the town hall, whose name holds the
+ * name of the site's largest named units (B-017): the registry often files a plant
+ * under the commune of its operator, or a zone has no `nature_detaillee`. A zone of
+ * another source's kind is skipped; one without a kind is taken, except for wind and
+ * solar farms, whose names are too common.
+ */
+function namedZoneOf(site: Site, near: { x: number; y: number }): Zone | undefined {
+  if (site.source === "wind" || site.source === "solar") return undefined;
+  const names = [...site.names].sort((a, b) => b.mw - a.mw || a.name.localeCompare(b.name));
+  for (const { name } of names) {
+    const found = allZones
+      .filter(
+        (z) =>
+          ZONE_KINDS[site.source].includes(z.kind) ||
+          (z.kind === null && nameFits(z.name, site.source)),
+      )
+      .filter((z) => namesPlant(z.name, name))
+      .map((z) => ({ z, d: Math.hypot(z.x - near.x, z.y - near.y) }))
+      .filter((c) => c.d <= NAMED_KM)
+      .sort((a, b) => a.d - b.d || a.z.name.localeCompare(b.z.name))[0];
+    if (found !== undefined) return found.z;
+  }
+  return undefined;
+}
+
+// The named dams of BD TOPO (DS-13), where a reservoir plant stands at the dam's foot.
+interface Dam {
+  readonly name: string;
+  readonly x: number;
+  readonly y: number;
+}
+const dams: Dam[] = [];
+for (const layer of ["construction_surfacique", "construction_lineaire"]) {
+  const url = `${WFS}?${new URLSearchParams({
+    SERVICE: "WFS",
+    VERSION: "2.0.0",
+    REQUEST: "GetFeature",
+    TYPENAMES: `BDTOPO_V3:${layer}`,
+    OUTPUTFORMAT: "application/json",
+    CQL_FILTER: "nature='Barrage' AND toponyme IS NOT NULL AND etat_de_l_objet='En service'",
+    COUNT: "10000",
+  }).toString()}`;
+  const json = JSON.parse((await cached(`dams-${layer}.json`, url)).toString("utf8")) as {
+    features: {
+      geometry: { type: string; coordinates: unknown } | null;
+      properties: { toponyme: string };
+    }[];
+  };
+  for (const f of json.features) {
+    // The dam's middle: the mean of its positions (lon, lat, maybe a height), enough
+    // for a 1 km cell.
+    const positions: (readonly number[])[] = [];
+    const walk = (v: unknown): void => {
+      if (!Array.isArray(v)) return;
+      if (typeof v[0] === "number") positions.push(v as number[]);
+      else for (const w of v) walk(w);
+    };
+    walk(f.geometry?.coordinates);
+    const n = positions.length;
+    const lon = positions.reduce((t, q) => t + (q[0] ?? 0), 0);
+    const lat = positions.reduce((t, q) => t + (q[1] ?? 0), 0);
+    if (n >= 1) dams.push({ name: f.properties.toponyme, ...kmOf(lat / n, lon / n) });
+  }
+}
+if (dams.length < 100) throw new Error("BD TOPO: too few named dams");
+
+/** The nearest named dam, within NAMED_KM, of a hydro site's largest named units. */
+function damOf(site: Site, near: { x: number; y: number }): Dam | undefined {
+  if (site.source !== "hydro") return undefined;
+  const names = [...site.names].sort((a, b) => b.mw - a.mw || a.name.localeCompare(b.name));
+  for (const { name } of names) {
+    const found = dams
+      .filter((d) => namesPlant(d.name, name))
+      .map((d) => ({ d, km: Math.hypot(d.x - near.x, d.y - near.y) }))
+      .filter((c) => c.km <= NAMED_KM)
+      .sort((a, b) => a.km - b.km || a.d.name.localeCompare(b.d.name))[0];
+    if (found !== undefined) return found.d;
+  }
+  return undefined;
+}
+
 /** The largest zone of a source's kind in a commune, if any. */
 const zoneOf = (insee: string, source: Source): Zone | undefined =>
   (zones.get(insee) ?? [])
@@ -268,6 +367,8 @@ interface Baked {
 }
 const baked: Baked[] = [];
 let exact = 0;
+const byName: string[] = [];
+const placedBy = { name: 0, commune: 0, dam: 0, "town hall": 0 };
 const missing: string[] = [];
 const off: string[] = [];
 for (const site of kept) {
@@ -276,9 +377,25 @@ for (const site of kept) {
     missing.push(`${site.insee} ${site.source} ${site.mw.toFixed(0)} MW`);
     continue;
   }
-  const zone = zoneOf(site.insee, site.source);
+  // Where it stands: its named zone, else the largest zone of its kind in its commune,
+  // else its named dam (B-017); else its town hall.
+  const hall = kmOf(chef.lat, chef.lon);
+  const named = namedZoneOf(site, hall);
+  const dam = named === undefined ? damOf(site, hall) : undefined;
+  const zone = named ?? zoneOf(site.insee, site.source) ?? dam;
   if (zone !== undefined) exact++;
-  const at = zone ?? kmOf(chef.lat, chef.lon);
+  placedBy[
+    named !== undefined
+      ? "name"
+      : zone === dam && dam !== undefined
+        ? "dam"
+        : zone !== undefined
+          ? "commune"
+          : "town hall"
+  ]++;
+  if (named !== undefined || zone === dam)
+    if (zone !== undefined) byName.push(`${chef.name} ${site.source} → ${zone.name}`);
+  const at = zone ?? hall;
   const r0 = Math.floor(at.y / FINE_KM);
   const c0 = Math.floor(at.x / FINE_KM);
   const want = kindOfRegion(site.region);
@@ -435,6 +552,8 @@ console.log(Object.values(FILIERES).map(bySource).join(", "));
 console.log(
   `placed by BD TOPO: ${String(exact)}; ${String(offshoreUnits.length)} offshore units; ${String(outside)} outside the 12 regions`,
 );
+console.log(`placed by: ${JSON.stringify(placedBy)}`);
+console.log(`by name: ${byName.join("; ")}`);
 if (missing.length > 0) console.log(`no chef-lieu: ${missing.join("; ")}`);
 if (off.length > 0) console.log(`not on their region: ${off.join("; ")}`);
 console.log(
