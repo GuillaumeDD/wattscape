@@ -4,7 +4,7 @@
  *
  *   node --experimental-strip-types tools/bake-map.ts
  *
- * Reads three GO sources of `docs/DATA-SOURCES.md` (downloads are cached in the
+ * Reads three GO sources of `docs/SOURCES.md` § 1 (downloads are cached in the
  * system's temporary folder, never committed):
  *
  * - DS-04, IGN ADMIN EXPRESS COG CARTO, regions, from IGN's WFS (S-013);

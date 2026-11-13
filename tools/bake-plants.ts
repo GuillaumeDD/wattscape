@@ -4,7 +4,7 @@
  *
  *   node --experimental-strip-types tools/bake-plants.ts
  *
- * Reads two GO sources of `docs/DATA-SOURCES.md` (downloads are cached in the
+ * Reads two GO sources of `docs/SOURCES.md` § 1 (downloads are cached in the
  * system's temporary folder, never committed):
  *
  * - DS-07, ODRÉ « Registre national des installations de production et de stockage

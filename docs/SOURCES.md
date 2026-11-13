@@ -1,9 +1,73 @@
 # Sources
 
-Every external source consulted for Wattscape, with what it gave us. Facts taken from
-a source are recorded where they are used (mostly `ARCHITECTURE.md`), citing the
-source's id here. Add a source the day it is consulted, even when it turns out to be
-useless, so nobody looks it up twice.
+Everything Wattscape takes from outside, in two parts:
+
+1. the **[data register](#1-data-register)**: for each open dataset considered, its
+   licence and whether we use it (ids `DS-`);
+2. the **[consultation log](#2-consultation-log)**: every external source read (a
+   dataset page, an API doc, a spec, a photo, a person), with what it gave us (ids
+   `S-`).
+
+A dataset is decided in part 1 and its facts are traced in part 2: a `DS-` row cites
+the `S-` entries it rests on (D-038).
+
+## 1. Data register
+
+For each source of open data, its licence and terms, whether we use it (**GO**),
+reject it (**NO-GO**) or have not decided yet (**TO CHECK**), and why. It exists so
+that every use of third-party data can be audited and revisited. How a source is
+used (fields, caveats) is in ARCHITECTURE § Data sources.
+
+### Rules
+
+- A source is used in code only when it is **GO**.
+- **GO** needs: an open licence compatible with a public GPL project and CC BY-SA art
+  (Licence Ouverte / Etalab 2.0, CC0, CC BY, ODbL for data we do not redistribute),
+  terms that a free, non-commercial, keyless static site can respect (rate limits,
+  attribution), and no privacy cost beyond ARCHITECTURE § Privacy.
+- The **attribution** each licence asks for is shown in the app's credits and in the
+  README, with the source's name and the date of the data shown. Setting a source
+  to **GO** for code adds, in the same PR, its credit in both languages and its
+  README line, and adds the product to the list `tests/i18n.test.ts` checks the
+  credits against.
+- Data **baked into the repository** (map, capacities, fixtures) also gets an
+  `ASSETS.md` entry; a licence that would force a different licence on the repo
+  (e.g. share-alike on a database) is a reason for NO-GO unless the data stays
+  outside the repo.
+- A decision changes only through a new dated comment in its row, never a silent
+  edit.
+
+> 💡 **Licence Ouverte / Etalab 2.0** is the French government's open licence: data
+> can be reused for any purpose, including commercially, as long as the source and
+> the date of its last update are cited. It is compatible with CC BY.
+
+### Register
+
+| Id    | Source                                                      | Used for                                | Licence and terms                                                                     | Decision | Comment                                                                                                         | Decided              |
+| ----- | ----------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------- | -------------------- |
+| DS-01 | RTE éCO2mix regional real time, via ODRÉ (S-003, S-004)     | Regional mix, live                      | Licence Ouverte 2.0; cite "RTE éCO2mix" and the reading time; 50 000 calls/user/month | GO       | The core of the project; keyless. 2026-11-11: licence and CORS (`*`) confirmed on the API (S-003)               | Guillaume 2026-11-11 |
+| DS-02 | RTE éCO2mix national real time, via ODRÉ (S-009)            | National view, live                     | Licence Ouverte 2.0 (S-009)                                                           | GO       | Same publisher and API as DS-01. 2026-11-11: licence and CORS (`*`) confirmed on the API (S-009)                | Guillaume 2026-11-11 |
+| DS-03 | Open-Meteo forecast API (S-005)                             | Current weather, snow depth             | CC BY 4.0; free tier non-commercial only; < 10 000 calls/day per IP                   | GO       | Keyless; non-commercial (no ads, no subscription); credits on the page. 2026-11-11: CORS `*`, quota checked     | Guillaume 2026-11-11 |
+| DS-04 | IGN ADMIN EXPRESS COG CARTO, regions (S-013)                | Baked map: regions; chef-lieux, towns   | Licence Ouverte 2.0 (S-013)                                                           | GO       | Official, open, no share-alike. 2026-11-11: licence read in IGN's metadata; baked in B-008 (D-014)              | Guillaume 2026-11-11 |
+| DS-05 | IGN BD ALTI 25 m, national elevation model, via WMS (S-014) | Baked map: relief                       | Licence Ouverte 2.0 (S-014)                                                           | GO       | 2026-11-11: chosen over Copernicus DEM, whose licence could not be read (D-014); France only                    | Guillaume 2026-11-11 |
+| DS-06 | OpenStreetMap                                               | Coastline, towns, plant locations       | ODbL: share-alike on derived databases                                                | TO CHECK | Rich but share-alike: acceptable only for facts we look up, not for a database baked into the repo              |                      |
+| DS-07 | ODRÉ « Registre national des installations de production »  | Installed capacity by region and source | Licence Ouverte 2.0 (to confirm)                                                      | GO       | For placing diffuse sources (World generation); baked at build time; 2026-11-12: GO, licence in API (S-016)     | Guillaume 2026-11-12 |
+| DS-08 | RTE production per unit ("production par groupe")           | Plant-by-plant output (Growth G-003)    | to check                                                                              | TO CHECK | Later; delay and terms to check                                                                                 |                      |
+| DS-09 | Electricity Maps API (S-001)                                | —                                       | API key required; commercial terms                                                    | NO-GO    | Inspiration only: needs a key (a secret in a static site) and duplicates éCO2mix for France                     | proposed, to confirm |
+| DS-10 | geo.api.gouv.fr (reverse geocoding)                         | Position → région                       | Licence Ouverte 2.0                                                                   | NO-GO    | Would send the user's exact position to a third party; the lookup runs offline instead (ARCHITECTURE § Privacy) | proposed, to confirm |
+| DS-11 | Natural Earth, admin-0 countries 1:10m (S-015)              | Baked map: neighbouring countries       | Public domain; credit welcome, not required (S-015)                                   | GO       | 2026-11-11: the land around France, so that it does not float alone; pinned commit (D-014)                      | Guillaume 2026-11-11 |
+| DS-12 | RTE éCO2mix regional consolidated, via ODRÉ (S-017)         | Baked ranges of consumption (B-014)     | Licence Ouverte 2.0 (S-017)                                                           | GO       | Same publisher and licence as DS-01; 12 months baked into the repo (p5, p95 per region)                         | Guillaume 2026-11-12 |
+| DS-13 | IGN BD TOPO, via WFS (S-018)                                | Baked: plants and offshore wind places  | Licence Ouverte 2.0 (IGN metadata IGNF_BD-TOPO)                                       | GO       | Real places of power plants and offshore farms (B-015, G-007); baked, never fetched at runtime                  | Guillaume 2026-11-12 |
+
+"proposed, to confirm" means Claude proposed the decision; it becomes final when
+Guillaume confirms it, and the cell then reads "Guillaume date".
+
+## 2. Consultation log
+
+Every external source consulted, with what it gave us. Facts taken from a source are
+recorded where they are used (mostly `ARCHITECTURE.md`), citing the source's id
+here. Add a source the day it is consulted, even when it turns out to be useless, so
+nobody looks it up twice.
 
 **Reliability** is how far a fact from the source can be trusted: **high** (the
 publisher documents its own data or API), **medium** (a secondary page, or a summary

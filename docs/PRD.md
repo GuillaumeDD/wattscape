@@ -177,9 +177,9 @@ idea that the grid can be seen.
   **CC BY-SA 4.0**, listed in `ASSETS.md`.
 - No third-party images, sprites or fonts unless CC0 / CC BY / CC BY-SA, with an
   `ASSETS.md` entry.
-- **Data:** only open data that is GO in [`DATA-SOURCES.md`](DATA-SOURCES.md), with
-  the attribution each licence asks for in the app's credits. Wattscape stays
-  non-commercial (no ads, no subscription), as Open-Meteo's free tier requires.
+- **Data:** only open data that is GO in
+  [`SOURCES.md` § 1](SOURCES.md#1-data-register), with the attribution each licence
+  asks for in the app's credits. Wattscape stays non-commercial (no ads, no subscription), as Open-Meteo's free tier requires.
 - **Landmarks:** only public-domain works and natural or generic sites, each GO in
   [`POI.md`](POI.md) before it is drawn (D-004). French freedom of panorama is
   narrow, so recent works (and the Eiffel Tower's light show) stay out.
@@ -274,7 +274,7 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-8  | Mockups: true isometric (map turned 45°) or north up?           | North up: France stays recognisable at a glance, from afar                                           | North up (Guillaume, 2026-11-11)                                      |
 | Q-9  | Region level: 4 km cells, or a finer 1 km relief?               | 1 km: at 4 km a region looks blocky (Normandie mockups)                                              | 1 km (Guillaume, 2026-11-11)                                          |
 | Q-10 | 1 km terrain: cliffs at 250 m drops only, shading over 4 km?    | Yes: every 100 m step drew a dark line on the plains (D-022, step-3 screenshots)                     | Yes (Guillaume, 2026-11-12, D-023)                                    |
-| Q-11 | Relief abroad, so border mountains do not end in a cliff?       | Yes, after Normandie (B-015): a GO source in DATA-SOURCES first (G-012)                              | Yes, after B-015 (Guillaume, 2026-11-12, D-023)                       |
+| Q-11 | Relief abroad, so border mountains do not end in a cliff?       | Yes, after Normandie (B-015): a GO source in SOURCES § 1 first (G-012)                               | Yes, after B-015 (Guillaume, 2026-11-12, D-023)                       |
 | Q-12 | On load: show France for 1.5 s, then fly to the region?         | Yes: it says where the region is, and it is short                                                    | Yes (Guillaume, 2026-11-12, D-023)                                    |
 | Q-13 | Double-click: zoom ×2 there, or fly to the region clicked?      | Zoom ×2 there: it works at every zoom; a region is one pick in the list away                         | Zoom ×2 there (Guillaume, 2026-11-12, D-023)                          |
 | Q-14 | Cooling towers at the 11 sites listed (from memory)?            | Yes until a source says otherwise; Tricastin, Saint-Alban, Blayais and the coast have none           | Yes; offshore wind too, Fécamp first (Guillaume, 2026-11-12, D-027)   |

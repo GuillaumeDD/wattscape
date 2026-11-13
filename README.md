@@ -15,7 +15,7 @@ Work in progress. Start with:
 - [`docs/PRD.md`](docs/PRD.md): what we build, and the open questions;
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): how it is built;
 - [`docs/DECISIONS.md`](docs/DECISIONS.md): the decisions made so far;
-- [`docs/POI.md`](docs/POI.md) and [`docs/DATA-SOURCES.md`](docs/DATA-SOURCES.md): which
+- [`docs/POI.md`](docs/POI.md) and [`docs/SOURCES.md`](docs/SOURCES.md): which
   landmarks and data sources are in or out, and why;
 - [`AGENTS.md`](AGENTS.md): how we work.
 
