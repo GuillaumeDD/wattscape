@@ -32,3 +32,4 @@ Statuses: `todo` / `wip` / `done`.
 | B-022 | Seasons                           | Four seasonal land palettes and props; continuous, per-cell transitions by date; live snow cover; frame snapshots for each season                                   | todo   |
 | B-023 | Rivers on the map                 | Rivers of reach 100 or more baked from BD TOPO (DS-13, D-039): the great ones on the national view, all from close; day and night; frame snapshots                  | done   |
 | B-024 | Camera budget, measured again     | `tools/perf.ts frames` on a quiet machine, three runs: wheel zoom and flight at p95 against the 25 ms of D-028; profile and fix if over                             | todo   |
+| B-025 | Foldable panel                    | A button folds the panel to its title and the figures' note; remembered; folded at first on a phone (D-052)                                                         | done   |

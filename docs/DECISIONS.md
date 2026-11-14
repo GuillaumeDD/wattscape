@@ -910,3 +910,19 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   about it; in `docs/POI.md` § Rules, the 2 km spacing of D-048.
 - **Why:** each caused a slip or extra work in this step.
 - **Revisit if:** a rule turns out to cost more than the slip it prevents.
+
+## D-052 — The panel folds, and starts folded on a phone
+
+- **Context:** on a phone, the page's panel covered half the map; Guillaume asked to
+  be able to fold it (project thread, 2026-11-14, with a screenshot).
+- **Options:** a button that folds it, always open at first; the same, folded at
+  first on a narrow screen; hide the panel entirely after a while.
+- **Decision (Claude, 2026-11-14, proposed, to confirm):** a "−"/"+" button; the
+  panel opens as the viewer left it, else folded on a narrow screen (under 40 rem
+  wide or 30 rem high) and open elsewhere. The figures' note stays visible when
+  folded.
+- **Why:** a phone shows the map on the first visit; a desktop still shows the region
+  list and "Use my location" at once. The note stays because every figure on screen
+  keeps its source and time (AGENTS.md § Non-negotiables), sample data most of all.
+- **Revisit if:** phone viewers miss the region list, or the legend (B-019) takes
+  the note's place.

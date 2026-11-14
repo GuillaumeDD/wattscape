@@ -154,6 +154,8 @@ idea that the grid can be seen.
   real figures: `?timelapse=day`, B-014), weather override and fixed data, for demos
   and screenshots (also as URL settings).
 - `prefers-reduced-motion`: no camera drift, slow animations.
+- The page's panel (title, region, language) folds to its title, so a phone shows
+  the map (Guillaume, 2026-11-14; B-025).
 
 ### 4.10 Localization
 

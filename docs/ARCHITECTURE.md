@@ -268,7 +268,7 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
 - The position is used for: (1) the offline area lookup (§ Geolocation); (2) the
   weather query, **rounded to 0.1°** (about 10 km). It is never stored, logged,
   put in the URL or sent elsewhere. What is remembered in `localStorage` is the area
-  code only.
+  code, the language and whether the panel is folded, nothing else.
 - Without a position, the weather will be taken (B-007) at the area's reference
   point, its regional prefecture (`referencePoint`); the national view has none
   (provisional).
@@ -702,6 +702,13 @@ and the Pyrenees, French mountains end in a cliff (PRD Q-11).
   then the latest step at or before the replayed time (`src/ui/replay-feed.ts`).
   The page labels it "Accéléré" with the step's date and time. Before the day's
   first step, or if the request fails, the plants and the towns are idle.
+
+- **Panel** (B-025, D-052): the page's text sits in a panel over the scene, which a
+  "−" button folds to its title and the figures' note (where they come from, and
+  their time, stay on screen), and a "+" opens again. It opens as the viewer left it
+  (`localStorage`), else folded on a narrow screen (under 40 rem wide or 30 rem high:
+  a phone), where it would cover half the map, and open elsewhere. Measured in
+  Chromium, on a Pixel 7 emulation and a 1280 × 720 window.
 
 ### Landmarks
 

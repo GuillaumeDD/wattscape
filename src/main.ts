@@ -11,7 +11,9 @@ import {
   atFromQuery,
   browserStorage,
   initialArea,
+  initialPanelFolded,
   sampleFromQuery,
+  savePanelFolded,
   savedLocale,
   saveLocale,
   timelapseFromQuery,
@@ -50,6 +52,7 @@ function render(locale: Locale): void {
   setText("credits-plants", t("creditsPlants"));
   setText("credits-plants-licence", t("creditsPlantsLicence"));
   document.getElementById("language")?.setAttribute("aria-label", t("switchLanguageLabel"));
+  renderPanel();
   setText("area-label", t("areaLabel"));
   setText("locate", t("useMyLocation"));
   setText("debug-link", t("debugTitle"));
@@ -58,6 +61,22 @@ function render(locale: Locale): void {
 }
 
 let plantsState: FeedState = { kind: "loading" };
+
+/**
+ * The panel folds to its title and the figures' note, so a phone sees the map: a
+ * "−" folds it, a "+" opens it again, named for screen readers.
+ */
+function renderPanel(): void {
+  const label = translate(locale, panelFolded ? "panelUnfold" : "panelFold");
+  document.querySelector("main")?.classList.toggle("folded", panelFolded);
+  document.getElementById("panel-body")?.toggleAttribute("hidden", panelFolded);
+  const toggle = document.getElementById("panel-toggle");
+  if (toggle === null) return;
+  toggle.textContent = panelFolded ? "+" : "−";
+  toggle.setAttribute("aria-expanded", String(!panelFolded));
+  toggle.setAttribute("aria-label", label);
+  toggle.title = label;
+}
 
 /** Where the plants' figures come from, and their time: every animated figure is traceable. */
 function renderPlantsNote(): void {
@@ -100,6 +119,9 @@ const areaState: AreaState = {
 };
 
 let locale: Locale = savedLocale(storage) ?? detectLocale(navigator.languages);
+/** A phone, in portrait or landscape: under 40 rem wide or under 30 rem high. */
+const NARROW = "(max-width: 40rem), (max-height: 30rem)";
+let panelFolded = initialPanelFolded(storage, window.matchMedia(NARROW).matches);
 render(locale);
 renderArea(true);
 
@@ -150,6 +172,12 @@ mountAreaPicker(areaState, () => {
   if (areaState.area === shownArea) return;
   shownArea = areaState.area;
   scene?.showArea(areaState.area);
+});
+
+document.getElementById("panel-toggle")?.addEventListener("click", () => {
+  panelFolded = !panelFolded;
+  savePanelFolded(storage, panelFolded);
+  renderPanel();
 });
 
 document.getElementById("language")?.addEventListener("click", () => {
