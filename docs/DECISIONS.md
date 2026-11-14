@@ -926,3 +926,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   keeps its source and time (AGENTS.md § Non-negotiables), sample data most of all.
 - **Revisit if:** phone viewers miss the region list, or the legend (B-019) takes
   the note's place.
+
+## D-053 — Plants named by their usual name; D-052 confirmed
+
+- **Context:** the plants' captions (B-020, PR #38) named a site by its commune, IGN's
+  official name: Penly showed as « Petit-Caux », Bugey as « Saint-Vulbas ». Guillaume
+  was also asked to confirm D-052 (the panel folded at first on a phone).
+- **Options:** the commune alone; the plant's usual name alone; both.
+- **Decision (Guillaume, 2026-11-14, project thread):** « D-052 : OK »; for the plants,
+  « le nom usuel avec entre parenthèses le nom officiel IGN (e.g., "Penly
+  (Petit-Caux)") ». The usual name is the plant name the national registry gives the
+  site's units (S-025), kept only when one plant holds most of the site's capacity
+  and its name is not already the commune's; wind, solar and bioenergy sites on land
+  keep the commune alone, and offshore farms their own name.
+- **Why:** a plant is known by its name, its place by the commune; both are true and
+  sourced.
+- **Revisit if:** the registry renames a plant, or a site gathers two plants of
+  similar size (Fos-sur-Mer, Laruns: commune alone for now).

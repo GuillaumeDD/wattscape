@@ -44,6 +44,12 @@ export interface ScenePlant {
    * drawn idle, with no motion and no glow, never with a guessed value.
    */
   readonly activity: number | null;
+  /**
+   * The figure behind it, for its caption (B-020): the load factor of its technology
+   * in its region as éCO2mix gives it, % (null when éCO2mix gives none), and the time
+   * of that reading; null when no reading is shown.
+   */
+  readonly figure: { readonly loadFactorPct: number | null; readonly timeMs: number } | null;
 }
 
 export interface Scene {
@@ -155,7 +161,18 @@ export function scenePlants(
     const reading = readings?.byRegion[site.region];
     const shown =
       reading !== undefined && freshness(reading, nowMs) !== "future" ? reading : undefined;
-    return { site, activity: activityOf(shown, site.source) };
+    const pct = shown?.loadFactorPct[site.source];
+    return {
+      site,
+      activity: activityOf(shown, site.source),
+      figure:
+        shown === undefined
+          ? null
+          : {
+              loadFactorPct: pct !== null && pct !== undefined && Number.isFinite(pct) ? pct : null,
+              timeMs: shown.timeMs,
+            },
+    };
   });
 }
 

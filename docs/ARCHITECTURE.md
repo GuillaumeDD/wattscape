@@ -489,7 +489,7 @@ A missing figure shows the element **idle**: no motion, no glow, never a guessed
 value. That is a region without a reading (not loaded, unavailable, late for the
 newest step), a reading dated more than 15 minutes in the future, or a technology
 éCO2mix gives no load factor for (`null`). The page note says why ("données
-indisponibles"); the captions (B-020) will say it per plant. A stale reading (over
+indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
 3 hours) still drives the plants and is labelled as stale.
 
 ## Sky, light and weather
@@ -760,8 +760,16 @@ months, and the palette has no lavender yet.
 `src/map/landmark-captions.ts`: its name and one line on what it is, in French and
 English, each citing the `S-` entries its facts come from (mostly the French
 Wikipedia, S-024); a line with no source found is marked `provisional` and listed in
-its PR. A frame tells which landmarks it drew and the box of each sprite
-(`Drawn.marks`, in buffer pixels); `src/ui/captions.ts` finds the one under the
+its PR. Every plant drawn, sprite or national marker, has one too, built from the
+data: its technology, its usual name for a large plant (`src/map/plant-names.ts`, from
+the registry, D-053) and its commune (or offshore farm), its installed capacity (DS-07;
+for wind, solar and bioenergy on land, every unit of the commune), and the figure
+that drives it: its technology's load factor in its region, as éCO2mix gives it
+(over 100 % too, where the sprite is clamped), with the reading's time; or, when
+there is none, why it is idle. éCO2mix gives no figure per plant, so the caption
+names the region the figure is for. A frame tells which landmarks and plants it
+drew and the box of each still body (`Drawn.marks`, in buffer pixels, the lowest
+last, in front); `src/ui/captions.ts` finds the one under the
 pointer (the front-most, within 1 pixel for a mouse, 4 for a finger) and places the
 caption above it, or below near the top, inside the window. The mouse shows a
 caption while it rests on the sprite; a tap shows it for 8 s, and a tap elsewhere

@@ -3,7 +3,7 @@
  * what is there; the theme decides how it looks. One theme for now, the pixel art
  * of ARCHITECTURE § Art direction; PRD G-011 proposes a second, chosen by the viewer.
  */
-import { type Scene } from "../scene/scene.ts";
+import { type Scene, type ScenePlant } from "../scene/scene.ts";
 import { pixelTheme } from "./pixel-theme.ts";
 import { type Surface } from "./surface.ts";
 
@@ -11,14 +11,25 @@ import { type Surface } from "./surface.ts";
  * Something a frame shows that has a caption (B-020): where it stands, as the box
  * of its sprite in buffer pixels (left and top included, right and bottom excluded).
  */
-export interface Mark {
-  readonly kind: "landmark";
-  /** Its row in docs/POI.md. */
+export type Mark = LandmarkMark | PlantMark;
+
+interface MarkBox {
+  /** Unique in a frame, and the same from frame to frame, so a caption can follow it. */
   readonly id: string;
   readonly left: number;
   readonly top: number;
   readonly right: number;
   readonly bottom: number;
+}
+
+export interface LandmarkMark extends MarkBox {
+  readonly kind: "landmark";
+  /** `id` is its row in docs/POI.md. */
+}
+
+export interface PlantMark extends MarkBox {
+  readonly kind: "plant";
+  readonly plant: ScenePlant;
 }
 
 /** What a drawn frame leaves to animate: the plants' motion (B-012). */

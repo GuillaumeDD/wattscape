@@ -138,7 +138,7 @@ async function findCaption(
   return null;
 }
 
-test("shows a landmark's caption under the mouse, and hides it when it leaves", async ({
+test("shows a landmark's or a plant's caption under the mouse, and hides it when it leaves", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 960, height: 540 });
@@ -149,7 +149,7 @@ test("shows a landmark's caption under the mouse, and hides it when it leaves", 
   const at = await findCaption(page, 420, 120, 140);
   expect(at).not.toBeNull();
   const shown = await caption(page);
-  expect(shown).toMatch(/^P-0\d\d \d+$/);
+  expect(shown).toMatch(/^(P-0\d\d|[a-z]+@[\d.]+,[\d.]+) -?\d+$/);
   // The mouse rests: the caption stays; off the canvas, it goes.
   await page.waitForTimeout(500);
   expect(await caption(page)).toBe(shown);
@@ -162,7 +162,9 @@ test("shows a landmark's caption under the mouse, and hides it when it leaves", 
 test.describe("on a touch screen", () => {
   test.use({ hasTouch: true });
 
-  test("a tap shows a landmark's caption, a tap elsewhere hides it", async ({ page }) => {
+  test("a tap shows a landmark's or a plant's caption, a tap elsewhere hides it", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 960, height: 540 });
     await page.goto("/scene.html?area=28");
     await page.waitForTimeout(2500);

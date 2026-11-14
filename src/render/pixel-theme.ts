@@ -14,10 +14,18 @@ import { ELEVATION_CLASSES, FOREIGN, KIND_COUNT, kindOfRegion, SEA } from "../ma
 import { type TerrainLayer } from "../map/layers.ts";
 import { RISE_METRES_PER_KM } from "../scene/camera.ts";
 import { type RegionCode } from "../data/eco2mix.ts";
+import { type PlantSite } from "../map/plants.ts";
 import { type Scene, type ScenePlant, type Town, townCellCount } from "../scene/scene.ts";
 import { skyColour, tinted } from "../sky/light.ts";
 import { drawLandmark, landmarkBox } from "./art/landmarks.ts";
-import { drawBody, drawMotion, hasMotion, type Pen, type SpriteSize } from "./art/plants.ts";
+import {
+  drawBody,
+  drawMotion,
+  hasMotion,
+  type Pen,
+  plantBox,
+  type SpriteSize,
+} from "./art/plants.ts";
 import { type Landmark } from "../map/landmarks.ts";
 import { isDiffuse } from "../map/sources.ts";
 import { BAYER_4, DITHER_LEVELS } from "./dither.ts";
@@ -595,6 +603,11 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
   return { plants: placed, landmarks: placedMarks };
 }
 
+/** A plant's mark: its technology and place, unique among the baked sites. */
+export function plantMarkId(site: PlantSite): string {
+  return `${site.source}@${String(site.x)},${String(site.y)}`;
+}
+
 /** One spare buffer for the crossfade, reused while the size stays the same. */
 let spare: Surface | null = null;
 
@@ -646,11 +659,20 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
     for (const p of shown.plants) drawBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
   }
   const placed = shown.plants;
-  const marks: Mark[] = shown.landmarks.map((m) => ({
-    kind: "landmark",
-    id: m.landmark.id,
-    ...landmarkBox(m.landmark, m.x, m.y),
-  }));
+  // In the painter's order, roughly: what stands lower on the frame is in front.
+  const marks: Mark[] = [
+    ...shown.landmarks.map((m): Mark => ({
+      kind: "landmark",
+      id: m.landmark.id,
+      ...landmarkBox(m.landmark, m.x, m.y),
+    })),
+    ...placed.map((p): Mark => ({
+      kind: "plant",
+      id: plantMarkId(p.plant.site),
+      plant: p.plant,
+      ...plantBox(p.plant.site, p.x, p.y, size),
+    })),
+  ].sort((a, b) => a.bottom - b.bottom || a.left - b.left);
   const moving = placed.filter(
     (p) => p.plant.activity !== null && p.plant.activity > 0 && hasMotion(p.plant.site, size),
   );

@@ -48,5 +48,16 @@
   "plantsSample": "Sample data: RTE éCO2mix reading of {time}, not live.",
   "plantsReplay": "Time-lapse: the past day in a minute, RTE éCO2mix reading of {time}.",
   "plantsAhead": "The RTE éCO2mix reading ({time}) is later than the time shown: the power plants are idle.",
-  "plantsUnavailable": "RTE éCO2mix data unavailable: the power plants are idle."
+  "plantsUnavailable": "RTE éCO2mix data unavailable: the power plants are idle.",
+  "plantNuclear": "Nuclear",
+  "plantThermal": "Thermal",
+  "plantWind": "Wind",
+  "plantSolar": "Solar",
+  "plantHydro": "Hydro",
+  "plantBioenergy": "Bioenergy",
+  "plantCapacity": "{mw} MW installed (national registry at 31/12/2024).",
+  "plantCapacityCommune": "{mw} MW installed in the commune (national registry at 31/12/2024).",
+  "plantLoad": "Load factor of the sector, {region}: {pct}% (RTE éCO2mix, {time}).",
+  "plantNoLoad": "RTE éCO2mix gives no load factor for this sector, {region}: idle.",
+  "plantNoData": "No RTE éCO2mix reading to show: the plant is idle."
 }

@@ -172,6 +172,32 @@ export function drawBody(
   draw(pen, map, ax, ay, (ch) => INK[ch] ?? null, lit);
 }
 
+/**
+ * The box a plant's still body covers, its bottom row's middle at (ax, ay), as
+ * `drawBody` draws it: left and top included, right and bottom excluded. The smoke
+ * and the steam above it are left out.
+ */
+export function plantBox(
+  site: PlantSite,
+  ax: number,
+  ay: number,
+  size: SpriteSize,
+): { left: number; top: number; right: number; bottom: number } {
+  const boxOf = (map: PixelMap, x: number, height: number) => {
+    const width = map[0]?.length ?? 0;
+    const left = x - Math.floor(width / 2);
+    return { left, top: ay - height + 1, right: left + width, bottom: ay + 1 };
+  };
+  if (size === "marker") return boxOf(MARKER, ax, MARKER.length);
+  const map = SPRITES[spriteOf(site)] ?? [];
+  if (site.source !== "wind") return boxOf(map, ax, map.length);
+  const n = turbineCount(site);
+  const height = Math.max(map.length, MAST_PX + 2);
+  const first = boxOf(map, Math.round(ax - ((n - 1) / 2) * TURBINE_GAP), height);
+  const last = boxOf(map, Math.round(ax + ((n - 1) / 2) * TURBINE_GAP), height);
+  return { left: first.left, top: first.top, right: last.right, bottom: first.bottom };
+}
+
 /** Fractional part, always in [0, 1). */
 function frac(v: number): number {
   return v - Math.floor(v);
