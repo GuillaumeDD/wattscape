@@ -281,6 +281,14 @@ specific. Focus on it:
 - Log every external source consulted (dataset page, API doc, spec, photo of a
   landmark, person) in `docs/SOURCES.md` the day it is used, with what it gave; cite
   its id (`S-003`) where a fact is recorded.
+- Wikimedia's APIs (Wikipedia, Wikidata) answer HTTP 429 after a few quick calls,
+  and then refuse every request for a while: batch (up to 20 titles per
+  `prop=extracts` call), space the calls, and fetch everything a step needs in one
+  go (D-054).
+- The national registry (DS-07) files a unit under its `codeinseecommune`, which can
+  be a neighbour of where it stands (`codeinseecommuneimplantation`): the Tricastin's
+  units sit under Pierrelatte. Match a site by both codes, never by the commune's
+  name alone (D-054).
 - A claim on screen about a place or a technology (a caption, a fact) has a source
   in `docs/SOURCES.md`; when none was found, it is marked **provisional** and listed
   in the PR for Guillaume to check.
