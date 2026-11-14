@@ -118,8 +118,65 @@ test("a wheel turn during a flight zooms from where the camera is, not from wher
   expect(duringFlight).not.toBe(wheelOnly);
 });
 
+/** The caption the page shows: the landmark's id and its left edge, or "". */
+async function caption(page: Page): Promise<string> {
+  return (await page.locator("#caption").textContent()) ?? "";
+}
+
+/** Moves the mouse over a patch of the page until a caption shows; where, or null. */
+async function findCaption(
+  page: Page,
+  left: number,
+  top: number,
+  size: number,
+): Promise<[number, number] | null> {
+  for (let y = top; y < top + size; y += 3)
+    for (let x = left; x < left + size; x += 3) {
+      await page.mouse.move(x, y);
+      if ((await caption(page)) !== "") return [x, y];
+    }
+  return null;
+}
+
+test("shows a landmark's caption under the mouse, and hides it when it leaves", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html?area=28");
+  await page.waitForTimeout(2500);
+  await settled(page);
+  // Étretat stands on the coast, in the top half of Normandie's frame.
+  const at = await findCaption(page, 420, 120, 140);
+  expect(at).not.toBeNull();
+  const shown = await caption(page);
+  expect(shown).toMatch(/^P-0\d\d \d+$/);
+  // The mouse rests: the caption stays; off the canvas, it goes.
+  await page.waitForTimeout(500);
+  expect(await caption(page)).toBe(shown);
+  await page.mouse.move(0, 0);
+  await page.mouse.move(-5, -5);
+  await page.dispatchEvent("#scene", "pointerleave", { pointerType: "mouse" });
+  expect(await caption(page)).toBe("");
+});
+
 test.describe("on a touch screen", () => {
   test.use({ hasTouch: true });
+
+  test("a tap shows a landmark's caption, a tap elsewhere hides it", async ({ page }) => {
+    await page.setViewportSize({ width: 960, height: 540 });
+    await page.goto("/scene.html?area=28");
+    await page.waitForTimeout(2500);
+    await settled(page);
+    const at = await findCaption(page, 420, 120, 140);
+    if (at === null) throw new Error("no landmark found");
+    await page.dispatchEvent("#scene", "pointerleave", { pointerType: "mouse" });
+    expect(await caption(page)).toBe("");
+    await page.touchscreen.tap(at[0], at[1]);
+    expect(await caption(page)).not.toBe("");
+    await page.waitForTimeout(400);
+    await page.touchscreen.tap(60, 500);
+    expect(await caption(page)).toBe("");
+  });
 
   test("a double-tap zooms in once, and a mouse double-click still works after a tap", async ({
     page,

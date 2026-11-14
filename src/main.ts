@@ -6,7 +6,8 @@ import { mountAreaPicker, renderAreaOptions, type AreaState } from "./ui/area-pi
 import { loadSample } from "./data/samples";
 import { feedState, type FeedState, startPlantFeed } from "./ui/plant-feed";
 import { startReplayFeed } from "./ui/replay-feed";
-import { mountSceneView, type SceneView } from "./ui/scene-view";
+import { mountSceneView, type SceneView, type ShownCaption } from "./ui/scene-view";
+import { captionPosition, captionText } from "./ui/captions";
 import {
   atFromQuery,
   browserStorage,
@@ -61,6 +62,8 @@ function render(locale: Locale): void {
 }
 
 let plantsState: FeedState = { kind: "loading" };
+/** The caption shown now, to write again when the language changes. */
+let caption: ShownCaption | null = null;
 
 /**
  * The panel folds to its title and the figures' note, so a phone sees the map: a
@@ -136,10 +139,36 @@ const clock =
     : at === undefined
       ? systemClock
       : fixedClock(at);
+/** A landmark's caption, by its sprite, in the viewer's language; text only, never HTML. */
+function renderCaption(): void {
+  const box = document.getElementById("caption");
+  if (box === null) return;
+  const text = caption === null ? null : captionText(caption.mark, locale);
+  if (caption === null || text === null) {
+    box.hidden = true;
+    return;
+  }
+  setText("caption-name", text.name);
+  setText("caption-line", text.line);
+  box.hidden = false;
+  const { left, top } = captionPosition(
+    caption.box,
+    box.offsetWidth,
+    box.offsetHeight,
+    window.innerWidth,
+    window.innerHeight,
+  );
+  box.style.left = `${String(left)}px`;
+  box.style.top = `${String(top)}px`;
+}
+
 const canvas = document.getElementById("scene");
 const scene: SceneView | null =
   canvas instanceof HTMLCanvasElement
-    ? mountSceneView(canvas, clock, areaState.area, timelapse !== undefined)
+    ? mountSceneView(canvas, clock, areaState.area, timelapse !== undefined, (shown) => {
+        caption = shown;
+        renderCaption();
+      })
     : null;
 
 // The plants' figures: live, or a recorded sample (`?sample=`), labelled as such.
@@ -178,6 +207,7 @@ document.getElementById("panel-toggle")?.addEventListener("click", () => {
   panelFolded = !panelFolded;
   savePanelFolded(storage, panelFolded);
   renderPanel();
+  renderCaption();
 });
 
 document.getElementById("language")?.addEventListener("click", () => {

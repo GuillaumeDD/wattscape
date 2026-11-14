@@ -250,6 +250,28 @@ body.scene button {
   margin-top: 0;
 }
 
+/* A landmark's caption (B-020), placed by src/ui/captions.ts next to its sprite. */
+#caption {
+  position: fixed;
+  z-index: 2;
+  box-sizing: border-box;
+  max-width: min(18rem, calc(100vw - 1rem));
+  padding: 0.4rem 0.6rem;
+  background: rgb(16 19 28 / 85%);
+  font-size: 0.8rem;
+  /* The pointer goes through it to the map: it never steals a drag or a hover. */
+  pointer-events: none;
+}
+
+#caption[hidden] {
+  display: none;
+}
+
+#caption-name {
+  display: block;
+  color: var(--accent);
+}
+
 body.scene #credits {
   z-index: 1;
   background: rgb(16 19 28 / 75%);

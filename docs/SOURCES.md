@@ -275,6 +275,42 @@ salant) 47.30122, −2.46260; « phare de la vieille » (Phare) 48.04067, −4.7
 « puy de dôme » (Volcan) 45.77294, 2.96515; « calanque de sormiou » (Baie)
 43.20956, 5.42189; « pic du midi de bigorre » (Sommet) 42.93707, 0.14120, not used.
 
+Consulted on 2026-11-14, **S-024**: [French Wikipedia][s022] again, the introductions
+of its articles (API, `prop=extracts&exintro`, three requests), for the landmarks'
+captions (`src/map/landmark-captions.ts`, B-016, B-020). Gave, by article: « Site
+d'Étretat »: chalk cliffs of the Côte d'Albâtre, three arches called « portes » and
+the needle. « Grand port maritime du Havre »: founded in 1517 by order of Francis I.
+« Le Mont-Saint-Michel »: a rocky islet, the abbey, the statue of Saint Michael
+157.10 m above the shore. « Tour Eiffel »: puddled iron, 330 m with its antennas,
+built in two years by Gustave Eiffel and his team for the 1889 World's Fair.
+« Beffroi de l'hôtel de ville de Lille »: opened in 1932, the tallest civic belfry
+in Europe, by Émile Dubuisson. « Cathédrale Notre-Dame d'Amiens »: begun in the 13th
+century, the largest cathedral of France by its inner volume. « Cathédrale
+Notre-Dame de Strasbourg »: founded in 1015, built from 1220. « Château du
+Haut-Koenigsbourg »: a castle of the 12th century. « Château de Chambord »: the
+largest of the Loire châteaux, built 1519–1547, a park walled for 32 km. « Cathédrale
+Notre-Dame de Chartres »: early 13th century, the north spire of the 16th. « Hospices
+de Beaune »: founded in the 15th century by Nicolas Rolin and Guigone de Salins,
+glazed-tile roofs. « Citadelle de Besançon »: by Vauban, 130 m above the Doubs, UNESCO
+World Heritage since 7 July 2008. « Château des ducs de Bretagne »: mostly of the 15th
+century, home of Nantes's history museum. « Marais salants de Guérande »: on Guérande,
+Batz-sur-Mer, Le Croisic and La Turballe. « Phare de la Vieille »: built 1882–1887 in
+the Raz de Sein. « Alignements de Carnac »: nearly 3 000 standing stones raised about
+4 500 BC, over more than four kilometres. « Dune du Pilat »: the highest dune in
+Europe, 103.6 m in 2023. « Fort Boyard » (a disambiguation page): a fortification
+between the islands of Aix and Oléron. « Place de la Bourse (Bordeaux) »: by Jacques
+and Ange-Jacques Gabriel, 1730–1755. « Pont du Gard »: a three-tier bridge of a Roman
+aqueduct from Uzès to Nîmes, probably of the first half of the 1st century. « Cité de
+Carcassonne »: two rings of walls of nearly 3 km, 52 towers. « Puy de Dôme »: a lava
+dome about 11 000 years old, one of the youngest of the Chaîne des Puys. « Basilique
+Notre-Dame de Fourvière »: on the hill over Lyon since the end of the 19th century.
+« Basilique Notre-Dame-de-la-Garde »: « la Bonne Mère », 19th century, on a limestone
+peak of 149 m that overlooks the city. « Calanque de Sormiou »: in the Calanques
+massif, in the national park. « Cathédrale Notre-Dame de Rouen »: Gothic. Not found:
+« Port de Fécamp » and « Base 11/19 »; then the API answered HTTP 429 to every
+request, on Wikipedia and Wikidata alike, so the slag heaps' caption is provisional.
+Reliability medium (a community encyclopedia).
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift

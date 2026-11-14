@@ -756,6 +756,20 @@ like the Mont Blanc, is drawn by the relief. The Champagne vineyards (P-017) and
 lavender fields (P-038) wait for the seasons (B-022): their colours change with the
 months, and the palette has no lavender yet.
 
+**Captions** (B-016, B-020). Every landmark drawn has a caption in
+`src/map/landmark-captions.ts`: its name and one line on what it is, in French and
+English, each citing the `S-` entries its facts come from (mostly the French
+Wikipedia, S-024); a line with no source found is marked `provisional` and listed in
+its PR. A frame tells which landmarks it drew and the box of each sprite
+(`Drawn.marks`, in buffer pixels); `src/ui/captions.ts` finds the one under the
+pointer (the front-most, within 1 pixel for a mouse, 4 for a finger) and places the
+caption above it, or below near the top, inside the window. The mouse shows a
+caption while it rests on the sprite; a tap shows it for 8 s, and a tap elsewhere
+hides it. The caption follows its sprite when the camera moves, and goes when the
+sprite leaves the frame. It is written with `textContent` and lets the pointer
+through, so it never takes a drag. Keyboard users have no way to it yet. Measured in
+Chromium only.
+
 ## Rendering and loop
 
 - The renderer draws into a `Surface` (`src/render/surface.ts`: an RGBA
@@ -850,6 +864,9 @@ only a coarser layer between 0.5 and 1.4 would cut it, which changes the picture
   a test and by the type checker (`satisfies`); French is the default and the
   fallback; the choice is remembered in `localStorage`; numbers and times formatted with `Intl` in the active language.
 - Region and landmark names are proper nouns kept in French in both languages.
+- The landmarks' captions are content, not interface: they live with their sources in
+  `src/map/landmark-captions.ts`, French and English side by side, checked by
+  `tests/captions.test.ts` (every landmark has both, plain text, two lines at most).
 
 ## Security
 
