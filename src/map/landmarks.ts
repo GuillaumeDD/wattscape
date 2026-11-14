@@ -30,7 +30,11 @@ export type LandmarkSprite =
   | "besanconCitadel"
   | "fortBoyard"
   | "placeDeLaBourse"
-  | "carcassonne";
+  | "carcassonne"
+  | "saltMarshes"
+  | "seaLighthouse"
+  | "puyDeDome"
+  | "calanques";
 
 export interface Landmark {
   /** Its row in docs/POI.md. */
@@ -106,4 +110,14 @@ export const LANDMARKS: readonly Landmark[] = [
   at("P-028", "placeDeLaBourse", 44.84156, -0.57015),
   // « La Cité », Carcassonne (Quartier).
   at("P-030", "carcassonne", 43.20649, 2.36399),
+
+  // The third lot (D-049). « Marais salants de Guérande » (Marais salant).
+  at("P-023", "saltMarshes", 47.30122, -2.4626),
+  // A generic lighthouse at sea (P-024), at the place of « Phare de la Vieille »
+  // (Construction ponctuelle, Phare) off the Pointe du Raz; its look is not copied.
+  at("P-024", "seaLighthouse", 48.04067, -4.75644),
+  // « Puy de Dôme » (Détail orographique, Volcan).
+  at("P-034", "puyDeDome", 45.77294, 2.96515),
+  // « Calanque de Sormiou » (Détail hydrographique, Baie).
+  at("P-037", "calanques", 43.20956, 5.42189),
 ];

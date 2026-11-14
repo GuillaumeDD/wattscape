@@ -218,6 +218,16 @@ dayAndNight(
     fitBox(areaBox(coarse, region), WIDTH, HEIGHT),
   ]),
 );
+// The third lot (D-049): the salt marshes, the lighthouse, the Puy de Dôme and the
+// Calanques, in two of their regions.
+dayAndNight(
+  "step-4-landmarks-3",
+  (["52", "84"] as const).map((region, k) => [
+    ["pays-de-la-loire", "auvergne-rhone-alpes"][k] ?? region,
+    region,
+    fitBox(areaBox(coarse, region), WIDTH, HEIGHT),
+  ]),
+);
 {
   const TILE_W = 96;
   const TILE_H = 64;
