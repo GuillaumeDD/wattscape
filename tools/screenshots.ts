@@ -8,8 +8,8 @@
  * frames it in a 480 × 270 buffer, by day (sun at 35°), at the golden hour (2°) and
  * at night (−20°); a close view of the Mont Blanc massif; and four moments of the
  * flight from France to Normandie, the crossfade between the 4 km and 1 km layers
- * among them, in one picture. Then the plants (B-012), the towns (B-014) and the
- * rivers (B-023), as each section says.
+ * among them, in one picture. Then the plants (B-012), the towns (B-014), the
+ * rivers (B-023) and the landmarks (B-016), as each section says.
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -197,3 +197,42 @@ dayAndNight(
     fitBox(areaBox(coarse, region), WIDTH, HEIGHT),
   ]),
 );
+
+// Step 4, B-016: a landmark in every region. Three regions as the app frames them,
+// then each landmark from close (3 pixels per km), side by side in the order of
+// src/map/landmarks.ts, by day and at night.
+dayAndNight(
+  "step-4-landmarks",
+  (["11", "53", "93"] as const).map((region, k) => [
+    ["ile-de-france", "bretagne", "provence-alpes-cote-d-azur"][k] ?? region,
+    region,
+    fitBox(areaBox(coarse, region), WIDTH, HEIGHT),
+  ]),
+);
+{
+  const TILE_W = 96;
+  const TILE_H = 64;
+  const PER_ROW = 5;
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const sheet = createSurface(TILE_W * PER_ROW, TILE_H * Math.ceil(LANDMARKS.length / PER_ROW));
+    LANDMARKS.forEach((landmark, k) => {
+      const tile = createSurface(TILE_W, TILE_H);
+      const camera = { x: landmark.x, y: landmark.y - 3, scale: 3 };
+      const scene = { ...referenceScene(null, camera, elevation), width: TILE_W, height: TILE_H };
+      drawPixelScene(scene, tile).animate(tile, 1.3);
+      const left = (k % PER_ROW) * TILE_W;
+      const top = Math.floor(k / PER_ROW) * TILE_H;
+      for (let y = 0; y < TILE_H; y++)
+        sheet.data.set(
+          tile.data.subarray(y * TILE_W * 4, (y + 1) * TILE_W * 4),
+          ((top + y) * sheet.width + left) * 4,
+        );
+    });
+    const file = `${OUT}/step-4-landmarks-close-${time}.png`;
+    writePng(file, sheet, 4);
+    console.log(`${file}: ${hashSurface(sheet)}`);
+  }
+}
