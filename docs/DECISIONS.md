@@ -819,3 +819,19 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   lighting is often a protected work of its own (P-009), so none is imitated.
 - **Revisit if:** Guillaume finds a landmark unreadable or wants the monuments lit
   at night (Q-30); or a region's view gets crowded once the other lots land.
+
+## D-047 — Landmarks: Guillaume's answer to Q-30
+
+- **Context:** D-045 drew a landmark in every region (PR #30) and asked whether the
+  twelve read well, with the monuments dark at night (PRD Q-30). PR #30 also named
+  three of its rows still "proposed, to confirm": the slag heaps of Loos-en-Gohelle
+  (P-012), Carnac (P-025) and the Dune du Pilat (P-026).
+- **Options:** keep the drawings and dark monuments, or change them; light the
+  monuments at night or not.
+- **Decision (Guillaume, 2026-11-14, « Q-30 : OK », after merging PR #30):** the
+  twelve stay as drawn; at night the monuments stay dark, only the Eiffel Tower has
+  plain lights. Claude reads the answer as covering the PR's list, so P-012, P-025
+  and P-026 now read "Guillaume, 2026-11-14".
+- **Why:** D-045.
+- **Revisit if:** a landmark is reported unreadable; or a monument's night lighting is
+  found to be in the public domain.
