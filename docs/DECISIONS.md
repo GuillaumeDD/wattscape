@@ -898,3 +898,15 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
     rows now read "Guillaume, 2026-11-14".
 - **Why:** D-048, D-049.
 - **Revisit if:** the conditions of D-048 or D-049 arise.
+
+## D-051 — Step 4 review: three lessons written down
+
+- **Context:** at the end of step 4 (B-016, B-017, B-023), Claude offered the
+  lessons of the step; Guillaume answered « Oui » (2026-11-14).
+- **Options:** keep them in memory only, or write them where the next session reads
+  them.
+- **Decision (Guillaume, 2026-11-14):** written down: in `AGENTS.md`, commit only the
+  screenshots a change is about, and count our own work before writing a figure
+  about it; in `docs/POI.md` § Rules, the 2 km spacing of D-048.
+- **Why:** each caused a slip or extra work in this step.
+- **Revisit if:** a rule turns out to cost more than the slip it prevents.
