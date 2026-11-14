@@ -16,14 +16,14 @@ import { RISE_METRES_PER_KM } from "../scene/camera.ts";
 import { type RegionCode } from "../data/eco2mix.ts";
 import { type Scene, type ScenePlant, type Town, townCellCount } from "../scene/scene.ts";
 import { skyColour, tinted } from "../sky/light.ts";
-import { drawLandmark } from "./art/landmarks.ts";
+import { drawLandmark, landmarkBox } from "./art/landmarks.ts";
 import { drawBody, drawMotion, hasMotion, type Pen, type SpriteSize } from "./art/plants.ts";
 import { type Landmark } from "../map/landmarks.ts";
 import { isDiffuse } from "../map/sources.ts";
 import { BAYER_4, DITHER_LEVELS } from "./dither.ts";
 import { COLOUR_NAMES, type ColourName, darken, PALETTE, type Rgb } from "./palette.ts";
 import { createSurface, type Surface } from "./surface.ts";
-import type { Drawn, Theme } from "./theme.ts";
+import type { Drawn, Mark, Theme } from "./theme.ts";
 
 /** Whether this engine stores a Uint32 with its low byte first (every common one does). */
 const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
@@ -620,11 +620,10 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
     throw new Error("the surface does not have the scene's size");
   const frame = frameOf(scene, out);
   const detail = scene.fine === null ? 0 : Math.min(DITHER_LEVELS, Math.max(0, scene.detail));
-  let placed: PlacedPlant[];
+  let shown: Placed;
   const size: SpriteSize = scene.camera.scale >= SPRITES_FROM_SCALE ? "full" : "marker";
-  if (!(detail > 0) || scene.fine === null)
-    placed = drawLayer(frame, scene, scene.coarse, true).plants;
-  else if (detail >= DITHER_LEVELS) placed = drawLayer(frame, scene, scene.fine, true).plants;
+  if (!(detail > 0) || scene.fine === null) shown = drawLayer(frame, scene, scene.coarse, true);
+  else if (detail >= DITHER_LEVELS) shown = drawLayer(frame, scene, scene.fine, true);
   else {
     // The plants are not dissolved: they stand once, on the layer that shows the
     // most, drawn over the crossfade (which lasts half a second).
@@ -641,12 +640,17 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
         if ((bayer[(x + ox) & 3] ?? 0) < detail)
           words[y * width + x] = detailed.words[y * width + x] ?? 0;
     }
-    const shown = detail * 2 >= DITHER_LEVELS ? finePlaced : coarsePlaced;
-    placed = shown.plants;
+    shown = detail * 2 >= DITHER_LEVELS ? finePlaced : coarsePlaced;
     const pen = penOf(frame, scene.light.darkness, scene.light.emissive);
     for (const m of shown.landmarks) drawLandmark(pen, m.landmark, m.x, m.y);
-    for (const p of placed) drawBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
+    for (const p of shown.plants) drawBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
   }
+  const placed = shown.plants;
+  const marks: Mark[] = shown.landmarks.map((m) => ({
+    kind: "landmark",
+    id: m.landmark.id,
+    ...landmarkBox(m.landmark, m.x, m.y),
+  }));
   const moving = placed.filter(
     (p) => p.plant.activity !== null && p.plant.activity > 0 && hasMotion(p.plant.site, size),
   );
@@ -654,6 +658,7 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
   const { darkness, emissive } = scene.light;
   return {
     moving: moving.length > 0,
+    marks,
     animate(target: Surface, seconds: number): void {
       if (target.width !== out.width || target.height !== out.height) return;
       const onTarget: Frame = { ...frameOf(scene, target), ox, oy };

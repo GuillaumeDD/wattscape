@@ -4,7 +4,8 @@
  * (src/ui/plant-feed.ts) runs too, at the time of the recorded step the test serves,
  * and `#plants-note` tells its state. With `?plants=replay`, the time-lapse's feed
  * (src/ui/replay-feed.ts) replays the three hours the test serves in 6 seconds, and
- * the note tells the state and the step's time.
+ * the note tells the state and the step's time. `#caption` names the landmark whose
+ * caption shows (B-020), and its box.
  */
 import { fixedClock, replayClock } from "../src/clock/clock";
 import { startPlantFeed } from "../src/ui/plant-feed";
@@ -37,7 +38,14 @@ if (canvas instanceof HTMLCanvasElement) {
       },
     );
   }
-  const view = replay ? null : mountSceneView(canvas, clock, area);
+  const view = replay
+    ? null
+    : mountSceneView(canvas, clock, area, false, (shown) => {
+        const caption = document.getElementById("caption");
+        if (caption)
+          caption.textContent =
+            shown === null ? "" : `${shown.mark.id} ${String(Math.round(shown.box.left))}`;
+      });
   if (live && view !== null)
     startPlantFeed(
       clock,

@@ -247,12 +247,25 @@ export const LANDMARK_SPRITES: Readonly<Record<LandmarkSprite, PixelMap>> = {
   ],
 };
 
-/** Draws a landmark, the middle of its bottom row at (ax, ay). */
-export function drawLandmark(pen: Pen, landmark: Landmark, ax: number, ay: number): void {
+/**
+ * The box a landmark's sprite covers when the middle of its bottom row is at (ax, ay):
+ * left and top included, right and bottom excluded.
+ */
+export function landmarkBox(
+  landmark: Landmark,
+  ax: number,
+  ay: number,
+): { left: number; top: number; right: number; bottom: number } {
   const map = LANDMARK_SPRITES[landmark.sprite];
   const width = Math.max(...map.map((row) => row.length));
   const left = ax - Math.floor(width / 2);
-  const top = ay - map.length + 1;
+  return { left, top: ay - map.length + 1, right: left + width, bottom: ay + 1 };
+}
+
+/** Draws a landmark, the middle of its bottom row at (ax, ay). */
+export function drawLandmark(pen: Pen, landmark: Landmark, ax: number, ay: number): void {
+  const map = LANDMARK_SPRITES[landmark.sprite];
+  const { left, top } = landmarkBox(landmark, ax, ay);
   for (let r = 0; r < map.length; r++) {
     const row = map[r] ?? "";
     for (let c = 0; c < row.length; c++) {
