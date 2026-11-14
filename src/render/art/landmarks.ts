@@ -134,6 +134,85 @@ export const LANDMARK_SPRITES: Readonly<Record<LandmarkSprite, PixelMap>> = {
   ],
   // The white basilica and its four towers on the hill over Lyon.
   fourviere: ["w.....w", "w.....w", "ww...ww", "wwwwwww", "wwwwwww", "wgwgwgw", "ggggggg"],
+  // The second lot (D-048). Rouen cathedral: pale stone, the cast-iron spire (dark),
+  // and west of it the Gros-Horloge (P-042), an arch over the street, its gold dial.
+  rouenCathedral: [
+    "........k...",
+    "........k...",
+    "........k...",
+    ".......kkk..",
+    ".......kkk..",
+    "......wwkww.",
+    "...w.wwwwwww",
+    "ggggwwbbbbww",
+    "gn.gwwwwwwww",
+    "g..gwwwwwwww",
+  ],
+  // Lille's belfry: a tall pale tower, its dark lantern and spire.
+  lilleBelfry: [
+    "..k..",
+    "..k..",
+    ".kkk.",
+    ".kpk.",
+    ".ppp.",
+    ".ppp.",
+    ".ppp.",
+    ".ppp.",
+    ".ppp.",
+    "ppppp",
+  ],
+  // Amiens cathedral: two short towers on the west front, the long nave, the thin spire.
+  amiensCathedral: [
+    "........k...",
+    "........k...",
+    "w.w.....k...",
+    "www....kkk..",
+    "wwwbbbbbbbbb",
+    "wwwwwwwwwwww",
+    "wwwwwwwwwwww",
+  ],
+  // Haut-Kœnigsbourg: red sandstone walls and roofs on its wooded hill, the square keep.
+  hautKoenigsbourg: [
+    "....rr.....",
+    "....pp.....",
+    "..rrpp.rr..",
+    "..pppppppr.",
+    ".ppppppppp.",
+    "eeeeeeeeeee",
+  ],
+  // Chartres: two different spires (the plain one south, the lacy one north), the
+  // copper roof of the nave, dark green.
+  chartresCathedral: [
+    "..w.........",
+    ".kw.........",
+    ".kw.........",
+    "kkww........",
+    "kkwweeeeeeee",
+    "wwwwwwwwwwww",
+    "wwwwwwwwwwww",
+  ],
+  // Besançon's citadel: Vauban's walls along the ridge, two bastions.
+  besanconCitadel: [".g.......g.", "ggg.www.ggg", "ggggggggggg", "eeeeeeeeeee"],
+  // Fort Boyard: an oval of stone in the sea, the foam at its foot.
+  fortBoyard: [".ggggggg.", "gwgwgwgwg", "ggggggggg", "fffffffff"],
+  // The Place de la Bourse: the long pale front and its dark roofs, along the river.
+  placeDeLaBourse: [
+    "..bbb...bbb..",
+    "bbwwwbbbwwwbb",
+    "wwwwwwwwwwwww",
+    "wgwgwgwgwgwgw",
+    "hhhhhhhhhhhhh",
+  ],
+  // The Cité de Carcassonne: two rings of walls and their towers under slate cones.
+  carcassonne: [
+    ".b...b...b...b.",
+    "bbb.bbb.bbb.bbb",
+    "ggg.ggg.ggg.ggg",
+    "ggggggggggggggg",
+    "b.b.b.b.b.b.b.b",
+    "ggggggggggggggg",
+    "ggggggggggggggg",
+  ],
   // The basilica on its rock, the gilded statue on the bell tower.
   notreDameDeLaGarde: [
     "..n....",

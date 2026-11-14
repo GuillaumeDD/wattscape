@@ -209,6 +209,15 @@ dayAndNight(
     fitBox(areaBox(coarse, region), WIDTH, HEIGHT),
   ]),
 );
+// The second lot (D-048), in two regions that gained landmarks.
+dayAndNight(
+  "step-4-landmarks-2",
+  (["32", "76"] as const).map((region, k) => [
+    ["hauts-de-france", "occitanie"][k] ?? region,
+    region,
+    fitBox(areaBox(coarse, region), WIDTH, HEIGHT),
+  ]),
+);
 {
   const TILE_W = 96;
   const TILE_H = 64;

@@ -262,7 +262,15 @@ des ducs de bretagne » 47.21613, −1.54930; « alignements du ménec » (Méga
 4.82252; « notre-dame de la garde » 43.28393, 5.37126; also « mont blanc »
 (Sommet) 45.83267, 6.86463, not used. A name alone is ambiguous (15 « mont
 blanc », three « pont du gard »): the bounding box picks the right one. Reliability
-high.
+high. Read again the same day for the second lot (D-048): « cathédrale notre-dame »
+of Rouen 49.44027, 1.09482; « gros horloge » (Monument) 49.44152, 1.09127; « beffroi
+de l'hôtel de ville », Lille 50.63063, 3.06978; « cathédrale notre-dame » of Amiens
+49.89457, 2.30205; « château du haut koenigsbourg » 48.24954, 7.34465; « cathédrale
+notre-dame de chartres » 48.44780, 1.48784; « muséum citadelle de besançon » 47.22860,
+6.03447; « fort boyard » (Ouvrage militaire) 45.99966, −1.21396; « place de la
+bourse », Bordeaux 44.84156, −0.57015; « la cité », Carcassonne 43.20649, 2.36399;
+« palais bénédictine » (Musée) 49.75885, 0.36771; « arc de triomphe » 48.87379,
+2.29506.
 
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte

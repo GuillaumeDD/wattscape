@@ -835,3 +835,27 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Why:** D-045.
 - **Revisit if:** a landmark is reported unreadable; or a monument's night lighting is
   found to be in the public domain.
+
+## D-048 — Landmarks: the second lot, and landmarks too close to another (B-016)
+
+- **Context:** after the first lot (D-045, D-047), 19 GO rows of `docs/POI.md` are
+  not drawn. A sprite keeps its size in pixels at every zoom (8 pixels per km at
+  most), so two landmarks a few hundred metres apart draw on top of each other.
+- **Options:** for a landmark near another: draw both anyway, draw one sprite that
+  shows both, or wait.
+- **Decision (Claude, 2026-11-14; to confirm, PRD Q-31):**
+  - nine more monuments, at their BD TOPO points (S-023): Rouen cathedral (P-041),
+    Lille's belfry (P-013), Amiens (P-014), Haut-Kœnigsbourg (P-016), Chartres
+    (P-019), Besançon's citadel (P-021), Fort Boyard (P-027), the Place de la Bourse
+    (P-028), Carcassonne (P-030);
+  - the Gros-Horloge (P-042), 0.28 km from the cathedral, is drawn in Rouen's sprite,
+    west of the nave, as it stands: Guillaume asked for both;
+  - the Palais Bénédictine (P-004, 0.3 km from Fécamp's lighthouse, P-005) and the
+    Arc de Triomphe (P-011, 1.7 km from the Eiffel Tower) wait;
+  - the generic and natural rows (vineyards, salt marshes, lighthouse, lavender,
+    Calanques, Pic du Midi, Puy de Dôme) come in a third lot: each needs a place
+    chosen, or the relief may draw it already.
+- **Why:** two sprites on top of each other read as neither; one sprite for two
+  landmarks that stand together reads as the place.
+- **Revisit if:** sprites grow with the zoom (then P-004 and P-011 can be drawn);
+  or Guillaume prefers a landmark to replace one already drawn.
