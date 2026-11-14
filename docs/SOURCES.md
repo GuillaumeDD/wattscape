@@ -212,6 +212,19 @@ limits the rate (HTTP 429): one request every 6 s passed. Reliability medium (a
 community database; a date of death there is rarely wrong, an attribution can be
 incomplete). Used as a reference only, nothing baked: no row in § 1.
 
+Consulted on 2026-11-14, **S-020**: [Wikidata][s019] again, the same way, for the
+landmarks Guillaume proposed (`docs/POI.md` P-039 to P-042, D-043). Gave, by item:
+Pont de Tancarville (Q2351952): 1959; its engineers Nicolas Esquillan (Q3340298),
+d. 1989-01-21, and Jacques Ramsay-Robinson (Q110774883), d. 1988-07-12. Pont de
+Brotonne (Q734387): 1977; its engineer Jean Muller (Q1685711), d. 2005-03-17. Pont
+de Normandie (Q504710): Michel Virlogeux, born 1946, and Bernard Raspaud, born
+1942, no date of death. Pont du Gard (Q189764): about 50 AD. Rouen cathedral
+(Q476516): begun in 1030; Mérimée ids PA00100800 and IA00021830; no architect
+given. Gros-Horloge (Q3116957): « 14th century astronomical clock in Rouen »;
+Mérimée id PA00100834. Jean-Antoine Alavoine (Q2402612), searched by name:
+d. 1834-11-15; nothing there links him to the cathedral's spire, which is from
+general knowledge. Reliability as S-019.
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift
