@@ -881,3 +881,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   seasons would show a false picture.
 - **Revisit if:** B-022 lands (then P-017 and P-038 are drawn); or Guillaume prefers
   another place for the lighthouse.
+
+## D-050 — Landmarks: Guillaume's answers to Q-31 and Q-32
+
+- **Context:** the second and third lots of landmarks (D-048, PR #32; D-049, PR #33)
+  left PRD Q-31 and Q-32 open. Six rows of the third lot (P-017, P-023, P-031,
+  P-034, P-037, P-038) still read "proposed, to confirm".
+- **Options:** accept the recommendations, or change them.
+- **Decision (Guillaume, 2026-11-14, « OK pour les recommandations »):**
+  - Q-31: the Gros-Horloge stays drawn in Rouen cathedral's sprite; the Palais
+    Bénédictine (P-004) and the Arc de Triomphe (P-011) wait until two landmarks this
+    close can be told apart;
+  - Q-32: the generic lighthouse stands off the Pointe du Raz; the Champagne
+    vineyards (P-017) and the lavender fields (P-038) wait for the seasons (B-022);
+  - Claude reads the answer as covering the third lot's rows, as for D-047: the six
+    rows now read "Guillaume, 2026-11-14".
+- **Why:** D-048, D-049.
+- **Revisit if:** the conditions of D-048 or D-049 arise.
