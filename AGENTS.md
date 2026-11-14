@@ -155,6 +155,10 @@ Format:
   `node --experimental-strip-types tools/record-frames.ts` (it prints which frames
   changed), commit `tests/fixtures/frames/hashes.json` with the change, and run
   `npm run e2e` to check that Chromium draws the same pixels.
+- `tools/screenshots.ts` redraws every screenshot, and the older ones change with
+  the data: commit only the files the change is about (restore the others with
+  `git checkout -- docs/screenshots/<file>`), so that a past PR's pictures still
+  show what it changed.
 
 ---
 
@@ -285,7 +289,8 @@ specific. Focus on it:
 - A figure written in a question, a PR or a message follows the same rule as a
   figure on screen: measured by a script or a query before it is written, never from
   memory (in B-015, Q-21 first said "mostly wind and solar"; the count gave biomass
-  and wind).
+  and wind). That holds for a count of our own work too (in B-016, "25 landmarks"
+  was written for the 28 in `src/map/landmarks.ts`).
 - Before citing a register id (`DS-`, `P-`, `Q-`, `D-`) in a question or on a
   decision card, re-read its row in the register.
 - At the end of a step, put every provisional choice still open to Guillaume in one

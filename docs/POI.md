@@ -21,6 +21,10 @@ exists so that every inclusion or exclusion can be audited and revisited (D-004)
 - A decision changes only through a new dated comment in its row (never a silent
   edit), and a change of rule goes to `docs/DECISIONS.md`.
 - Coordinates are recorded when the landmark is placed (B-016), with their source.
+- Two drawn landmarks stand 2 km apart or more: a sprite keeps its size in pixels at
+  every zoom, so two closer ones draw on top of each other (D-048, checked by
+  `tests/landmarks.test.ts`). A landmark that stands next to another is drawn in the
+  same sprite, or waits.
 
 > 💡 **Freedom of panorama** is the right to depict a protected building seen from
 > a public place. French law grants it only narrowly (non-commercial use by
