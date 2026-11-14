@@ -11,7 +11,8 @@ import { coarseLayer, fineLayer, type TerrainLayer } from "../map/layers";
 import { CONSUMPTION_RANGES } from "../map/consumption";
 import { LANDMARKS } from "../map/landmarks";
 import { PLANT_SITES } from "../map/plants";
-import { DEFAULT_THEME, type Drawn } from "../render/theme";
+import { DEFAULT_THEME, type Drawn, type Mark } from "../render/theme";
+import { type Box, markAt } from "./captions";
 import { createSurface, type Surface } from "../render/surface";
 import {
   areaBox,
@@ -63,6 +64,12 @@ const INTRO_MS = 1500;
  * and a third of the frame cap, for the battery (ARCHITECTURE § Performance).
  */
 const MOTION_STEP_MS = 100;
+/** How far around a sprite the mouse still shows its caption, in buffer pixels. */
+const HOVER_SLACK = 1;
+/** The same for a finger, wider than a cursor. */
+const TAP_SLACK = 4;
+/** A tapped caption stays this long (PRD § 4.8: never over the scene for long). */
+const TAP_CAPTION_MS = 8000;
 
 export interface SceneView {
   /** Flies to an area: the whole of France, or a region. */
@@ -93,12 +100,20 @@ function roamBox(): KmBox {
   return { left: b.left - 60, top: b.top - 60, right: b.right + 60, bottom: b.bottom + 60 };
 }
 
+/** A mark whose caption shows, and its box on the page, in CSS pixels. */
+export interface ShownCaption {
+  readonly mark: Mark;
+  readonly box: Box;
+}
+
 export function mountSceneView(
   canvas: HTMLCanvasElement,
   clock: Clock,
   initialArea: Eco2mixArea,
   /** The clock runs fast (the time-lapse): the light changes every frame. */
   fastClock = false,
+  /** Called with the mark whose caption shows, wherever it moves, or null to hide it. */
+  onCaption: (shown: ShownCaption | null) => void = () => undefined,
 ): SceneView {
   const context = canvas.getContext("2d");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -129,6 +144,51 @@ export function mountSceneView(
   let frameRequest: number | null = null;
 
   const home = (): Camera => fitBox(areaBox(coarse, regionOf(area)), size.width, size.height);
+
+  // Captions (B-020): the mark under the mouse, or the one last tapped, for a while.
+  let captioned: string | null = null;
+  let lastShown: string | null = null;
+  let captionTimer: number | null = null;
+
+  /** Tells the page where the captioned mark is now, or that there is none. */
+  function showCaption(): void {
+    const mark = captioned === null ? null : (drawn?.marks.find((m) => m.id === captioned) ?? null);
+    if (mark === null) {
+      if (lastShown !== null) onCaption(null);
+      lastShown = null;
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const sx = rect.width / Math.max(1, size.width);
+    const sy = rect.height / Math.max(1, size.height);
+    lastShown = mark.id;
+    onCaption({
+      mark,
+      box: {
+        left: rect.left + mark.left * sx,
+        top: rect.top + mark.top * sy,
+        right: rect.left + mark.right * sx,
+        bottom: rect.top + mark.bottom * sy,
+      },
+    });
+  }
+
+  /** Captions the mark at a point of the page (or none), for `ms` or until changed. */
+  function captionAt(clientX: number, clientY: number, slack: number, ms: number | null): void {
+    const [x, y] = toBuffer(clientX, clientY);
+    const id = drawn === null ? null : (markAt(drawn.marks, x, y, slack)?.id ?? null);
+    if (captionTimer !== null) window.clearTimeout(captionTimer);
+    captionTimer = null;
+    if (id !== null && ms !== null)
+      captionTimer = window.setTimeout(() => {
+        captionTimer = null;
+        captioned = null;
+        showCaption();
+      }, ms);
+    if (id === captioned) return;
+    captioned = id;
+    showCaption();
+  }
 
   function resize(): void {
     size = bufferSize(window.innerWidth, window.innerHeight, devicePixelRatio);
@@ -272,6 +332,8 @@ export function mountSceneView(
       if (redraw) {
         lastKey = key;
         drawn = DEFAULT_THEME.draw(scene, still);
+        // The caption follows its mark, or goes when the mark leaves the frame.
+        showCaption();
       }
       lastStep = step;
       surface.data.set(still.data);
@@ -349,7 +411,11 @@ export function mountSceneView(
   });
   canvas.addEventListener("pointermove", (e) => {
     const p = pointers.get(e.pointerId);
-    if (p === undefined) return;
+    if (p === undefined) {
+      // A mouse moving with no button down: the caption of what it is on, while it is.
+      if (e.pointerType === "mouse") captionAt(e.clientX, e.clientY, HOVER_SLACK, null);
+      return;
+    }
     const [bx, by] = toBuffer(p.x, p.y);
     const [ax, ay] = toBuffer(e.clientX, e.clientY);
     p.x = e.clientX;
@@ -381,8 +447,15 @@ export function mountSceneView(
     else if (isDoubleTap(lastTap, press)) {
       lastTap = null;
       zoomInAt(e.clientX, e.clientY);
-    } else lastTap = press;
+    } else {
+      lastTap = press;
+      // A tap shows the caption of what it is on for a while; a tap elsewhere hides it.
+      captionAt(e.clientX, e.clientY, TAP_SLACK, TAP_CAPTION_MS);
+    }
   };
+  canvas.addEventListener("pointerleave", (e) => {
+    if (e.pointerType === "mouse") captionAt(Number.NaN, Number.NaN, 0, null);
+  });
   canvas.addEventListener("pointerup", release);
   canvas.addEventListener("pointercancel", release);
   canvas.addEventListener("dblclick", (e) => {
