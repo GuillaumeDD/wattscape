@@ -249,6 +249,21 @@ et 1897 », the archangel made in 1895 by Emmanuel Frémiet; Beaune's glazed til
 community encyclopedia, no primary source read): it agrees with what was assumed,
 and both authors died more than 70 years ago (S-019).
 
+Consulted on 2026-11-14, **S-023**: the BD TOPO again (S-018, DS-13), its WFS layer
+`BDTOPO_V3:toponymie` filtered by name (`graphie_du_toponyme`) and bounding box, for
+the positions of `src/map/landmarks.ts` (B-016, D-045). Gave, as named points (°N,
+°E): « abbaye du mont-saint-michel » 48.63612, −1.51132; « tour eiffel »
+(Monument) 48.85826, 2.29424; « terrils du 11/19 » (Terril) 50.44558, 2.78259;
+« cathédrale notre-dame » in Strasbourg 48.58189, 7.75111; « château de chambord »
+47.61608, 1.51718; « hôtel-dieu » in Beaune (Musée) 47.02210, 4.83660; « château
+des ducs de bretagne » 47.21613, −1.54930; « alignements du ménec » (Mégalithe)
+47.59340, −3.07964; « dune du pilat » (Dune) 44.58875, −1.21572; « pont du gard »
+(Vestige archéologique) 43.94739, 4.53511; « notre-dame de fourvière » 45.76223,
+4.82252; « notre-dame de la garde » 43.28393, 5.37126; also « mont blanc »
+(Sommet) 45.83267, 6.86463, not used. A name alone is ambiguous (15 « mont
+blanc », three « pont du gard »): the bounding box picks the right one. Reliability
+high.
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift

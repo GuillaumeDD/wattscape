@@ -794,3 +794,28 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** a plant visibly stands in the wrong place on screen (then a GO
   source of coordinates comes first, `docs/SOURCES.md` § 1); or a region's sites
   read as too many or too few.
+
+## D-045 — Landmarks: one in every region first, and how they are drawn (B-016)
+
+- **Context:** 35 landmarks are GO in `docs/POI.md`; only Normandie's three were
+  drawn (B-015). B-016 draws the others.
+- **Options:** draw them all in one change, or in lots; a landmark's own colours,
+  or colours that read on the map; a light on each monument at night, or none.
+- **Decision (Claude, 2026-11-14; to confirm, PRD Q-30):**
+  - a first lot of twelve gives every region one landmark or more, at the point
+    BD TOPO names (S-023); the other GO rows follow in later lots;
+  - a landmark in a town is drawn in a colour that reads on the roofs: the Eiffel
+    Tower is a dark lattice, Strasbourg's sandstone is the pale pink of the golden
+    sky, the basilicas are white;
+  - the Mont Blanc (P-033) gets no sprite: the 1 km relief already draws its snow,
+    and a sprite on top of it could not be told apart. Auvergne-Rhône-Alpes's
+    landmark is Fourvière (P-035);
+  - at night the monuments are dark silhouettes. Only the Eiffel Tower has plain
+    lights (P-008), no beam and no sparkle (P-009). No statue is drawn but the
+    archangel of Mont-Saint-Michel (Frémiet, d. 1910) and the Virgin of Notre-Dame
+    de la Garde (Lequesne, d. 1887), one gold pixel each.
+- **Why:** every region shows something of its own as soon as possible; a sprite
+  that cannot be seen is not worth a claim about a place; a monument's night
+  lighting is often a protected work of its own (P-009), so none is imitated.
+- **Revisit if:** Guillaume finds a landmark unreadable or wants the monuments lit
+  at night (Q-30); or a region's view gets crowded once the other lots land.

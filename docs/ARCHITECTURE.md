@@ -719,6 +719,17 @@ they stand on their cell's top face, drawn with the terrain at the end of their 
 so the relief in front hides them, at full sprite size only (0.7 pixel per km and
 up).
 
+Then one landmark or more in every region (B-016, D-045), each at the point BD TOPO
+names (layer `toponymie`, S-023): the Mont-Saint-Michel (P-006), the Eiffel Tower, a
+dark lattice with plain lights at night and no beam (P-008, P-009), the twin slag
+heaps of Loos-en-Gohelle (P-012), Strasbourg cathedral and its single spire (P-015),
+Chambord's roofs (P-018), the glazed roof of the Hospices de Beaune (P-020), the
+castle of Nantes (P-022), Carnac's rows of stones (P-025), the Dune du Pilat
+(P-026), the Pont du Gard (P-029), Fourvière (P-035) and Notre-Dame de la Garde
+(P-036). A landmark that stands in a town is drawn in a colour that reads on the
+roofs (dark, white or pale). The Mont Blanc (P-033) has no sprite: the relief
+already draws its snow.
+
 ## Rendering and loop
 
 - The renderer draws into a `Surface` (`src/render/surface.ts`: an RGBA
