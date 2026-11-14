@@ -943,3 +943,16 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   sourced.
 - **Revisit if:** the registry renames a plant, or a site gathers two plants of
   similar size (Fos-sur-Mer, Laruns: commune alone for now).
+
+## D-054 — Step 5 review: two lessons written down
+
+- **Context:** at the end of the captions (B-016, B-020), Claude offered to write down
+  two surprises of the step; Guillaume answered « oui » (2026-11-14).
+- **Options:** keep them in memory only, or write them where the next session reads
+  them.
+- **Decision (Guillaume, 2026-11-14):** written in `AGENTS.md` § 5: Wikimedia's APIs
+  rate-limit hard (S-024: every request refused after a few calls, which left P-012's
+  caption provisional); the registry files some units under a neighbouring commune
+  (S-025: the Tricastin under Pierrelatte).
+- **Why:** each cost a provisional caption or a manual check in this step.
+- **Revisit if:** a rule turns out to cost more than the slip it prevents.
