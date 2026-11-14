@@ -212,6 +212,43 @@ limits the rate (HTTP 429): one request every 6 s passed. Reliability medium (a
 community database; a date of death there is rarely wrong, an attribution can be
 incomplete). Used as a reference only, nothing baked: no row in § 1.
 
+Consulted on 2026-11-14, **S-020**: [Wikidata][s019] again, the same way, for the
+landmarks Guillaume proposed (`docs/POI.md` P-039 to P-042, D-043). Gave, by item:
+Pont de Tancarville (Q2351952): 1959; its engineers Nicolas Esquillan (Q3340298),
+d. 1989-01-21, and Jacques Ramsay-Robinson (Q110774883), d. 1988-07-12. Pont de
+Brotonne (Q734387): 1977; its engineer Jean Muller (Q1685711), d. 2005-03-17. Pont
+de Normandie (Q504710): Michel Virlogeux, born 1946, and Bernard Raspaud, born
+1942, no date of death. Pont du Gard (Q189764): about 50 AD. Rouen cathedral
+(Q476516): begun in 1030; Mérimée ids PA00100800 and IA00021830; no architect
+given. Gros-Horloge (Q3116957): « 14th century astronomical clock in Rouen »;
+Mérimée id PA00100834. Jean-Antoine Alavoine (Q2402612), searched by name:
+d. 1834-11-15; nothing there links him to the cathedral's spire, which is from
+general knowledge. Reliability as S-019.
+
+Consulted on 2026-11-14, **S-021**: [Mérimée][s021], the Ministry of Culture's
+register of protected monuments, read on POP record by record
+(`/notice/merimee/<id>`, ids from Wikidata's P380), for who restored four landmarks
+of `docs/POI.md` (PRD Q-28, D-043). Gave: Cité de Carcassonne (PA00102588): author
+« Viollet-le-Duc Eugène (architecte) », « très restaurée au 19e siècle par
+Viollet-le-Duc ». Haut-Kœnigsbourg (IA00124535, PA00084875): author « Ebhardt Bodo
+(architecte) », rebuilt « de 1901 à 1908 »; the painter Léo Schnug for the
+interiors, which are not drawn. Rouen cathedral (IA00021830): spire « par Robert
+Becquet en 1544, détruite en 1822 ; Alavoine la reconstruit de 1823 à 1884 »;
+restorations by Barthélémy and Desmarest (1859 to 1868) and Louis Sauvageot (1894
+to 1904), and repairs after the bombings of 1944. The records of the abbey of
+Mont-Saint-Michel (PA00110460) and of the Hospices de Beaune (PA00112112) name no
+restorer. Gros-Horloge (PA00100834): « horloge publique », listed in 1862.
+Reliability high (the State's own register), but a record can be short.
+
+Consulted on 2026-11-14, **S-022**: [French Wikipedia][s022], articles « Abbaye du
+Mont-Saint-Michel » and « Hospices de Beaune », through the API (`prop=extracts`),
+for the two restorations Mérimée does not name. Gave: the bell tower and spire of
+the abbey church « reconstruits par l'architecte Victor Petitgrand […] entre 1892
+et 1897 », the archangel made in 1895 by Emmanuel Frémiet; Beaune's glazed tiles
+« reconstruites entre 1902 et 1907 par Sauvageot ». Reliability medium (a
+community encyclopedia, no primary source read): it agrees with what was assumed,
+and both authors died more than 70 years ago (S-019).
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift
@@ -223,4 +260,6 @@ incomplete). Used as a reference only, nothing baked: no row in § 1.
 [s015-repo]: https://github.com/nvkelso/natural-earth-vector/tree/ca96624a56bd078437bca8184e78163e5039ad19
 [s017]: https://odre.opendatasoft.com/explore/dataset/eco2mix-regional-cons-def/
 [s019]: https://www.wikidata.org/
+[s021]: https://pop.culture.gouv.fr/
+[s022]: https://fr.wikipedia.org/
 [s018-csw]: https://data.geopf.fr/csw?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&OUTPUTSCHEMA=http://standards.iso.org/iso/19115/-3/mdb/2.0&elementSetName=full&ID=IGNF_BD-TOPO

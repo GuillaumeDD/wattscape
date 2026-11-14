@@ -29,20 +29,20 @@ chef-lieu of the commune the registry files the site under.
 
 | Id    | Site (commune, source, MW)               | Stands at | Point                                                      | Status | Comment                                                  |
 | ----- | ---------------------------------------- | --------- | ---------------------------------------------------------- | ------ | -------------------------------------------------------- |
-| PL-01 | Montézic, hydro, 910                     | town hall | Pumped storage; no zone or dam of that name in BD TOPO     | OPEN   | PRD Q-23                                                 |
-| PL-02 | Les Mazures, hydro, 808                  | town hall | The Revin pumped storage; BD TOPO names no « Revin »       | OPEN   | PRD Q-23                                                 |
-| PL-03 | Sisteron, hydro, 214                     | town hall | No zone or dam of that name within 15 km                   | OPEN   | PRD Q-23                                                 |
-| PL-04 | Oraison, hydro, 187                      | town hall | Hydro zones 6 to 8 km away, none named Oraison             | OPEN   | PRD Q-23                                                 |
+| PL-01 | Montézic, hydro, 910                     | town hall | Pumped storage; no zone or dam of that name in BD TOPO     | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-02 | Les Mazures, hydro, 808                  | town hall | The Revin pumped storage; BD TOPO names no « Revin »       | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-03 | Sisteron, hydro, 214                     | town hall | No zone or dam of that name within 15 km                   | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-04 | Oraison, hydro, 187                      | town hall | Hydro zones 6 to 8 km away, none named Oraison             | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
 | PL-05 | Caderousse, hydro, 156                   | town hall | BD TOPO has « usine de caderousse », nature « Usine »      | OPEN   | Lead: match zones of nature « Usine » too (S-018)        |
-| PL-06 | Saint-Estève-Janson, hydro, 141          | town hall | No zone or dam of that name within 15 km                   | OPEN   | PRD Q-23                                                 |
-| PL-07 | Fos-sur-Mer, thermal, 1 181              | town hall | Five plants summed in one site; none named in BD TOPO      | OPEN   | PRD Q-23; see PL-15                                      |
-| PL-08 | Grande-Synthe, thermal, 818              | town hall | « Braek » in the registry; not in BD TOPO                  | OPEN   | PRD Q-23                                                 |
-| PL-09 | Landivisiau, thermal, 446                | town hall | « Ponant » in the registry; not in BD TOPO                 | OPEN   | PRD Q-23                                                 |
-| PL-10 | Gonfreville-l'Orcher, thermal, 342       | town hall | Three industrial cogenerations summed; none named          | OPEN   | PRD Q-23; see PL-15                                      |
-| PL-11 | Abergement-la-Ronce, thermal, 167        | town hall | « Tavaux » in the registry (Solvay's site); not in BD TOPO | OPEN   | PRD Q-23                                                 |
-| PL-12 | Saint-Étienne-du-Rouvray, thermal, 132   | town hall | « Chapelle (La) » in the registry; not in BD TOPO          | OPEN   | PRD Q-23                                                 |
-| PL-13 | Le Lardin-Saint-Lazare, thermal, 102     | town hall | « Condat-le-Lardin », a paper mill's cogeneration          | OPEN   | PRD Q-23                                                 |
-| PL-14 | Gardanne, bioenergy, 151                 | town hall | « Provence » in the registry; no such zone in BD TOPO      | OPEN   | PRD Q-23; 150 before D-041 counted every unit            |
+| PL-06 | Saint-Estève-Janson, hydro, 141          | town hall | No zone or dam of that name within 15 km                   | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-07 | Fos-sur-Mer, thermal, 1 181              | town hall | Five plants summed in one site; none named in BD TOPO      | WAIT   | 2026-11-14: kept (D-044) until a shift shows; see PL-15  |
+| PL-08 | Grande-Synthe, thermal, 818              | town hall | « Braek » in the registry; not in BD TOPO                  | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-09 | Landivisiau, thermal, 446                | town hall | « Ponant » in the registry; not in BD TOPO                 | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-10 | Gonfreville-l'Orcher, thermal, 342       | town hall | Three industrial cogenerations summed; none named          | WAIT   | 2026-11-14: kept (D-044) until a shift shows; see PL-15  |
+| PL-11 | Abergement-la-Ronce, thermal, 167        | town hall | « Tavaux » in the registry (Solvay's site); not in BD TOPO | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-12 | Saint-Étienne-du-Rouvray, thermal, 132   | town hall | « Chapelle (La) » in the registry; not in BD TOPO          | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-13 | Le Lardin-Saint-Lazare, thermal, 102     | town hall | « Condat-le-Lardin », a paper mill's cogeneration          | WAIT   | 2026-11-14: kept (D-044) until a shift shows on screen   |
+| PL-14 | Gardanne, bioenergy, 151                 | town hall | « Provence » in the registry; no such zone in BD TOPO      | WAIT   | 2026-11-14: kept (D-044); was 150 MW before D-041        |
 | PL-15 | Every site                               | —         | A site sums a commune's units: several plants, one place   | OPEN   | Brommat's site stands at Sarrans's dam (its other plant) |
 | PL-16 | Morchies, wind, 162; Jametz, solar, 137  | town hall | Wind and solar are not matched by name (D-036)             | WAIT   | 2026-11-13, D-041: every unit counted (were 154, 110)    |
 | PL-17 | 32 wind, 9 solar, 46 bioenergy sites     | town hall | No BD TOPO zone of their kind in their commune             | WAIT   | Stay (Q-21, D-034); 40, 12 and 52 before D-041           |

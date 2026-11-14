@@ -740,3 +740,57 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   Haut-Kœnigsbourg is still from general knowledge); or the war-time extensions
   of the term of protection apply to an author dead in 1942–1947, which was not
   examined.
+
+## D-043 — Landmarks: Guillaume's answers to Q-26 to Q-28, and the Seine's bridges
+
+- **Context:** D-042 proposed 19 landmarks GO and left PRD Q-26 to Q-28 open.
+  Guillaume answered in the project thread on 2026-11-14 and proposed landmarks of
+  his own for Normandie.
+- **Options:** confirm the GO rows or not; for a protected work (Pont de Normandie,
+  Viaduc de Millau), draw nothing in its place, or look for a public-domain
+  alternative.
+- **Decision (Guillaume, 2026-11-14):**
+  - Q-26: « OK for the GO »; the 19 rows of D-042 now read "Guillaume, 2026-11-14".
+    For the NO-GO, « let's try to find relevant alternatives »; the Pont de
+    Normandie (P-007) stays NO-GO « for the future ».
+  - Q-27: « OK »: GO on the 70-year rule alone for authors dead in 1942–1947.
+  - Q-28: « OK pour Mérimée »: who restored Mont-Saint-Michel's spire,
+    Carcassonne, the roofs of Beaune and Haut-Kœnigsbourg is sourced in Mérimée
+    before those four are drawn.
+    Done the same day: Mérimée (S-021) names Viollet-le-Duc for Carcassonne,
+    Bodo Ebhardt for Haut-Kœnigsbourg and Alavoine for the spire of Rouen
+    cathedral. It names no one for Mont-Saint-Michel's spire or Beaune's roofs:
+    French Wikipedia (S-022) gives Petitgrand and Sauvageot, as assumed.
+  - The Pont du Gard (P-029, Roman) is Occitanie's bridge in place of the Viaduc de
+    Millau (P-032), as he asked.
+  - The two other bridges he proposed are still protected, so both are NO-GO by the
+    rule of D-004: Pont de Tancarville (P-039; engineers d. 1988 and 1989) and Pont
+    de Brotonne (P-040; engineer d. 2005), dates from S-020. He was told so in the
+    thread.
+  - Rouen cathedral (P-041) and the Gros-Horloge (P-042), which he proposed, are
+    GO (medieval; a clock of the 14th century, S-020): proposed by Claude,
+    confirmed by Guillaume (« Q-29 : yes »).
+- **Why:** the rule of D-004 holds whoever proposes the landmark; an alternative is
+  kept only when it is in the public domain.
+- **Revisit if:** a primary source names another author for Mont-Saint-Michel's
+  spire or Beaune's roofs (sourced in Wikipedia only); the war-time extensions turn
+  out to apply (Q-27 was accepted without examining them); or a bridge's rights
+  lapse (Tancarville from 2060, Brotonne from 2076).
+
+## D-044 — Plants: Guillaume's answers to Q-23 and Q-25
+
+- **Context:** two questions on the plants were open since B-017: PRD Q-23 (D-036)
+  and Q-25 (D-041).
+- **Options:** for Q-23, leave the large plants BD TOPO does not name at their town
+  hall, or first find another source of coordinates; for Q-25, keep or change the
+  thresholds of D-041.
+- **Decision (Guillaume, 2026-11-14, « Q-23 : oui », « Q-25 : oui »):**
+  - the large plants BD TOPO does not name stay at their town hall; their rows in
+    `docs/PLANTS.md` (PL-01 to PL-04, PL-06 to PL-14) go from OPEN to WAIT;
+  - one site per 250 MW of wind or solar and per 50 MW of bioenergy of a region's
+    installed capacity, as D-041 proposed.
+- **Why:** at a region's scale a town hall is a few pixels from the plant; the
+  thresholds keep about as many sites as before, where the capacity is.
+- **Revisit if:** a plant visibly stands in the wrong place on screen (then a GO
+  source of coordinates comes first, `docs/SOURCES.md` § 1); or a region's sites
+  read as too many or too few.
