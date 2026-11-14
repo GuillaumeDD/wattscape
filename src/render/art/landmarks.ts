@@ -29,6 +29,8 @@ export const LANDMARK_INK: Readonly<Record<string, ColourName>> = {
   e: "forest",
   p: "skyGolden",
   k: "seaDeep",
+  m: "meadow",
+  a: "grass",
   L: "rock",
 };
 
@@ -213,6 +215,24 @@ export const LANDMARK_SPRITES: Readonly<Record<LandmarkSprite, PixelMap>> = {
     "ggggggggggggggg",
     "ggggggggggggggg",
   ],
+  // The third lot (D-049). Guérande's salt marshes: pale pans between grey dikes,
+  // white heaps of salt.
+  saltMarshes: [
+    "..w.....w....",
+    ".www...www...",
+    "ggggggggggggg",
+    "gfgsgfgfgsgfg",
+    "ggggggggggggg",
+    "gsgfgfgsgfgfg",
+    "ggggggggggggg",
+  ],
+  // A generic lighthouse on a rock at sea: white with a dark band, its light at night.
+  seaLighthouse: [".r.", ".L.", ".w.", ".k.", ".w.", ".w.", "gwg", "fgf"],
+  // The Puy de Dôme: a grassy cone, lit on its west side, over the chain of smaller
+  // volcanoes; it stands out on the forest around it.
+  puyDeDome: [".....m.....", "....mma....", "...mmmaa...", ".m.mmmmaa.a", "mmammmmmaaa"],
+  // The Calanques: white limestone cliffs over a narrow inlet of the sea.
+  calanques: [".ww......ww..", "wwwg....wwwg.", "wwwwg..gwwwww", "wwwwwbbwwwwww", "fffffbbffffff"],
   // The basilica on its rock, the gilded statue on the bell tower.
   notreDameDeLaGarde: [
     "..n....",

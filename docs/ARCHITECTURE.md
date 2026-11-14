@@ -741,6 +741,14 @@ within 2 km of one already drawn waits for a way to tell them apart: the Palais
 Bénédictine (P-004, 0.3 km from Fécamp's lighthouse) and the Arc de Triomphe (P-011,
 1.7 km from the Eiffel Tower).
 
+The third lot (D-049), natural sites and generic scenes: Guérande's salt marshes
+(P-023); a generic lighthouse on a rock at sea, lit at night, at the place of the
+Phare de la Vieille off the Pointe du Raz (P-024); the Puy de Dôme, a grassy cone
+over the forest (P-034); the Calanques at Sormiou (P-037). The Pic du Midi (P-031),
+like the Mont Blanc, is drawn by the relief. The Champagne vineyards (P-017) and the
+lavender fields (P-038) wait for the seasons (B-022): their colours change with the
+months, and the palette has no lavender yet.
+
 ## Rendering and loop
 
 - The renderer draws into a `Surface` (`src/render/surface.ts`: an RGBA

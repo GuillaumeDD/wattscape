@@ -270,7 +270,10 @@ notre-dame de chartres » 48.44780, 1.48784; « muséum citadelle de besançon �
 6.03447; « fort boyard » (Ouvrage militaire) 45.99966, −1.21396; « place de la
 bourse », Bordeaux 44.84156, −0.57015; « la cité », Carcassonne 43.20649, 2.36399;
 « palais bénédictine » (Musée) 49.75885, 0.36771; « arc de triomphe » 48.87379,
-2.29506.
+2.29506. And for the third lot (D-049): « marais salants de guérande » (Marais
+salant) 47.30122, −2.46260; « phare de la vieille » (Phare) 48.04067, −4.75644;
+« puy de dôme » (Volcan) 45.77294, 2.96515; « calanque de sormiou » (Baie)
+43.20956, 5.42189; « pic du midi de bigorre » (Sommet) 42.93707, 0.14120, not used.
 
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte

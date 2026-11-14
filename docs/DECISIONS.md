@@ -859,3 +859,25 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   landmarks that stand together reads as the place.
 - **Revisit if:** sprites grow with the zoom (then P-004 and P-011 can be drawn);
   or Guillaume prefers a landmark to replace one already drawn.
+
+## D-049 — Landmarks: the third lot, natural sites and generic scenes (B-016)
+
+- **Context:** after the second lot (D-048), seven GO rows of `docs/POI.md` are
+  natural sites or generic scenes. A generic scene has no single place; seasons are
+  not drawn yet (B-022), and the palette has no lavender colour.
+- **Options:** for each, draw it now at a chosen place, leave it to the relief, or
+  wait for the seasons.
+- **Decision (Claude, 2026-11-14; to confirm, PRD Q-32):**
+  - drawn, at points BD TOPO names (S-023): Guérande's salt marshes (P-023); the
+    Puy de Dôme (P-034); the Calanques at Sormiou (P-037); a generic lighthouse at
+    the place of the Phare de la Vieille, off the Pointe du Raz (P-024), its look
+    not copied;
+  - the Pic du Midi (P-031) gets no sprite, like the Mont Blanc (D-045): the relief
+    draws the Pyrenees; its observatory is not drawn;
+  - the Champagne vineyards (P-017) and the lavender fields (P-038) wait for B-022:
+    their rows say "seasonal", and a field drawn in one colour all year would be
+    wrong half the year.
+- **Why:** each region keeps its landmarks; a seasonal scene drawn before the
+  seasons would show a false picture.
+- **Revisit if:** B-022 lands (then P-017 and P-038 are drawn); or Guillaume prefers
+  another place for the lighthouse.
