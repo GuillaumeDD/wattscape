@@ -730,6 +730,17 @@ castle of Nantes (P-022), Carnac's rows of stones (P-025), the Dune du Pilat
 roofs (dark, white or pale). The Mont Blanc (P-033) has no sprite: the relief
 already draws its snow.
 
+The second lot (D-048), at points of the same layer: Rouen cathedral, its cast-iron
+spire dark, with the Gros-Horloge's arch and gold dial west of it in the same sprite
+(P-041, P-042: 0.28 km apart, too close for two); Lille's belfry (P-013); Amiens
+cathedral (P-014); Haut-Kœnigsbourg on its wooded hill (P-016); Chartres and its two
+different spires (P-019); Besançon's citadel (P-021); Fort Boyard in the sea
+(P-027); the Place de la Bourse along the Garonne (P-028); the two rings of walls of
+Carcassonne (P-030). A sprite keeps its size in pixels at every zoom, so a landmark
+within 2 km of one already drawn waits for a way to tell them apart: the Palais
+Bénédictine (P-004, 0.3 km from Fécamp's lighthouse) and the Arc de Triomphe (P-011,
+1.7 km from the Eiffel Tower).
+
 ## Rendering and loop
 
 - The renderer draws into a `Surface` (`src/render/surface.ts`: an RGBA

@@ -21,7 +21,16 @@ export type LandmarkSprite =
   | "pilatDune"
   | "pontDuGard"
   | "fourviere"
-  | "notreDameDeLaGarde";
+  | "notreDameDeLaGarde"
+  | "rouenCathedral"
+  | "lilleBelfry"
+  | "amiensCathedral"
+  | "hautKoenigsbourg"
+  | "chartresCathedral"
+  | "besanconCitadel"
+  | "fortBoyard"
+  | "placeDeLaBourse"
+  | "carcassonne";
 
 export interface Landmark {
   /** Its row in docs/POI.md. */
@@ -76,4 +85,25 @@ export const LANDMARKS: readonly Landmark[] = [
   at("P-035", "fourviere", 45.76223, 4.82252),
   // Provence-Alpes-Côte d'Azur. « Notre-Dame de la Garde », Marseille (Culte chrétien).
   at("P-036", "notreDameDeLaGarde", 43.28393, 5.37126),
+
+  // The second lot (D-048). « Cathédrale Notre-Dame » of Rouen (Culte chrétien). The
+  // Gros-Horloge (P-042, « Gros Horloge », 49.44152, 1.09127) stands 0.28 km west:
+  // too close for a sprite of its own, so it is drawn in this one, west of the nave.
+  at("P-041", "rouenCathedral", 49.44027, 1.09482),
+  // « Beffroi de l'hôtel de ville », Lille (Construction).
+  at("P-013", "lilleBelfry", 50.63063, 3.06978),
+  // « Cathédrale Notre-Dame » of Amiens (Culte chrétien).
+  at("P-014", "amiensCathedral", 49.89457, 2.30205),
+  // « Château du Haut Koenigsbourg » (Château).
+  at("P-016", "hautKoenigsbourg", 48.24954, 7.34465),
+  // « Cathédrale Notre-Dame de Chartres » (Culte chrétien).
+  at("P-019", "chartresCathedral", 48.4478, 1.48784),
+  // « Muséum citadelle de Besançon » (Musée), inside the citadel.
+  at("P-021", "besanconCitadel", 47.2286, 6.03447),
+  // « Fort Boyard » (Ouvrage militaire).
+  at("P-027", "fortBoyard", 45.99966, -1.21396),
+  // « Place de la Bourse », Bordeaux (Espace public).
+  at("P-028", "placeDeLaBourse", 44.84156, -0.57015),
+  // « La Cité », Carcassonne (Quartier).
+  at("P-030", "carcassonne", 43.20649, 2.36399),
 ];

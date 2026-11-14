@@ -60,6 +60,12 @@ describe("the landmarks (src/map/landmarks.ts)", () => {
     }
   });
 
+  it("stand 2 km or more apart, so that no two sprites draw on top of each other (D-048)", () => {
+    for (const [i, a] of LANDMARKS.entries())
+      for (const b of LANDMARKS.slice(i + 1))
+        expect(Math.hypot(a.x - b.x, a.y - b.y), `${a.id} ${b.id}`).toBeGreaterThanOrEqual(2);
+  });
+
   it("give every region one landmark or more (B-016)", () => {
     const regions = new Set(LANDMARKS.map((l) => areaOfPosition(l.latitude, l.longitude).area));
     for (const region of REGION_CODES) expect(regions.has(region), region).toBe(true);
