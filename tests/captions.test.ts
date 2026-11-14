@@ -6,7 +6,10 @@ import { LOCALES } from "../src/i18n";
 import { kmOf } from "../src/map/grid";
 import { LANDMARK_CAPTIONS } from "../src/map/landmark-captions";
 import { LANDMARKS } from "../src/map/landmarks";
+import { PLANT_NAMES, plantName } from "../src/map/plant-names";
 import { PLANT_SITES } from "../src/map/plants";
+import { isDiffuse } from "../src/map/sources";
+import { type Source } from "../src/data/eco2mix";
 import { coarseLayer, fineLayer } from "../src/map/layers";
 import { FINE_ELEVATION_RLE } from "../src/map/relief";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine";
@@ -108,6 +111,23 @@ describe("the plants' captions (B-020)", () => {
     expect(captionText(plant(offshore), "fr", time)?.name).toBe(
       `Éolien · ${offshore.site.commune}`,
     );
+  });
+
+  it("give a large plant its usual name, with its commune's (D-053)", () => {
+    const penly = day.find((p) => p.site.source === "nuclear" && p.site.commune === "Petit-Caux");
+    if (penly === undefined) throw new Error("no Penly");
+    expect(captionText(plant(penly), "fr", time)?.name).toBe("Nucléaire · Penly (Petit-Caux)");
+    expect(plantName({ source: "wind", commune: "Petit-Caux" })).toBe("Petit-Caux");
+  });
+
+  it("name only baked sites, each of them once, never a diffuse one", () => {
+    const keys = new Set(PLANT_SITES.map((s) => `${s.source}|${s.commune}`));
+    for (const key of Object.keys(PLANT_NAMES)) {
+      expect(keys.has(key), key).toBe(true);
+      expect(isDiffuse(key.split("|")[0] as Source), key).toBe(false);
+    }
+    const names = Object.values(PLANT_NAMES);
+    expect(new Set(names).size).toBe(names.length);
   });
 
   it("are tied to marks whose ids are unique among the baked plants", () => {

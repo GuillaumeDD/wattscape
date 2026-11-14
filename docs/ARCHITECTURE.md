@@ -761,7 +761,8 @@ months, and the palette has no lavender yet.
 English, each citing the `S-` entries its facts come from (mostly the French
 Wikipedia, S-024); a line with no source found is marked `provisional` and listed in
 its PR. Every plant drawn, sprite or national marker, has one too, built from the
-data: its technology and commune (or offshore farm), its installed capacity (DS-07;
+data: its technology, its usual name for a large plant (`src/map/plant-names.ts`, from
+the registry, D-053) and its commune (or offshore farm), its installed capacity (DS-07;
 for wind, solar and bioenergy on land, every unit of the commune), and the figure
 that drives it: its technology's load factor in its region, as éCO2mix gives it
 (over 100 % too, where the sprite is clamped), with the reading's time; or, when

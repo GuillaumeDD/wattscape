@@ -6,6 +6,7 @@ import { type Source } from "../data/eco2mix";
 import { REGION_NAMES } from "../geo/regions";
 import { type Locale, type MessageKey, translate } from "../i18n";
 import { LANDMARK_CAPTIONS } from "../map/landmark-captions";
+import { plantName } from "../map/plant-names";
 import { isDiffuse } from "../map/sources";
 import { type Mark, type PlantMark } from "../render/theme";
 
@@ -72,7 +73,10 @@ export function captionText(
             .replace("{region}", region)
             .replace("{pct}", number.format(figure.loadFactorPct))
             .replace("{time}", time(figure.timeMs));
-  return { name: `${t(SOURCE_KEYS[site.source])} · ${site.commune}`, line: `${capacity} ${load}` };
+  return {
+    name: `${t(SOURCE_KEYS[site.source])} · ${plantName(site)}`,
+    line: `${capacity} ${load}`,
+  };
 }
 
 /** A landmark's mark, as far as its caption needs. */

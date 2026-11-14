@@ -311,6 +311,19 @@ massif, in the national park. « Cathédrale Notre-Dame de Rouen »: Gothic. Not
 request, on Wikipedia and Wikidata alike, so the slag heaps' caption is provisional.
 Reliability medium (a community encyclopedia).
 
+Consulted on 2026-11-14, **S-025**: the national registry of installations
+([ODRÉ][s016], DS-07) again, through its API (`exports/json`, one request: units in
+service of 10 MW or more, nuclear, hydro and thermal, with `nominstallation`,
+`commune` and `puismaxinstallee`), for the usual names of the large plants in their
+captions (`src/map/plant-names.ts`, D-053). Gave each unit's plant name: « GROUPE 01
+DE LA CENTRALE NUCLEAIRE DE PENLY » filed under Petit-Caux, « … DE BUGEY (LE) » under
+Saint-Vulbas, « … DE CHINON B » under Avoine, and so on for the 85 major sites; the
+Tricastin's units are filed under Pierrelatte, next to Saint-Paul-Trois-Châteaux
+where the bake placed them. Some sites gather plants of similar size (Fos-sur-Mer:
+La Gracieuse 453 MW and Richier 514 MW; Laruns) or hold their main plant under
+another commune (Orelle, Le Cheylas, Cuzion): they keep the commune's name.
+Reliability high (the registry's own data).
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift
