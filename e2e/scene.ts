@@ -5,9 +5,11 @@
  * and `#plants-note` tells its state. With `?plants=replay`, the time-lapse's feed
  * (src/ui/replay-feed.ts) replays the three hours the test serves in 6 seconds, and
  * the note tells the state and the step's time. `#caption` names the landmark whose
- * caption shows (B-020), and its box.
+ * caption shows (B-020), and its box. `?theme=modern` opens with the modern theme
+ * (G-011), and `#theme-toggle` switches.
  */
 import { fixedClock, replayClock } from "../src/clock/clock";
+import { isThemeId, type ThemeId } from "../src/render/theme-ids";
 import { startPlantFeed } from "../src/ui/plant-feed";
 import { startReplayFeed } from "../src/ui/replay-feed";
 import { mountSceneView } from "../src/ui/scene-view";
@@ -18,6 +20,8 @@ if (canvas instanceof HTMLCanvasElement) {
   const area = params.get("area") === "28" ? "28" : "FR";
   const live = params.get("plants") === "live";
   const replay = params.get("plants") === "replay";
+  const asked = params.get("theme");
+  let theme: ThemeId = isThemeId(asked) ? asked : "pixel";
   // 2026-11-12 10:30 UTC: 45 minutes after the step recorded that day.
   const clock = fixedClock(live ? Date.UTC(2026, 10, 12, 10, 30) : Date.UTC(2026, 5, 21, 12));
   if (replay) {
@@ -40,12 +44,24 @@ if (canvas instanceof HTMLCanvasElement) {
   }
   const view = replay
     ? null
-    : mountSceneView(canvas, clock, area, false, (shown) => {
-        const caption = document.getElementById("caption");
-        if (caption)
-          caption.textContent =
-            shown === null ? "" : `${shown.mark.id} ${String(Math.round(shown.box.left))}`;
-      });
+    : mountSceneView(
+        canvas,
+        clock,
+        area,
+        false,
+        (shown) => {
+          const caption = document.getElementById("caption");
+          if (caption)
+            caption.textContent =
+              shown === null ? "" : `${shown.mark.id} ${String(Math.round(shown.box.left))}`;
+        },
+        theme,
+      );
+  // `#theme-toggle` goes from one theme to the other, as the page's list does.
+  document.getElementById("theme-toggle")?.addEventListener("click", () => {
+    theme = theme === "pixel" ? "modern" : "pixel";
+    view?.setTheme(theme);
+  });
   if (live && view !== null)
     startPlantFeed(
       clock,

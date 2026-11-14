@@ -34,6 +34,8 @@ export interface TerrainLayer {
   readonly seaDistance: Uint8Array;
   /** One byte per cell: 1 where a river of the layer crosses French land (B-023). */
   readonly rivers: Uint8Array;
+  /** The rivers of the layer as lines, for a theme that draws them as such (G-011). */
+  readonly courses: readonly River[];
 }
 
 let great: readonly River[] | null = null;
@@ -107,6 +109,7 @@ export function coarseLayer(): TerrainLayer {
     seaDistance: seaDistances(kinds, COARSE_COLUMNS, COARSE_ROWS),
     // The great rivers alone: on the national view, more would be a web.
     rivers: riversOf(kinds, COARSE_KM, COARSE_COLUMNS, COARSE_ROWS, greatRivers()),
+    courses: greatRivers(),
   };
   return coarse;
 }
@@ -130,6 +133,7 @@ export function fineLayer(
   if (fine?.rows === reliefRows && fine.rivers === lesserRivers) return fine.layer;
   if (reliefRows.length !== FINE_ROWS) throw new Error(`relief: ${reliefRows.length} rows`);
   const kinds = decodeRuns(FINE_ROWS_RLE, FINE_COLUMNS);
+  const courses = [...greatRivers(), ...lesserRivers.map(unpackRiver)];
   const layer: TerrainLayer = {
     km: FINE_KM,
     columns: FINE_COLUMNS,
@@ -137,10 +141,8 @@ export function fineLayer(
     kinds,
     elevation: decodeRuns(reliefRows, FINE_COLUMNS, ELEVATION_CLASSES.length),
     seaDistance: seaDistances(kinds, FINE_COLUMNS, FINE_ROWS),
-    rivers: riversOf(kinds, FINE_KM, FINE_COLUMNS, FINE_ROWS, [
-      ...greatRivers(),
-      ...lesserRivers.map(unpackRiver),
-    ]),
+    rivers: riversOf(kinds, FINE_KM, FINE_COLUMNS, FINE_ROWS, courses),
+    courses,
   };
   fine = { rows: reliefRows, rivers: lesserRivers, layer };
   return layer;

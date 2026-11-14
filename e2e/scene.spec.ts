@@ -272,3 +272,51 @@ test("replays the steps of the day from one request, the light moving", async ({
   expect(asked).toHaveLength(1);
   expect(asked[0]).toContain("eco2mix-regional-tr/exports/json");
 });
+
+test("draws the modern theme at several pixels per scene pixel, with its captions", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html?area=28&theme=modern");
+  await page.waitForTimeout(2500);
+  await settled(page);
+  const canvas = await page.evaluate(() => {
+    const c = document.getElementById("scene") as HTMLCanvasElement;
+    return {
+      w: c.width,
+      h: c.height,
+      cssW: c.getBoundingClientRect().width,
+      // The class the page's stylesheet scales smoothly (src/style.css).
+      smooth: c.classList.contains("smooth"),
+    };
+  });
+  // 540 / 270 rounds to 2, raised to the least factor, 3: a scene of 320 × 180,
+  // drawn at 3 output pixels each (a small window), the screen's own pixels.
+  expect(canvas).toEqual({ w: 960, h: 540, cssW: 960, smooth: true });
+  // The captions answer at the same places of the page as in pixel art.
+  const at = await findCaption(page, 420, 120, 140);
+  expect(at).not.toBeNull();
+  expect(await caption(page)).toMatch(/^(P-0\d\d|[a-z]+@[\d.]+,[\d.]+) -?\d+$/);
+});
+
+test("switches theme in place: the camera stays, and pixel art comes back as it was", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto("/scene.html");
+  await page.mouse.move(960, 540);
+  await page.mouse.wheel(0, -300);
+  const pixel = await settled(page);
+  expect(pixel.startsWith("480x270:")).toBe(true);
+
+  await page.click("#theme-toggle");
+  const modern = await settled(page);
+  // Full HD: 2 output pixels per scene pixel, scaled up smoothly.
+  expect(modern.startsWith("960x540:")).toBe(true);
+  expect(await page.locator("#scene").evaluate((c) => c.classList.contains("smooth"))).toBe(true);
+  expect(await page.locator("#scene").evaluate((c) => c.getBoundingClientRect().width)).toBe(1920);
+
+  await page.click("#theme-toggle");
+  expect(await settled(page)).toBe(pixel);
+  expect(await page.locator("#scene").evaluate((c) => c.classList.contains("smooth"))).toBe(false);
+});

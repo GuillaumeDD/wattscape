@@ -324,6 +324,15 @@ La Gracieuse 453 MW and Richier 514 MW; Laruns) or hold their main plant under
 another commune (Orelle, Le Cheylas, Cuzion): they keep the commune's name.
 Reliability high (the registry's own data).
 
+Consulted on 2026-11-14, **S-026**: [Return of the runners][s026], Guillaume's own
+game, the look he named for the modern theme (G-011): its `README.md`, its
+`docs/ARCHITECTURE.md` § Art direction and the screenshot `docs/screenshots/readme-play.png`.
+Gave what « modern » means there: art drawn in code as vectors and procedural
+textures, at the screen's own pixels; layers back to front with a soft drop shadow
+under the terrain; a lit top edge on each slab; light added over the scene (glows);
+a vignette of up to 42 % at the corners; one dim backdrop per world. Nothing was
+copied from it: no code, no asset. Reliability high (the project's own documents).
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift
@@ -337,4 +346,5 @@ Reliability high (the registry's own data).
 [s019]: https://www.wikidata.org/
 [s021]: https://pop.culture.gouv.fr/
 [s022]: https://fr.wikipedia.org/
+[s026]: https://github.com/GuillaumeDD/return-of-the-runners
 [s018-csw]: https://data.geopf.fr/csw?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&OUTPUTSCHEMA=http://standards.iso.org/iso/19115/-3/mdb/2.0&elementSetName=full&ID=IGNF_BD-TOPO

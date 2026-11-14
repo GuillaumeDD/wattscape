@@ -69,7 +69,8 @@ button {
   color: inherit;
 }
 
-#area-picker {
+#area-picker,
+#theme-picker {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -180,6 +181,11 @@ body.scene {
   cursor: grab;
 }
 
+/* A smooth theme (G-011) drawn at fewer pixels than the screen's is scaled up smoothly. */
+#scene.smooth {
+  image-rendering: auto;
+}
+
 #scene:active {
   cursor: grabbing;
 }
@@ -242,7 +248,8 @@ body.scene #location-note {
   font-size: 0.8rem;
 }
 
-body.scene #area-picker {
+body.scene #area-picker,
+body.scene #theme-picker {
   justify-content: flex-start;
 }
 

@@ -1,15 +1,19 @@
 /**
  * A visual theme: how a scene (src/scene/scene.ts) becomes pixels. The scene says
- * what is there; the theme decides how it looks. One theme for now, the pixel art
- * of ARCHITECTURE § Art direction; PRD G-011 proposes a second, chosen by the viewer.
+ * what is there; the theme decides how it looks. Two themes, chosen by the viewer
+ * (PRD G-011): the pixel art of ARCHITECTURE § Art direction, and the modern one.
  */
 import { type Scene, type ScenePlant } from "../scene/scene.ts";
+import { modernTheme } from "./modern-theme.ts";
 import { pixelTheme } from "./pixel-theme.ts";
 import { type Surface } from "./surface.ts";
+import { DEFAULT_THEME_ID, type ThemeId } from "./theme-ids.ts";
+
+export { type ThemeId } from "./theme-ids.ts";
 
 /**
  * Something a frame shows that has a caption (B-020): where it stands, as the box
- * of its sprite in buffer pixels (left and top included, right and bottom excluded).
+ * of its sprite in scene pixels (left and top included, right and bottom excluded).
  */
 export type Mark = LandmarkMark | PlantMark;
 
@@ -40,18 +44,31 @@ export interface Drawn {
   readonly marks: readonly Mark[];
   /**
    * Draws the motion at an animation time (seconds) into `target`, which holds a copy
-   * of the drawn frame. Pure: the same time gives the same pixels.
+   * of the drawn frame. Pure: the same time gives the same pixels. To be called
+   * before the theme draws its next frame, whose buffers it may share.
    */
   animate(target: Surface, seconds: number): void;
 }
 
 export interface Theme {
-  readonly id: string;
-  /** Draws the whole still frame into `out`, which has the scene's size. Pure. */
+  readonly id: ThemeId;
+  /**
+   * Output pixels per scene pixel, a whole number, for a scene of `width` × `height`
+   * shown at `factor` device pixels per scene pixel: 1 for pixel art, more for a
+   * smooth theme. The scene, its camera and the marks stay in scene pixels.
+   */
+  density(width: number, height: number, factor: number): number;
+  /**
+   * Draws the whole still frame into `out`, which has the scene's size times the
+   * density. Pure.
+   */
   draw(scene: Scene, out: Surface): Drawn;
 }
 
 /** Every theme, by id. */
-export const THEMES: Readonly<Record<string, Theme>> = { [pixelTheme.id]: pixelTheme };
+export const THEMES: Readonly<Record<ThemeId, Theme>> = {
+  pixel: pixelTheme,
+  modern: modernTheme,
+};
 
-export const DEFAULT_THEME: Theme = pixelTheme;
+export const DEFAULT_THEME: Theme = THEMES[DEFAULT_THEME_ID];
