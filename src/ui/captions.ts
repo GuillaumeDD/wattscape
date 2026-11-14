@@ -2,9 +2,12 @@
  * Captions (B-020): which mark the pointer is on, and where its caption goes. Pure,
  * so tested without a page; `src/ui/scene-view.ts` and `src/main.ts` wire them.
  */
-import { type Locale } from "../i18n";
+import { type Source } from "../data/eco2mix";
+import { REGION_NAMES } from "../geo/regions";
+import { type Locale, type MessageKey, translate } from "../i18n";
 import { LANDMARK_CAPTIONS } from "../map/landmark-captions";
-import { type Mark } from "../render/theme";
+import { isDiffuse } from "../map/sources";
+import { type Mark, type PlantMark } from "../render/theme";
 
 /**
  * The mark under a point of the buffer, within `slack` pixels of its box (a finger is
@@ -26,11 +29,54 @@ export interface CaptionText {
   readonly line: string;
 }
 
-export function captionText(mark: Pick<Mark, "kind" | "id">, locale: Locale): CaptionText | null {
-  const caption = LANDMARK_CAPTIONS[mark.id];
-  if (caption === undefined) return null;
-  return { name: caption.name, line: caption[locale] };
+const SOURCE_KEYS = {
+  nuclear: "plantNuclear",
+  thermal: "plantThermal",
+  wind: "plantWind",
+  solar: "plantSolar",
+  hydro: "plantHydro",
+  bioenergy: "plantBioenergy",
+} as const satisfies Record<Source, MessageKey>;
+
+/**
+ * A mark's caption in the viewer's language; null for a landmark without one. A
+ * plant's says what it is and where, its installed capacity (DS-07), and the figure
+ * that drives it: its technology's load factor in its region, with the reading's
+ * time (`time` formats it), or why there is none. Never a figure of its own: éCO2mix
+ * gives none per plant (ARCHITECTURE § Data-to-scene mapping).
+ */
+export function captionText(
+  mark: LandmarkMarkRef | Pick<PlantMark, "kind" | "plant">,
+  locale: Locale,
+  time: (ms: number) => string,
+): CaptionText | null {
+  if (mark.kind === "landmark") {
+    const caption = LANDMARK_CAPTIONS[mark.id];
+    return caption === undefined ? null : { name: caption.name, line: caption[locale] };
+  }
+  const t = (key: MessageKey): string => translate(locale, key);
+  const { site, figure } = mark.plant;
+  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  const region = REGION_NAMES[site.region];
+  const perCommune = isDiffuse(site.source) && !site.offshore;
+  const capacity = t(perCommune ? "plantCapacityCommune" : "plantCapacity").replace(
+    "{mw}",
+    number.format(site.mw),
+  );
+  const load =
+    figure === null
+      ? t("plantNoData")
+      : figure.loadFactorPct === null
+        ? t("plantNoLoad").replace("{region}", region)
+        : t("plantLoad")
+            .replace("{region}", region)
+            .replace("{pct}", number.format(figure.loadFactorPct))
+            .replace("{time}", time(figure.timeMs));
+  return { name: `${t(SOURCE_KEYS[site.source])} · ${site.commune}`, line: `${capacity} ${load}` };
 }
+
+/** A landmark's mark, as far as its caption needs. */
+type LandmarkMarkRef = Pick<Mark, "id"> & { readonly kind: "landmark" };
 
 export interface Box {
   readonly left: number;

@@ -1,20 +1,21 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { FRAME_HEIGHT, FRAME_WIDTH } from "../e2e/reference-frames";
+import { FRAME_HEIGHT, FRAME_WIDTH, recordedPlants } from "../e2e/reference-frames";
 import { REGION_CODES } from "../src/data/eco2mix";
 import { LOCALES } from "../src/i18n";
 import { kmOf } from "../src/map/grid";
 import { LANDMARK_CAPTIONS } from "../src/map/landmark-captions";
 import { LANDMARKS } from "../src/map/landmarks";
+import { PLANT_SITES } from "../src/map/plants";
 import { coarseLayer, fineLayer } from "../src/map/layers";
 import { FINE_ELEVATION_RLE } from "../src/map/relief";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine";
 import { landmarkBox, LANDMARK_SPRITES } from "../src/render/art/landmarks";
-import { drawPixelScene, SPRITES_FROM_SCALE } from "../src/render/pixel-theme";
+import { drawPixelScene, plantMarkId, SPRITES_FROM_SCALE } from "../src/render/pixel-theme";
 import { createSurface } from "../src/render/surface";
 import { type Mark } from "../src/render/theme";
 import { type Camera } from "../src/scene/camera";
-import { type Scene } from "../src/scene/scene";
+import { type Scene, type ScenePlant } from "../src/scene/scene";
 import { lightAt } from "../src/sky/light";
 import { captionPosition, captionText, markAt } from "../src/ui/captions";
 import { mulberry32 } from "./random";
@@ -60,9 +61,58 @@ describe("the landmarks' captions (src/map/landmark-captions.ts)", () => {
   });
 
   it("are read by mark, in the viewer's language", () => {
-    expect(captionText({ kind: "landmark", id: "P-008" }, "fr")?.name).toBe("Tour Eiffel");
-    expect(captionText({ kind: "landmark", id: "P-008" }, "en")?.line).toContain("1889");
-    expect(captionText({ kind: "landmark", id: "P-999" }, "fr")).toBeNull();
+    expect(captionText({ kind: "landmark", id: "P-008" }, "fr", String)?.name).toBe("Tour Eiffel");
+    expect(captionText({ kind: "landmark", id: "P-008" }, "en", String)?.line).toContain("1889");
+    expect(captionText({ kind: "landmark", id: "P-999" }, "fr", String)).toBeNull();
+  });
+});
+
+describe("the plants' captions (B-020)", () => {
+  const day = recordedPlants(false);
+  const paluel = day.find((p) => p.site.commune === "Paluel" && p.site.source === "nuclear");
+  if (paluel === undefined) throw new Error("no Paluel");
+  const plant = (p: ScenePlant) => ({ kind: "plant" as const, plant: p });
+  const time = (ms: number): string => `T${String(ms)}`;
+
+  it("say what and where, the installed capacity, and the region's figure with its time", () => {
+    const fr = captionText(plant(paluel), "fr", time);
+    expect(fr?.name).toBe("Nucléaire · Paluel");
+    expect(fr?.line).toContain(
+      `${new Intl.NumberFormat("fr").format(paluel.site.mw)} MW installés`,
+    );
+    expect(fr?.line).toContain("Normandie : 62 %");
+    expect(fr?.line).toContain(`T${String(paluel.figure?.timeMs)}`);
+    const en = captionText(plant(paluel), "en", time);
+    expect(en?.name).toBe("Nuclear · Paluel");
+    expect(en?.line).toContain("Normandie: 62%");
+  });
+
+  it("show the figure as éCO2mix gives it, over 100 % too, never the clamped activity", () => {
+    const over = { ...paluel, activity: 1, figure: { loadFactorPct: 117.4, timeMs: 0 } };
+    expect(captionText(plant(over), "fr", time)?.line).toContain(": 117 %");
+  });
+
+  it("say why there is no figure: no reading, or none for this technology", () => {
+    const none = { ...paluel, activity: null, figure: null };
+    expect(captionText(plant(none), "fr", time)?.line).toContain("Pas de relevé RTE éCO2mix");
+    const noLoad = { ...paluel, activity: null, figure: { loadFactorPct: null, timeMs: 0 } };
+    expect(captionText(plant(noLoad), "en", time)?.line).toContain("gives no load factor");
+  });
+
+  it("give a diffuse site's capacity as its commune's, but not an offshore farm's", () => {
+    const solar = day.find((p) => p.site.source === "solar");
+    const offshore = day.find((p) => p.site.offshore);
+    if (solar === undefined || offshore === undefined) throw new Error("no site");
+    expect(captionText(plant(solar), "fr", time)?.line).toContain("installés dans la commune");
+    expect(captionText(plant(offshore), "fr", time)?.line).not.toContain("commune");
+    expect(captionText(plant(offshore), "fr", time)?.name).toBe(
+      `Éolien · ${offshore.site.commune}`,
+    );
+  });
+
+  it("are tied to marks whose ids are unique among the baked plants", () => {
+    const ids = PLANT_SITES.map(plantMarkId);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
 
@@ -188,5 +238,21 @@ describe("the marks of a frame (src/render/pixel-theme.ts)", () => {
 
   it("are none on the national view, where no landmark is drawn", () => {
     expect(marksOf(sceneAt({ ...near, scale: SPRITES_FROM_SCALE / 2 }, 0))).toEqual([]);
+  });
+
+  it("name the plants drawn, as sprites or as the national view's markers", () => {
+    const plants = recordedPlants(false);
+    for (const scale of [SPRITES_FROM_SCALE / 2, 2]) {
+      const marks = marksOf({ ...sceneAt({ ...near, scale }, 16), plants });
+      const shown = marks.filter((m) => m.kind === "plant");
+      expect(shown.length, String(scale)).toBeGreaterThan(0);
+      for (const m of shown) {
+        expect(m.id).toBe(plantMarkId(m.plant.site));
+        expect(plants).toContain(m.plant);
+      }
+      // In front comes last: the marks run down the frame.
+      for (let i = 1; i < marks.length; i++)
+        expect(marks[i]?.bottom ?? 0).toBeGreaterThanOrEqual(marks[i - 1]?.bottom ?? 0);
+    }
   });
 });

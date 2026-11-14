@@ -81,6 +81,14 @@ function renderPanel(): void {
   toggle.title = label;
 }
 
+/** A reading's time: a live step is under 3 hours old, its time says enough; any other gets its date. */
+function readingTime(ms: number): string {
+  return new Intl.DateTimeFormat(locale, {
+    ...(plantsState.kind === "live" ? {} : { dateStyle: "short" as const }),
+    timeStyle: "short",
+  }).format(new Date(ms));
+}
+
 /** Where the plants' figures come from, and their time: every animated figure is traceable. */
 function renderPlantsNote(): void {
   const t = (key: MessageKey): string => translate(locale, key);
@@ -89,11 +97,7 @@ function renderPlantsNote(): void {
     setText("plants-note", t(state.kind === "loading" ? "plantsLoading" : "plantsUnavailable"));
     return;
   }
-  // A live step is under 3 hours old: its time says enough. Any other gets its date.
-  const time = new Intl.DateTimeFormat(locale, {
-    ...(state.kind === "live" ? {} : { dateStyle: "short" as const }),
-    timeStyle: "short",
-  }).format(new Date(state.timeMs));
+  const time = readingTime(state.timeMs);
   const keys = {
     live: "plantsLive",
     stale: "plantsStale",
@@ -143,7 +147,7 @@ const clock =
 function renderCaption(): void {
   const box = document.getElementById("caption");
   if (box === null) return;
-  const text = caption === null ? null : captionText(caption.mark, locale);
+  const text = caption === null ? null : captionText(caption.mark, locale, readingTime);
   if (caption === null || text === null) {
     box.hidden = true;
     return;

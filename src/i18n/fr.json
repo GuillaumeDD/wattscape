@@ -48,5 +48,16 @@
   "plantsSample": "Données d'exemple : relevé RTE éCO2mix du {time}, pas le direct.",
   "plantsReplay": "Accéléré : la journée passée en une minute, relevé RTE éCO2mix du {time}.",
   "plantsAhead": "Le relevé RTE éCO2mix ({time}) est postérieur à l'heure montrée : centrales au repos.",
-  "plantsUnavailable": "Données RTE éCO2mix indisponibles : les centrales sont au repos."
+  "plantsUnavailable": "Données RTE éCO2mix indisponibles : les centrales sont au repos.",
+  "plantNuclear": "Nucléaire",
+  "plantThermal": "Thermique",
+  "plantWind": "Éolien",
+  "plantSolar": "Solaire",
+  "plantHydro": "Hydraulique",
+  "plantBioenergy": "Bioénergies",
+  "plantCapacity": "{mw} MW installés (registre national au 31/12/2024).",
+  "plantCapacityCommune": "{mw} MW installés dans la commune (registre national au 31/12/2024).",
+  "plantLoad": "Taux de charge de la filière, {region} : {pct} % (RTE éCO2mix, {time}).",
+  "plantNoLoad": "RTE éCO2mix ne donne pas de taux de charge pour cette filière, {region} : au repos.",
+  "plantNoData": "Pas de relevé RTE éCO2mix à montrer : la centrale est au repos."
 }

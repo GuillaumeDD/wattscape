@@ -18,6 +18,7 @@ import {
   drawMotion,
   hasMotion,
   type Pen,
+  plantBox,
   SPRITES,
   spriteOf,
   turbineCount,
@@ -227,6 +228,21 @@ describe("activityOf and scenePlants (ARCHITECTURE § Data-to-scene mapping)", (
     expect(scenePlants(sites, null, now).every((p) => p.activity === null)).toBe(true);
   });
 
+  it("keeps the figure behind each plant as éCO2mix gives it, unclamped, with its time", () => {
+    // The caption shows the figure itself: 125 % stays 125 %, while the plant runs at 1.
+    const [nuclear, wind] = scenePlants(sites, readings(reading(125, 1000)), 1000);
+    expect(nuclear?.figure).toEqual({ loadFactorPct: 125, timeMs: 1000 });
+    expect(nuclear?.activity).toBe(1);
+    expect(wind?.figure).toBeNull();
+    expect(scenePlants(sites, readings(reading(null, 1000)), 1000)[0]?.figure).toEqual({
+      loadFactorPct: null,
+      timeMs: 1000,
+    });
+    const now = 10 * STALE_AFTER_MS;
+    expect(scenePlants(sites, readings(reading(50, now + 20 * 60_000)), now)[0]?.figure).toBeNull();
+    expect(scenePlants(sites, null, now).every((p) => p.figure === null)).toBe(true);
+  });
+
   it("gives the recorded steps' figures: Normandie's nuclear at 62 %, no sun at night", () => {
     const day = recordedPlants(false);
     expect(day.find((p) => p.site.commune === "Paluel")?.activity).toBe(0.62);
@@ -369,6 +385,28 @@ describe("the source sprites (src/render/art/plants.ts)", () => {
       expect(pen.pixels.size).toBe(7);
       expect([...pen.pixels.values()]).toContain(p.source);
     }
+  });
+
+  it("cover exactly the box plantBox gives, for every sprite and size (B-020)", () => {
+    const sized = [
+      ...ALL,
+      site("wind", { mw: 40 }),
+      site("wind", { mw: 10 }),
+      site("wind", { offshore: true }),
+    ];
+    for (const p of sized)
+      for (const size of ["full", "marker"] as const) {
+        const pen = recorder(false);
+        drawBody(pen, p, 0.5, 20, 30, size);
+        const xs = [...pen.pixels.keys()].map((k) => Number(k.split(",")[0]));
+        const ys = [...pen.pixels.keys()].map((k) => Number(k.split(",")[1]));
+        const box = plantBox(p, 20, 30, size);
+        const label = `${p.source} ${String(p.mw)} ${size}`;
+        expect(box.left, label).toBe(Math.min(...xs));
+        expect(box.right, label).toBe(Math.max(...xs) + 1);
+        expect(box.top, label).toBe(Math.min(...ys));
+        expect(box.bottom, label).toBe(Math.max(...ys) + 1);
+      }
   });
 });
 
