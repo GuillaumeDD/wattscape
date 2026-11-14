@@ -4,6 +4,8 @@
   "status": "Under construction: the power plants follow the data, the legend is coming.",
   "switchLanguage": "Français",
   "switchLanguageLabel": "Passer en français",
+  "panelFold": "Fold the panel",
+  "panelUnfold": "Unfold the panel",
   "creditsData": "Data:",
   "creditsEco2mixLicence": "(Open Licence 2.0), weather by",
   "creditsWeatherLicence": "(CC BY 4.0)",

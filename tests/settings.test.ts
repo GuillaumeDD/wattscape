@@ -4,10 +4,13 @@ import {
   areaFromQuery,
   atFromQuery,
   initialArea,
+  initialPanelFolded,
   saveArea,
   savedArea,
   savedLocale,
+  savedPanelFolded,
   saveLocale,
+  savePanelFolded,
   sampleFromQuery,
 } from "../src/ui/settings";
 
@@ -91,6 +94,30 @@ describe("saved language", () => {
     expect(() => {
       saveLocale(throwing, "fr");
     }).not.toThrow();
+  });
+});
+
+describe("folded panel", () => {
+  it("round-trips the choice and ignores anything else or blocked storage", () => {
+    const storage = memoryStorage();
+    savePanelFolded(storage, true);
+    expect(savedPanelFolded(storage)).toBe(true);
+    savePanelFolded(storage, false);
+    expect(savedPanelFolded(storage)).toBe(false);
+    expect(savedPanelFolded(memoryStorage({ "wattscape.panel": "yes" }))).toBeUndefined();
+    expect(savedPanelFolded(throwing)).toBeUndefined();
+    expect(savedPanelFolded(undefined)).toBeUndefined();
+    expect(() => {
+      savePanelFolded(throwing, true);
+    }).not.toThrow();
+  });
+
+  it("opens folded on a narrow screen and open elsewhere, unless the viewer chose", () => {
+    expect(initialPanelFolded(memoryStorage(), true)).toBe(true);
+    expect(initialPanelFolded(memoryStorage(), false)).toBe(false);
+    expect(initialPanelFolded(throwing, true)).toBe(true);
+    expect(initialPanelFolded(memoryStorage({ "wattscape.panel": "open" }), true)).toBe(false);
+    expect(initialPanelFolded(memoryStorage({ "wattscape.panel": "folded" }), false)).toBe(true);
   });
 });
 

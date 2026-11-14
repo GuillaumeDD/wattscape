@@ -7,6 +7,7 @@ import { isLocale, type Locale } from "../i18n";
 
 const AREA_KEY = "wattscape.area";
 const LOCALE_KEY = "wattscape.locale";
+const PANEL_KEY = "wattscape.panel";
 
 /** `localStorage`, or `undefined` where merely touching it throws (blocked storage). */
 export function browserStorage(): Storage | undefined {
@@ -69,6 +70,40 @@ export function saveLocale(storage: Pick<Storage, "setItem"> | undefined, locale
   } catch {
     // Storage can be blocked (private mode, settings): the choice then lasts the visit.
   }
+}
+
+/** Whether the page's panel was left folded in this browser, if storage says so. */
+export function savedPanelFolded(
+  storage: Pick<Storage, "getItem"> | undefined,
+): boolean | undefined {
+  try {
+    const value = storage?.getItem(PANEL_KEY);
+    return value === "folded" ? true : value === "open" ? false : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function savePanelFolded(
+  storage: Pick<Storage, "setItem"> | undefined,
+  folded: boolean,
+): void {
+  try {
+    storage?.setItem(PANEL_KEY, folded ? "folded" : "open");
+  } catch {
+    // Storage can be blocked (private mode, settings): the choice then lasts the visit.
+  }
+}
+
+/**
+ * Whether the panel opens folded: as the viewer left it, else folded on a narrow
+ * screen (a phone), where it would cover half the map, and open elsewhere.
+ */
+export function initialPanelFolded(
+  storage: Pick<Storage, "getItem"> | undefined,
+  narrow: boolean,
+): boolean {
+  return savedPanelFolded(storage) ?? narrow;
 }
 
 /** The earliest and latest instants `?at=` accepts (UTC). */

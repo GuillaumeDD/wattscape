@@ -4,6 +4,8 @@
   "status": "En construction : les centrales suivent les données, la légende arrive.",
   "switchLanguage": "English",
   "switchLanguageLabel": "Switch to English",
+  "panelFold": "Replier le panneau",
+  "panelUnfold": "Déplier le panneau",
   "creditsData": "Données :",
   "creditsEco2mixLicence": "(Licence Ouverte 2.0), météo",
   "creditsWeatherLicence": "(CC BY 4.0)",
