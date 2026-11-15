@@ -78,8 +78,24 @@ describe("modernDensity", () => {
     expect(modernDensity(480, 270, 0)).toBe(2);
   });
 
-  it("is 1 for pixel art", () => {
+  it("halves, rounded down and never under 1, while the camera moves (Q-34)", () => {
+    for (const [width, height, factor] of [
+      [480, 270, 4],
+      [320, 180, 3],
+      [160, 90, 6],
+      [480, 270, Number.NaN],
+    ] as const) {
+      const still = modernDensity(width, height, factor);
+      const moving = modernDensity(width, height, factor, true);
+      expect(moving).toBe(Math.floor(still / 2));
+      expect(moving).toBeGreaterThanOrEqual(1);
+      expect(moving * moving * 4).toBeLessThanOrEqual(still * still);
+    }
+  });
+
+  it("is 1 for pixel art, moving or not", () => {
     expect(THEMES.pixel.density(480, 270, 4)).toBe(1);
+    expect(THEMES.pixel.density(480, 270, 4, true)).toBe(1);
   });
 });
 

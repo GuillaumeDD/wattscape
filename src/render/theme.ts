@@ -55,9 +55,11 @@ export interface Theme {
   /**
    * Output pixels per scene pixel, a whole number, for a scene of `width` × `height`
    * shown at `factor` device pixels per scene pixel: 1 for pixel art, more for a
-   * smooth theme. The scene, its camera and the marks stay in scene pixels.
+   * smooth theme. The scene, its camera and the marks stay in scene pixels. With
+   * `moving`, the density for a frame of a moving camera, which a smooth theme may
+   * draw with fewer pixels to keep its pace (PRD Q-34).
    */
-  density(width: number, height: number, factor: number): number;
+  density(width: number, height: number, factor: number, moving?: boolean): number;
   /**
    * Draws the whole still frame into `out`, which has the scene's size times the
    * density. Pure.

@@ -35,3 +35,4 @@ Statuses: `todo` / `wip` / `done`.
 | B-025 | Foldable panel                    | A button folds the panel to its title and the figures' note; remembered; folded at first on a phone (D-052)                                                         | done   |
 | B-026 | Modern theme: the map, the choice | A second theme (G-011), chosen in the panel or by `?theme=`: smooth relief, sky, towns, rivers; same camera, captions, data; frames hashed in Node and Chromium     | wip    |
 | B-027 | Modern theme: plants, landmarks   | The plants and the landmarks drawn smooth for the modern theme (pixel-art sprites enlarged until then); the direction chosen by Guillaume (Q-33)                    | todo   |
+| B-028 | Modern theme: the idle drift      | The drift in budget (30 ms/s; 45 to 47 measured, D-056): shift the last frame on a pan and draw only the edge that comes in, the picture unchanged                  | todo   |

@@ -71,6 +71,8 @@ const INTRO_MS = 1500;
  * and a third of the frame cap, for the battery (ARCHITECTURE § Performance).
  */
 const MOTION_STEP_MS = 100;
+/** How long after a drag, a wheel turn or a pinch the camera still counts as moving. */
+const SETTLE_MS = 150;
 /** How far around a sprite the mouse still shows its caption, in buffer pixels. */
 const HOVER_SLACK = 1;
 /** The same for a finger, wider than a cursor. */
@@ -144,6 +146,10 @@ export function mountSceneView(
   let lights: TownLights = {};
   let plantsVersion = 0;
   let image: ImageData | null = null;
+  /** The frames already allocated, by density: one at rest, one for a moving camera. */
+  const frames = new Map<number, { surface: Surface; still: Surface }>();
+  /** When an input last moved the camera at once (a drag, the wheel, a pinch). */
+  let lastMove = Number.NEGATIVE_INFINITY;
   let area = initialArea;
   let camera = fitBox(areaBox(coarse, null), size.width, size.height);
   /** Where the drift started from, and when; reset by every input. */
@@ -204,21 +210,39 @@ export function mountSceneView(
     showCaption();
   }
 
-  function resize(): void {
-    size = bufferSize(window.innerWidth, window.innerHeight, devicePixelRatio);
-    const density = theme.density(size.width, size.height, size.factor);
+  /**
+   * Sizes the frame for the theme's density, at rest or with the camera moving (a
+   * smooth theme then draws fewer pixels, PRD Q-34). The frames of both are kept, so
+   * that going from one to the other allocates nothing.
+   */
+  function fit(moving: boolean): void {
+    const density = theme.density(size.width, size.height, size.factor, moving);
     const width = size.width * density;
     const height = size.height * density;
     if (surface.width !== width || surface.height !== height) {
-      surface = createSurface(width, height);
-      still = createSurface(width, height);
+      const kept = frames.get(density);
+      const next =
+        kept?.surface.width === width && kept.surface.height === height
+          ? kept
+          : { surface: createSurface(width, height), still: createSurface(width, height) };
+      frames.set(density, next);
+      surface = next.surface;
+      still = next.still;
       image = null;
+      // What the still frame held was drawn for another camera: draw it again.
+      lastKey = "";
     }
     if (canvas.width !== width) canvas.width = width;
     if (canvas.height !== height) canvas.height = height;
     // Pixel art keeps its pixels square and crisp; a smooth theme drawn at fewer
     // pixels than the screen's is scaled up smoothly.
-    canvas.classList.toggle("smooth", density > 1);
+    canvas.classList.toggle("smooth", theme.density(size.width, size.height, size.factor) > 1);
+  }
+
+  function resize(): void {
+    size = bufferSize(window.innerWidth, window.innerHeight, devicePixelRatio);
+    frames.clear();
+    fit(false);
     // Whole device pixels per buffer pixel: CSS pixels are device pixels / ratio.
     canvas.style.width = `${String((size.width * size.factor) / devicePixelRatio)}px`;
     canvas.style.height = `${String((size.height * size.factor) / devicePixelRatio)}px`;
@@ -253,7 +277,9 @@ export function mountSceneView(
    * drifting), never a stale one, so a wheel turn or a drag never jumps back.
    */
   function move(step: (from: Camera) => Camera): void {
-    takeOver(animationClock.now());
+    const now = animationClock.now();
+    takeOver(now);
+    lastMove = now;
     camera = clampCamera(step(camera), roam, camera);
     base = camera;
     wake();
@@ -311,6 +337,10 @@ export function mountSceneView(
         : Math.max(target, detail - DETAIL_STEP);
     // The light follows the view's centre, every frame: a few microseconds, and it
     // stays right during a flight and under a fixed clock (B-014 brings the rest).
+    // While the camera flies, crossfades or follows an input, a smooth theme draws
+    // fewer pixels; the full frame comes back once it has settled.
+    const settling = now - lastMove < SETTLE_MS;
+    fit(flight !== null || detail !== target || settling);
     const light = viewLight(shown, clock.now());
     const scene: Scene = {
       width: size.width,
@@ -370,7 +400,13 @@ export function mountSceneView(
     // Keep going while the camera moves; the plants wake the loop by their steps only;
     // otherwise sleep until the drift starts, the light changes or an input comes.
     const untilDrift = lastInput + IDLE_DRIFT_AFTER_MS - now;
-    if (flight !== null || detail !== target || fastClock || (!reducedMotion && untilDrift <= 0))
+    if (
+      flight !== null ||
+      detail !== target ||
+      settling ||
+      fastClock ||
+      (!reducedMotion && untilDrift <= 0)
+    )
       wake();
     else if (drawn?.moving === true) sleep((step + 1) * MOTION_STEP_MS - now);
     else sleep(reducedMotion ? LIGHT_EVERY_MS : Math.min(LIGHT_EVERY_MS, untilDrift));
@@ -549,6 +585,7 @@ export function mountSceneView(
       theme = THEMES[id];
       // The frame of the theme before is not this one's: nothing of it is kept.
       drawn = null;
+      lastKey = "";
       resize();
       wake();
     },

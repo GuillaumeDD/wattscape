@@ -988,3 +988,26 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** Guillaume wants the screen's own pixels
   at the cost of slower frames; the moving camera is judged too slow (then: draw
   fewer pixels while it moves, or shift the last frame on a pan).
+
+## D-056 — Modern theme: fewer pixels while the camera moves; the tagline reworded
+
+- **Context:** PR #40 asked Guillaume two questions. Q-34: in the modern theme a
+  moving camera took about twice D-028's 25 ms. The PRD's row recommended accepting
+  it for now; the PR and the message to Guillaume proposed to draw fewer pixels
+  while the camera moves. Q-35: the tagline said « en pixel art » under both themes.
+- **Options:** Q-34: accept; fewer pixels while the camera moves; shift the last
+  frame on a pan. Q-35: keep the tagline, or reword it.
+- **Decision (Guillaume, 2026-11-15):** « Q-34 : OK for the reco. Q-35 : reword ».
+  Read by Claude as the proposal of the message he answered: while the camera
+  flies, crossfades or follows a drag, the wheel or a pinch, and for 150 ms after,
+  the modern theme draws at half its density, rounded down (1 output pixel per
+  scene pixel on a 1080p screen, a quarter of the pixels), then the full frame
+  again. The idle drift keeps the full frame: it never stops, and the scene would
+  stay soft. The tagline loses its last words: « L'électricité de votre région, en
+  direct. », "Your region's electricity, live." (Claude's wording, **proposed**).
+- **Why:** measured the same day (ARCHITECTURE § Performance): a drag goes from 32
+  to 38 ms at p95 down to 13 to 15 ms, a flight from 48 to 54 ms to 24 to 28 ms, the
+  wheel from 45 to 51 ms to 23 to 26 ms. The softer picture lasts the movement only.
+- **Revisit if:** the softer frames show too much in a flight; the idle drift, still
+  over its 30 ms/s, is to be brought in budget (then: shift the last frame on a
+  pan, B-028); Guillaume meant "accept for now", or wants another tagline.
