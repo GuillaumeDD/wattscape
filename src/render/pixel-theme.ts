@@ -691,4 +691,4 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
   };
 }
 
-export const pixelTheme: Theme = { id: "pixel", draw: drawPixelScene };
+export const pixelTheme: Theme = { id: "pixel", density: () => 1, draw: drawPixelScene };

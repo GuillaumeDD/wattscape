@@ -8,15 +8,18 @@ import { feedState, type FeedState, startPlantFeed } from "./ui/plant-feed";
 import { startReplayFeed } from "./ui/replay-feed";
 import { mountSceneView, type SceneView, type ShownCaption } from "./ui/scene-view";
 import { captionPosition, captionText } from "./ui/captions";
+import { isThemeId, THEME_IDS, type ThemeId } from "./render/theme-ids";
 import {
   atFromQuery,
   browserStorage,
   initialArea,
   initialPanelFolded,
+  initialTheme,
   sampleFromQuery,
   savePanelFolded,
   savedLocale,
   saveLocale,
+  saveTheme,
   timelapseFromQuery,
 } from "./ui/settings";
 
@@ -55,6 +58,8 @@ function render(locale: Locale): void {
   document.getElementById("language")?.setAttribute("aria-label", t("switchLanguageLabel"));
   renderPanel();
   setText("area-label", t("areaLabel"));
+  setText("theme-label", t("themeLabel"));
+  renderThemeOptions();
   setText("locate", t("useMyLocation"));
   setText("debug-link", t("debugTitle"));
   document.getElementById("scene")?.setAttribute("aria-label", t("sceneLabel"));
@@ -117,7 +122,28 @@ function renderArea(rebuild: boolean): void {
   setText("location-note", translate(locale, areaState.note));
 }
 
+const THEME_NAMES = {
+  pixel: "themePixel",
+  modern: "themeModern",
+} as const satisfies Record<ThemeId, MessageKey>;
+
+/** The list of themes (PRD G-011), in the viewer's language, the current one selected. */
+function renderThemeOptions(): void {
+  const select = document.getElementById("theme");
+  if (!(select instanceof HTMLSelectElement)) return;
+  select.replaceChildren(
+    ...THEME_IDS.map((id) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = translate(locale, THEME_NAMES[id]);
+      return option;
+    }),
+  );
+  select.value = theme;
+}
+
 const storage = browserStorage();
+let theme: ThemeId = initialTheme(location.search, storage);
 
 const areaState: AreaState = {
   area: initialArea(location.search, storage),
@@ -169,11 +195,27 @@ function renderCaption(): void {
 const canvas = document.getElementById("scene");
 const scene: SceneView | null =
   canvas instanceof HTMLCanvasElement
-    ? mountSceneView(canvas, clock, areaState.area, timelapse !== undefined, (shown) => {
-        caption = shown;
-        renderCaption();
-      })
+    ? mountSceneView(
+        canvas,
+        clock,
+        areaState.area,
+        timelapse !== undefined,
+        (shown) => {
+          caption = shown;
+          renderCaption();
+        },
+        theme,
+      )
     : null;
+
+document.getElementById("theme")?.addEventListener("change", (event) => {
+  const value = event.target instanceof HTMLSelectElement ? event.target.value : undefined;
+  // The list holds the known themes only; anything else is ignored.
+  if (!isThemeId(value)) return;
+  theme = value;
+  saveTheme(storage, theme);
+  scene?.setTheme(theme);
+});
 
 // The plants' figures: live, or a recorded sample (`?sample=`), labelled as such.
 const sample = sampleFromQuery(location.search);

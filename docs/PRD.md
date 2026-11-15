@@ -156,6 +156,10 @@ idea that the grid can be seen.
 - `prefers-reduced-motion`: no camera drift, slow animations.
 - The page's panel (title, region, language) folds to its title, so a phone shows
   the map (Guillaume, 2026-11-14; B-025).
+- Two visual themes, chosen in the panel (« Style ») or by `?theme=modern`, and
+  remembered: the pixel art, the default, and a modern one, smooth, « minimaliste,
+  élégant, apaisant » (Guillaume, 2026-11-12; G-011, B-026). Only the drawing
+  changes: the camera, the data, the captions and the light are the same.
 
 ### 4.10 Localization
 
@@ -254,7 +258,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-008 | Pumped-storage plants (STEP) pumping water uphill at night, from the `pompage` figure  | proposed |
 | G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |
-| G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | proposed |
+| G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | planned  |
 | G-012 | Relief of the neighbouring countries, so the Alps do not end in a cliff at the border  | planned  |
 | G-013 | A soak of 4 hours or more, in one stretch (Guillaume, 2026-11-12; B-013 ran 2 hours)   | proposed |
 | G-014 | Warm water shimmering on the sea off the coastal nuclear plants (PRD Q-16, Q-20)       | proposed |
@@ -299,3 +303,6 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-30 | Do the twelve landmarks of D-045 read well, dark at night?      | Yes: one or more per region; lit monuments would imitate lighting designs, often protected (P-009)   | Yes (Guillaume, 2026-11-14, D-047)                                    |
 | Q-31 | Gros-Horloge drawn with Rouen; P-004, P-011 wait (D-048)?       | Yes: sprites keep their size at every zoom; two this close draw on top of each other                 | Yes (Guillaume, 2026-11-14, D-050)                                    |
 | Q-32 | Lighthouse off the Pointe du Raz; vines, lavender wait (D-049)? | Yes: the Raz is a well-known headland; vines and lavender need the seasons (B-022)                   | Yes (Guillaume, 2026-11-14, D-050)                                    |
+| Q-33 | Modern theme: shaded relief (A) or stacked flat layers (B)?     | A: the calmest, and it reads in the mountains as in the plains; B gets busy in the Alps (D-055)      | A (Guillaume, 2026-11-14, decision card; D-055)                       |
+| Q-34 | Modern theme: accept slower frames while the camera moves?      | Accept for now: still frames are in budget; moving ones are about twice D-028's 25 ms (D-055)        | Pending (asked 2026-11-14)                                            |
+| Q-35 | The tagline says « en pixel art »: keep it under both themes?   | Keep: it names the project's first look; or drop the words if it reads wrong under the modern one    | Pending (asked 2026-11-14)                                            |

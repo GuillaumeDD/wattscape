@@ -956,3 +956,35 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   (S-025: the Tricastin under Pierrelatte).
 - **Why:** each cost a provisional caption or a manual check in this step.
 - **Revisit if:** a rule turns out to cost more than the slip it prevents.
+
+## D-055 — The modern theme: a shaded relief, drawn smooth beside the pixel art
+
+- **Context:** Guillaume asked for a second look, chosen by the viewer, « minimaliste,
+  élégant, apaisant », « doit appeler à la contemplation », after his game Return of
+  the runners (2026-11-12, G-011), and gave the go-ahead on 2026-11-14. That game's
+  art direction (S-026) is vectors drawn in code at the screen's pixels, soft
+  shadows, light added over the scene and a vignette.
+- **Options:** for the look, two mockups from the same scene model
+  (`docs/screenshots/step-6-mockup-*.png`): (A) a shaded relief, continuous tints and
+  a soft hill shading; (B) flat layers by altitude, stacked like cut paper, each
+  with a soft shadow and a lit edge, the closest to that game's terrain slabs. For
+  the resolution: the screen's own pixels, or fewer, scaled up. For the plants and
+  the landmarks: drawn anew at once, or the pixel-art sprites enlarged meanwhile.
+- **Decision:** (A), chosen by Guillaume on the decision card of 2026-11-14 (PRD
+  Q-33). The rest is Claude's, the same day, **proposed** until Guillaume has seen
+  the deployed build (PRD Q-34 open): pixel art stays the default, and the theme is
+  chosen in the panel or by `?theme=modern`. It draws 2 output pixels per scene pixel, more
+  only in a small window. The plants and the landmarks keep their pixel-art sprites
+  in this theme until B-027, so that every caption and every motion is there from
+  the first day. The view, the camera and the data are those of the pixel art: only
+  the drawing changes (ARCHITECTURE § The modern theme).
+- **Why:** (A) is the calmest, and reads in the mountains as in the plains, where
+  (B) gets busy; a small PR that shows the whole map beats a large one that waits
+  for every sprite drawn anew. On a 1080p screen (4 device pixels per scene pixel),
+  a frame at 3 output pixels per scene pixel takes 38 to 46 ms in Node, against 17
+  to 24 ms at 2: the camera's budget is 25 ms (D-028). Even so, a moving camera is
+  over that budget in this theme once in Chromium (ARCHITECTURE § Performance),
+  which Q-34 asks Guillaume to accept or not.
+- **Revisit if:** Guillaume wants the screen's own pixels
+  at the cost of slower frames; the moving camera is judged too slow (then: draw
+  fewer pixels while it moves, or shift the last frame on a pan).

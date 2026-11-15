@@ -12,6 +12,7 @@ import { LANDMARKS } from "../src/map/landmarks.ts";
 import { PLANT_SITES } from "../src/map/plants.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine.ts";
+import { drawModernScene } from "../src/render/modern-theme.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, type Surface } from "../src/render/surface.ts";
 import { drawTestCard } from "../src/render/test-card.ts";
@@ -31,6 +32,8 @@ import nightStep from "../tests/fixtures/eco2mix/2026-11-12-all-regions-0100z.js
 
 export const FRAME_WIDTH = 480;
 export const FRAME_HEIGHT = 270;
+/** Output pixels per scene pixel of the modern theme's frames. */
+export const MODERN_DENSITY = 2;
 
 /**
  * The plants as two recorded steps of every region show them (DS-01): 2026-11-12 at
@@ -83,6 +86,19 @@ function scene(
   return out;
 }
 
+/** The same scene by the modern theme, at the density a full HD screen gets. */
+function modern(
+  focus: CellRegion | null,
+  camera: Camera,
+  sunElevation: number,
+  seconds?: number,
+): Surface {
+  const out = createSurface(FRAME_WIDTH * MODERN_DENSITY, FRAME_HEIGHT * MODERN_DENSITY);
+  const drawn = drawModernScene(referenceScene(focus, camera, sunElevation), out);
+  if (seconds !== undefined) drawn.animate(out, seconds);
+  return out;
+}
+
 const framed = (region: CellRegion | null): Camera =>
   fitBox(areaBox(coarseLayer(), region), FRAME_WIDTH, FRAME_HEIGHT);
 
@@ -103,4 +119,14 @@ export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
   "plants-normandie-day-t1.3": () => scene("28", framed("28"), 35, 1.3),
   "plants-normandie-night-t1.3": () => scene("28", framed("28"), -20, 1.3),
   "plants-rhone-day-t0.7": () => scene("84", { ...kmOf(45.0, 4.9), scale: 1.6 }, 35, 0.7),
+  // The modern theme (G-011), at 2 output pixels per scene pixel: France with its
+  // sky, a region by day, at the golden hour and at night with its plants moving,
+  // the blend between the two layers, and the relief close up.
+  "modern-france-day": () => modern(null, framed(null), 35),
+  "modern-france-night": () => modern(null, framed(null), -20),
+  "modern-normandie-day-t1.3": () => modern("28", framed("28"), 35, 1.3),
+  "modern-normandie-night-t1.3": () => modern("28", framed("28"), -20, 1.3),
+  "modern-auvergne-rhone-alpes-golden": () => modern("84", framed("84"), 2),
+  "modern-crossfade-day": () => modern(null, { ...kmOf(45.5, 3), scale: 0.6 }, 35),
+  "modern-mont-blanc-day": () => modern("84", { ...kmOf(45.83, 6.86), scale: 4 }, 35),
 };

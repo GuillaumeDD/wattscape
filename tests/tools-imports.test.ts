@@ -25,6 +25,7 @@ describe("modules the tools import", () => {
     "e2e/reference-frames.ts",
     "src/map/layers.ts",
     "src/render/pixel-theme.ts",
+    "src/render/modern-theme.ts",
     "src/render/theme.ts",
     "src/scene/camera.ts",
     "src/scene/scene.ts",

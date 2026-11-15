@@ -1,13 +1,15 @@
 /**
  * Settings from the URL and from browser storage. Both are untrusted (ARCHITECTURE §
- * Security): only a known area code is accepted, anything else is ignored.
+ * Security): only a known area code or theme is accepted, anything else is ignored.
  */
 import { isEco2mixArea, type Eco2mixArea } from "../data/eco2mix";
 import { isLocale, type Locale } from "../i18n";
+import { DEFAULT_THEME_ID, isThemeId, type ThemeId } from "../render/theme-ids";
 
 const AREA_KEY = "wattscape.area";
 const LOCALE_KEY = "wattscape.locale";
 const PANEL_KEY = "wattscape.panel";
+const THEME_KEY = "wattscape.theme";
 
 /** `localStorage`, or `undefined` where merely touching it throws (blocked storage). */
 export function browserStorage(): Storage | undefined {
@@ -70,6 +72,41 @@ export function saveLocale(storage: Pick<Storage, "setItem"> | undefined, locale
   } catch {
     // Storage can be blocked (private mode, settings): the choice then lasts the visit.
   }
+}
+
+/** `?theme=modern` or `?theme=pixel`; `undefined` when absent, repeated or not a theme. */
+export function themeFromQuery(search: string): ThemeId | undefined {
+  if (search.length > 2048) return undefined;
+  const values = new URLSearchParams(search).getAll("theme");
+  if (values.length !== 1) return undefined;
+  const value = values[0];
+  return isThemeId(value) ? value : undefined;
+}
+
+/** The theme remembered in this browser, if storage works and holds a known one. */
+export function savedTheme(storage: Pick<Storage, "getItem"> | undefined): ThemeId | undefined {
+  try {
+    const value = storage?.getItem(THEME_KEY);
+    return isThemeId(value) ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function saveTheme(storage: Pick<Storage, "setItem"> | undefined, theme: ThemeId): void {
+  try {
+    storage?.setItem(THEME_KEY, theme);
+  } catch {
+    // Storage can be blocked (private mode, settings): the choice then lasts the visit.
+  }
+}
+
+/** The theme to open with: the URL wins, then the remembered choice, then pixel art. */
+export function initialTheme(
+  search: string,
+  storage: Pick<Storage, "getItem"> | undefined,
+): ThemeId {
+  return themeFromQuery(search) ?? savedTheme(storage) ?? DEFAULT_THEME_ID;
 }
 
 /** Whether the page's panel was left folded in this browser, if storage says so. */

@@ -5,13 +5,17 @@ import {
   atFromQuery,
   initialArea,
   initialPanelFolded,
+  initialTheme,
   saveArea,
   savedArea,
   savedLocale,
   savedPanelFolded,
+  savedTheme,
   saveLocale,
   savePanelFolded,
+  saveTheme,
   sampleFromQuery,
+  themeFromQuery,
 } from "../src/ui/settings";
 
 function memoryStorage(initial: Record<string, string> = {}): Storage {
@@ -186,5 +190,45 @@ describe("sampleFromQuery (B-012)", () => {
       `?sample=day&x=${"a".repeat(3000)}`,
     ])
       expect(sampleFromQuery(bad), bad).toBeUndefined();
+  });
+});
+
+describe("theme (?theme=, G-011)", () => {
+  it("reads a known theme, once, and nothing else", () => {
+    expect(themeFromQuery("?theme=modern")).toBe("modern");
+    expect(themeFromQuery("?area=28&theme=pixel")).toBe("pixel");
+    for (const bad of [
+      "",
+      "?theme=",
+      "?theme=Modern",
+      "?theme=modern%20",
+      "?theme=modern&theme=modern",
+      "?theme=<script>",
+      "?theme=__proto__",
+      `?theme=modern&x=${"a".repeat(3000)}`,
+    ])
+      expect(themeFromQuery(bad), bad).toBeUndefined();
+  });
+
+  it("remembers a known theme only, and survives a blocked storage", () => {
+    const storage = memoryStorage();
+    expect(savedTheme(storage)).toBeUndefined();
+    saveTheme(storage, "modern");
+    expect(savedTheme(storage)).toBe("modern");
+    expect(savedTheme(memoryStorage({ "wattscape.theme": "neon" }))).toBeUndefined();
+    expect(savedTheme(throwing)).toBeUndefined();
+    expect(savedTheme(undefined)).toBeUndefined();
+    expect(() => {
+      saveTheme(throwing, "modern");
+    }).not.toThrow();
+  });
+
+  it("opens with the URL's theme, then the remembered one, then pixel art", () => {
+    const remembered = memoryStorage({ "wattscape.theme": "modern" });
+    expect(initialTheme("?theme=pixel", remembered)).toBe("pixel");
+    expect(initialTheme("", remembered)).toBe("modern");
+    expect(initialTheme("?theme=neon", remembered)).toBe("modern");
+    expect(initialTheme("", memoryStorage())).toBe("pixel");
+    expect(initialTheme("", throwing)).toBe("pixel");
   });
 });

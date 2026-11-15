@@ -9,19 +9,21 @@
  * at night (−20°); a close view of the Mont Blanc massif; and four moments of the
  * flight from France to Normandie, the crossfade between the 4 km and 1 km layers
  * among them, in one picture. Then the plants (B-012), the towns (B-014), the
- * rivers (B-023) and the landmarks (B-016), as each section says.
+ * rivers (B-023) and the landmarks (B-016), as each section says; and the modern
+ * theme (G-011, `step-6-modern-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine.ts";
+import { drawModernScene } from "../src/render/modern-theme.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, hashSurface, type Surface } from "../src/render/surface.ts";
 import { areaBox, type Camera, fitBox, flightAt } from "../src/scene/camera.ts";
 import { LANDMARKS } from "../src/map/landmarks.ts";
 import { detailForScale, bakedTowns, type Scene } from "../src/scene/scene.ts";
 import { lightAt } from "../src/sky/light.ts";
-import { recordedTownLights, referenceScene } from "../e2e/reference-frames.ts";
+import { MODERN_DENSITY, recordedTownLights, referenceScene } from "../e2e/reference-frames.ts";
 import { writePng } from "./png.ts";
 
 const OUT = process.argv[2] ?? "docs/screenshots";
@@ -255,3 +257,22 @@ dayAndNight(
     console.log(`${file}: ${hashSurface(sheet)}`);
   }
 }
+
+// The modern theme (G-011), at 2 output pixels per scene pixel: France and two
+// regions as the app frames them, by day and at night, with the recorded plants.
+for (const [name, focus] of [
+  ["france", null],
+  ["normandie", "28"],
+  ["auvergne-rhone-alpes", "84"],
+] as const)
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+    const surface = createSurface(WIDTH * MODERN_DENSITY, HEIGHT * MODERN_DENSITY);
+    drawModernScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
+    const file = `${OUT}/step-6-modern-${name}-${time}.png`;
+    writePng(file, surface);
+    console.log(`${file}: ${hashSurface(surface)}`);
+  }

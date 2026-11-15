@@ -33,3 +33,5 @@ Statuses: `todo` / `wip` / `done`.
 | B-023 | Rivers on the map                 | Rivers of reach 100 or more baked from BD TOPO (DS-13, D-039): the great ones on the national view, all from close; day and night; frame snapshots                  | done   |
 | B-024 | Camera budget, measured again     | `tools/perf.ts frames` on a quiet machine, three runs: wheel zoom and flight at p95 against the 25 ms of D-028; profile and fix if over                             | todo   |
 | B-025 | Foldable panel                    | A button folds the panel to its title and the figures' note; remembered; folded at first on a phone (D-052)                                                         | done   |
+| B-026 | Modern theme: the map, the choice | A second theme (G-011), chosen in the panel or by `?theme=`: smooth relief, sky, towns, rivers; same camera, captions, data; frames hashed in Node and Chromium     | wip    |
+| B-027 | Modern theme: plants, landmarks   | The plants and the landmarks drawn smooth for the modern theme (pixel-art sprites enlarged until then); the direction chosen by Guillaume (Q-33)                    | todo   |

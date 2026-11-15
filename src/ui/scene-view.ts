@@ -11,7 +11,14 @@ import { coarseLayer, fineLayer, type TerrainLayer } from "../map/layers";
 import { CONSUMPTION_RANGES } from "../map/consumption";
 import { LANDMARKS } from "../map/landmarks";
 import { PLANT_SITES } from "../map/plants";
-import { DEFAULT_THEME, type Drawn, type Mark } from "../render/theme";
+import {
+  DEFAULT_THEME,
+  type Drawn,
+  type Mark,
+  type Theme,
+  THEMES,
+  type ThemeId,
+} from "../render/theme";
 import { type Box, markAt } from "./captions";
 import { createSurface, type Surface } from "../render/surface";
 import {
@@ -81,6 +88,8 @@ export interface SceneView {
    * dated after the clock's time (`?at=` in the past) does not.
    */
   setReadings(readings: RegionalReadings | null, sample?: boolean): void;
+  /** Draws the scene with another theme (PRD G-011), from the next frame on. */
+  setTheme(id: ThemeId): void;
 }
 
 interface Flight {
@@ -114,16 +123,21 @@ export function mountSceneView(
   fastClock = false,
   /** Called with the mark whose caption shows, wherever it moves, or null to hide it. */
   onCaption: (shown: ShownCaption | null) => void = () => undefined,
+  /** The theme the scene opens with. */
+  initialTheme: ThemeId = DEFAULT_THEME.id,
 ): SceneView {
   const context = canvas.getContext("2d");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const coarse = coarseLayer();
   const roam = roamBox();
 
+  let theme: Theme = THEMES[initialTheme];
+  /** The scene's size, in scene pixels: what the camera, the marks and the inputs count in. */
   let size: BufferSize = bufferSize(window.innerWidth, window.innerHeight, devicePixelRatio);
-  let surface: Surface = createSurface(size.width, size.height);
+  /** The frame the theme draws: the scene's size times the theme's density. */
+  let surface: Surface = createSurface(0, 0);
   /** The still frame, without the plants' motion; `surface` is it plus the motion. */
-  let still: Surface = createSurface(size.width, size.height);
+  let still: Surface = createSurface(0, 0);
   let drawn: Drawn | null = null;
   let lastStep = Number.NaN;
   let plants: readonly ScenePlant[] = scenePlants(PLANT_SITES, null, clock.now());
@@ -192,13 +206,19 @@ export function mountSceneView(
 
   function resize(): void {
     size = bufferSize(window.innerWidth, window.innerHeight, devicePixelRatio);
-    if (surface.width !== size.width || surface.height !== size.height) {
-      surface = createSurface(size.width, size.height);
-      still = createSurface(size.width, size.height);
+    const density = theme.density(size.width, size.height, size.factor);
+    const width = size.width * density;
+    const height = size.height * density;
+    if (surface.width !== width || surface.height !== height) {
+      surface = createSurface(width, height);
+      still = createSurface(width, height);
       image = null;
     }
-    if (canvas.width !== size.width) canvas.width = size.width;
-    if (canvas.height !== size.height) canvas.height = size.height;
+    if (canvas.width !== width) canvas.width = width;
+    if (canvas.height !== height) canvas.height = height;
+    // Pixel art keeps its pixels square and crisp; a smooth theme drawn at fewer
+    // pixels than the screen's is scaled up smoothly.
+    canvas.classList.toggle("smooth", density > 1);
     // Whole device pixels per buffer pixel: CSS pixels are device pixels / ratio.
     canvas.style.width = `${String((size.width * size.factor) / devicePixelRatio)}px`;
     canvas.style.height = `${String((size.height * size.factor) / devicePixelRatio)}px`;
@@ -309,6 +329,7 @@ export function mountSceneView(
     // Redraw only when what is drawn changes: the drift moves the camera by a pixel
     // every second or two, and a still scene costs nothing.
     const key = [
+      theme.id,
       size.width,
       size.height,
       // The theme's own offsets: the picture moves only when these do.
@@ -331,7 +352,7 @@ export function mountSceneView(
     if (context !== null && (redraw || (drawn?.moving === true && step !== lastStep))) {
       if (redraw) {
         lastKey = key;
-        drawn = DEFAULT_THEME.draw(scene, still);
+        drawn = theme.draw(scene, still);
         // The caption follows its mark, or goes when the mark leaves the frame.
         showCaption();
       }
@@ -521,6 +542,14 @@ export function mountSceneView(
       plants = scenePlants(PLANT_SITES, readings, now);
       lights = townLights(readings, CONSUMPTION_RANGES, now);
       plantsVersion++;
+      wake();
+    },
+    setTheme(id: ThemeId): void {
+      if (theme.id === id) return;
+      theme = THEMES[id];
+      // The frame of the theme before is not this one's: nothing of it is kept.
+      drawn = null;
+      resize();
       wake();
     },
   };

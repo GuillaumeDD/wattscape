@@ -3,7 +3,7 @@
  * site, served by `vite preview` (never the dev server). Run by hand:
  *
  *   npm run build
- *   node --experimental-strip-types tools/perf.ts frames [--throttle 4]
+ *   node --experimental-strip-types tools/perf.ts frames [--throttle 4] [--theme modern]
  *   node --experimental-strip-types tools/perf.ts soak <minutes> [out.jsonl]
  *
  * `frames`: a 1920 × 1080 window (a 480 × 270 buffer, factor 4) through the views a
@@ -125,7 +125,7 @@ if (mode === "frames") {
     ["night", NIGHT],
   ] as const) {
     const { page, cdp } = await newPage();
-    await page.goto(`${BASE}?area=FR&${query}`);
+    await page.goto(`${BASE}?area=FR&${query}&theme=${flag("--theme") ?? "pixel"}`);
     await page.waitForTimeout(3000);
     await measure(`France still, ${label}`, page, cdp, 8000);
 

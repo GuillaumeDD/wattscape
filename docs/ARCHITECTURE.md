@@ -617,9 +617,15 @@ validates them on the deployed build.
 
 The scene model (`src/scene/scene.ts`) says what a frame shows: its size, the
 camera, the light, the region in focus, the terrain layers, the level of detail and
-the towns. A **theme** (`src/render/theme.ts`) turns it into pixels; the pixel-art
-theme (`src/render/pixel-theme.ts`) is the only one so far, and a second one can
-come without touching the model (PRD G-011). The step-2 mockups
+the towns. A **theme** (`src/render/theme.ts`) turns it into pixels: the pixel-art
+theme (`src/render/pixel-theme.ts`), the default, and the modern one
+(`src/render/modern-theme.ts`, § The modern theme), which came without touching the
+model but for the rivers' lines, added to a layer (`TerrainLayer.courses`). The
+viewer chooses in the panel or by `?theme=modern` (`src/ui/settings.ts`; the names
+are in `src/render/theme-ids.ts`), and the choice is remembered in `localStorage`.
+A theme says how many output pixels it draws per scene pixel (`density`: 1 for
+pixel art); the scene, its camera, the marks and the inputs stay in scene pixels,
+so the framing, the captions and the controls are the same under both. The step-2 mockups
 (`docs/screenshots/step-2-mockup-*.png`) were drawn by the first version of this
 theme; `tools/screenshots.ts` writes the step-3 frames (`step-3-*.png`): France,
 Normandie and Auvergne-Rhône-Alpes as the app frames them, the Mont Blanc massif
@@ -662,6 +668,52 @@ How the terrain draws, aiming at calm, elegant pixel art (Guillaume, 2026-11-11)
 
 BD ALTI covers France only, so the land abroad is flat: at the borders of the Alps
 and the Pyrenees, French mountains end in a cliff (PRD Q-11).
+
+### The modern theme (B-026)
+
+Asked by Guillaume on 2026-11-12 (G-011): a second look, « minimaliste, élégant,
+apaisant », after his game Return of the runners (S-026). Two mockups were shown on
+2026-11-14 (`docs/screenshots/step-6-mockup-*.png`): A, a shaded relief in
+continuous tints, and B, flat layers stacked like cut paper. Guillaume chose A the
+same day (PRD Q-33, D-055); what follows is **proposed** until he has seen it on
+the deployed build. `tools/screenshots.ts` writes its frames
+(`step-6-modern-*.png`).
+
+- **Same view:** north up, 2:1, the relief raised by the same 250 m per kilometre of
+  width, and the pixel-art theme's own offsets, so a camera frames the same ground
+  and the picture moves when that one's would.
+- **Resolution:** 2 output pixels per scene pixel (960 × 540 on a 1080p screen),
+  more in a small window, up to the device's pixels, while the frame stays under
+  600 000 pixels (`modernDensity`); the canvas scales the rest up smoothly
+  (`#scene.smooth`). A frame costs about 35 ns a pixel (§ Performance).
+- **Relief:** the altitude of each cell (its class's floor) is smoothed by two
+  [1 2 1] passes and read between cells (bilinear). Each row of the ground is drawn
+  from the front to the back under a horizon per column, so a mountain hides what
+  is behind it, and each pixel is drawn once.
+- **Land:** a tint by altitude, linear between keys (`MODERN_TINTS`: greens up to
+  800 m, greys from 1 300 m, near white from 2 400 m), times a hill shading from
+  the north-west read over 4 km on both layers. Abroad and outside the region in
+  focus the land is paler and greyer by day; as the sun sets the veil turns to a
+  shade, in eight steps, because a pale veil would outshine the region at night.
+- **Sea:** a gradient by distance to the coast (a 3-4 chamfer distance, so the
+  bands follow the coast in curves), pale along the shore. The coast is cut where
+  the land's mask, read between cells, crosses a half: sharp at any zoom.
+- **Towns:** a warm wash by day; at night, a glow added over the light, around each
+  town of a region with a figure, stronger the more the region consumes (the same
+  `lampLevels` as pixel art: § Data-to-scene mapping); none without a figure.
+- **Rivers:** their lines (`courses`), on French land, one to two pixels wide,
+  hidden by the relief in front.
+- **Light:** the land's colour times one factor per channel: white by day, warm at
+  sunset, blue at night (`modernLight`), continuous in the darkness of § Sky, light
+  and weather. The sky is a gradient between the same three moments, with stars at
+  night; the land melts into it over 140 km at the map's north edge; a vignette
+  darkens the corners by up to 30 %.
+- **Plants and landmarks:** the pixel-art sprites for now, each of their pixels a
+  square of output pixels, hidden where the relief in front covers them; the same
+  marks, so the captions are the same. Their own drawings are B-027.
+- **Determinism:** additions, multiplications, divisions, floors and square roots
+  only (IEEE 754 rounds those exactly); no `Math.sin`, `exp` or `hypot`. Its frames
+  are hashed in Node and in Chromium like the others.
 
 ### Camera and controls (B-011)
 
@@ -782,12 +834,14 @@ Chromium only.
 
 - The renderer draws into a `Surface` (`src/render/surface.ts`: an RGBA
   `Uint8ClampedArray` with width and height). In the browser, `ui/` blits it with
-  `putImageData` into a canvas scaled by CSS with `image-rendering: pixelated`; in
-  tests, the same buffer is hashed (FNV-1a over the size and the bytes,
+  `putImageData` into a canvas scaled by CSS with `image-rendering: pixelated`
+  (smoothly for the modern theme, whose surface is the scene's size times its
+  density); in tests, the same buffer is hashed (FNV-1a over the size and the bytes,
   `hashSurface`).
 - **Frame hashes:** `tests/fixtures/frames/hashes.json` records the hash of each
   reference frame of `e2e/reference-frames.ts` (the test card, France, Normandie,
-  Auvergne-Rhône-Alpes, the Mont Blanc massif and a crossfade). Node checks them in
+  Auvergne-Rhône-Alpes, the Mont Blanc massif and a crossfade, in pixel art and in
+  the modern theme). Node checks them in
   the unit tests, and Chromium in `e2e/frame-hash.spec.ts` (`npm run e2e`: Vite
   builds `e2e/*.html` into `dist-e2e/`, Playwright opens them);
   `e2e/scene.spec.ts` drives the scene with the mouse and the keys. Firefox and
@@ -855,6 +909,31 @@ Budget (D-028):
   load). Met: the same soak made 8
   requests, one every 15 minutes, all to `odre.opendatasoft.com`.
 
+**The modern theme** (B-026), same tool with `--theme modern`, same machine, on
+2026-11-14, one run each, pixel art measured just before it: a 1920 × 1080 window
+draws 960 × 540 pixels (2 per scene pixel).
+
+| View                          | Pixel art p95 | Modern p50 | Modern p95 | Modern busy  |
+| ----------------------------- | ------------- | ---------- | ---------- | ------------ |
+| France, still                 | 0.4–0.5 ms    | 0.9–1.0 ms | 1.4–1.7 ms | 18–25 ms/s   |
+| Normandie, plants moving      | 0.4–0.5 ms    | 1.0–1.1 ms | 1.3–1.5 ms | 20–24 ms/s   |
+| Idle drift (Normandie)        | 2.0–2.1 ms    | 0.9–1.0 ms | 21–22 ms   | 52–54 ms/s   |
+| Drag pan (Normandie)          | 2.3–2.4 ms    | 21 ms      | 32–38 ms   | 347–357 ms/s |
+| Flight France ↔ Normandie     | 17–18 ms      | 20–22 ms   | 48–54 ms   | 402–430 ms/s |
+| Wheel zoom in and out (worst) | 18 ms         | 22–23 ms   | 45–51 ms   | 527–533 ms/s |
+
+Against the budget: a still scene and moving plants are within it; the idle drift
+is not (a whole frame, about 20 ms, each time the camera moves by a scene pixel:
+52 to 54 ms of work per second for 30), and a moving camera is not either (about
+twice the 25 ms at p95; the blend between the two layers draws both, 48 ms in
+Node). The first frame of the 1 km layer costs about 220 to 260 ms in Node, once
+(its smoothed relief, its distances to the coast and its colours), and a change
+of region, of the towns' light or of the veil at dusk about 45 ms (the land's
+texture). Open, PRD Q-34: accept, or draw fewer pixels while the camera moves, or
+shift the last frame on a pan. In Node, where the time goes at 960 × 540: the
+terrain 17 to 20 ms (about 35 ns a pixel, half of it the walk and the write of
+the pixels, a sixth the reading of the colours), the rivers 2 to 6 ms.
+
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame
 walks 300 000 to 500 000 cells for 130 000 pixels (10 to 20 ms in Node), and the
@@ -883,6 +962,7 @@ only a coarser layer between 0.5 and 1.4 would cut it, which changes the picture
   range (|MW| ≤ 200 000, load factors 0–200 %), bounded strings, known area codes, a
   `?at=` read field by field and checked against the calendar, `?sample=` among
   `day` and `night` only (a recorded step, loaded as a chunk from the site itself),
+  `?theme=` and the remembered theme among `pixel` and `modern` only,
   `?timelapse=` `day` only, and its answer a bare array of at most 1 212 rows and
   2 MB, each row through the same parser as the live step;
   they never throw past
