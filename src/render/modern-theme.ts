@@ -50,11 +50,18 @@ export const MODERN_PIXEL_BUDGET = 600_000;
  * Output pixels per scene pixel, for a scene of `width` × `height` shown at `factor`
  * device pixels per scene pixel: 2, or more in a small window, up to the device's
  * own pixels, while the budget allows; the canvas scales the rest up, smoothly.
+ * While the camera moves (`moving`), half of that, rounded down: a quarter of the
+ * pixels or fewer, softer for the time of the movement (PRD Q-34, D-056).
  */
-export function modernDensity(width: number, height: number, factor: number): number {
+export function modernDensity(
+  width: number,
+  height: number,
+  factor: number,
+  moving = false,
+): number {
   let d = Number.isFinite(factor) ? Math.max(2, Math.floor(factor)) : 2;
   while (d > 2 && width * height * d * d > MODERN_PIXEL_BUDGET) d--;
-  return d;
+  return moving ? Math.floor(d / 2) : d;
 }
 
 const hex = (s: string): Rgb => [

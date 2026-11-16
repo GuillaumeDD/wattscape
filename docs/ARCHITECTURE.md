@@ -624,7 +624,7 @@ model but for the rivers' lines, added to a layer (`TerrainLayer.courses`). The
 viewer chooses in the panel or by `?theme=modern` (`src/ui/settings.ts`; the names
 are in `src/render/theme-ids.ts`), and the choice is remembered in `localStorage`.
 A theme says how many output pixels it draws per scene pixel (`density`: 1 for
-pixel art); the scene, its camera, the marks and the inputs stay in scene pixels,
+pixel art; the modern one halves its own while the camera moves, D-056); the scene, its camera, the marks and the inputs stay in scene pixels,
 so the framing, the captions and the controls are the same under both. The step-2 mockups
 (`docs/screenshots/step-2-mockup-*.png`) were drawn by the first version of this
 theme; `tools/screenshots.ts` writes the step-3 frames (`step-3-*.png`): France,
@@ -929,10 +929,26 @@ twice the 25 ms at p95; the blend between the two layers draws both, 48 ms in
 Node). The first frame of the 1 km layer costs about 220 to 260 ms in Node, once
 (its smoothed relief, its distances to the coast and its colours), and a change
 of region, of the towns' light or of the veil at dusk about 45 ms (the land's
-texture). Open, PRD Q-34: accept, or draw fewer pixels while the camera moves, or
-shift the last frame on a pan. In Node, where the time goes at 960 × 540: the
+texture). In Node, where the time goes at 960 × 540: the
 terrain 17 to 20 ms (about 35 ns a pixel, half of it the walk and the write of
 the pixels, a sixth the reading of the colours), the rivers 2 to 6 ms.
+
+Since Guillaume's answer to Q-34 (D-056), the modern theme draws at half its
+density while the camera flies, crossfades or follows an input, and for 150 ms
+after (`SETTLE_MS`): 480 × 270 pixels in that window, softer, then the full frame
+again. Measured on 2026-11-15, same tool, one run by day and one at night:
+
+| View                          | Modern p50 | Modern p95 | Modern busy  |
+| ----------------------------- | ---------- | ---------- | ------------ |
+| Idle drift (Normandie)        | 0.8 ms     | 28–29 ms   | 45–47 ms/s   |
+| Drag pan (Normandie)          | 8.2–8.5 ms | 13–15 ms   | 160–174 ms/s |
+| Flight France ↔ Normandie     | 9.1–9.3 ms | 24–28 ms   | 217–226 ms/s |
+| Wheel zoom in and out (worst) | 11–13 ms   | 23–26 ms   | 233–264 ms/s |
+
+A drag is within the 25 ms; the flight and the wheel sit at its edge (the frames
+at p95 are those of the blend between the two layers, and the full frame that ends
+a movement). The idle drift keeps the full frame, since it never stops, and stays
+over its 30 ms/s: open, B-028 (shift the last frame on a pan).
 
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame
