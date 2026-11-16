@@ -133,8 +133,8 @@ export function turbineCount(site: Pick<PlantSite, "mw" | "offshore">): number {
 }
 
 /** Turbines are this many pixels apart, and this tall. */
-const TURBINE_GAP = 5;
-const MAST_PX = 7;
+export const TURBINE_GAP = 5;
+export const MAST_PX = 7;
 
 /** Size in pixels a sprite is drawn at: full, or the national view's markers. */
 export type SpriteSize = "full" | "marker";

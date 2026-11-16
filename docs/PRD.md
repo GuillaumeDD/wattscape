@@ -258,7 +258,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-008 | Pumped-storage plants (STEP) pumping water uphill at night, from the `pompage` figure  | proposed |
 | G-009 | Installable PWA, and a real OS screensaver wrapper                                     | proposed |
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |
-| G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | planned  |
+| G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | done     |
 | G-012 | Relief of the neighbouring countries, so the Alps do not end in a cliff at the border  | planned  |
 | G-013 | A soak of 4 hours or more, in one stretch (Guillaume, 2026-11-12; B-013 ran 2 hours)   | proposed |
 | G-014 | Warm water shimmering on the sea off the coastal nuclear plants (PRD Q-16, Q-20)       | proposed |
@@ -306,3 +306,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-33 | Modern theme: shaded relief (A) or stacked flat layers (B)?     | A: the calmest, and it reads in the mountains as in the plains; B gets busy in the Alps (D-055)      | A (Guillaume, 2026-11-14, decision card; D-055)                       |
 | Q-34 | Modern theme: accept slower frames while the camera moves?      | Accept for now: still frames are in budget; moving ones are about twice D-028's 25 ms (D-055)        | Fewer pixels while it moves (Guillaume, 2026-11-15, D-056)            |
 | Q-35 | The tagline says « en pixel art »: keep it under both themes?   | Keep: it names the project's first look; or drop the words if it reads wrong under the modern one    | Reword (Guillaume, 2026-11-15, D-056)                                 |
+| Q-36 | Modern theme sprites: enlarged, smoothed, or drawn anew?        | Drawn anew: fine shapes sit best on the shaded relief; smoothing alone changes little (D-057)        | Drawn anew (Guillaume, 2026-11-16, decision card; D-057)              |

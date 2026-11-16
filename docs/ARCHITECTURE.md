@@ -481,9 +481,13 @@ checked against real screens.
 | Solar fields                        | `tch_solaire`     | glints on a·33 % of the panel cells, a new draw every 0.5 s (so none at night)   |
 | Dams                                | `tch_hydraulique` | ceil(3·a) streams of water falling down the face                                 |
 | Thermal plant chimneys              | `tch_thermique`   | smoke 2 + 7·a px high, a puff every 3 / (0.3 + 0.7·a) s                          |
-| Bioenergy plants                    | `tch_bioenergies` | a small smoke, 2 + 4·a px high; its window lit at night when a > 0               |
+| Bioenergy plants                    | `tch_bioenergies` | a small smoke, 2 + 4·a px high; its window lit at night when a ≥ 0.5             |
 | Town windows lit; power lines later | `consommation`    | l = (c − p5) / (p95 − p5), clamped 0–1; lamps on 4 + 12·l of 16 town pixels      |
 | Legend: stacked bar and figures     | MW per source     | shares of total production; import if `ech_physiques` > 0, export if < 0 (B-019) |
+
+Both themes draw these rows from the same figures with the same formulas; the
+modern one (`src/render/art/modern-plants.ts`) draws a puff as a soft spot trailing
+two fainter ones, and the blades of a farm that does not turn stand still, one up.
 
 A missing figure shows the element **idle**: no motion, no glow, never a guessed
 value. That is a region without a reading (not loaded, unavailable, late for the
@@ -708,12 +712,24 @@ the deployed build. `tools/screenshots.ts` writes its frames
   and weather. The sky is a gradient between the same three moments, with stars at
   night; the land melts into it over 140 km at the map's north edge; a vignette
   darkens the corners by up to 30 %.
-- **Plants and landmarks:** the pixel-art sprites for now, each of their pixels a
-  square of output pixels, hidden where the relief in front covers them; the same
-  marks, so the captions are the same. Their own drawings are B-027.
+- **Plants** (B-027, D-057): their own drawings (`src/render/art/modern-plants.ts`),
+  shapes filled through a brush that smooths their edge over one output pixel:
+  cooling towers narrow at the waist with a plume, reactors under a dome, turbines
+  with a tapered mast and three blades, a slanted solar array, a dam, a hall with
+  its stack. Lit from the north-west, a soft shadow at the foot, hidden where the
+  relief in front covers them. Each stays within the box of its pixel-art sprite,
+  so the marks and the captions are the same, and moves by the same figures and
+  formulas (§ Data-to-scene mapping). On the national view, a dot of the source's
+  colour.
+- **Landmarks:** the pixel-art sprites, smoothed, until each has its own drawing
+  (B-027): a sprite's pixels are gathered, its outline drawn at the half level of
+  their coverage read between their centres (a stair becomes a slope), with the
+  same shadow.
 - **Determinism:** additions, multiplications, divisions, floors and square roots
-  only (IEEE 754 rounds those exactly); no `Math.sin`, `exp` or `hypot`. Its frames
-  are hashed in Node and in Chromium like the others.
+  only (IEEE 754 rounds those exactly) for the still frame; no `Math.sin`, `exp` or
+  `hypot`. Only the turning blades take a sine, as in pixel art: an animation, not
+  what the world contains. Its frames are hashed in Node and in Chromium like the
+  others.
 
 ### Camera and controls (B-011)
 
@@ -949,6 +965,12 @@ A drag is within the 25 ms; the flight and the wheel sit at its edge (the frames
 at p95 are those of the blend between the two layers, and the full frame that ends
 a movement). The idle drift keeps the full frame, since it never stops, and stays
 over its 30 ms/s: open, B-028 (shift the last frame on a pan).
+
+With the plants' own drawings (B-027), measured on 2026-11-16, same tool, one run
+by day and one at night: Normandie with its plants moving takes 1.2 to 1.3 ms at
+p50, 1.7 to 1.8 ms at p95 and 19 to 25 ms of work per second, within the budget.
+In Node at 960 × 540, the plants and the landmarks of a region take 1 to 5 ms of a
+frame of about 20 ms, and a step of their motion 0.5 to 0.8 ms.
 
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame

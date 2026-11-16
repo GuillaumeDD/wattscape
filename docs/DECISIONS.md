@@ -1011,3 +1011,23 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** the softer frames show too much in a flight; the idle drift, still
   over its 30 ms/s, is to be brought in budget (then: shift the last frame on a
   pan, B-028); Guillaume meant "accept for now", or wants another tagline.
+
+## D-057 — Modern theme: plants and landmarks get new drawings
+
+- **Context:** in the modern theme the plants and the landmarks were the pixel-art
+  sprites, enlarged (D-055). Three mockups of close-ups of Normandie and
+  Centre-Val de Loire were shown on 2026-11-16 (PRD Q-36;
+  `docs/screenshots/step-7-mockup-*.png`).
+- **Options:** (1) keep the enlarged pixels; (2) smooth the same sprites and give
+  them a shadow, in one small PR; (3) new drawings at the theme's own pixels, the
+  eight kinds of plants first, then the 28 landmarks over several PRs, smoothed
+  meanwhile.
+- **Decision (Guillaume, 2026-11-16, decision card):** (3). The drawings themselves
+  are Claude's, **proposed**: each stays in the box of its pixel-art sprite and
+  moves by the same figures and formulas, so the captions and the data-to-scene
+  mapping are unchanged (ARCHITECTURE § The modern theme).
+- **Why:** fine drawings sit best on a shaded relief; at this size smoothing alone
+  changes little.
+- **Revisit if:** a drawing reads worse than its sprite on a real screen; a detail
+  drawn from general knowledge and not from a source turns out wrong (the yellow
+  foundation of a turbine at sea, two domes for a plant without towers).

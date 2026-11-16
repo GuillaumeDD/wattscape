@@ -228,6 +228,39 @@ describe("drawModernScene", () => {
     }
   });
 
+  it("draws the plants and the landmarks at their marks, and touches nothing else", () => {
+    for (const [focus, elevation] of [
+      ["28", 35],
+      ["84", -20],
+      [null, 35],
+    ] as const) {
+      const scene = referenceScene(focus, framed(focus), elevation);
+      const full = createSurface(scene.width * 2, scene.height * 2);
+      const { marks } = drawModernScene(scene, full);
+      const bare = draw({ ...scene, plants: [], landmarks: [] });
+      // A rotor's blades and a shadow reach a few pixels past a box.
+      const near = new Uint8Array(scene.width * scene.height);
+      for (const m of marks)
+        for (let y = Math.max(0, m.top - 4); y < Math.min(scene.height, m.bottom + 3); y++)
+          for (let x = Math.max(0, m.left - 4); x < Math.min(scene.width, m.right + 4); x++)
+            near[y * scene.width + x] = 1;
+      let changed = 0;
+      for (let p = 0; p < full.width * full.height; p++) {
+        if (
+          full.data[p * 4] === bare.data[p * 4] &&
+          full.data[p * 4 + 1] === bare.data[p * 4 + 1] &&
+          full.data[p * 4 + 2] === bare.data[p * 4 + 2]
+        )
+          continue;
+        changed++;
+        const x = Math.floor((p % full.width) / 2);
+        const y = Math.floor(Math.floor(p / full.width) / 2);
+        expect(near[y * scene.width + x], `${String(x)},${String(y)}`).toBe(1);
+      }
+      expect(changed).toBeGreaterThan(0);
+    }
+  });
+
   it("lights no lamp without a figure, and lamps where there is one", () => {
     const camera = framed("11");
     const base = { ...referenceScene("11", camera, -20), plants: [], landmarks: [] };
