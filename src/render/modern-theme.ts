@@ -5,12 +5,14 @@
  * vignette; several output pixels per scene pixel, so nothing reads as a pixel.
  *
  * Same view as the pixel-art theme (north up, 2:1, seen from the south, D-017) and
- * the same offsets, so a camera frames the same ground in both. The plants and the
- * landmarks are the pixel-art sprites for now, enlarged; their own drawings follow.
+ * the same offsets, so a camera frames the same ground in both. The plants have
+ * their own drawings (./art/modern-plants.ts, B-027); the landmarks are the
+ * pixel-art sprites, smoothed, until each has its own.
  *
  * Pure, and the same in every engine: additions, multiplications, divisions, floors
- * and square roots (exactly rounded by IEEE 754) decide every pixel; no Math.sin, exp
- * or hypot (AGENTS.md § Determinism).
+ * and square roots (exactly rounded by IEEE 754) decide every pixel of the still
+ * frame; no Math.sin, exp or hypot (AGENTS.md § Determinism). Only the turning
+ * blades, an animation, take a sine.
  */
 import { ELEVATION_CLASSES, FOREIGN, kindOfRegion, SEA } from "../map/grid.ts";
 import { type Landmark } from "../map/landmarks.ts";
@@ -19,14 +21,8 @@ import { RIVER_UNITS_PER_KM } from "../map/river-lines.ts";
 import { HIGHEST_METRES, RISE_METRES_PER_KM } from "../scene/camera.ts";
 import { type Scene, type ScenePlant, type Town } from "../scene/scene.ts";
 import { drawLandmark, landmarkBox } from "./art/landmarks.ts";
-import {
-  drawBody,
-  drawMotion,
-  hasMotion,
-  type Pen,
-  plantBox,
-  type SpriteSize,
-} from "./art/plants.ts";
+import { type Brush, drawModernBody, drawModernMotion } from "./art/modern-plants.ts";
+import { hasMotion, type Pen, plantBox, type SpriteSize } from "./art/plants.ts";
 import { DITHER_LEVELS } from "./dither.ts";
 import { PALETTE, type Rgb } from "./palette.ts";
 import {
@@ -775,12 +771,27 @@ function standingAt(
   };
 }
 
+/** What draws on the ground: the brush of the plants, and the pen of the landmarks. */
+interface Tools extends Pen, Brush {
+  /** What is drawn next stands there: the relief in front of it hides it. */
+  stand(on: Standing): void;
+  /** Draws the sprite put with the pen since the last call, with its shadow or not. */
+  flush(shadow: boolean): void;
+}
+
 /**
- * A pen for the sprites: each of their pixels is a square of `density` output
- * pixels, under the light (softened at night, so a plant still reads), hidden where
- * the relief in front covers it; lamps are drawn as they are.
+ * The tools for what stands on the ground, under the light (softened at night, so a
+ * plant still reads) and hidden where the relief in front covers it; lamps are drawn
+ * as they are.
+ *
+ * The brush fills shapes, their edge smoothed over one output pixel (the plants,
+ * ./art/modern-plants.ts). The pen is for the sprites still drawn pixel by pixel
+ * (the landmarks, until each has its own drawing): a sprite's pixels are gathered,
+ * then drawn smooth, its outline at the half level of its pixels' coverage read
+ * between their centres (a stair becomes a slope, a lone pixel a dot), its colours
+ * blended the same way.
  */
-function penOf(frame: Frame, emissive: boolean): Pen & { stand(on: Standing): void } {
+function toolsOf(frame: Frame, emissive: boolean): Tools {
   const { data, depth, width, height, density, vx, vy } = frame;
   const soft = emissive ? 0.3 : 0;
   const light: Rgb = [
@@ -789,19 +800,38 @@ function penOf(frame: Frame, emissive: boolean): Pen & { stand(on: Standing): vo
     frame.light[2] + (1 - frame.light[2]) * soft,
   ];
   let limit = 0;
-  const square = (x: number, y: number, r: number, g: number, b: number): void => {
-    const left = x * density;
-    const top = y * density;
-    if (left + density <= 0 || top + density <= 0 || left >= width || top >= height) return;
-    for (let py = Math.max(0, top); py < Math.min(height, top + density); py++)
-      for (let px = Math.max(0, left); px < Math.min(width, left + density); px++) {
+  // The sprite being put: its pixels, in scene pixels, and their colours.
+  let xs: number[] = [];
+  let ys: number[] = [];
+  let colours: number[] = [];
+  const add = (x: number, y: number, r: number, g: number, b: number): void => {
+    xs.push(x);
+    ys.push(y);
+    colours.push(r, g, b);
+  };
+  const spot: Brush["spot"] = (cx, cy, rx, ry, colour, alpha, unlit = false) => {
+    if (!(rx > 0) || !(ry > 0)) return;
+    const r = colour[0] * (unlit ? 1 : light[0]);
+    const g = colour[1] * (unlit ? 1 : light[1]);
+    const b = colour[2] * (unlit ? 1 : light[2]);
+    const x0 = Math.max(0, Math.floor((cx - rx) * density));
+    const x1 = Math.min(width, Math.ceil((cx + rx) * density));
+    const y0 = Math.max(0, Math.floor((cy - ry) * density));
+    const y1 = Math.min(height, Math.ceil((cy + ry) * density));
+    for (let py = y0; py < y1; py++) {
+      const dy = ((py + 0.5) / density - cy) / ry;
+      for (let px = x0; px < x1; px++) {
+        const dx = ((px + 0.5) / density - cx) / rx;
+        const a = (1 - dx * dx - dy * dy) * alpha;
+        if (!(a > 0)) continue;
         const p = py * width + px;
         if ((depth[p] ?? 0) > limit) continue;
-        const v = vignette(vx[px] ?? 0, vy[py] ?? 0);
-        data[p * 4] = r * v;
-        data[p * 4 + 1] = g * v;
-        data[p * 4 + 2] = b * v;
+        const v = vignette(vx[px] ?? 0, vy[py] ?? 0) * a;
+        data[p * 4] = (data[p * 4] ?? 0) * (1 - a) + r * v;
+        data[p * 4 + 1] = (data[p * 4 + 1] ?? 0) * (1 - a) + g * v;
+        data[p * 4 + 2] = (data[p * 4 + 2] ?? 0) * (1 - a) + b * v;
       }
+    }
   };
   return {
     emissive,
@@ -809,15 +839,124 @@ function penOf(frame: Frame, emissive: boolean): Pen & { stand(on: Standing): vo
       // Two scene pixels of slack: its foot stands on the ground, not behind it.
       limit = on.row + 2 * density;
     },
+    spot,
+    fill(left, top, right, bottom, distance, colour, ink) {
+      const unlit = ink?.unlit === true;
+      const opacity = ink?.alpha ?? 1;
+      const shade = ink?.shade;
+      const r = colour[0] * (unlit ? 1 : light[0]);
+      const g = colour[1] * (unlit ? 1 : light[1]);
+      const b = colour[2] * (unlit ? 1 : light[2]);
+      const x0 = Math.max(0, Math.floor(left * density));
+      const x1 = Math.min(width, Math.ceil(right * density));
+      const y0 = Math.max(0, Math.floor(top * density));
+      const y1 = Math.min(height, Math.ceil(bottom * density));
+      for (let py = y0; py < y1; py++) {
+        const y = (py + 0.5) / density;
+        for (let px = x0; px < x1; px++) {
+          const x = (px + 0.5) / density;
+          // The edge over one output pixel: half covered where the distance is 0.
+          const a = clamp01(0.5 - distance(x, y) * density) * opacity;
+          if (!(a > 0)) continue;
+          const p = py * width + px;
+          if ((depth[p] ?? 0) > limit) continue;
+          const v =
+            vignette(vx[px] ?? 0, vy[py] ?? 0) * a * (shade === undefined ? 1 : shade(x, y));
+          data[p * 4] = (data[p * 4] ?? 0) * (1 - a) + r * v;
+          data[p * 4 + 1] = (data[p * 4 + 1] ?? 0) * (1 - a) + g * v;
+          data[p * 4 + 2] = (data[p * 4 + 2] ?? 0) * (1 - a) + b * v;
+        }
+      }
+    },
     put(x, y, colour) {
       const c = PALETTE[colour];
-      square(x, y, c[0] * light[0], c[1] * light[1], c[2] * light[2]);
+      add(x, y, c[0] * light[0], c[1] * light[1], c[2] * light[2]);
     },
     glow(x, y) {
-      square(x, y, LAMP[0], LAMP[1], LAMP[2]);
+      add(x, y, LAMP[0], LAMP[1], LAMP[2]);
+    },
+    flush(shadow) {
+      const count = xs.length;
+      if (count === 0) return;
+      let x0 = Infinity;
+      let y0 = Infinity;
+      let x1 = -Infinity;
+      let y1 = -Infinity;
+      for (let i = 0; i < count; i++) {
+        const x = xs[i] ?? 0;
+        const y = ys[i] ?? 0;
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+      // A grid with a pixel of margin around: what is covered, and in which colour.
+      const gw = x1 - x0 + 3;
+      const gh = y1 - y0 + 3;
+      const cover = new Uint8Array(gw * gh);
+      const rgb = new Float32Array(gw * gh * 3);
+      for (let i = 0; i < count; i++) {
+        const g = ((ys[i] ?? 0) - y0 + 1) * gw + (xs[i] ?? 0) - x0 + 1;
+        cover[g] = 1;
+        rgb[g * 3] = colours[i * 3] ?? 0;
+        rgb[g * 3 + 1] = colours[i * 3 + 1] ?? 0;
+        rgb[g * 3 + 2] = colours[i * 3 + 2] ?? 0;
+      }
+      xs = [];
+      ys = [];
+      colours = [];
+      // A soft shadow at its foot, cast to the east, as wide as the sprite.
+      const wide = x1 - x0 + 1;
+      if (shadow)
+        spot(
+          (x0 + x1 + 1) / 2 + wide * 0.12,
+          y1 + 1,
+          wide * 0.6 + 0.8,
+          Math.max(0.7, wide / 9),
+          SHADOW,
+          0.3,
+          true,
+        );
+      const left = Math.max(0, (x0 - 1) * density);
+      const right = Math.min(width, (x1 + 2) * density);
+      const top = Math.max(0, (y0 - 1) * density);
+      const bottom = Math.min(height, (y1 + 2) * density);
+      for (let py = top; py < bottom; py++) {
+        // The place between the centres of the sprite's pixels.
+        const v = (py + 0.5) / density - 0.5 - (y0 - 1);
+        const gy = Math.floor(v);
+        const fy = v - gy;
+        for (let px = left; px < right; px++) {
+          const u = (px + 0.5) / density - 0.5 - (x0 - 1);
+          const gx = Math.floor(u);
+          const fx = u - gx;
+          const g = gy * gw + gx;
+          const w00 = (cover[g] ?? 0) * (1 - fx) * (1 - fy);
+          const w10 = (cover[g + 1] ?? 0) * fx * (1 - fy);
+          const w01 = (cover[g + gw] ?? 0) * (1 - fx) * fy;
+          const w11 = (cover[g + gw + 1] ?? 0) * fx * fy;
+          const covered = w00 + w10 + w01 + w11;
+          // The outline at the half level, over one output pixel.
+          const alpha = clamp01((covered - 0.5) * density + 0.5);
+          if (!(alpha > 0)) continue;
+          const p = py * width + px;
+          if ((depth[p] ?? 0) > limit) continue;
+          const share = (vignette(vx[px] ?? 0, vy[py] ?? 0) * alpha) / covered;
+          for (let c = 0; c < 3; c++) {
+            const colour =
+              (rgb[g * 3 + c] ?? 0) * w00 +
+              (rgb[(g + 1) * 3 + c] ?? 0) * w10 +
+              (rgb[(g + gw) * 3 + c] ?? 0) * w01 +
+              (rgb[(g + gw + 1) * 3 + c] ?? 0) * w11;
+            data[p * 4 + c] = (data[p * 4 + c] ?? 0) * (1 - alpha) + colour * share;
+          }
+        }
+      }
     },
   };
 }
+
+const SHADOW: Rgb = [0, 0, 0];
 
 /** The buffers of the frame drawn last, reused while the size stays the same. */
 let depths: [Int16Array, Int16Array] | null = null;
@@ -870,7 +1009,7 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
   }
 
   const size: SpriteSize = scene.camera.scale >= SPRITES_FROM_SCALE ? "full" : "marker";
-  const pen = penOf(frame, scene.light.emissive);
+  const pen = toolsOf(frame, scene.light.emissive);
   // Back to front: what stands further south is drawn over what stands behind it.
   const landmarks: PlacedLandmark[] =
     size === "full"
@@ -885,13 +1024,14 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
   for (const m of landmarks) {
     pen.stand(m);
     drawLandmark(pen, m.landmark, m.x, m.y);
+    pen.flush(true);
   }
   const plants: PlacedPlant[] = visiblePlants(scene, frame.ox / density, scene.width)
     .map((plant) => ({ plant, ...standingAt(frame, scene, layer, plant.site.x, plant.site.y) }))
     .sort((a, b) => a.row - b.row || a.x - b.x);
   for (const p of plants) {
     pen.stand(p);
-    drawBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
+    drawModernBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
   }
   const marks: Mark[] = [
     ...landmarks.map((m): Mark => ({
@@ -914,10 +1054,10 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
     marks,
     animate(target: Surface, seconds: number): void {
       if (target.width !== out.width || target.height !== out.height) return;
-      const motion = penOf({ ...frame, data: target.data }, scene.light.emissive);
+      const motion = toolsOf({ ...frame, data: target.data }, scene.light.emissive);
       for (const p of moving) {
         motion.stand(p);
-        drawMotion(motion, p.plant.site, p.plant.activity, p.x, p.y, size, seconds);
+        drawModernMotion(motion, p.plant.site, p.plant.activity, p.x, p.y, size, seconds);
       }
     },
   };

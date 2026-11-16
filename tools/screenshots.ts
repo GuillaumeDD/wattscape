@@ -10,7 +10,7 @@
  * flight from France to Normandie, the crossfade between the 4 km and 1 km layers
  * among them, in one picture. Then the plants (B-012), the towns (B-014), the
  * rivers (B-023) and the landmarks (B-016), as each section says; and the modern
- * theme (G-011, `step-6-modern-*.png`).
+ * theme (G-011, `step-6-modern-*.png`) and its own plants (B-027, `step-7-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -273,6 +273,24 @@ for (const [name, focus] of [
     const surface = createSurface(WIDTH * MODERN_DENSITY, HEIGHT * MODERN_DENSITY);
     drawModernScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
     const file = `${OUT}/step-6-modern-${name}-${time}.png`;
+    writePng(file, surface);
+    console.log(`${file}: ${hashSurface(surface)}`);
+  }
+
+// The modern theme's own plants (B-027): two regions with most kinds of plants, by
+// day and at night, their motion at 1.3 s.
+for (const [name, focus] of [
+  ["normandie", "28"],
+  ["centre-val-de-loire", "24"],
+] as const)
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+    const surface = createSurface(WIDTH * MODERN_DENSITY, HEIGHT * MODERN_DENSITY);
+    drawModernScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
+    const file = `${OUT}/step-7-modern-plants-${name}-${time}.png`;
     writePng(file, surface);
     console.log(`${file}: ${hashSurface(surface)}`);
   }
