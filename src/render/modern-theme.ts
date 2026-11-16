@@ -21,7 +21,9 @@ import { RIVER_UNITS_PER_KM } from "../map/river-lines.ts";
 import { HIGHEST_METRES, RISE_METRES_PER_KM } from "../scene/camera.ts";
 import { type Scene, type ScenePlant, type Town } from "../scene/scene.ts";
 import { drawLandmark, landmarkBox } from "./art/landmarks.ts";
-import { type Brush, drawModernBody, drawModernMotion } from "./art/modern-plants.ts";
+import { type Brush } from "./art/shapes.ts";
+import { drawModernLandmark } from "./art/modern-landmarks.ts";
+import { drawModernBody, drawModernMotion } from "./art/modern-plants.ts";
 import { hasMotion, type Pen, plantBox, type SpriteSize } from "./art/plants.ts";
 import { DITHER_LEVELS } from "./dither.ts";
 import { PALETTE, type Rgb } from "./palette.ts";
@@ -1023,8 +1025,12 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
       : [];
   for (const m of landmarks) {
     pen.stand(m);
-    drawLandmark(pen, m.landmark, m.x, m.y);
-    pen.flush(true);
+    // Its own drawing, or its pixel-art sprite, smoothed, until it has one.
+    const box = landmarkBox(m.landmark, m.x, m.y);
+    if (!drawModernLandmark(pen, m.landmark, box.left, m.y)) {
+      drawLandmark(pen, m.landmark, m.x, m.y);
+      pen.flush(true);
+    }
   }
   const plants: PlacedPlant[] = visiblePlants(scene, frame.ox / density, scene.width)
     .map((plant) => ({ plant, ...standingAt(frame, scene, layer, plant.site.x, plant.site.y) }))

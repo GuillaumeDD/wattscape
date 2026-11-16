@@ -10,7 +10,8 @@
  * flight from France to Normandie, the crossfade between the 4 km and 1 km layers
  * among them, in one picture. Then the plants (B-012), the towns (B-014), the
  * rivers (B-023) and the landmarks (B-016), as each section says; and the modern
- * theme (G-011, `step-6-modern-*.png`) and its own plants (B-027, `step-7-*.png`).
+ * theme (G-011, `step-6-modern-*.png`), its own plants (B-027, `step-7-*.png`) and
+ * its own landmarks (`step-8-modern-landmarks.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -294,3 +295,28 @@ for (const [name, focus] of [
     writePng(file, surface);
     console.log(`${file}: ${hashSurface(surface)}`);
   }
+
+// The modern theme's own landmarks (B-027): each one that has its drawing, close up,
+// by day (left) and at night (right), without the plants.
+{
+  const { MODERN_LANDMARK_SPRITES } = await import("../src/render/art/modern-landmarks.ts");
+  const drawn = LANDMARKS.filter((l) => MODERN_LANDMARK_SPRITES.includes(l.sprite));
+  const [w, h] = [40, 26];
+  const sheet = createSurface(w * MODERN_DENSITY * 2, h * MODERN_DENSITY * drawn.length);
+  drawn.forEach((landmark, row) => {
+    [35, -20].forEach((elevation, column) => {
+      const camera = { x: landmark.x, y: landmark.y - 8, scale: 1 };
+      const scene = { ...referenceScene(null, camera, elevation), width: w, height: h, plants: [] };
+      const surface = createSurface(w * MODERN_DENSITY, h * MODERN_DENSITY);
+      drawModernScene(scene, surface);
+      for (let y = 0; y < surface.height; y++)
+        sheet.data.set(
+          surface.data.subarray(y * surface.width * 4, (y + 1) * surface.width * 4),
+          ((row * surface.height + y) * sheet.width + column * surface.width) * 4,
+        );
+    });
+  });
+  const file = `${OUT}/step-8-modern-landmarks.png`;
+  writePng(file, sheet, 4);
+  console.log(`${file}: ${hashSurface(sheet)}`);
+}

@@ -721,10 +721,17 @@ the deployed build. `tools/screenshots.ts` writes its frames
   so the marks and the captions are the same, and moves by the same figures and
   formulas (§ Data-to-scene mapping). On the national view, a dot of the source's
   colour.
-- **Landmarks:** the pixel-art sprites, smoothed, until each has its own drawing
-  (B-027): a sprite's pixels are gathered, its outline drawn at the half level of
-  their coverage read between their centres (a stair becomes a slope), with the
-  same shadow.
+- **Landmarks:** their own drawings too (`src/render/art/modern-landmarks.ts`), by
+  lots (B-027), with the brush and the shapes of the plants
+  (`src/render/art/shapes.ts`), each within the box of its pixel-art sprite and
+  under the same limits of `docs/POI.md`: the Eiffel Tower lit plainly, by as many
+  lamps as its sprite and no beam; the lighthouses generic. The first lot: Étretat,
+  Le Havre's cranes, Fécamp's harbour light, the Mont-Saint-Michel, Rouen
+  cathedral, the Eiffel Tower and the lighthouse at sea
+  (`docs/screenshots/step-8-modern-landmarks.png`). A landmark with no drawing yet
+  keeps its pixel-art sprite, smoothed: its pixels are gathered, its outline drawn
+  at the half level of their coverage read between their centres (a stair becomes
+  a slope), with the same shadow.
 - **Determinism:** additions, multiplications, divisions, floors and square roots
   only (IEEE 754 rounds those exactly) for the still frame; no `Math.sin`, `exp` or
   `hypot`. Only the turning blades take a sine, as in pixel art: an animation, not
