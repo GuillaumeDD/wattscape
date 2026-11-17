@@ -11,8 +11,9 @@
  * among them, in one picture. Then the plants (B-012), the towns (B-014), the
  * rivers (B-023) and the landmarks (B-016), as each section says; and the modern
  * theme (G-011, `step-6-modern-*.png`), its own plants (B-027, `step-7-*.png`) and
- * its own landmarks (`step-8-modern-landmarks.png`), at the sharp density a full HD
- * screen gets (D-058, `step-8-modern-sharp-*.png`).
+ * its own landmarks by lots (`step-8-modern-landmarks.png`, the second lot in
+ * `step-9-modern-landmarks.png`), at the sharp density a full HD screen gets (D-058,
+ * `step-8-modern-sharp-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -297,13 +298,37 @@ for (const [name, focus] of [
     console.log(`${file}: ${hashSurface(surface)}`);
   }
 
-// The modern theme's own landmarks (B-027): each one that has its drawing, close up,
-// by day (left) and at night (right), without the plants.
-{
-  const { MODERN_LANDMARK_SPRITES } = await import("../src/render/art/modern-landmarks.ts");
-  const drawn = LANDMARKS.filter((l) => MODERN_LANDMARK_SPRITES.includes(l.sprite));
+// The modern theme's own landmarks (B-027), lot by lot: each one close up, by day
+// (left) and at night (right), without the plants, at the sharp density (D-058), as
+// a full HD screen shows them, twice enlarged.
+for (const [file, lot] of [
+  [
+    "step-8-modern-landmarks.png",
+    [
+      "etretat",
+      "portCranes",
+      "harbourLight",
+      "montSaintMichel",
+      "eiffelTower",
+      "rouenCathedral",
+      "seaLighthouse",
+    ],
+  ],
+  [
+    "step-9-modern-landmarks.png",
+    [
+      "slagHeaps",
+      "lilleBelfry",
+      "amiensCathedral",
+      "strasbourgCathedral",
+      "hautKoenigsbourg",
+      "chartresCathedral",
+      "chambord",
+    ],
+  ],
+] as const) {
+  const drawn = LANDMARKS.filter((l) => (lot as readonly string[]).includes(l.sprite));
   const [w, h] = [40, 26];
-  // At the sharp density (D-058), as a full HD screen shows them, twice enlarged.
   const density = MODERN_SHARP_DENSITY;
   const sheet = createSurface(w * density * 2, h * density * drawn.length);
   drawn.forEach((landmark, row) => {
@@ -319,9 +344,8 @@ for (const [name, focus] of [
         );
     });
   });
-  const file = `${OUT}/step-8-modern-landmarks.png`;
-  writePng(file, sheet, 2);
-  console.log(`${file}: ${hashSurface(sheet)}`);
+  writePng(`${OUT}/${file}`, sheet, 2);
+  console.log(`${OUT}/${file}: ${hashSurface(sheet)}`);
 }
 
 // The modern theme at the sharp density (D-058), as a full HD screen shows it: two
