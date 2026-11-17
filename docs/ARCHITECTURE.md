@@ -741,7 +741,11 @@ the deployed build. `tools/screenshots.ts` writes its frames
   the pixel art (Guillaume). The second lot, the north and the east: the twin slag
   heaps of Loos-en-Gohelle, Lille's belfry, Amiens, Strasbourg and Chartres
   cathedrals, the Haut-Kœnigsbourg and Chambord
-  (`docs/screenshots/step-9-modern-landmarks.png`). A landmark with no drawing yet
+  (`docs/screenshots/step-9-modern-landmarks.png`). The third lot, the west: the
+  castle of the dukes of Brittany, the Carnac stones, Guérande's salt marshes, the
+  Dune du Pilat, Fort Boyard, the Place de la Bourse (its buildings, not the water
+  mirror) and the Cité de Carcassonne
+  (`docs/screenshots/step-10-modern-landmarks.png`). A landmark with no drawing yet
   keeps its pixel-art sprite, smoothed: its pixels are gathered, its outline drawn
   at the half level of their coverage read between their centres (a stair becomes
   a slope), with the same shadow.

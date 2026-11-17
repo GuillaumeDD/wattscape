@@ -42,6 +42,10 @@ const SANDSTONE: Rgb = [182, 104, 84];
 const TILE: Rgb = [128, 62, 52];
 const COPPER: Rgb = [96, 144, 122];
 const SPOIL: Rgb = [92, 84, 78];
+const CLAY: Rgb = [128, 132, 112];
+const BRINE: Rgb = [164, 188, 196];
+const BRINE_SALT: Rgb = [226, 222, 214];
+const BRINE_PINK: Rgb = [214, 192, 190];
 
 /** Six points on a circle of radius 1, every sixth of a turn: a table, not a sine. */
 const PETALS: readonly (readonly [number, number])[] = [
@@ -1067,7 +1071,374 @@ const DRAWINGS: Readonly<Partial<Record<LandmarkSprite, Drawing>>> = {
     );
     line(brush, cx, foot - 5.5, cx, foot - 6, 0.06, 0.04, STONE);
   },
+  // The third lot (B-027), the west and the south-west. The castle of the dukes of
+  // Brittany: the granite curtain wall over its moat, two round towers under slate
+  // cones, the white Grand Logis behind with its dormers.
+  nantesCastle(brush, left, foot) {
+    const cx = left + 5.5;
+    shadow(brush, cx, foot, 11);
+    box(brush, left + 0.3, foot - 0.3, left + 10.7, foot, PALETTE.sea, { alpha: 0.85 });
+    // The Grand Logis, behind: white tuffeau, a tall slate roof, its dormers.
+    box(brush, left + 3.4, foot - 3.55, left + 7.6, foot - 2.4, CHALK, {
+      shade: lit(cx, 2.1, foot - 3.55, foot - 2.4, 0.2, 0),
+    });
+    roof(brush, left + 3.9, left + 7.1, foot - 4.7, foot - 3.55, 0.35, SLATE, {
+      shade: lit(cx, 1.9, 0, 1, 0.25, 0),
+    });
+    for (const x of [left + 4.4, left + 5.5, left + 6.6]) {
+      box(brush, x - 0.2, foot - 4.15, x + 0.2, foot - 3.55, CHALK);
+      spire(brush, x, foot - 4.55, foot - 4.1, 0.27, CHALK);
+      box(brush, x - 0.08, foot - 4.0, x + 0.08, foot - 3.7, DARK, { alpha: 0.6 });
+    }
+    // The curtain wall, its walk on corbels, the gate.
+    const shade = lit(cx, 5, foot - 2.6, foot, 0.22, 0.12);
+    box(brush, left + 1.5, foot - 2.45, left + 9.5, foot - 0.3, GRANITE, { shade });
+    box(brush, left + 1.5, foot - 2.6, left + 9.5, foot - 2.3, GRANITE, { shade });
+    box(brush, left + 1.5, foot - 2.3, left + 9.5, foot - 2.18, DARK, { alpha: 0.4 });
+    shape(
+      brush,
+      cx - 0.45,
+      foot - 1.6,
+      cx + 0.45,
+      foot - 0.3,
+      doorway(cx, 0.36, foot - 1.1, 0.4, foot - 0.3),
+      DARK,
+      { alpha: 0.7 },
+    );
+    // The towers: round, a machicolated crown, slits, the cones.
+    for (const x of [left + 1.4, left + 9.6]) {
+      const drum = lit(x, 1.15, foot - 3.5, foot, 0.4, 0.1);
+      box(brush, x - 1.15, foot - 3.3, x + 1.15, foot - 0.3, GRANITE, { shade: drum });
+      box(brush, x - 1.25, foot - 3.55, x + 1.25, foot - 3.2, GRANITE, { shade: drum });
+      for (let k = 0; k < 5; k++)
+        box(brush, x - 1 + k * 0.5 - 0.07, foot - 3.2, x - 1 + k * 0.5 + 0.07, foot - 3.05, DARK, {
+          alpha: 0.5,
+        });
+      for (const up of [1.3, 2.3])
+        box(brush, x - 0.07, foot - up - 0.4, x + 0.07, foot - up, DARK, { alpha: 0.6 });
+      spire(brush, x, foot - 5, foot - 3.55, 1.2, SLATE, { shade: lit(x, 1.2, 0, 1, 0.35, 0) });
+    }
+  },
+  // Carnac: rows of standing stones of granite, running east, each its own rough
+  // block, the far rows smaller, lichen on their west faces.
+  carnacStones(brush, left, foot) {
+    for (const [row, base, scale, start] of [
+      [0, foot - 2.55, 0.55, 1.1],
+      [1, foot - 1.35, 0.75, 0.6],
+      [2, foot - 0.1, 1, 0.5],
+    ] as const) {
+      shadow(brush, left + 6.5, base + 0.05, 12.5);
+      for (let k = 0; k < 7; k++) {
+        const x = left + start + 0.25 * row + k * (1.6 + 0.3 * scale);
+        // Each stone's height, width and lean from tables, not by chance.
+        const pick = k + 3 * row;
+        const tall = (MENHIRS[pick % MENHIRS.length] ?? 1) * scale;
+        const half = (0.38 + 0.07 * (pick % 3)) * scale;
+        const lean = (LEANS[pick % LEANS.length] ?? 0) * scale;
+        const top = base - tall;
+        const stone: Corners = [
+          [x - half, base],
+          [x - half * 0.95 + lean * 0.4, top + tall * 0.3],
+          [x - half * 0.45 + lean, top],
+          [x + half * 0.35 + lean, top + tall * 0.08],
+          [x + half * 0.9 + lean * 0.5, top + tall * 0.4],
+          [x + half, base],
+        ];
+        polygon(brush, stone, GRANITE, { shade: lit(x, half, top, base, 0.42, 0.18) });
+        const block = inside(stone);
+        shape(
+          brush,
+          x - half,
+          top,
+          x,
+          base,
+          (px, py) => Math.max(block(px, py) + 0.05, px - x + half * 0.3, top + tall * 0.3 - py),
+          PALETTE.meadow,
+          { alpha: 0.4 },
+        );
+      }
+    }
+  },
+  // Guérande's salt marshes: shallow pans of brine between low clay banks, seen
+  // from above, the far ones smaller; the salt drying white or pink in some, and
+  // two heaps of it raked up on the banks.
+  saltMarshes(brush, left, foot) {
+    polygon(
+      brush,
+      [
+        [left + 0.9, foot - 5],
+        [left + 12.1, foot - 5],
+        [left + 12.9, foot],
+        [left + 0.1, foot],
+      ],
+      CLAY,
+      { shade: (_, y) => 0.92 + 0.1 * clamp((foot - y) / 5, 0, 1) },
+    );
+    for (const [row, top, bottom] of [
+      [0, foot - 4.75, foot - 3.7],
+      [1, foot - 3.45, foot - 2.05],
+      [2, foot - 1.8, foot - 0.2],
+    ] as const) {
+      // Each row's pans, by the cuts between them: from tables, not by chance, the
+      // banks running a little aslant.
+      const cuts = PANS[row];
+      const slant = 0.12 * (row + 1);
+      const from = left + 0.95 - 0.4 * row;
+      const to = left + 12.05 + 0.4 * row;
+      for (let k = 0; k + 1 < cuts.length; k++) {
+        const a = from + (to - from) * (cuts[k] ?? 0) + 0.12;
+        const b = from + (to - from) * (cuts[k + 1] ?? 1) - 0.12;
+        const tilt = (k % 2 === 0 ? 1 : -1) * slant * (k === 0 || k + 2 === cuts.length ? 0 : 1);
+        // What each pan holds, by a rule: brine mostly, salt drying in some.
+        const kind = (k + 2 * row) % 5;
+        const colour = kind === 0 ? BRINE_SALT : kind === 3 ? BRINE_PINK : BRINE;
+        polygon(
+          brush,
+          [
+            [a + tilt, top],
+            [b + tilt, top],
+            [b, bottom],
+            [a, bottom],
+          ],
+          colour,
+          { shade: (_, y) => 1.05 - 0.1 * clamp((y - top) / (bottom - top), 0, 1) },
+        );
+      }
+    }
+    for (const [cx, up] of [
+      [left + 2.4, 4.9],
+      [left + 8.6, 4.9],
+    ] as const) {
+      const base = foot - up;
+      shadow(brush, cx + 0.3, base, 2.4);
+      polygon(
+        brush,
+        [
+          [cx - 0.12, base - 1.9],
+          [cx + 0.12, base - 1.9],
+          [cx + 1.05, base],
+          [cx - 1.05, base],
+        ],
+        CHALK,
+        { shade: lit(cx, 1, base - 1.9, base, 0.32, 0.05) },
+      );
+    }
+  },
+  // The Dune du Pilat: a long slope of sand up from the ocean's foam, rippled by the
+  // wind, and a steeper face down into the pines.
+  pilatDune(brush, left, foot) {
+    const crest = left + 8;
+    const high = 3.7;
+    const west = left + 0.2;
+    const east = left + 11.4;
+    const height = (x: number): number => {
+      if (x <= west || x >= east) return 0;
+      if (x <= crest) {
+        const t = (x - west) / (crest - west);
+        return high * t * t * (3 - 2 * t);
+      }
+      const s = (x - crest) / (east - crest);
+      return high * (1 - s * s);
+    };
+    foam(brush, left - 0.2, left + 2.2, foot);
+    // The pines, behind the dune's foot, then the dune, then the nearer pines.
+    for (const [x, up, r] of PINES_BEHIND)
+      disc(brush, left + x, foot - up, r, PALETTE.forest, {
+        shade: lit(left + x, r, 0, 1, 0.35, 0),
+      });
+    shape(
+      brush,
+      west,
+      foot - high,
+      east,
+      foot,
+      (x, y) => Math.max(foot - height(x) - y, y - foot),
+      PALETTE.sand,
+      {
+        shade: (x) =>
+          x <= crest
+            ? 1.05 - 0.08 * ((crest - x) / (crest - west))
+            : 0.86 - 0.1 * clamp((x - crest) / (east - crest), 0, 1),
+      },
+    );
+    // The ripples on the windward side, and the crest's sharp line.
+    for (const k of [0, 1, 2, 3, 4]) {
+      const x0 = left + 2.4 + k * 1.05;
+      const y0 = foot - height(x0) + 0.3;
+      line(brush, x0, y0 + 0.25, x0 + 0.75, y0 - 0.15, 0.06, 0.06, PALETTE.field, { alpha: 0.55 });
+    }
+    for (const [x, up, r] of PINES_FRONT)
+      disc(brush, left + x, foot - up, r, PALETTE.forest, {
+        shade: lit(left + x, r, 0, 1, 0.35, 0),
+      });
+  },
+  // Fort Boyard: the long oval of pale stone in the sea, its two rows of gun ports,
+  // the parapet, the watch turret; the foam at its foot.
+  fortBoyard(brush, left, foot) {
+    const cx = left + 4.5;
+    foam(brush, left - 0.2, left + 9.2, foot);
+    box(brush, left + 0.2, foot - 0.6, left + 8.8, foot - 0.05, GRANITE, {
+      shade: lit(cx, 4.3, 0, 1, 0.3, 0),
+    });
+    const shade = (x: number, y: number): number => {
+      // A long drum, lit from the west: darker towards its curved ends.
+      const u = (x - cx) / 4.2;
+      return (
+        (0.78 + 0.26 * Math.sqrt(clamp(1 - u * u, 0, 1)) - 0.06 * u) * (y > foot - 1 ? 0.95 : 1)
+      );
+    };
+    box(brush, left + 0.3, foot - 3.15, left + 8.7, foot - 0.55, OCHRE, { shade });
+    box(brush, left + 0.45, foot - 3.4, left + 8.55, foot - 3.1, OCHRE, { shade });
+    for (const [up, step] of [
+      [1.25, 0.82],
+      [2.35, 0.82],
+    ] as const)
+      for (let k = 0; k < 10; k++) {
+        const x = left + 0.82 + k * step;
+        shape(
+          brush,
+          x - 0.15,
+          foot - up - 0.45,
+          x + 0.15,
+          foot - up,
+          doorway(x, 0.11, foot - up - 0.25, 0.15, foot - up),
+          DARK,
+          { alpha: 0.55 },
+        );
+      }
+    box(brush, left + 0.3, foot - 1.75, left + 8.7, foot - 1.65, DARK, { alpha: 0.25 });
+    // The watch turret on the parapet.
+    box(brush, left + 6.35, foot - 4, left + 7.05, foot - 3.35, OCHRE, {
+      shade: lit(left + 6.7, 0.35, 0, 1, 0.3, 0),
+    });
+    box(brush, left + 6.25, foot - 4.1, left + 7.15, foot - 3.95, GRANITE);
+  },
+  // The Place de la Bourse: the long front of pale stone, its two pavilions with
+  // their pediments and tall roofs, the arcades, the slate roofs and dormers; the
+  // quay at its foot. The water mirror is not drawn (P-028).
+  placeDeLaBourse(brush, left, foot) {
+    shadow(brush, left + 6.5, foot - 0.6, 13);
+    box(brush, left - 0.1, foot - 0.65, left + 13.1, foot, QUAY, {
+      shade: (_, y) => (y > foot - 0.2 ? 0.85 : 1),
+    });
+    const shade = lit(left + 6.5, 6.5, foot - 3.5, foot - 0.6, 0.16, 0.1);
+    // The long roof and its dormers.
+    roof(brush, left + 0.4, left + 12.6, foot - 4.15, foot - 3.35, 0.3, SLATE);
+    for (let k = 0; k < 12; k++) {
+      const x = left + 0.75 + k * 1.05;
+      box(brush, x - 0.13, foot - 3.85, x + 0.13, foot - 3.4, STONE, { alpha: 0.9 });
+    }
+    box(brush, left + 0.05, foot - 3.4, left + 12.95, foot - 0.6, STONE, { shade });
+    box(brush, left + 0.05, foot - 3.5, left + 12.95, foot - 3.3, CHALK, { shade });
+    // The pavilions: a little proud, their roofs higher, their pediments.
+    for (const cx of [left + 3, left + 10]) {
+      roof(brush, cx - 0.9, cx + 0.9, foot - 5, foot - 3.9, 0.55, SLATE, {
+        shade: lit(cx, 1.4, 0, 1, 0.3, 0),
+      });
+      box(brush, cx - 1.45, foot - 3.9, cx + 1.45, foot - 0.6, STONE, {
+        shade: lit(cx, 1.45, foot - 3.9, foot - 0.6, 0.18, 0.1),
+      });
+      polygon(
+        brush,
+        [
+          [cx, foot - 4.45],
+          [cx + 1.5, foot - 3.85],
+          [cx - 1.5, foot - 3.85],
+        ],
+        CHALK,
+        { shade: lit(cx, 1.5, 0, 1, 0.15, 0) },
+      );
+      for (const dx of [-1.05, 1.05])
+        box(brush, cx + dx - 0.1, foot - 3.75, cx + dx + 0.1, foot - 0.6, CHALK, { alpha: 0.7 });
+    }
+    // The arcades of the ground floor, the windows above.
+    for (let k = 0; k < 13; k++) {
+      const x = left + 0.5 + k * 1;
+      shape(
+        brush,
+        x - 0.28,
+        foot - 1.75,
+        x + 0.28,
+        foot - 0.6,
+        doorway(x, 0.24, foot - 1.4, 0.24, foot - 0.6),
+        DARK,
+        { alpha: 0.55 },
+      );
+      box(brush, x - 0.15, foot - 3.05, x + 0.15, foot - 2.25, DARK, { alpha: 0.5 });
+    }
+    box(brush, left + 0.05, foot - 2.05, left + 12.95, foot - 1.95, GRANITE, { alpha: 0.45 });
+  },
+  // The Cité de Carcassonne: the outer ring of walls, low, its small towers; behind
+  // it the inner ring, higher, its tall towers; ochre stone, battlements, the
+  // pointed slate roofs of the restoration.
+  carcassonne(brush, left, foot) {
+    shadow(brush, left + 7.5, foot, 15);
+    const shade = lit(left + 7.5, 7.5, foot - 4.2, foot, 0.2, 0.12);
+    // The inner ring, behind.
+    box(brush, left + 0.6, foot - 4.1, left + 14.4, foot - 2, OCHRE, { shade });
+    merlons(brush, left + 0.6, left + 14.4, foot - 4.1, OCHRE);
+    for (const x of [left + 1.5, left + 5.5, left + 9.5, left + 13.5]) {
+      const drum = lit(x, 0.85, 0, 1, 0.4, 0);
+      box(brush, x - 0.85, foot - 5.35, x + 0.85, foot - 2, OCHRE, { shade: drum });
+      box(brush, x - 0.07, foot - 4.6, x + 0.07, foot - 4.1, DARK, { alpha: 0.6 });
+      spire(brush, x, foot - 6.95, foot - 5.35, 1, SLATE, { shade: lit(x, 1, 0, 1, 0.35, 0) });
+    }
+    // The lists between the rings, then the outer ring and its towers.
+    box(brush, left + 0.2, foot - 2.05, left + 14.8, foot - 1.85, PALETTE.meadow, { alpha: 0.7 });
+    box(brush, left + 0.1, foot - 1.9, left + 14.9, foot, OCHRE, {
+      shade: lit(left + 7.5, 7.5, foot - 1.9, foot, 0.22, 0.14),
+    });
+    merlons(brush, left + 0.1, left + 14.9, foot - 1.9, OCHRE);
+    for (let k = 0; k < 8; k++) {
+      const x = left + 0.5 + k * 2;
+      box(brush, x - 0.48, foot - 2.6, x + 0.48, foot, OCHRE, {
+        shade: lit(x, 0.48, 0, 1, 0.4, 0),
+      });
+      box(brush, x - 0.05, foot - 1.6, x + 0.05, foot - 1.2, DARK, { alpha: 0.55 });
+      spire(brush, x, foot - 3.45, foot - 2.6, 0.6, SLATE, { shade: lit(x, 0.6, 0, 1, 0.35, 0) });
+    }
+    // The Porte Narbonnaise's way in, between two towers of the outer ring.
+    shape(
+      brush,
+      left + 7.1,
+      foot - 1.2,
+      left + 7.9,
+      foot,
+      doorway(left + 7.5, 0.3, foot - 0.75, 0.35, foot),
+      DARK,
+      { alpha: 0.7 },
+    );
+  },
 };
+
+/** The heights of Carnac's stones, in scene pixels, along a row: a table, not chance. */
+const MENHIRS = [1.7, 1.35, 1.55, 1.15, 1.45, 1.05, 1.25, 0.95] as const;
+/** Where the banks cut each row of Guérande's pans, from 0 (west) to 1 (east), far row first. */
+const PANS = [
+  [0, 0.21, 0.37, 0.62, 0.8, 1],
+  [0, 0.15, 0.4, 0.55, 0.77, 1],
+  [0, 0.24, 0.42, 0.66, 0.85, 1],
+] as const;
+/** How far each stone's top leans, east or west. */
+const LEANS = [0.08, -0.1, 0.02, 0.12, -0.06, 0.1, -0.12] as const;
+/** The pines by the Dune du Pilat: (x from the box's left, height of the centre, radius). */
+const PINES_BEHIND = [
+  [9.9, 1.1, 0.6],
+  [10.9, 1.4, 0.7],
+  [12, 1.2, 0.65],
+  [12.7, 1.5, 0.5],
+] as const;
+const PINES_FRONT = [
+  [10.6, 0.45, 0.55],
+  [11.6, 0.6, 0.6],
+  [12.5, 0.45, 0.5],
+] as const;
+
+/** Battlements along the top of a wall from x0 to x1 at `top`. */
+function merlons(brush: Brush, x0: number, x1: number, top: number, colour: Rgb): void {
+  for (let x = x0 + 0.12; x + 0.24 <= x1; x += 0.48)
+    box(brush, x, top - 0.18, x + 0.24, top + 0.02, colour, { shade: lit(x, 0.12, 0, 1, 0.2, 0) });
+}
 
 /** The sprites that have a drawing of their own here. */
 export const MODERN_LANDMARK_SPRITES: readonly LandmarkSprite[] = Object.keys(
