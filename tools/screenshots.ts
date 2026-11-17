@@ -12,7 +12,8 @@
  * rivers (B-023) and the landmarks (B-016), as each section says; and the modern
  * theme (G-011, `step-6-modern-*.png`), its own plants (B-027, `step-7-*.png`) and
  * its own landmarks by lots (`step-8-modern-landmarks.png`, the second lot in
- * `step-9-modern-landmarks.png`, the third in `step-10-modern-landmarks.png`), at the sharp density a full HD screen gets (D-058,
+ * `step-9-modern-landmarks.png`, the third in `step-10-modern-landmarks.png`, the
+ * fourth in `step-11-modern-landmarks.png`), at the sharp density a full HD screen gets (D-058,
  * `step-8-modern-sharp-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
@@ -336,6 +337,18 @@ for (const [file, lot] of [
       "fortBoyard",
       "placeDeLaBourse",
       "carcassonne",
+    ],
+  ],
+  [
+    "step-11-modern-landmarks.png",
+    [
+      "beauneHospices",
+      "pontDuGard",
+      "fourviere",
+      "notreDameDeLaGarde",
+      "besanconCitadel",
+      "puyDeDome",
+      "calanques",
     ],
   ],
 ] as const) {
