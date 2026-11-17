@@ -36,6 +36,14 @@ export interface PlantMark extends MarkBox {
   readonly plant: ScenePlant;
 }
 
+/** A box of pixels of a surface: left and top included, right and bottom excluded. */
+export interface Rect {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
 /** What a drawn frame leaves to animate: the plants' motion (B-012). */
 export interface Drawn {
   /** Whether anything moves: when not, the frame stays as drawn. */
@@ -45,9 +53,11 @@ export interface Drawn {
   /**
    * Draws the motion at an animation time (seconds) into `target`, which holds a copy
    * of the drawn frame. Pure: the same time gives the same pixels. To be called
-   * before the theme draws its next frame, whose buffers it may share.
+   * before the theme draws its next frame, whose buffers it may share. A theme may
+   * return the boxes of `target` it drew in, all of them: the page then copies and
+   * shows these alone, instead of the whole frame at every step.
    */
-  animate(target: Surface, seconds: number): void;
+  animate(target: Surface, seconds: number): readonly Rect[] | undefined;
 }
 
 export interface Theme {

@@ -1031,3 +1031,30 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** a drawing reads worse than its sprite on a real screen; a detail
   drawn from general knowledge and not from a source turns out wrong (the yellow
   foundation of a turbine at sea, two domes for a plant without towers).
+
+## D-058 — Modern theme: finer drawings, and a sharp frame for what stands on the map
+
+- **Context:** on 2026-11-16 Guillaume found the first seven landmarks of the
+  modern theme rough (« le portage du pixel art est un peu brut »). Two causes,
+  shown on a mockup of the seven by day and at night
+  (`docs/screenshots/step-8-modern-landmarks.png` is the outcome): the shapes kept
+  close to the sprites, boxes on their grid; and the theme drew 2 pixels per scene
+  pixel, so a tower of 9 × 13 scene pixels had 18 × 26 pixels to itself, scaled up
+  by the browser.
+- **Options:** (2) draw the shapes again, at the same 2 pixels; (3) draw them
+  again and draw the plants and the landmarks at the screen's own pixels; or
+  another direction (size, style, colours).
+- **Decision (Guillaume, 2026-11-16, decision card):** (3). How it is done is
+  Claude's, **proposed**: on a screen with 4 pixels or more per scene pixel the
+  frame has 4, the map is still drawn at 2 and spread over it, and what stands on
+  it is drawn at 4 (ARCHITECTURE § The modern theme, Sharp frame). The sprites'
+  boxes, the marks and the captions are unchanged.
+- **Why:** the map is soft and costs 35 ns a pixel; the plants and the landmarks
+  are small, cost little, and are where the eye rests.
+- **Cost, measured:** at rest with the plants moving, 55 ms of work per second
+  for a budget of 30, most of it the hand-over of a canvas four times larger at
+  each step of the motion (ARCHITECTURE § Performance). Not accepted yet: PRD
+  Q-37, B-029.
+- **Revisit if:** Guillaume does not accept the cost and B-029 finds no way under
+  the budget (then 2 pixels again, with the finer shapes); a screen between 2 and
+  4 pixels per scene pixel shows the landmarks too soft.
