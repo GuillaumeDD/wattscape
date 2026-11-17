@@ -6,8 +6,8 @@
  * Eiffel Tower lit plainly, with no beam and no sparkle (P-008, P-009); the
  * lighthouses generic (P-005, P-024). Still, except for their lights, lit at night.
  *
- * A landmark with no drawing here yet keeps its pixel-art sprite, smoothed by the
- * theme. Original drawings, in code; no asset.
+ * Every landmark has one, drawn in four lots (B-027). Original drawings, in code; no
+ * asset.
  */
 import { type Landmark, type LandmarkSprite } from "../../map/landmarks.ts";
 import { PALETTE, type Rgb } from "../palette.ts";
@@ -249,7 +249,8 @@ function eiffelHalf(up: number): number {
   return 0.1 + 3.3 * t * t * t;
 }
 
-const DRAWINGS: Readonly<Partial<Record<LandmarkSprite, Drawing>>> = {
+/** A drawing for every sprite: the type says that none is missing. */
+const DRAWINGS: Readonly<Record<LandmarkSprite, Drawing>> = {
   // The needle (west) and the arch (the Porte d'Aval, a buttress that steps out of
   // the cliff into the sea): white chalk in beds, under the grass, in the foam.
   etretat(brush, left, foot) {
@@ -1900,24 +1901,15 @@ function merlons(brush: Brush, x0: number, x1: number, top: number, colour: Rgb)
     box(brush, x, top - 0.18, x + 0.24, top + 0.02, colour, { shade: lit(x, 0.12, 0, 1, 0.2, 0) });
 }
 
-/** The sprites that have a drawing of their own here. */
-export const MODERN_LANDMARK_SPRITES: readonly LandmarkSprite[] = Object.keys(
-  DRAWINGS,
-) as LandmarkSprite[];
-
 /**
  * Draws a landmark, the middle of its bottom row at pixel (ax, ay) and the left of
- * its box at `left` (./landmarks.ts's `landmarkBox`). False, and nothing drawn, when
- * it has no drawing here yet.
+ * its box at `left` (./landmarks.ts's `landmarkBox`).
  */
 export function drawModernLandmark(
   brush: Brush,
   landmark: Landmark,
   left: number,
   ay: number,
-): boolean {
-  const drawing = DRAWINGS[landmark.sprite];
-  if (drawing === undefined) return false;
-  drawing(brush, left, ay + 1);
-  return true;
+): void {
+  DRAWINGS[landmark.sprite](brush, left, ay + 1);
 }

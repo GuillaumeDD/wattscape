@@ -749,10 +749,8 @@ the deployed build. `tools/screenshots.ts` writes its frames
   the south-east: the Hospices de Beaune, the Citadel of Besançon, the Pont du
   Gard, Fourvière, the Puy de Dôme (its volcanoes, no mast), Notre-Dame de la Garde
   and the Calanques (`docs/screenshots/step-11-modern-landmarks.png`): every
-  landmark has its own drawing. A landmark with no drawing yet
-  keeps its pixel-art sprite, smoothed: its pixels are gathered, its outline drawn
-  at the half level of their coverage read between their centres (a stair becomes
-  a slope), with the same shadow.
+  landmark has its own drawing, so the smoothed pixel-art sprites that stood in
+  for them are no longer drawn.
 - **Determinism:** additions, multiplications, divisions, floors and square roots
   only (IEEE 754 rounds those exactly) for the still frame; no `Math.sin`, `exp` or
   `hypot`. Only the turning blades take a sine, as in pixel art: an animation, not
