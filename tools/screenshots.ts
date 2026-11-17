@@ -10,13 +10,15 @@
  * flight from France to Normandie, the crossfade between the 4 km and 1 km layers
  * among them, in one picture. Then the plants (B-012), the towns (B-014), the
  * rivers (B-023) and the landmarks (B-016), as each section says; and the modern
- * theme (G-011, `step-6-modern-*.png`) and its own plants (B-027, `step-7-*.png`).
+ * theme (G-011, `step-6-modern-*.png`), its own plants (B-027, `step-7-*.png`) and
+ * its own landmarks (`step-8-modern-landmarks.png`), at the sharp density a full HD
+ * screen gets (D-058, `step-8-modern-sharp-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine.ts";
-import { drawModernScene } from "../src/render/modern-theme.ts";
+import { drawModernScene, MODERN_SHARP_DENSITY } from "../src/render/modern-theme.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, hashSurface, type Surface } from "../src/render/surface.ts";
 import { areaBox, type Camera, fitBox, flightAt } from "../src/scene/camera.ts";
@@ -291,6 +293,51 @@ for (const [name, focus] of [
     const surface = createSurface(WIDTH * MODERN_DENSITY, HEIGHT * MODERN_DENSITY);
     drawModernScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
     const file = `${OUT}/step-7-modern-plants-${name}-${time}.png`;
+    writePng(file, surface);
+    console.log(`${file}: ${hashSurface(surface)}`);
+  }
+
+// The modern theme's own landmarks (B-027): each one that has its drawing, close up,
+// by day (left) and at night (right), without the plants.
+{
+  const { MODERN_LANDMARK_SPRITES } = await import("../src/render/art/modern-landmarks.ts");
+  const drawn = LANDMARKS.filter((l) => MODERN_LANDMARK_SPRITES.includes(l.sprite));
+  const [w, h] = [40, 26];
+  // At the sharp density (D-058), as a full HD screen shows them, twice enlarged.
+  const density = MODERN_SHARP_DENSITY;
+  const sheet = createSurface(w * density * 2, h * density * drawn.length);
+  drawn.forEach((landmark, row) => {
+    [35, -20].forEach((elevation, column) => {
+      const camera = { x: landmark.x, y: landmark.y - 8, scale: 1 };
+      const scene = { ...referenceScene(null, camera, elevation), width: w, height: h, plants: [] };
+      const surface = createSurface(w * density, h * density);
+      drawModernScene(scene, surface);
+      for (let y = 0; y < surface.height; y++)
+        sheet.data.set(
+          surface.data.subarray(y * surface.width * 4, (y + 1) * surface.width * 4),
+          ((row * surface.height + y) * sheet.width + column * surface.width) * 4,
+        );
+    });
+  });
+  const file = `${OUT}/step-8-modern-landmarks.png`;
+  writePng(file, sheet, 2);
+  console.log(`${file}: ${hashSurface(sheet)}`);
+}
+
+// The modern theme at the sharp density (D-058), as a full HD screen shows it: two
+// regions, by day and at night, their plants' motion at 1.3 s.
+for (const [name, focus] of [
+  ["normandie", "28"],
+  ["ile-de-france", "11"],
+] as const)
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+    const surface = createSurface(WIDTH * MODERN_SHARP_DENSITY, HEIGHT * MODERN_SHARP_DENSITY);
+    drawModernScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
+    const file = `${OUT}/step-8-modern-sharp-${name}-${time}.png`;
     writePng(file, surface);
     console.log(`${file}: ${hashSurface(surface)}`);
   }

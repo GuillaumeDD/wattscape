@@ -12,7 +12,7 @@ import { LANDMARKS } from "../src/map/landmarks.ts";
 import { PLANT_SITES } from "../src/map/plants.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine.ts";
-import { drawModernScene } from "../src/render/modern-theme.ts";
+import { drawModernScene, MODERN_SHARP_DENSITY } from "../src/render/modern-theme.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, type Surface } from "../src/render/surface.ts";
 import { drawTestCard } from "../src/render/test-card.ts";
@@ -86,14 +86,18 @@ function scene(
   return out;
 }
 
-/** The same scene by the modern theme, at the density a full HD screen gets. */
+/**
+ * The same scene by the modern theme, at 2 output pixels per scene pixel, or at the
+ * sharp density a full HD screen gets (4, the map drawn at 2: D-058).
+ */
 function modern(
   focus: CellRegion | null,
   camera: Camera,
   sunElevation: number,
   seconds?: number,
+  density = MODERN_DENSITY,
 ): Surface {
-  const out = createSurface(FRAME_WIDTH * MODERN_DENSITY, FRAME_HEIGHT * MODERN_DENSITY);
+  const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
   const drawn = drawModernScene(referenceScene(focus, camera, sunElevation), out);
   if (seconds !== undefined) drawn.animate(out, seconds);
   return out;
@@ -129,4 +133,10 @@ export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
   "modern-auvergne-rhone-alpes-golden": () => modern("84", framed("84"), 2),
   "modern-crossfade-day": () => modern(null, { ...kmOf(45.5, 3), scale: 0.6 }, 35),
   "modern-mont-blanc-day": () => modern("84", { ...kmOf(45.83, 6.86), scale: 4 }, 35),
+  // At the sharp density (D-058): the map spread from 2 pixels per scene pixel, the
+  // plants and the landmarks at 4.
+  "modern-sharp-normandie-day-t1.3": () =>
+    modern("28", framed("28"), 35, 1.3, MODERN_SHARP_DENSITY),
+  "modern-sharp-normandie-night-t1.3": () =>
+    modern("28", framed("28"), -20, 1.3, MODERN_SHARP_DENSITY),
 };

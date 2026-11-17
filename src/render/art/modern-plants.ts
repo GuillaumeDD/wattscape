@@ -18,59 +18,18 @@ import {
   TURBINE_GAP,
   turbineCount,
 } from "./plants.ts";
+import { BLACK, box, type Brush, clamp, DARK, disc, LAMP, line, round, shadow } from "./shapes.ts";
 
-/** How a filled shape is drawn. */
-export interface Ink {
-  /** Its opacity, 1 by default. */
-  readonly alpha?: number;
-  /** Drawn as it is, not under the scene's light: a lamp, a shadow. */
-  readonly unlit?: boolean;
-  /** A factor on the colour at each place: the shading of a round wall. */
-  readonly shade?: (x: number, y: number) => number;
-}
-
-/** What a theme gives to draw shapes with. */
-export interface Brush {
-  /** Whether lit windows show now (the sun is down). */
-  readonly emissive: boolean;
-  /**
-   * Fills, within a box, where `distance` is negative: the distance to the shape's
-   * edge in scene pixels, about; the edge is smoothed over one output pixel.
-   */
-  fill(
-    left: number,
-    top: number,
-    right: number,
-    bottom: number,
-    distance: (x: number, y: number) => number,
-    colour: Rgb,
-    ink?: Ink,
-  ): void;
-  /** A soft spot: an ellipse, `alpha` at its centre, nothing at its rim. */
-  spot(
-    cx: number,
-    cy: number,
-    rx: number,
-    ry: number,
-    colour: Rgb,
-    alpha: number,
-    unlit?: boolean,
-  ): void;
-}
+export type { Brush, Ink } from "./shapes.ts";
 
 const SNOW = PALETTE.snow;
 const CONCRETE: Rgb = [226, 226, 220];
 const SLAB: Rgb = [150, 150, 146];
 const STEEL: Rgb = [176, 182, 180];
-const DARK: Rgb = [58, 52, 48];
 const SMOKE: Rgb = [112, 106, 102];
-const BLACK: Rgb = [0, 0, 0];
-const LAMP = PALETTE.lamp;
 /** The yellow of an offshore foundation's transition piece. */
 const FOUNDATION: Rgb = [214, 170, 60];
 
-const clamp = (v: number, low: number, high: number): number =>
-  v < low ? low : v > high ? high : v;
 const frac = (v: number): number => v - Math.floor(v);
 
 /** A small integer hash, for glints that come and go (no Math.random): ./plants.ts's. */
@@ -78,93 +37,6 @@ function hash3(a: number, b: number, c: number): number {
   let h = Math.imul(a, 0x27d4eb2d) ^ Math.imul(b, 0x165667b1) ^ Math.imul(c, 0x1b873593);
   h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d);
   return (h ^ (h >>> 12)) >>> 0;
-}
-
-/** Lit from the west: 1 on the left edge of a wall `half` wide around `cx`, less on the right. */
-const round =
-  (cx: number, half: number, dim = 0.2) =>
-  (x: number): number =>
-    1 - dim * clamp((x - cx) / half / 2 + 0.5, 0, 1);
-
-function box(
-  brush: Brush,
-  x0: number,
-  y0: number,
-  x1: number,
-  y1: number,
-  colour: Rgb,
-  ink?: Ink,
-): void {
-  const cx = (x0 + x1) / 2;
-  const cy = (y0 + y1) / 2;
-  const hw = (x1 - x0) / 2;
-  const hh = (y1 - y0) / 2;
-  brush.fill(
-    x0 - 1,
-    y0 - 1,
-    x1 + 1,
-    y1 + 1,
-    (x, y) => Math.max(Math.abs(x - cx) - hw, Math.abs(y - cy) - hh),
-    colour,
-    ink,
-  );
-}
-
-function disc(brush: Brush, cx: number, cy: number, r: number, colour: Rgb, ink?: Ink): void {
-  brush.fill(
-    cx - r - 1,
-    cy - r - 1,
-    cx + r + 1,
-    cy + r + 1,
-    (x, y) => Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy)) - r,
-    colour,
-    ink,
-  );
-}
-
-/** A line from a to b, `ra` thick at a (as a radius) and `rb` at b, with round ends. */
-function line(
-  brush: Brush,
-  ax: number,
-  ay: number,
-  bx: number,
-  by: number,
-  ra: number,
-  rb: number,
-  colour: Rgb,
-  ink?: Ink,
-): void {
-  const dx = bx - ax;
-  const dy = by - ay;
-  const length2 = dx * dx + dy * dy || 1;
-  const r = Math.max(ra, rb) + 1;
-  brush.fill(
-    Math.min(ax, bx) - r,
-    Math.min(ay, by) - r,
-    Math.max(ax, bx) + r,
-    Math.max(ay, by) + r,
-    (x, y) => {
-      const t = clamp(((x - ax) * dx + (y - ay) * dy) / length2, 0, 1);
-      const ex = x - ax - t * dx;
-      const ey = y - ay - t * dy;
-      return Math.sqrt(ex * ex + ey * ey) - (ra + (rb - ra) * t);
-    },
-    colour,
-    ink,
-  );
-}
-
-/** The shadow at the foot of something `width` wide, cast to the east. */
-function shadow(brush: Brush, cx: number, foot: number, width: number): void {
-  brush.spot(
-    cx + width * 0.12,
-    foot,
-    width * 0.6 + 0.8,
-    Math.max(0.7, width / 9),
-    BLACK,
-    0.3,
-    true,
-  );
 }
 
 /** A window: a lamp at night when lit, a dark pane otherwise. */

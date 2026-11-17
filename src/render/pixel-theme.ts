@@ -681,7 +681,7 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
   return {
     moving: moving.length > 0,
     marks,
-    animate(target: Surface, seconds: number): void {
+    animate(target: Surface, seconds: number): undefined {
       if (target.width !== out.width || target.height !== out.height) return;
       const onTarget: Frame = { ...frameOf(scene, target), ox, oy };
       const pen = penOf(onTarget, darkness, emissive);

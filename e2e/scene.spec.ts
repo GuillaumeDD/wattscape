@@ -236,6 +236,26 @@ test("animates the plants from one answer for every region, the camera still", a
   expect(new URL(asked[0] ?? "").searchParams.get("limit")).toBe("24");
 });
 
+test("animates the modern theme's plants on its sharp frame, the camera still", async ({
+  page,
+}) => {
+  await page.route("https://odre.opendatasoft.com/**", (route) =>
+    route.fulfill({ body: DAY_STEP, contentType: "application/json" }),
+  );
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto("/scene.html?area=28&plants=live&theme=modern");
+  await expect(page.locator("#plants-note")).toHaveText("live");
+  await page.waitForTimeout(3500);
+  // The motion goes to the canvas box by box (D-058): the picture still changes.
+  const pictures = new Set<string>();
+  for (let i = 0; i < 6; i++) {
+    pictures.add(await picture(page));
+    await page.waitForTimeout(170);
+  }
+  expect(pictures.size).toBeGreaterThan(1);
+  for (const one of pictures) expect(one.startsWith("1920x1080:")).toBe(true);
+});
+
 test("leaves the plants idle and still when the data is unavailable", async ({ page }) => {
   await page.route("https://odre.opendatasoft.com/**", (route) => route.abort());
   await page.setViewportSize({ width: 960, height: 540 });
@@ -311,8 +331,8 @@ test("switches theme in place: the camera stays, and pixel art comes back as it 
 
   await page.click("#theme-toggle");
   const modern = await settled(page);
-  // Full HD: 2 output pixels per scene pixel, scaled up smoothly.
-  expect(modern.startsWith("960x540:")).toBe(true);
+  // Full HD: the sharp density, the screen's own 4 pixels per scene pixel (D-058).
+  expect(modern.startsWith("1920x1080:")).toBe(true);
   expect(await page.locator("#scene").evaluate((c) => c.classList.contains("smooth"))).toBe(true);
   expect(await page.locator("#scene").evaluate((c) => c.getBoundingClientRect().width)).toBe(1920);
 

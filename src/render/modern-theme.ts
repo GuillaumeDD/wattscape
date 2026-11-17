@@ -21,7 +21,9 @@ import { RIVER_UNITS_PER_KM } from "../map/river-lines.ts";
 import { HIGHEST_METRES, RISE_METRES_PER_KM } from "../scene/camera.ts";
 import { type Scene, type ScenePlant, type Town } from "../scene/scene.ts";
 import { drawLandmark, landmarkBox } from "./art/landmarks.ts";
-import { type Brush, drawModernBody, drawModernMotion } from "./art/modern-plants.ts";
+import { type Brush } from "./art/shapes.ts";
+import { drawModernLandmark } from "./art/modern-landmarks.ts";
+import { drawModernBody, drawModernMotion } from "./art/modern-plants.ts";
 import { hasMotion, type Pen, plantBox, type SpriteSize } from "./art/plants.ts";
 import { DITHER_LEVELS } from "./dither.ts";
 import { PALETTE, type Rgb } from "./palette.ts";
@@ -33,7 +35,7 @@ import {
   visiblePlants,
 } from "./pixel-theme.ts";
 import { type Surface } from "./surface.ts";
-import type { Drawn, Mark, Theme } from "./theme.ts";
+import type { Drawn, Mark, Rect, Theme } from "./theme.ts";
 
 /**
  * The most output pixels a frame is drawn at, beyond a density of 2: a frame costs
@@ -46,8 +48,11 @@ export const MODERN_PIXEL_BUDGET = 600_000;
  * Output pixels per scene pixel, for a scene of `width` × `height` shown at `factor`
  * device pixels per scene pixel: 2, or more in a small window, up to the device's
  * own pixels, while the budget allows; the canvas scales the rest up, smoothly.
- * While the camera moves (`moving`), half of that, rounded down: a quarter of the
- * pixels or fewer, softer for the time of the movement (PRD Q-34, D-056).
+ * Where that gives 2 and the screen has 4 or more, the sharp density, 4: the map
+ * is still drawn at 2 (`modernMapDensity`), what stands on it at 4 (D-058).
+ * While the camera moves (`moving`), half of the map's density, rounded down: a
+ * quarter of its pixels or fewer, softer for the time of the movement (PRD Q-34,
+ * D-056).
  */
 export function modernDensity(
   width: number,
@@ -57,7 +62,87 @@ export function modernDensity(
 ): number {
   let d = Number.isFinite(factor) ? Math.max(2, Math.floor(factor)) : 2;
   while (d > 2 && width * height * d * d > MODERN_PIXEL_BUDGET) d--;
-  return moving ? Math.floor(d / 2) : d;
+  if (moving) return Math.floor(d / 2);
+  return d === 2 && Number.isFinite(factor) && factor >= MODERN_SHARP_DENSITY
+    ? MODERN_SHARP_DENSITY
+    : d;
+}
+
+/**
+ * The sharp density (D-058): where the screen has 4 pixels or more per scene pixel
+ * and the budget gives the map 2, the frame has 4. The map, soft, is still drawn at
+ * 2 and spread over the frame; the plants and the landmarks, small and where the
+ * eye rests, are drawn at the frame's 4, the pixels of a full HD screen.
+ */
+export const MODERN_SHARP_DENSITY = 4;
+
+/** The pixels per scene pixel the map is drawn at, in a frame of a density. */
+export function modernMapDensity(density: number): number {
+  return density === MODERN_SHARP_DENSITY ? MODERN_SHARP_DENSITY / 2 : density;
+}
+
+/**
+ * Spreads a picture of `width` × `height` pixels over a surface twice as large each
+ * way, smoothly: each pixel of `out` is read between the centres of the four
+ * nearest of `from`, three quarters from the nearer and one from the farther each
+ * way (at the edges, the nearest alone). In whole numbers, the same bytes in every
+ * engine; two bytes of a pixel at a time, which makes it twice as fast: about
+ * 10 ms for a full HD frame, where byte by byte took 22 (measured in Node).
+ */
+export function spread(from: Uint8ClampedArray, width: number, height: number, out: Surface): void {
+  if (out.width !== width * 2 || out.height !== height * 2 || from.length !== width * height * 4)
+    throw new Error("the surface is not twice the picture");
+  const source = new Uint32Array(from.buffer, from.byteOffset, width * height);
+  const target = new Uint32Array(out.data.buffer, out.data.byteOffset, out.width * out.height);
+  const wide = out.width;
+  // A pixel is four bytes: the first and the third are summed in one number, the
+  // second and the fourth in another, with room between them for the sums (the
+  // same on a machine of either byte order).
+  const PAIR = 0x00ff00ff;
+  /** A row of `from` spread along x: for each pixel of `out`, its two pairs, times 4. */
+  const along = (row: number, odd: Uint32Array, even: Uint32Array): void => {
+    const start = row * width;
+    for (let x = 0; x < width; x++) {
+      const here = source[start + x] ?? 0;
+      const before = source[start + Math.max(0, x - 1)] ?? 0;
+      const after = source[start + Math.min(width - 1, x + 1)] ?? 0;
+      const o = (here & PAIR) * 3;
+      const e = ((here >>> 8) & PAIR) * 3;
+      odd[2 * x] = o + (before & PAIR);
+      even[2 * x] = e + ((before >>> 8) & PAIR);
+      odd[2 * x + 1] = o + (after & PAIR);
+      even[2 * x + 1] = e + ((after >>> 8) & PAIR);
+    }
+  };
+  let rows = [
+    { odd: new Uint32Array(wide), even: new Uint32Array(wide) },
+    { odd: new Uint32Array(wide), even: new Uint32Array(wide) },
+    { odd: new Uint32Array(wide), even: new Uint32Array(wide) },
+  ] as const;
+  const ROUND = 0x00080008;
+  for (let y = 0; y < height; y++) {
+    // The rows before, here and after, spread along x; each is spread once.
+    const [before, here, after] = rows;
+    if (y === 0) {
+      along(0, here.odd, here.even);
+      before.odd.set(here.odd);
+      before.even.set(here.even);
+    }
+    along(Math.min(height - 1, y + 1), after.odd, after.even);
+    let up = 2 * y * wide;
+    let down = up + wide;
+    for (let x = 0; x < wide; x++) {
+      const o = (here.odd[x] ?? 0) * 3;
+      const e = (here.even[x] ?? 0) * 3;
+      target[up++] =
+        (((o + (before.odd[x] ?? 0) + ROUND) >>> 4) & PAIR) |
+        ((((e + (before.even[x] ?? 0) + ROUND) >>> 4) & PAIR) << 8);
+      target[down++] =
+        (((o + (after.odd[x] ?? 0) + ROUND) >>> 4) & PAIR) |
+        ((((e + (after.even[x] ?? 0) + ROUND) >>> 4) & PAIR) << 8);
+    }
+    rows = [here, after, before];
+  }
 }
 
 const hex = (s: string): Rgb => [
@@ -771,12 +856,21 @@ function standingAt(
   };
 }
 
+interface MutableRect {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
 /** What draws on the ground: the brush of the plants, and the pen of the landmarks. */
 interface Tools extends Pen, Brush {
   /** What is drawn next stands there: the relief in front of it hides it. */
   stand(on: Standing): void;
   /** Draws the sprite put with the pen since the last call, with its shadow or not. */
   flush(shadow: boolean): void;
+  /** The boxes drawn in so far, one for each thing that stood, in the pixels drawn. */
+  touched(): readonly Rect[];
 }
 
 /**
@@ -790,9 +884,53 @@ interface Tools extends Pen, Brush {
  * then drawn smooth, its outline at the half level of its pixels' coverage read
  * between their centres (a stair becomes a slope, a lone pixel a dot), its colours
  * blended the same way.
+ *
+ * They draw into `target`: the frame's own pixels, or finer ones (the frame then
+ * still says what the relief hides, and the vignette).
  */
-function toolsOf(frame: Frame, emissive: boolean): Tools {
-  const { data, depth, width, height, density, vx, vy } = frame;
+function toolsOf(frame: Frame, emissive: boolean, target: Surface): Tools {
+  const { depth, vx, vy } = frame;
+  const { data, width, height } = target;
+  // The pixels drawn per scene pixel, and the frame's pixels per pixel drawn: `target`
+  // is the frame's own surface, or a finer one the frame was spread over.
+  const density = (width * frame.density) / frame.width;
+  const back = frame.density / density;
+  const own = back !== 1;
+  const columns = frame.width;
+  /** Whether the relief in front hides what stands at a pixel. */
+  const hidden = (px: number, py: number): boolean =>
+    (depth[own ? Math.floor(py * back) * columns + Math.floor(px * back) : py * width + px] ?? 0) >
+    limit;
+  /** The vignette at a pixel. */
+  const dim = (px: number, py: number): number =>
+    own
+      ? vignette(vx[Math.floor(px * back)] ?? 0, vy[Math.floor(py * back)] ?? 0)
+      : vignette(vx[px] ?? 0, vy[py] ?? 0);
+  /**
+   * Lays a colour over pixel `p`, covering the share `a` of it; (r, g, b) is the
+   * colour times that share.
+   */
+  const lay = (p: number, a: number, r: number, g: number, b: number): void => {
+    const i = p * 4;
+    data[i] = (data[i] ?? 0) * (1 - a) + r;
+    data[i + 1] = (data[i + 1] ?? 0) * (1 - a) + g;
+    data[i + 2] = (data[i + 2] ?? 0) * (1 - a) + b;
+  };
+  // The boxes of what was drawn, one for each thing that stands.
+  const touched: MutableRect[] = [];
+  let current: MutableRect | null = null;
+  const touch = (x0: number, y0: number, x1: number, y1: number): void => {
+    if (!(x0 < x1 && y0 < y1)) return;
+    if (current === null) {
+      current = { left: x0, top: y0, right: x1, bottom: y1 };
+      touched.push(current);
+      return;
+    }
+    current.left = Math.min(current.left, x0);
+    current.top = Math.min(current.top, y0);
+    current.right = Math.max(current.right, x1);
+    current.bottom = Math.max(current.bottom, y1);
+  };
   const soft = emissive ? 0.3 : 0;
   const light: Rgb = [
     frame.light[0] + (1 - frame.light[0]) * soft,
@@ -818,18 +956,16 @@ function toolsOf(frame: Frame, emissive: boolean): Tools {
     const x1 = Math.min(width, Math.ceil((cx + rx) * density));
     const y0 = Math.max(0, Math.floor((cy - ry) * density));
     const y1 = Math.min(height, Math.ceil((cy + ry) * density));
+    touch(x0, y0, x1, y1);
     for (let py = y0; py < y1; py++) {
       const dy = ((py + 0.5) / density - cy) / ry;
       for (let px = x0; px < x1; px++) {
         const dx = ((px + 0.5) / density - cx) / rx;
         const a = (1 - dx * dx - dy * dy) * alpha;
         if (!(a > 0)) continue;
-        const p = py * width + px;
-        if ((depth[p] ?? 0) > limit) continue;
-        const v = vignette(vx[px] ?? 0, vy[py] ?? 0) * a;
-        data[p * 4] = (data[p * 4] ?? 0) * (1 - a) + r * v;
-        data[p * 4 + 1] = (data[p * 4 + 1] ?? 0) * (1 - a) + g * v;
-        data[p * 4 + 2] = (data[p * 4 + 2] ?? 0) * (1 - a) + b * v;
+        if (hidden(px, py)) continue;
+        const v = dim(px, py) * a;
+        lay(py * width + px, a, r * v, g * v, b * v);
       }
     }
   };
@@ -837,8 +973,10 @@ function toolsOf(frame: Frame, emissive: boolean): Tools {
     emissive,
     stand(on) {
       // Two scene pixels of slack: its foot stands on the ground, not behind it.
-      limit = on.row + 2 * density;
+      limit = on.row + 2 * frame.density;
+      current = null;
     },
+    touched: () => touched,
     spot,
     fill(left, top, right, bottom, distance, colour, ink) {
       const unlit = ink?.unlit === true;
@@ -851,6 +989,7 @@ function toolsOf(frame: Frame, emissive: boolean): Tools {
       const x1 = Math.min(width, Math.ceil(right * density));
       const y0 = Math.max(0, Math.floor(top * density));
       const y1 = Math.min(height, Math.ceil(bottom * density));
+      touch(x0, y0, x1, y1);
       for (let py = y0; py < y1; py++) {
         const y = (py + 0.5) / density;
         for (let px = x0; px < x1; px++) {
@@ -858,13 +997,9 @@ function toolsOf(frame: Frame, emissive: boolean): Tools {
           // The edge over one output pixel: half covered where the distance is 0.
           const a = clamp01(0.5 - distance(x, y) * density) * opacity;
           if (!(a > 0)) continue;
-          const p = py * width + px;
-          if ((depth[p] ?? 0) > limit) continue;
-          const v =
-            vignette(vx[px] ?? 0, vy[py] ?? 0) * a * (shade === undefined ? 1 : shade(x, y));
-          data[p * 4] = (data[p * 4] ?? 0) * (1 - a) + r * v;
-          data[p * 4 + 1] = (data[p * 4 + 1] ?? 0) * (1 - a) + g * v;
-          data[p * 4 + 2] = (data[p * 4 + 2] ?? 0) * (1 - a) + b * v;
+          if (hidden(px, py)) continue;
+          const v = dim(px, py) * a * (shade === undefined ? 1 : shade(x, y));
+          lay(py * width + px, a, r * v, g * v, b * v);
         }
       }
     },
@@ -921,6 +1056,7 @@ function toolsOf(frame: Frame, emissive: boolean): Tools {
       const right = Math.min(width, (x1 + 2) * density);
       const top = Math.max(0, (y0 - 1) * density);
       const bottom = Math.min(height, (y1 + 2) * density);
+      touch(left, top, right, bottom);
       for (let py = top; py < bottom; py++) {
         // The place between the centres of the sprite's pixels.
         const v = (py + 0.5) / density - 0.5 - (y0 - 1);
@@ -939,17 +1075,15 @@ function toolsOf(frame: Frame, emissive: boolean): Tools {
           // The outline at the half level, over one output pixel.
           const alpha = clamp01((covered - 0.5) * density + 0.5);
           if (!(alpha > 0)) continue;
-          const p = py * width + px;
-          if ((depth[p] ?? 0) > limit) continue;
-          const share = (vignette(vx[px] ?? 0, vy[py] ?? 0) * alpha) / covered;
-          for (let c = 0; c < 3; c++) {
-            const colour =
-              (rgb[g * 3 + c] ?? 0) * w00 +
+          if (hidden(px, py)) continue;
+          const share = (dim(px, py) * alpha) / covered;
+          const mixed = (c: number): number =>
+            ((rgb[g * 3 + c] ?? 0) * w00 +
               (rgb[(g + 1) * 3 + c] ?? 0) * w10 +
               (rgb[(g + gw) * 3 + c] ?? 0) * w01 +
-              (rgb[(g + gw + 1) * 3 + c] ?? 0) * w11;
-            data[p * 4 + c] = (data[p * 4 + c] ?? 0) * (1 - alpha) + colour * share;
-          }
+              (rgb[(g + gw + 1) * 3 + c] ?? 0) * w11) *
+            share;
+          lay(py * width + px, alpha, mixed(0), mixed(1), mixed(2));
         }
       }
     },
@@ -961,27 +1095,37 @@ const SHADOW: Rgb = [0, 0, 0];
 /** The buffers of the frame drawn last, reused while the size stays the same. */
 let depths: [Int16Array, Int16Array] | null = null;
 let spare: Uint8ClampedArray | null = null;
+let ground: Uint8ClampedArray | null = null;
 
 /**
  * Draws a scene: the 4 km layer, the 1 km one, or a blend of both, then the rivers,
  * the landmarks and the plants' still bodies. `out` is the scene's size times a
  * whole number, the density. Returns what moves; `animate` reads what this frame
  * hides behind the relief, so it is to be called before the next frame is drawn.
+ *
+ * At the sharp density (`MODERN_SHARP_DENSITY`), the map is drawn at half of it and
+ * spread smoothly over `out`; what stands on it is then drawn at `out`'s own pixels
+ * (D-058).
  */
 export function drawModernScene(scene: Scene, out: Surface): Drawn {
-  const density = scene.width > 0 ? out.width / scene.width : 1;
+  const sharp = scene.width > 0 ? out.width / scene.width : 1;
   if (
-    !Number.isInteger(density) ||
-    density < 1 ||
-    out.width !== scene.width * density ||
-    out.height !== scene.height * density
+    !Number.isInteger(sharp) ||
+    sharp < 1 ||
+    out.width !== scene.width * sharp ||
+    out.height !== scene.height * sharp
   )
     throw new Error("the surface is not a whole multiple of the scene's size");
-  const pixels = out.width * out.height;
+  const density = modernMapDensity(sharp);
+  const pixels = scene.width * density * scene.height * density;
+  // The map's own pixels: `out`'s, or a buffer of this module's when `out` is finer.
+  if (density !== sharp && ground?.length !== pixels * 4)
+    ground = new Uint8ClampedArray(pixels * 4);
+  const map = density === sharp || ground === null ? out.data : ground;
   if (depths?.[0].length !== pixels) depths = [new Int16Array(pixels), new Int16Array(pixels)];
   const detail = scene.fine === null ? 0 : Math.min(DITHER_LEVELS, Math.max(0, scene.detail));
   let layer = scene.coarse;
-  let frame = frameOf(scene, out.data, depths[0], density);
+  let frame = frameOf(scene, map, depths[0], density);
   if (!(detail > 0) || scene.fine === null) {
     drawTerrain(frame, scene, layer);
     drawRivers(frame, scene, layer);
@@ -994,22 +1138,22 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
     // ground stands once, on the layer that shows the most.
     drawTerrain(frame, scene, scene.coarse);
     drawRivers(frame, scene, scene.coarse);
-    if (spare?.length !== out.data.length) spare = new Uint8ClampedArray(out.data.length);
+    if (spare?.length !== map.length) spare = new Uint8ClampedArray(map.length);
     const detailed = frameOf(scene, spare, depths[1], density);
     drawTerrain(detailed, scene, scene.fine);
     drawRivers(detailed, scene, scene.fine);
     const share = detail / DITHER_LEVELS;
-    const { data } = out;
-    for (let i = 0; i < data.length; i++)
-      data[i] = (data[i] ?? 0) + ((spare[i] ?? 0) - (data[i] ?? 0)) * share;
+    for (let i = 0; i < map.length; i++)
+      map[i] = (map[i] ?? 0) + ((spare[i] ?? 0) - (map[i] ?? 0)) * share;
     if (detail * 2 >= DITHER_LEVELS) {
       layer = scene.fine;
-      frame = { ...detailed, data: out.data };
+      frame = { ...detailed, data: map };
     }
   }
+  if (map !== out.data) spread(map, scene.width * density, scene.height * density, out);
 
   const size: SpriteSize = scene.camera.scale >= SPRITES_FROM_SCALE ? "full" : "marker";
-  const pen = toolsOf(frame, scene.light.emissive);
+  const pen = toolsOf(frame, scene.light.emissive, out);
   // Back to front: what stands further south is drawn over what stands behind it.
   const landmarks: PlacedLandmark[] =
     size === "full"
@@ -1023,8 +1167,12 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
       : [];
   for (const m of landmarks) {
     pen.stand(m);
-    drawLandmark(pen, m.landmark, m.x, m.y);
-    pen.flush(true);
+    // Its own drawing, or its pixel-art sprite, smoothed, until it has one.
+    const box = landmarkBox(m.landmark, m.x, m.y);
+    if (!drawModernLandmark(pen, m.landmark, box.left, m.y)) {
+      drawLandmark(pen, m.landmark, m.x, m.y);
+      pen.flush(true);
+    }
   }
   const plants: PlacedPlant[] = visiblePlants(scene, frame.ox / density, scene.width)
     .map((plant) => ({ plant, ...standingAt(frame, scene, layer, plant.site.x, plant.site.y) }))
@@ -1052,13 +1200,14 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
   return {
     moving: moving.length > 0,
     marks,
-    animate(target: Surface, seconds: number): void {
-      if (target.width !== out.width || target.height !== out.height) return;
-      const motion = toolsOf({ ...frame, data: target.data }, scene.light.emissive);
+    animate(target: Surface, seconds: number): readonly Rect[] {
+      if (target.width !== out.width || target.height !== out.height) return [];
+      const motion = toolsOf(frame, scene.light.emissive, target);
       for (const p of moving) {
         motion.stand(p);
         drawModernMotion(motion, p.plant.site, p.plant.activity, p.x, p.y, size, seconds);
       }
+      return motion.touched();
     },
   };
 }

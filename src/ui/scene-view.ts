@@ -15,6 +15,7 @@ import {
   DEFAULT_THEME,
   type Drawn,
   type Mark,
+  type Rect,
   type Theme,
   THEMES,
   type ThemeId,
@@ -117,6 +118,17 @@ export interface ShownCaption {
   readonly box: Box;
 }
 
+/** Copies a box of a surface to the same place of another of the same size. */
+function copyBox(from: Surface, to: Surface, box: Rect): void {
+  for (let y = box.top; y < box.bottom; y++) {
+    const start = (y * to.width + box.left) * 4;
+    to.data.set(from.data.subarray(start, (y * to.width + box.right) * 4), start);
+  }
+}
+
+const sameBox = (a: Rect, b: Rect): boolean =>
+  a.left === b.left && a.top === b.top && a.right === b.right && a.bottom === b.bottom;
+
 export function mountSceneView(
   canvas: HTMLCanvasElement,
   clock: Clock,
@@ -146,6 +158,8 @@ export function mountSceneView(
   let lights: TownLights = {};
   let plantsVersion = 0;
   let image: ImageData | null = null;
+  /** The boxes of `surface` the last step's motion was drawn in, if the theme says. */
+  let moved: readonly Rect[] | null = null;
   /** The frames already allocated, by density: one at rest, one for a moving camera. */
   const frames = new Map<number, { surface: Surface; still: Surface }>();
   /** When an input last moved the camera at once (a drag, the wheel, a pinch). */
@@ -387,15 +401,36 @@ export function mountSceneView(
         showCaption();
       }
       lastStep = step;
-      surface.data.set(still.data);
-      drawn?.animate(surface, (step * MOTION_STEP_MS * (reducedMotion ? 0.5 : 1)) / 1000);
+      // Where the last step's motion was drawn, the still frame comes back; all of
+      // it after a redraw, or when the theme does not say where it draws.
+      const stale = redraw ? null : moved;
+      if (stale === null) surface.data.set(still.data);
+      else for (const box of stale) copyBox(still, surface, box);
+      moved =
+        drawn?.animate(surface, (step * MOTION_STEP_MS * (reducedMotion ? 0.5 : 1)) / 1000) ?? null;
       // The image wraps the surface's own bytes: no copy per frame.
       image ??= new ImageData(
         surface.data as Uint8ClampedArray<ArrayBuffer>,
         surface.width,
         surface.height,
       );
-      context.putImageData(image, 0, 0);
+      if (stale === null || moved === null) context.putImageData(image, 0, 0);
+      else {
+        // Only what changed goes to the canvas. A plant's motion mostly stays in the
+        // same box from a step to the next: that box goes once.
+        const now = moved;
+        const gone = stale.filter((a) => !now.some((b) => sameBox(a, b)));
+        for (const box of [...gone, ...now])
+          context.putImageData(
+            image,
+            0,
+            0,
+            box.left,
+            box.top,
+            box.right - box.left,
+            box.bottom - box.top,
+          );
+      }
     }
     // Keep going while the camera moves; the plants wake the loop by their steps only;
     // otherwise sleep until the drift starts, the light changes or an input comes.

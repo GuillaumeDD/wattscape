@@ -686,10 +686,18 @@ the deployed build. `tools/screenshots.ts` writes its frames
 - **Same view:** north up, 2:1, the relief raised by the same 250 m per kilometre of
   width, and the pixel-art theme's own offsets, so a camera frames the same ground
   and the picture moves when that one's would.
-- **Resolution:** 2 output pixels per scene pixel (960 × 540 on a 1080p screen),
-  more in a small window, up to the device's pixels, while the frame stays under
-  600 000 pixels (`modernDensity`); the canvas scales the rest up smoothly
-  (`#scene.smooth`). A frame costs about 35 ns a pixel (§ Performance).
+- **Resolution:** the map takes 2 output pixels per scene pixel (960 × 540 on a
+  1080p screen), more in a small window, up to the device's pixels, while it stays
+  under 600 000 pixels (`modernDensity`, `modernMapDensity`): it costs about 35 ns
+  a pixel (§ Performance), and it is soft, so more pixels would show little.
+- **Sharp frame** (D-058): where the map has 2 and the screen 4 or more per scene
+  pixel (a 1080p screen), the frame has 4 (1920 × 1080). The map, drawn at 2, is
+  spread over it smoothly by `spread` (each pixel read between the four nearest,
+  in whole numbers), and the plants and the landmarks are then drawn at the
+  frame's own pixels: they are small, a tower of 9 × 13 scene pixels, and at 2
+  their details blurred (`docs/screenshots/step-8-modern-sharp-*.png`). Elsewhere
+  the canvas scales the frame up smoothly (`#scene.smooth`), as before; while the
+  camera moves the frame is the map's, halved (D-056).
 - **Relief:** the altitude of each cell (its class's floor) is smoothed by two
   [1 2 1] passes and read between cells (bilinear). Each row of the ground is drawn
   from the front to the back under a horizon per column, so a mountain hides what
@@ -721,10 +729,19 @@ the deployed build. `tools/screenshots.ts` writes its frames
   so the marks and the captions are the same, and moves by the same figures and
   formulas (§ Data-to-scene mapping). On the national view, a dot of the source's
   colour.
-- **Landmarks:** the pixel-art sprites, smoothed, until each has its own drawing
-  (B-027): a sprite's pixels are gathered, its outline drawn at the half level of
-  their coverage read between their centres (a stair becomes a slope), with the
-  same shadow.
+- **Landmarks:** their own drawings too (`src/render/art/modern-landmarks.ts`), by
+  lots (B-027), with the brush and the shapes of the plants
+  (`src/render/art/shapes.ts`), each within the box of its pixel-art sprite and
+  under the same limits of `docs/POI.md`: the Eiffel Tower lit plainly, by as many
+  lamps as its sprite and no beam; the lighthouses generic. The first lot: Étretat,
+  Le Havre's cranes, Fécamp's harbour light, the Mont-Saint-Michel, Rouen
+  cathedral, the Eiffel Tower and the lighthouse at sea
+  (`docs/screenshots/step-8-modern-landmarks.png`), drawn a second time on
+  2026-11-16, further from their sprites, when the first read as a rough port of
+  the pixel art (Guillaume). A landmark with no drawing yet
+  keeps its pixel-art sprite, smoothed: its pixels are gathered, its outline drawn
+  at the half level of their coverage read between their centres (a stair becomes
+  a slope), with the same shadow.
 - **Determinism:** additions, multiplications, divisions, floors and square roots
   only (IEEE 754 rounds those exactly) for the still frame; no `Math.sin`, `exp` or
   `hypot`. Only the turning blades take a sine, as in pixel art: an animation, not
@@ -853,11 +870,13 @@ Chromium only.
   `putImageData` into a canvas scaled by CSS with `image-rendering: pixelated`
   (smoothly for the modern theme, whose surface is the scene's size times its
   density); in tests, the same buffer is hashed (FNV-1a over the size and the bytes,
-  `hashSurface`).
+  `hashSurface`). A theme's `animate` may return the boxes it drew the motion in:
+  between two redraws the page then copies and puts those boxes only, not the
+  whole frame at each step.
 - **Frame hashes:** `tests/fixtures/frames/hashes.json` records the hash of each
   reference frame of `e2e/reference-frames.ts` (the test card, France, Normandie,
   Auvergne-Rhône-Alpes, the Mont Blanc massif and a crossfade, in pixel art and in
-  the modern theme). Node checks them in
+  the modern theme, and Normandie at its sharp density). Node checks them in
   the unit tests, and Chromium in `e2e/frame-hash.spec.ts` (`npm run e2e`: Vite
   builds `e2e/*.html` into `dist-e2e/`, Playwright opens them);
   `e2e/scene.spec.ts` drives the scene with the mouse and the keys. Firefox and
@@ -971,6 +990,36 @@ by day and one at night: Normandie with its plants moving takes 1.2 to 1.3 ms at
 p50, 1.7 to 1.8 ms at p95 and 19 to 25 ms of work per second, within the budget.
 In Node at 960 × 540, the plants and the landmarks of a region take 1 to 5 ms of a
 frame of about 20 ms, and a step of their motion 0.5 to 0.8 ms.
+
+The sharp frame (D-058), measured on the evening of 2026-11-16, same tool, one run
+by day and one at night, against the commit before it measured the same hour (the
+machine ran slower than on the days above):
+
+| View                          | Before: p95, busy      | Sharp: p50, p95, busy          |
+| ----------------------------- | ---------------------- | ------------------------------ |
+| France, still                 | 1.2–1.3 ms, 24–25 ms/s | 0.6 ms, 0.8–0.9 ms, 32–35 ms/s |
+| Normandie, plants moving      | 2.0 ms, 30–31 ms/s     | 2.6–2.8 ms, 3.7 ms, 55 ms/s    |
+| Idle drift (Normandie)        | 24–31 ms, 57–60 ms/s   | 0.4 ms, 32–35 ms, 62–65 ms/s   |
+| Drag pan (Normandie)          | 14–16 ms, 186–217 ms/s | 7.8–8.5 ms, 14–16 ms, 182–206  |
+| Flight France ↔ Normandie     | 30 ms, 255–261 ms/s    | 9.8–10 ms, 30 ms, 271–273 ms/s |
+| Wheel zoom in and out (worst) | 26–27 ms, 270–277 ms/s | 11–13 ms, 24 ms, 246–263 ms/s  |
+
+A moving camera is unchanged: its frames are the map's, halved, as before. At rest
+the sharp frame is **over the budget**: with the plants moving, 3.7 ms a frame at
+p95 for 3 and 55 ms of work per second for 30, which Guillaume accepted for now
+(PRD Q-37, 2026-11-17; to be brought down: B-029). Two costs,
+measured apart. The motion is drawn on four times the pixels: a step takes 1.9 to
+2.1 ms in Node for 0.6 to 1.0. And a canvas is handed whole to the browser each
+time any part of it changes: with the same drawing and no `putImageData` at the
+steps, the work falls from 55 to 34 to 36 ms/s (and from 32–35 to 14–17 for France,
+still), so about 20 ms/s go to handing over 1920 × 1080 pixels ten times a second,
+twice what 960 × 540 took. Two other ways were built and measured the same evening
+and dropped: a second canvas over the map for what stands on it (53 to 58 ms/s with
+the plants moving, and as much handed over), and a small canvas for each moving
+plant over a still frame (100 to 106 ms/s: the layout of thirty canvases at each
+step costs more than it saves). Spreading the map takes about 10 ms of a still
+frame in Node (22 byte by byte, before two bytes were summed at a time), once per
+redraw: the idle drift, already over (B-028), pays it at each of its frames.
 
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame
