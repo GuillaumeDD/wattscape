@@ -745,7 +745,11 @@ the deployed build. `tools/screenshots.ts` writes its frames
   castle of the dukes of Brittany, the Carnac stones, Guérande's salt marshes, the
   Dune du Pilat, Fort Boyard, the Place de la Bourse (its buildings, not the water
   mirror) and the Cité de Carcassonne
-  (`docs/screenshots/step-10-modern-landmarks.png`). A landmark with no drawing yet
+  (`docs/screenshots/step-10-modern-landmarks.png`). The fourth lot, the centre and
+  the south-east: the Hospices de Beaune, the Citadel of Besançon, the Pont du
+  Gard, Fourvière, the Puy de Dôme (its volcanoes, no mast), Notre-Dame de la Garde
+  and the Calanques (`docs/screenshots/step-11-modern-landmarks.png`): every
+  landmark has its own drawing. A landmark with no drawing yet
   keeps its pixel-art sprite, smoothed: its pixels are gathered, its outline drawn
   at the half level of their coverage read between their centres (a stair becomes
   a slope), with the same shadow.

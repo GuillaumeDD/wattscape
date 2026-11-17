@@ -46,6 +46,8 @@ const CLAY: Rgb = [128, 132, 112];
 const BRINE: Rgb = [164, 188, 196];
 const BRINE_SALT: Rgb = [226, 222, 214];
 const BRINE_PINK: Rgb = [214, 192, 190];
+const TIMBER: Rgb = [128, 92, 64];
+const INLET: Rgb = [72, 150, 166];
 
 /** Six points on a circle of radius 1, every sixth of a turn: a table, not a sine. */
 const PETALS: readonly (readonly [number, number])[] = [
@@ -1409,6 +1411,374 @@ const DRAWINGS: Readonly<Partial<Record<LandmarkSprite, Drawing>>> = {
       { alpha: 0.7 },
     );
   },
+  // The fourth lot (B-027), the centre and the south-east. The Hospices de Beaune:
+  // the steep roof of glazed tiles in lozenges of four colours, its dormers and
+  // their pinnacles, the timber gallery over the ground floor.
+  beauneHospices(brush, left, foot) {
+    shadow(brush, left + 5.5, foot, 11);
+    box(brush, left + 0.2, foot - 1.05, left + 10.8, foot, STONE, {
+      shade: lit(left + 5.5, 5.3, foot - 1.05, foot, 0.18, 0.1),
+    });
+    for (let k = 0; k < 6; k++) {
+      const x = left + 1 + k * 1.8;
+      shape(
+        brush,
+        x - 0.3,
+        foot - 0.85,
+        x + 0.3,
+        foot,
+        doorway(x, 0.26, foot - 0.5, 0.3, foot),
+        DARK,
+        {
+          alpha: 0.55,
+        },
+      );
+    }
+    // The gallery: a timber floor on its posts.
+    box(brush, left + 0.2, foot - 1.9, left + 10.8, foot - 1.05, TIMBER, {
+      shade: lit(left + 5.5, 5.3, 0, 1, 0.2, 0),
+    });
+    for (let k = 0; k < 12; k++) {
+      const x = left + 0.55 + k * 0.9;
+      box(brush, x + 0.12, foot - 1.75, x + 0.7, foot - 1.15, DARK, { alpha: 0.45 });
+    }
+    // The roof and its lozenges, from a lattice: each colour where its cells fall.
+    const slopes: Corners = [
+      [left + 1.2, foot - 4.9],
+      [left + 9.8, foot - 4.9],
+      [left + 11, foot - 1.85],
+      [left, foot - 1.85],
+    ];
+    const roofLine = inside(slopes);
+    polygon(brush, slopes, GLAZE[1] ?? TILE, { shade: lit(left + 5.5, 5.5, 0, 1, 0.15, 0) });
+    for (const c of [0, 2, 3])
+      shape(
+        brush,
+        left,
+        foot - 4.9,
+        left + 11,
+        foot - 1.85,
+        (x, y) => Math.max(roofLine(x, y) + 0.05, lozenge(x - left, y - foot, c)),
+        GLAZE[c] ?? DARK,
+        { shade: lit(left + 5.5, 5.5, 0, 1, 0.15, 0) },
+      );
+    // The dormers, gabled, their pinnacles.
+    for (const x of [left + 1.6, left + 5.5, left + 9.4]) {
+      box(brush, x - 0.5, foot - 3.3, x + 0.5, foot - 1.85, STONE, {
+        shade: lit(x, 0.5, 0, 1, 0.25, 0),
+      });
+      box(brush, x - 0.22, foot - 2.9, x + 0.22, foot - 2.1, DARK, { alpha: 0.55 });
+      spire(brush, x, foot - 4.55, foot - 3.3, 0.62, STONE, { shade: lit(x, 0.6, 0, 1, 0.3, 0) });
+      line(brush, x, foot - 4.5, x, foot - 5.85, 0.05, 0.03, IRON);
+    }
+  },
+  // The Pont du Gard: three tiers of arches of golden stone over the Gardon, the
+  // lowest the narrowest, the top a long row of small arches under the channel.
+  pontDuGard(brush, left, foot) {
+    box(brush, left + 1.6, foot - 0.45, left + 13.4, foot, PALETTE.sea, { alpha: 0.85 });
+    shadow(brush, left + 7.5, foot - 0.3, 12);
+    const shade = lit(left + 7.5, 7.5, foot - 7, foot, 0.18, 0.12);
+    arcade(brush, left + 2.6, left + 12.4, foot - 3.3, foot - 0.2, 4, 0.75, OCHRE, shade);
+    arcade(brush, left + 0.6, left + 14.4, foot - 6.05, foot - 3.3, 6, 0.78, OCHRE, shade);
+    arcade(brush, left + 0.1, left + 14.9, foot - 7, foot - 6.05, 16, 0.55, OCHRE, shade);
+    for (const y of [foot - 3.3, foot - 6.05])
+      box(brush, left + 0.6, y - 0.07, left + 14.4, y + 0.07, GRANITE, { alpha: 0.5 });
+    box(brush, left + 0.1, foot - 7, left + 14.9, foot - 6.85, STONE, { alpha: 0.7 });
+  },
+  // Fourvière: the white basilica on its hill over Lyon, its front between two
+  // octagonal towers with battlements, the pediment and the porch's columns.
+  fourviere(brush, left, foot) {
+    const cx = left + 3.5;
+    shape(
+      brush,
+      left - 0.3,
+      foot - 1.3,
+      left + 7.3,
+      foot,
+      mound(cx, foot, 3.8, 1.2),
+      PALETTE.forest,
+      {
+        shade: lit(cx, 3.8, foot - 1.2, foot, 0.3, 0),
+      },
+    );
+    const shade = lit(cx, 3, foot - 5, foot - 1, 0.22, 0.1);
+    box(brush, left + 0.9, foot - 4.1, left + 6.1, foot - 1, CHALK, { shade });
+    roof(brush, left + 1.6, left + 5.4, foot - 4.6, foot - 4.1, 0.3, GRANITE);
+    polygon(
+      brush,
+      [
+        [cx, foot - 5.1],
+        [cx + 1.7, foot - 4],
+        [cx - 1.7, foot - 4],
+      ],
+      CHALK,
+      { shade },
+    );
+    disc(brush, cx, foot - 4.45, 0.22, DARK, { alpha: 0.4 });
+    for (let k = 0; k < 4; k++) {
+      const x = cx - 1.2 + k * 0.8;
+      line(brush, x, foot - 3.85, x, foot - 1.6, 0.09, 0.09, GRANITE, { alpha: 0.6 });
+    }
+    box(brush, cx - 1.5, foot - 1.6, cx + 1.5, foot - 1, CHALK, { shade });
+    shape(
+      brush,
+      cx - 0.35,
+      foot - 2.6,
+      cx + 0.35,
+      foot - 1,
+      doorway(cx, 0.3, foot - 2.1, 0.3, foot - 1),
+      DARK,
+      {
+        alpha: 0.6,
+      },
+    );
+    for (const x of [left + 0.65, left + 6.35]) {
+      const drum = lit(x, 0.6, 0, 1, 0.35, 0);
+      box(brush, x - 0.6, foot - 6.35, x + 0.6, foot - 1, CHALK, { shade: drum });
+      for (const up of [2.6, 4.2])
+        shape(
+          brush,
+          x - 0.15,
+          foot - up - 0.75,
+          x + 0.15,
+          foot - up,
+          doorway(x, 0.11, foot - up - 0.5, 0.2, foot - up),
+          DARK,
+          {
+            alpha: 0.55,
+          },
+        );
+      box(brush, x - 0.68, foot - 6.45, x + 0.68, foot - 6.25, CHALK, { shade: drum });
+      merlons(brush, x - 0.68, x + 0.68, foot - 6.45, CHALK);
+    }
+  },
+  // Notre-Dame de la Garde on its rock: the basilica in bands of pale and green
+  // stone, its dome; the bell tower, its belfry, and the gilded Virgin on top.
+  notreDameDeLaGarde(brush, left, foot) {
+    shape(
+      brush,
+      left - 0.2,
+      foot - 2.3,
+      left + 7.2,
+      foot,
+      mound(left + 3.8, foot, 3.6, 2.1),
+      GRANITE,
+      {
+        shade: lit(left + 3.8, 3.6, foot - 2.1, foot, 0.35, 0.05),
+      },
+    );
+    for (const [x, up, r] of [
+      [left + 0.6, 0.5, 0.45],
+      [left + 6.6, 0.6, 0.5],
+      [left + 1.4, 1.1, 0.35],
+    ] as const)
+      disc(brush, x, foot - up, r, PALETTE.forest, { shade: lit(x, r, 0, 1, 0.3, 0) });
+    // The basilica and its dome.
+    const body = lit(left + 4.5, 2.3, foot - 3.7, foot - 1.8, 0.22, 0.05);
+    disc(brush, left + 4.9, foot - 3.9, 0.95, STONE, {
+      shade: lit(left + 4.9, 0.95, 0, 1, 0.4, 0),
+    });
+    line(brush, left + 4.9, foot - 4.8, left + 4.9, foot - 5.2, 0.05, 0.04, GOLD);
+    box(brush, left + 2.6, foot - 3.65, left + 6.9, foot - 1.85, CHALK, { shade: body });
+    bands(brush, left + 2.6, left + 6.9, foot - 3.65, foot - 1.85);
+    for (let k = 0; k < 4; k++) {
+      const x = left + 3.6 + k * 0.9;
+      shape(
+        brush,
+        x - 0.17,
+        foot - 3.2,
+        x + 0.17,
+        foot - 2.3,
+        doorway(x, 0.14, foot - 2.95, 0.18, foot - 2.3),
+        DARK,
+        {
+          alpha: 0.6,
+        },
+      );
+    }
+    // The bell tower: square, banded; the belfry, the drum, the statue.
+    const tower = left + 2.5;
+    box(brush, tower - 0.62, foot - 6.4, tower + 0.62, foot - 1.85, CHALK, {
+      shade: lit(tower, 0.62, 0, 1, 0.3, 0),
+    });
+    bands(brush, tower - 0.62, tower + 0.62, foot - 6.4, foot - 1.85);
+    shape(
+      brush,
+      tower - 0.3,
+      foot - 6.1,
+      tower + 0.3,
+      foot - 5.1,
+      doorway(tower, 0.25, foot - 5.8, 0.25, foot - 5.1),
+      DARK,
+      {
+        alpha: 0.65,
+      },
+    );
+    box(brush, tower - 0.72, foot - 6.55, tower + 0.72, foot - 6.35, CHALK);
+    box(brush, tower - 0.38, foot - 7.15, tower + 0.38, foot - 6.55, CHALK, {
+      shade: lit(tower, 0.38, 0, 1, 0.3, 0),
+    });
+    polygon(
+      brush,
+      [
+        [tower - 0.08, foot - 8.6],
+        [tower + 0.08, foot - 8.6],
+        [tower + 0.3, foot - 7.15],
+        [tower - 0.3, foot - 7.15],
+      ],
+      GOLD,
+      { shade: lit(tower, 0.3, 0, 1, 0.3, 0) },
+    );
+    disc(brush, tower, foot - 8.72, 0.16, GOLD);
+    line(brush, tower + 0.05, foot - 8.1, tower + 0.32, foot - 8.45, 0.05, 0.04, GOLD);
+  },
+  // Besançon's citadel: Vauban's walls along the ridge, a bastion at each end with
+  // its sloping faces and its watch box, the barracks between them.
+  besanconCitadel(brush, left, foot) {
+    const cx = left + 5.5;
+    shape(
+      brush,
+      left - 0.3,
+      foot - 1.5,
+      left + 11.3,
+      foot,
+      mound(cx, foot, 5.8, 1.35),
+      PALETTE.forest,
+      {
+        shade: lit(cx, 5.8, foot - 1.4, foot, 0.3, 0),
+      },
+    );
+    const shade = lit(cx, 5, foot - 3, foot - 1, 0.22, 0.1);
+    // The barracks, behind the walls: long, under slate.
+    box(brush, left + 3.6, foot - 2.75, left + 7.4, foot - 2, STONE, { shade });
+    roof(brush, left + 3.9, left + 7.1, foot - 3.35, foot - 2.75, 0.3, SLATE);
+    for (let k = 0; k < 5; k++)
+      box(brush, left + 4 + k * 0.75, foot - 2.6, left + 4.2 + k * 0.75, foot - 2.25, DARK, {
+        alpha: 0.5,
+      });
+    box(brush, left + 1.5, foot - 2.15, left + 9.5, foot - 1.1, OCHRE, { shade });
+    box(brush, left + 1.5, foot - 2.25, left + 9.5, foot - 2.1, STONE, { alpha: 0.8 });
+    for (const x of [left + 1.6, left + 9.4]) {
+      polygon(
+        brush,
+        [
+          [x - 1, foot - 2.6],
+          [x + 1, foot - 2.6],
+          [x + 1.4, foot - 1.05],
+          [x - 1.4, foot - 1.05],
+        ],
+        OCHRE,
+        { shade: lit(x, 1.3, 0, 1, 0.35, 0) },
+      );
+      box(brush, x - 1.05, foot - 2.72, x + 1.05, foot - 2.55, STONE, { alpha: 0.85 });
+      const corner = x + (x < cx ? -0.85 : 0.85);
+      box(brush, corner - 0.2, foot - 2.95, corner + 0.2, foot - 2.6, STONE, {
+        shade: lit(corner, 0.2, 0, 1, 0.3, 0),
+      });
+      shape(
+        brush,
+        corner - 0.25,
+        foot - 3.3,
+        corner + 0.25,
+        foot - 2.95,
+        mound(corner, foot - 2.95, 0.24, 0.3),
+        STONE,
+      );
+    }
+  },
+  // The Puy de Dôme: its steep dome of green over the forest, lit from the west, and
+  // the smaller volcanoes of the chain around it, one with its crater.
+  puyDeDome(brush, left, foot) {
+    for (const [cx, rx, ry] of [
+      [left + 1.4, 1.5, 1.5],
+      [left + 9.9, 1.4, 1.35],
+    ] as const)
+      shape(brush, cx - rx, foot - ry, cx + rx, foot, mound(cx, foot, rx, ry), PALETTE.grass, {
+        shade: lit(cx, rx, foot - ry, foot, 0.35, 0),
+      });
+    shape(
+      brush,
+      left + 1.05,
+      foot - 1.62,
+      left + 1.75,
+      foot - 1.25,
+      mound(left + 1.4, foot - 1.25, 0.38, 0.28),
+      DARK,
+      { alpha: 0.35 },
+    );
+    const cx = left + 5.6;
+    const high = 4.9;
+    const reach = 3.7;
+    shape(
+      brush,
+      cx - reach,
+      foot - high,
+      cx + reach,
+      foot,
+      (x, y) => {
+        const u = clamp(Math.abs(x - cx) / reach, 0, 1);
+        return Math.max(foot - high * (1 - u * u) * (1 - 0.2 * u) - y, y - foot);
+      },
+      PALETTE.meadow,
+      { shade: lit(cx, reach * 0.7, foot - high, foot, 0.38, -0.05) },
+    );
+    for (const [x, up, r] of [
+      [left + 2.6, 0.45, 0.5],
+      [left + 3.4, 0.35, 0.45],
+      [left + 8.1, 0.4, 0.5],
+      [left + 8.9, 0.5, 0.45],
+      [left + 7.3, 0.3, 0.4],
+    ] as const)
+      disc(brush, x, foot - up, r, PALETTE.forest, { shade: lit(x, r, 0, 1, 0.3, 0) });
+  },
+  // The Calanques: two massifs of white limestone, cut by gullies, pines clinging to
+  // them, over a narrow inlet of clear water that opens on the sea.
+  calanques(brush, left, foot) {
+    box(brush, left - 0.2, foot - 0.55, left + 13.2, foot, PALETTE.sea, { alpha: 0.8 });
+    polygon(
+      brush,
+      [
+        [left + 5.3, foot - 1.5],
+        [left + 6.9, foot - 1.5],
+        [left + 8.4, foot],
+        [left + 4, foot],
+      ],
+      INLET,
+    );
+    for (const [corners, cx, half] of [
+      [WEST_CLIFF, left + 2.2, 2.8],
+      [EAST_CLIFF, left + 10.4, 2.8],
+    ] as const) {
+      const massif: Corners = corners.map(([x, up]) => [left + x, foot - up] as const);
+      polygon(brush, massif, CHALK, { shade: lit(cx, half, foot - 5, foot, 0.3, 0.12) });
+      const rock = inside(massif);
+      // Gullies down the faces, and the pines.
+      for (const dx of [-1.6, -0.5, 0.7, 1.7])
+        shape(
+          brush,
+          cx + dx - 0.3,
+          foot - 5,
+          cx + dx + 0.3,
+          foot,
+          (x, y) =>
+            Math.max(rock(x, y) + 0.2, Math.abs(x - (cx + dx) - 0.15 * (y - foot + 2.5)) - 0.05),
+          GRANITE,
+          { alpha: 0.4 },
+        );
+      for (const [dx, up] of [
+        [-1.9, 3.6],
+        [-0.8, 3.9],
+        [1.2, 2.3],
+        [0.3, 3.1],
+      ] as const) {
+        const x = cx + (cx < left + 6 ? dx : -dx);
+        if (rock(x, foot - up) < -0.25)
+          disc(brush, x, foot - up, 0.32, PALETTE.forest, { shade: lit(x, 0.32, 0, 1, 0.3, 0) });
+      }
+    }
+    foam(brush, left - 0.2, left + 4, foot);
+    foam(brush, left + 8.5, left + 13.2, foot);
+  },
 };
 
 /** The heights of Carnac's stones, in scene pixels, along a row: a table, not chance. */
@@ -1432,6 +1802,96 @@ const PINES_FRONT = [
   [10.6, 0.45, 0.55],
   [11.6, 0.6, 0.6],
   [12.5, 0.45, 0.5],
+] as const;
+
+/** The glazed tiles of Beaune's roof: the ground, and the colours of its lozenges. */
+const GLAZE: readonly Rgb[] = [
+  [206, 162, 54],
+  [124, 52, 40],
+  [62, 98, 62],
+  [46, 40, 38],
+];
+
+/**
+ * The lozenges of colour `c` (1 to 3) of Beaune's roof, at (x, y) from the box's
+ * bottom left: a lattice of diamonds 1.1 wide, each cell's colour by a rule.
+ */
+function lozenge(x: number, y: number, c: number): number {
+  const size = 1.1;
+  const u = (x + y * 1.4) / size;
+  const v = (x - y * 1.4) / size;
+  const i = Math.floor(u);
+  const j = Math.floor(v);
+  const fu = u - i;
+  const fv = v - j;
+  const edge = Math.min(fu, 1 - fu, fv, 1 - fv) * size * 0.5;
+  // Diamonds in a regular weave: yellow, green, black, and the ground's red-brown.
+  const colour = (Math.abs(i) % 2) * 2 + (Math.abs(j) % 2);
+  return colour === c ? 0.03 - edge : edge + 0.03;
+}
+
+/**
+ * A tier of arches from x0 to x1, `count` of them, between `top` and `bottom`: the
+ * stone where the arches are not, each opening `rise` of the tier high.
+ */
+function arcade(
+  brush: Brush,
+  x0: number,
+  x1: number,
+  top: number,
+  bottom: number,
+  count: number,
+  rise: number,
+  colour: Rgb,
+  shade: (x: number, y: number) => number,
+): void {
+  const step = (x1 - x0) / count;
+  const half = step * 0.36;
+  const spring = bottom - (bottom - top) * rise + half;
+  shape(
+    brush,
+    x0,
+    top,
+    x1,
+    bottom,
+    (x, y) => {
+      const cell = x0 + (Math.floor((x - x0) / step) + 0.5) * step;
+      const opening = doorway(cell, half, spring, half, bottom + 1)(x, y);
+      return Math.max(x0 - x, x - x1, top - y, y - bottom, -opening);
+    },
+    colour,
+    { shade },
+  );
+}
+
+/** Bands of green stone across a pale wall, as Notre-Dame de la Garde's. */
+function bands(brush: Brush, x0: number, x1: number, top: number, bottom: number): void {
+  for (let y = top + 0.35; y < bottom - 0.1; y += 0.55)
+    box(brush, x0, y, x1, y + 0.17, COPPER, { alpha: 0.55 });
+}
+
+/** The Calanques' two massifs: (x from the box's left, height above the foot). */
+const WEST_CLIFF = [
+  [-0.2, 0],
+  [-0.2, 3.9],
+  [0.5, 4.6],
+  [1.3, 4.3],
+  [2.1, 4.85],
+  [3, 3.9],
+  [3.9, 2.6],
+  [4.6, 1.2],
+  [4.9, 0],
+] as const;
+const EAST_CLIFF = [
+  [7.7, 0],
+  [8.1, 1.6],
+  [8.6, 3.4],
+  [9.3, 4.6],
+  [10.1, 4.2],
+  [10.9, 4.9],
+  [11.9, 4.3],
+  [13.2, 3.6],
+  [13.2, 0],
 ] as const;
 
 /** Battlements along the top of a wall from x0 to x1 at `top`. */
