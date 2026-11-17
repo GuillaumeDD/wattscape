@@ -1053,8 +1053,9 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   are small, cost little, and are where the eye rests.
 - **Cost, measured:** at rest with the plants moving, 55 ms of work per second
   for a budget of 30, most of it the hand-over of a canvas four times larger at
-  each step of the motion (ARCHITECTURE § Performance). Not accepted yet: PRD
-  Q-37, B-029.
+  each step of the motion (ARCHITECTURE § Performance). Accepted by Guillaume on
+  2026-11-17 (decision card, PRD Q-37): keep the sharp frame, and bring it under
+  the budget later (B-029), rather than before merging or by going back to 2.
 - **Revisit if:** Guillaume does not accept the cost and B-029 finds no way under
   the budget (then 2 pixels again, with the finer shapes); a screen between 2 and
   4 pixels per scene pixel shows the landmarks too soft.

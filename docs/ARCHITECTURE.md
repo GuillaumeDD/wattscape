@@ -1006,7 +1006,8 @@ machine ran slower than on the days above):
 
 A moving camera is unchanged: its frames are the map's, halved, as before. At rest
 the sharp frame is **over the budget**: with the plants moving, 3.7 ms a frame at
-p95 for 3 and 55 ms of work per second for 30 (open: PRD Q-37, B-029). Two costs,
+p95 for 3 and 55 ms of work per second for 30, which Guillaume accepted for now
+(PRD Q-37, 2026-11-17; to be brought down: B-029). Two costs,
 measured apart. The motion is drawn on four times the pixels: a step takes 1.9 to
 2.1 ms in Node for 0.6 to 1.0. And a canvas is handed whole to the browser each
 time any part of it changes: with the same drawing and no `putImageData` at the
