@@ -36,6 +36,22 @@ const GLASS: Rgb = [168, 196, 212];
 const GOLD = PALETTE.nuclear;
 const FOAM = PALETTE.foam;
 const RED = PALETTE.roof;
+const BRICK: Rgb = [170, 96, 74];
+const PINK: Rgb = [206, 150, 136];
+const SANDSTONE: Rgb = [182, 104, 84];
+const TILE: Rgb = [128, 62, 52];
+const COPPER: Rgb = [96, 144, 122];
+const SPOIL: Rgb = [92, 84, 78];
+
+/** Six points on a circle of radius 1, every sixth of a turn: a table, not a sine. */
+const PETALS: readonly (readonly [number, number])[] = [
+  [1, 0],
+  [0.5, 0.866],
+  [-0.5, 0.866],
+  [-1, 0],
+  [-0.5, -0.866],
+  [0.5, -0.866],
+];
 
 /** A drawing: the landmark's box starts at `left`, and it stands on `foot`. */
 type Drawing = (brush: Brush, left: number, foot: number) => void;
@@ -567,6 +583,489 @@ const DRAWINGS: Readonly<Partial<Record<LandmarkSprite, Drawing>>> = {
       shade: lit(cx, 1.65, foot - 1.5, foot, 0.35, 0.1),
     });
     lighthouse(brush, cx, foot - 1.15, foot - 8, true);
+  },
+  // The second lot (B-027). The twin heaps of the 11/19 pit: dark spoil in steep
+  // cones, rain-worn, grass creeping up their feet.
+  slagHeaps(brush, left, foot) {
+    shadow(brush, left + 5.5, foot, 11);
+    for (const [cx, top] of [
+      [left + 2.5, foot - 4],
+      [left + 8.5, foot - 3.85],
+    ] as const) {
+      const cone: Corners = [
+        [cx - 0.3, top],
+        [cx + 0.3, top],
+        [cx + 2.75, foot],
+        [cx - 2.75, foot],
+      ];
+      polygon(brush, cone, SPOIL, { shade: lit(cx, 2.4, top, foot, 0.4, 0) });
+      // The gullies the rain cuts down their sides.
+      const walls = inside(cone);
+      for (const dx of [-1.4, -0.6, 0.5, 1.3]) {
+        const x0 = cx + dx * 0.25;
+        const x1 = cx + dx;
+        shape(
+          brush,
+          Math.min(x0, x1) - 0.2,
+          top,
+          Math.max(x0, x1) + 0.2,
+          foot,
+          (x, y) => {
+            const t = clamp((y - top) / (foot - top), 0, 1);
+            return Math.max(walls(x, y) + 0.15, Math.abs(x - (x0 + (x1 - x0) * t)) - 0.06);
+          },
+          DARK,
+          { alpha: 0.35 },
+        );
+      }
+      shape(
+        brush,
+        cx - 3,
+        foot - 1,
+        cx + 3,
+        foot,
+        (x, y) => Math.max(walls(x, y), foot - 0.55 - y + 0.25 * Math.abs(((x - cx) * 1.7) % 1)),
+        PALETTE.grass,
+        { alpha: 0.8 },
+      );
+    }
+  },
+  // Lille's belfry: the tall brick shaft with its stone quoins over the town hall,
+  // the clock, the crowned top with its corner pinnacles, the lantern and the
+  // spire.
+  lilleBelfry(brush, left, foot) {
+    const cx = left + 2.5;
+    shadow(brush, cx, foot, 5);
+    // The town hall at its foot.
+    box(brush, left + 0.1, foot - 1.15, left + 4.9, foot, STONE, {
+      shade: lit(cx, 2.4, foot - 1.15, foot, 0.2, 0.1),
+    });
+    for (let k = 0; k < 5; k++) {
+      const x = left + 0.55 + k * 0.97;
+      box(brush, x - 0.12, foot - 0.85, x + 0.12, foot - 0.35, DARK, { alpha: 0.55 });
+    }
+    // The shaft, narrowing a little, brick between stone quoins.
+    const shaft: Corners = [
+      [cx - 0.95, foot - 6.7],
+      [cx + 0.95, foot - 6.7],
+      [cx + 1.1, foot - 1.15],
+      [cx - 1.1, foot - 1.15],
+    ];
+    const shade = lit(cx, 1.1, foot - 6.7, foot, 0.28, 0.08);
+    polygon(brush, shaft, BRICK, { shade });
+    const walls = inside(shaft);
+    for (const side of [-1, 1])
+      shape(
+        brush,
+        cx - 1.2,
+        foot - 6.8,
+        cx + 1.2,
+        foot - 1.1,
+        (x, y) => Math.max(walls(x, y), -(side * (x - cx)) + 0.78),
+        STONE,
+        { shade },
+      );
+    // Slits up the shaft, and the clock.
+    for (const up of [2, 3, 4]) {
+      const y = foot - up;
+      shape(brush, cx - 0.2, y - 0.6, cx + 0.2, y, doorway(cx, 0.1, y - 0.3, 0.2, y), DARK, {
+        alpha: 0.6,
+      });
+    }
+    disc(brush, cx, foot - 5.6, 0.48, STONE);
+    disc(brush, cx, foot - 5.6, 0.32, CHALK);
+    line(brush, cx, foot - 5.6, cx, foot - 5.82, 0.04, 0.04, DARK);
+    line(brush, cx, foot - 5.6, cx + 0.15, foot - 5.55, 0.04, 0.04, DARK);
+    // The top: a stone stage with its arches, pinnacles at the corners.
+    box(brush, cx - 1.05, foot - 7.5, cx + 1.05, foot - 6.65, STONE, {
+      shade: lit(cx, 1.05, 0, 1, 0.25, 0),
+    });
+    for (const dx of [-0.45, 0.45])
+      shape(
+        brush,
+        cx + dx - 0.2,
+        foot - 7.35,
+        cx + dx + 0.2,
+        foot - 6.75,
+        doorway(cx + dx, 0.15, foot - 7.1, 0.2, foot - 6.8),
+        DARK,
+        { alpha: 0.7 },
+      );
+    for (const dx of [-1, 1]) spire(brush, cx + dx, foot - 8.35, foot - 7.5, 0.2, STONE);
+    // The lantern and the spire, dark, a golden point.
+    box(brush, cx - 0.52, foot - 8.45, cx + 0.52, foot - 7.5, SLATE, {
+      shade: lit(cx, 0.52, 0, 1, 0.3, 0),
+    });
+    box(brush, cx - 0.2, foot - 8.25, cx + 0.2, foot - 7.75, DARK, { alpha: 0.6 });
+    spire(brush, cx, foot - 9.85, foot - 8.45, 0.55, SLATE, { shade: lit(cx, 0.5, 0, 1, 0.3, 0) });
+    disc(brush, cx, foot - 9.85, 0.12, GOLD);
+  },
+  // Amiens cathedral from the south: the west front and its two short towers, its
+  // rose window, the long nave on its buttresses under the slate roof, the thin
+  // spire over the crossing, the apse.
+  amiensCathedral(brush, left, foot) {
+    shadow(brush, left + 6, foot, 12);
+    // The spire, behind the roof: a drum, the needle, golden at its tip.
+    const cross = left + 8.5;
+    box(brush, cross - 0.6, foot - 4.1, cross + 0.6, foot - 3, SLATE, {
+      shade: lit(cross, 0.6, 0, 1, 0.3, 0),
+    });
+    spire(brush, cross, foot - 7, foot - 4.1, 0.4, SLATE, { shade: lit(cross, 0.4, 0, 1, 0.3, 0) });
+    disc(brush, cross, foot - 7, 0.1, GOLD);
+    // The nave: wall, roof, buttresses and windows; the apse at the east end.
+    box(brush, left + 3, foot - 2.2, left + 11.4, foot, STONE, {
+      shade: lit(left + 7, 4, foot - 2.2, foot, 0.14, 0.14),
+    });
+    roof(brush, left + 3, left + 11.2, foot - 3.15, foot - 2.2, 0.15, SLATE);
+    for (let k = 0; k < 9; k++) {
+      const x = left + 3.45 + k * 0.9;
+      shape(
+        brush,
+        x - 0.14,
+        foot - 1.9,
+        x + 0.14,
+        foot - 0.55,
+        doorway(x, 0.13, foot - 1.6, 0.28, foot - 0.6),
+        DARK,
+        { alpha: 0.55 },
+      );
+      line(brush, x + 0.45, foot - 2.25, x + 0.45, foot, 0.08, 0.1, GRANITE, { alpha: 0.5 });
+    }
+    shape(brush, left + 11, foot - 2, left + 12, foot, mound(left + 11.2, foot, 0.8, 2.1), STONE, {
+      shade: lit(left + 11.2, 0.8, foot - 2, foot, 0.3, 0.1),
+    });
+    // The west front: two towers, the south one a little higher, the gallery
+    // between them, the rose, three portals.
+    const front = left + 1.5;
+    box(brush, left + 0.05, foot - 4.4, left + 2.95, foot, STONE, {
+      shade: lit(front, 1.45, foot - 4.4, foot, 0.22, 0.1),
+    });
+    for (const [x0, top] of [
+      [left + 0.05, foot - 5.5],
+      [left + 2, foot - 5.25],
+    ] as const) {
+      box(brush, x0, top, x0 + 0.95, foot - 4.3, STONE, {
+        shade: lit(x0 + 0.47, 0.5, 0, 1, 0.22, 0),
+      });
+      shape(
+        brush,
+        x0 + 0.3,
+        top + 0.15,
+        x0 + 0.65,
+        foot - 4.4,
+        doorway(x0 + 0.47, 0.13, top + 0.45, 0.25, foot - 4.55),
+        DARK,
+        { alpha: 0.6 },
+      );
+    }
+    box(brush, left + 0.05, foot - 4.5, left + 2.95, foot - 4.3, GRANITE, { alpha: 0.6 });
+    disc(brush, front, foot - 3.35, 0.58, GRANITE);
+    disc(brush, front, foot - 3.35, 0.44, SLATE);
+    for (const [x, half] of [
+      [front - 0.95, 0.24],
+      [front, 0.32],
+      [front + 0.95, 0.24],
+    ] as const)
+      shape(
+        brush,
+        x - half - 0.05,
+        foot - 2.2,
+        x + half + 0.05,
+        foot,
+        doorway(x, half, foot - 1.3 + half, 0.55, foot),
+        DARK,
+        { alpha: 0.65 },
+      );
+  },
+  // Strasbourg cathedral: pink sandstone, the west front's lacework, the octagon
+  // and its single spire over the north tower; the nave under its slate roof.
+  strasbourgCathedral(brush, left, foot) {
+    shadow(brush, left + 4, foot, 8);
+    // The nave.
+    box(brush, left + 3, foot - 2, left + 8, foot, PINK, {
+      shade: lit(left + 5.5, 2.5, foot - 2, foot, 0.16, 0.14),
+    });
+    roof(brush, left + 3, left + 7.85, foot - 3.05, foot - 2, 0.15, SLATE);
+    for (let k = 0; k < 5; k++) {
+      const x = left + 3.55 + k * 0.92;
+      shape(
+        brush,
+        x - 0.14,
+        foot - 1.7,
+        x + 0.14,
+        foot - 0.5,
+        doorway(x, 0.13, foot - 1.4, 0.26, foot - 0.55),
+        DARK,
+        { alpha: 0.55 },
+      );
+    }
+    // The west front, up to its platform, laced with tall thin lines.
+    const front = left + 1.6;
+    const shade = lit(front, 1.6, foot - 4.4, foot, 0.25, 0.1);
+    box(brush, left + 0.05, foot - 4.4, left + 3.15, foot, PINK, { shade });
+    for (let k = 0; k < 7; k++) {
+      const x = left + 0.35 + k * 0.42;
+      line(brush, x, foot - 4.25, x, foot - 1.6, 0.035, 0.035, DARK, { alpha: 0.35 });
+    }
+    disc(brush, front, foot - 3.05, 0.62, DARK, { alpha: 0.5 });
+    disc(brush, front, foot - 3.05, 0.45, PINK, { shade });
+    for (let k = 0; k < 6; k++) {
+      // The rose's petals: dark dots in a ring, by a table of angles.
+      const [dx, dy] = PETALS[k] ?? [0, 0];
+      disc(brush, front + dx * 0.28, foot - 3.05 + dy * 0.28, 0.07, DARK, { alpha: 0.6 });
+    }
+    for (const [x, half] of [
+      [front - 1, 0.26],
+      [front, 0.36],
+      [front + 1, 0.26],
+    ] as const)
+      shape(
+        brush,
+        x - half - 0.05,
+        foot - 1.7,
+        x + half + 0.05,
+        foot,
+        doorway(x, half, foot - 1.05 + half, 0.6, foot),
+        DARK,
+        { alpha: 0.65 },
+      );
+    // The platform, and the stub of the south tower that was never raised.
+    box(brush, left + 0.05, foot - 4.55, left + 3.15, foot - 4.3, PINK, { shade });
+    box(brush, left + 2.3, foot - 4.95, left + 3.15, foot - 4.4, PINK, { shade });
+    // The north tower's octagon, its four stair turrets, and the spire.
+    const tower = left + 1.5;
+    box(brush, tower - 0.85, foot - 6.25, tower + 0.85, foot - 4.4, PINK, {
+      shade: lit(tower, 0.85, foot - 6.25, foot - 4.4, 0.3, 0),
+    });
+    for (const dx of [-0.32, 0.32])
+      shape(
+        brush,
+        tower + dx - 0.16,
+        foot - 6.05,
+        tower + dx + 0.16,
+        foot - 4.6,
+        doorway(tower + dx, 0.12, foot - 5.75, 0.25, foot - 4.65),
+        DARK,
+        { alpha: 0.6 },
+      );
+    for (const dx of [-0.9, 0.9])
+      line(brush, tower + dx, foot - 4.4, tower + dx, foot - 6.55, 0.13, 0.08, PINK, { shade });
+    const needle: Corners = [
+      [tower, foot - 9],
+      [tower + 0.8, foot - 6.25],
+      [tower - 0.8, foot - 6.25],
+    ];
+    polygon(brush, needle, PINK, { shade: lit(tower, 0.8, 0, 1, 0.3, 0) });
+    // Its tiers of open work.
+    const point = inside(needle);
+    for (const up of [6.7, 7.25, 7.8, 8.3])
+      shape(
+        brush,
+        tower - 0.8,
+        foot - up - 0.08,
+        tower + 0.8,
+        foot - up + 0.08,
+        (x, y) => Math.max(point(x, y) + 0.12, Math.abs(y - (foot - up)) - 0.05),
+        DARK,
+        { alpha: 0.45 },
+      );
+  },
+  // Haut-Kœnigsbourg: red sandstone walls on the top of its wooded hill, the halls
+  // under steep roofs, the square keep in the middle.
+  hautKoenigsbourg(brush, left, foot) {
+    const cx = left + 5.5;
+    // The hill and its trees.
+    shape(
+      brush,
+      left - 0.3,
+      foot - 1.6,
+      left + 11.3,
+      foot,
+      mound(cx, foot, 5.8, 1.5),
+      PALETTE.forest,
+      {
+        shade: lit(cx, 5.8, foot - 1.5, foot, 0.3, 0),
+      },
+    );
+    for (let k = 0; k < 9; k++) {
+      const x = left + 0.9 + k * 1.15;
+      const up = 0.55 + 0.35 * (1 - Math.abs(x - cx) / 5.5);
+      disc(brush, x, foot - up, 0.42, PALETTE.forest, { shade: lit(x, 0.42, 0, 1, 0.35, 0) });
+    }
+    const shade = lit(cx, 4.5, foot - 3.2, foot - 1, 0.25, 0.12);
+    // The outer walls along the crest, and their round tower to the east.
+    box(brush, left + 1, foot - 2.15, left + 10, foot - 1.05, SANDSTONE, { shade });
+    shape(
+      brush,
+      left + 8.7,
+      foot - 3.1,
+      left + 10.1,
+      foot - 1,
+      (x, y) => Math.max(Math.abs(x - (left + 9.4)) - 0.6, foot - 3 - y, y - (foot - 1.05)),
+      SANDSTONE,
+      { shade },
+    );
+    spire(brush, left + 9.4, foot - 3.75, foot - 3, 0.72, TILE);
+    // The halls, their steep roofs.
+    box(brush, left + 2, foot - 3.05, left + 8.7, foot - 2.1, SANDSTONE, { shade });
+    roof(brush, left + 2.5, left + 3.5, foot - 4.1, foot - 3.05, 0.5, TILE);
+    roof(brush, left + 6.9, left + 7.9, foot - 3.95, foot - 3.05, 0.5, TILE);
+    for (let k = 0; k < 7; k++) {
+      const x = left + 2.4 + k * 0.95;
+      if (k === 2 || k === 3) continue;
+      box(brush, x - 0.1, foot - 2.75, x + 0.1, foot - 2.4, DARK, { alpha: 0.6 });
+    }
+    // The keep: square, taller, its roof and a little spire.
+    box(brush, left + 4.15, foot - 5.1, left + 5.85, foot - 2.1, SANDSTONE, {
+      shade: lit(left + 5, 0.85, foot - 5.1, foot - 2.1, 0.3, 0.1),
+    });
+    for (const up of [3, 4.2])
+      box(brush, left + 4.85, foot - up - 0.35, left + 5.15, foot - up, DARK, { alpha: 0.6 });
+    roof(brush, left + 4.85, left + 5.15, foot - 5.95, foot - 5.1, 0.95, TILE);
+  },
+  // Chartres cathedral from the south: the plain old spire, nearer, and behind it
+  // the taller lacy one; the nave under its green copper roof, its buttresses.
+  chartresCathedral(brush, left, foot) {
+    shadow(brush, left + 6, foot, 12);
+    // The north tower, behind: pale, its flamboyant spire with pinnacles.
+    const north = left + 2.6;
+    box(brush, north - 0.95, foot - 4.4, north + 0.95, foot, STONE, {
+      shade: lit(north, 0.95, foot - 4.4, foot, 0.22, 0.1),
+    });
+    const lace: Corners = [
+      [north, foot - 7],
+      [north + 0.75, foot - 4.4],
+      [north - 0.75, foot - 4.4],
+    ];
+    polygon(brush, lace, STONE, { shade: lit(north, 0.7, 0, 1, 0.3, 0) });
+    for (const [dx, up] of [
+      [-0.8, 5.2],
+      [0.8, 5.2],
+      [-0.55, 5.9],
+      [0.55, 5.9],
+    ] as const)
+      spire(brush, north + dx, foot - up - 0.75, foot - up + 0.75, 0.13, STONE);
+    const point = inside(lace);
+    for (const up of [5, 5.6, 6.2])
+      shape(
+        brush,
+        north - 0.8,
+        foot - up - 0.08,
+        north + 0.8,
+        foot - up + 0.08,
+        (x, y) => Math.max(point(x, y) + 0.1, Math.abs(y - (foot - up)) - 0.045),
+        DARK,
+        { alpha: 0.4 },
+      );
+    // The south tower, nearer: plain, its octagonal spire grey with age.
+    const south = left + 1;
+    box(brush, south - 0.95, foot - 4.2, south + 0.95, foot, STONE, {
+      shade: lit(south, 0.95, foot - 4.2, foot, 0.25, 0.1),
+    });
+    for (const up of [1.6, 3.2])
+      shape(
+        brush,
+        south - 0.2,
+        foot - up - 0.75,
+        south + 0.2,
+        foot - up,
+        doorway(south, 0.14, foot - up - 0.45, 0.25, foot - up),
+        DARK,
+        { alpha: 0.6 },
+      );
+    spire(brush, south, foot - 6.4, foot - 4.2, 0.9, GRANITE, {
+      shade: lit(south, 0.9, 0, 1, 0.3, 0),
+    });
+    line(brush, south, foot - 6.4, south, foot - 4.2, 0.03, 0.05, DARK, { alpha: 0.3 });
+    // The nave: wall, buttresses, windows, the copper roof; the apse.
+    box(brush, left + 3.55, foot - 2.2, left + 11.4, foot, STONE, {
+      shade: lit(left + 7.5, 4, foot - 2.2, foot, 0.14, 0.14),
+    });
+    roof(brush, left + 3.55, left + 11.2, foot - 3.25, foot - 2.2, 0.15, COPPER, {
+      shade: (_, y) => (y < foot - 2.9 ? 1.08 : 0.95),
+    });
+    for (let k = 0; k < 8; k++) {
+      const x = left + 4 + k * 0.92;
+      shape(
+        brush,
+        x - 0.14,
+        foot - 1.9,
+        x + 0.14,
+        foot - 0.55,
+        doorway(x, 0.13, foot - 1.6, 0.28, foot - 0.6),
+        DARK,
+        { alpha: 0.55 },
+      );
+      line(brush, x + 0.46, foot - 2.3, x + 0.46, foot, 0.08, 0.11, GRANITE, { alpha: 0.5 });
+    }
+    shape(brush, left + 11, foot - 2, left + 12, foot, mound(left + 11.2, foot, 0.8, 2.1), STONE, {
+      shade: lit(left + 11.2, 0.8, foot - 2, foot, 0.3, 0.1),
+    });
+  },
+  // Chambord: the white walls and their rows of windows under a forest of slate
+  // roofs, turrets and chimneys, the lantern of the great stair in the middle.
+  chambord(brush, left, foot) {
+    shadow(brush, left + 7.5, foot, 15);
+    const shade = lit(left + 7.5, 7.5, foot - 2.2, foot, 0.2, 0.1);
+    box(brush, left + 0.05, foot - 2.15, left + 14.95, foot, STONE, { shade });
+    // The round towers at the corners, a little proud of the walls.
+    for (const x of [left + 0.75, left + 14.25])
+      box(brush, x - 0.7, foot - 2.3, x + 0.7, foot, STONE, {
+        shade: lit(x, 0.7, foot - 2.3, foot, 0.35, 0.1),
+      });
+    for (const row of [0.6, 1.45])
+      for (let k = 0; k < 14; k++) {
+        const x = left + 0.75 + k * 1.03;
+        box(brush, x - 0.14, foot - row - 0.42, x + 0.14, foot - row, DARK, { alpha: 0.5 });
+      }
+    box(brush, left + 0.05, foot - 1.1, left + 14.95, foot - 0.98, GRANITE, { alpha: 0.5 });
+    // The terrace and its roofs.
+    box(brush, left, foot - 2.45, left + 15, foot - 2.15, SLATE);
+    for (const cx of [left + 1.5, left + 5.5, left + 9.5, left + 13.5]) {
+      polygon(
+        brush,
+        [
+          [cx - 0.35, foot - 4.15],
+          [cx + 0.35, foot - 4.15],
+          [cx + 1.45, foot - 2.45],
+          [cx - 1.45, foot - 2.45],
+        ],
+        SLATE,
+        { shade: lit(cx, 1.4, 0, 1, 0.35, 0) },
+      );
+      // Dormers in the roof, a turret on its top with its little cone.
+      for (const dx of [-0.65, 0.65])
+        box(brush, cx + dx - 0.16, foot - 3.1, cx + dx + 0.16, foot - 2.55, CHALK, { alpha: 0.85 });
+      box(brush, cx - 0.17, foot - 5.15, cx + 0.17, foot - 4.1, STONE, {
+        shade: lit(cx, 0.17, 0, 1, 0.3, 0),
+      });
+      spire(brush, cx, foot - 5.95, foot - 5.15, 0.27, SLATE);
+    }
+    // Chimneys between the roofs.
+    for (const x of [left + 3.5, left + 4.3, left + 10.7, left + 11.5])
+      box(brush, x - 0.13, foot - 4, x + 0.13, foot - 2.45, STONE, {
+        shade: lit(x, 0.13, 0, 1, 0.3, 0),
+      });
+    // The lantern of the great stair: white, open, crowned.
+    const cx = left + 7.5;
+    box(brush, cx - 0.55, foot - 3.9, cx + 0.55, foot - 2.45, STONE, {
+      shade: lit(cx, 0.55, 0, 1, 0.3, 0),
+    });
+    for (const dx of [-0.25, 0.25])
+      box(brush, dx + cx - 0.08, foot - 3.65, dx + cx + 0.08, foot - 2.75, DARK, { alpha: 0.55 });
+    box(brush, cx - 0.32, foot - 5.05, cx + 0.32, foot - 3.9, STONE, {
+      shade: lit(cx, 0.32, 0, 1, 0.3, 0),
+    });
+    shape(
+      brush,
+      cx - 0.4,
+      foot - 5.6,
+      cx + 0.4,
+      foot - 5.05,
+      mound(cx, foot - 5.05, 0.38, 0.45),
+      SLATE,
+    );
+    line(brush, cx, foot - 5.5, cx, foot - 6, 0.06, 0.04, STONE);
   },
 };
 

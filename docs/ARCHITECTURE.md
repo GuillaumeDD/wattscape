@@ -738,7 +738,10 @@ the deployed build. `tools/screenshots.ts` writes its frames
   cathedral, the Eiffel Tower and the lighthouse at sea
   (`docs/screenshots/step-8-modern-landmarks.png`), drawn a second time on
   2026-11-16, further from their sprites, when the first read as a rough port of
-  the pixel art (Guillaume). A landmark with no drawing yet
+  the pixel art (Guillaume). The second lot, the north and the east: the twin slag
+  heaps of Loos-en-Gohelle, Lille's belfry, Amiens, Strasbourg and Chartres
+  cathedrals, the Haut-Kœnigsbourg and Chambord
+  (`docs/screenshots/step-9-modern-landmarks.png`). A landmark with no drawing yet
   keeps its pixel-art sprite, smoothed: its pixels are gathered, its outline drawn
   at the half level of their coverage read between their centres (a stair becomes
   a slope), with the same shadow.

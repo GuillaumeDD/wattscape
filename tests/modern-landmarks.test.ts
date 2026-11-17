@@ -16,9 +16,10 @@ function drawn(landmark: Landmark, night = false) {
 const withDrawing = LANDMARKS.filter((l) => MODERN_LANDMARK_SPRITES.includes(l.sprite));
 
 describe("the modern landmarks (src/render/art/modern-landmarks.ts)", () => {
-  it("draws the first lot: Normandie's five, the Eiffel Tower and the lighthouse at sea", () => {
+  it("draws two lots: Normandie's five, the Eiffel Tower, the lighthouse at sea; the north and east", () => {
     expect([...MODERN_LANDMARK_SPRITES].sort()).toEqual(
       [
+        // The first lot.
         "eiffelTower",
         "etretat",
         "harbourLight",
@@ -26,6 +27,14 @@ describe("the modern landmarks (src/render/art/modern-landmarks.ts)", () => {
         "portCranes",
         "rouenCathedral",
         "seaLighthouse",
+        // The second: Hauts-de-France, Grand Est, Centre-Val de Loire.
+        "amiensCathedral",
+        "chambord",
+        "chartresCathedral",
+        "hautKoenigsbourg",
+        "lilleBelfry",
+        "slagHeaps",
+        "strasbourgCathedral",
       ].sort(),
     );
     expect(withDrawing).toHaveLength(MODERN_LANDMARK_SPRITES.length);
