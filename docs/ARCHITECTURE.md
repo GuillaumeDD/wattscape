@@ -1030,6 +1030,28 @@ step costs more than it saves). Spreading the map takes about 10 ms of a still
 frame in Node (22 byte by byte, before two bytes were summed at a time), once per
 redraw: the idle drift, already over (B-028), pays it at each of its frames.
 
+B-029, measured on 2026-11-18 with the same tool. Two changes that keep every pixel
+(the reference frames unchanged): a filled shape can say, row by row, where in its
+box it lies (`span`), so that a slanted line, a turbine's blade, is measured over a
+short run of each row and not over its whole box; and a spot, a puff of a plume,
+is measured over its ellipse's run of each row; the frame's row and column under
+each pixel drawn are worked out once. A step of the motion falls from about 1.7 to
+1.4 ms in Node, and in Chromium:
+
+| View (sharp frame)       | Before: p50, p95, busy   | After: p50, p95, busy   |
+| ------------------------ | ------------------------ | ----------------------- |
+| France, still            | 0.4–0.5, 0.7 ms, 27 ms/s | 0.5, 0.8 ms, 28–30 ms/s |
+| Normandie, plants moving | 2.2–2.3, 3.4–3.6, 46–47  | 1.8, 2.5–2.9 ms, 37–42  |
+
+Still **over the budget** with the plants moving. A trace of that view before
+these changes (DevTools timeline, 5 s) showed where the time goes: about 27 ms/s
+in the animation frames, the script, and 15 ms/s in the commit that hands the canvas over, nearly all of it
+`Canvas2DResourceProvider::ProduceCanvasResource`, a copy of the whole canvas at
+each step that changed it. That copy is the headless Chromium's, which draws the
+canvas without a GPU; with one it may cost much less, unmeasured here. France,
+still, where only the national view's plumes move, already spends 27 to 30 ms/s:
+the floor of a canvas of 1920 × 1080 handed over ten times a second.
+
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame
 walks 300 000 to 500 000 cells for 130 000 pixels (10 to 20 ms in Node), and the

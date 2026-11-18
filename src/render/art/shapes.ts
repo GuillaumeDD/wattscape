@@ -23,7 +23,10 @@ export interface Brush {
   readonly emissive: boolean;
   /**
    * Fills, within a box, where `distance` is negative: the distance to the shape's
-   * edge in scene pixels, about; the edge is smoothed over one output pixel.
+   * edge in scene pixels, about; the edge is smoothed over one output pixel. With
+   * `span`, only between the two x it gives at each y: a shape that fills little of
+   * its box (a slanted line) need not be measured all over it. The span may be
+   * wider than the shape, never narrower: it saves time, it changes no pixel.
    */
   fill(
     left: number,
@@ -33,6 +36,7 @@ export interface Brush {
     distance: (x: number, y: number) => number,
     colour: Rgb,
     ink?: Ink,
+    span?: (y: number) => readonly [number, number],
   ): void;
   /** A soft spot: an ellipse, `alpha` at its centre, nothing at its rim. */
   spot(
@@ -118,6 +122,10 @@ export function line(
   const dy = by - ay;
   const length2 = dx * dx + dy * dy || 1;
   const r = Math.max(ra, rb) + 1;
+  const flat = Math.abs(dy) < 1e-9;
+  // The span's reach: the line's half-width, and half an output pixel over which its
+  // edge fades (an output pixel is never wider than a scene pixel).
+  const reach = Math.max(ra, rb) + 0.5;
   brush.fill(
     Math.min(ax, bx) - r,
     Math.min(ay, by) - r,
@@ -131,6 +139,16 @@ export function line(
     },
     colour,
     ink,
+    // At a height y, what lies within reach of the line lies within reach of its
+    // points between y - reach and y + reach: of a slanted line, a short run of a row.
+    (y) => {
+      if (flat) return [Math.min(ax, bx) - reach, Math.max(ax, bx) + reach];
+      const t0 = clamp((y - reach - ay) / dy, 0, 1);
+      const t1 = clamp((y + reach - ay) / dy, 0, 1);
+      const x0 = ax + t0 * dx;
+      const x1 = ax + t1 * dx;
+      return [Math.min(x0, x1) - reach, Math.max(x0, x1) + reach];
+    },
   );
 }
 

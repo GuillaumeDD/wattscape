@@ -889,17 +889,16 @@ function toolsOf(frame: Frame, emissive: boolean, target: Surface): Tools {
   // is the frame's own surface, or a finer one the frame was spread over.
   const density = (width * frame.density) / frame.width;
   const back = frame.density / density;
-  const own = back !== 1;
   const columns = frame.width;
-  /** Whether the relief in front hides what stands at a pixel. */
-  const hidden = (px: number, py: number): boolean =>
-    (depth[own ? Math.floor(py * back) * columns + Math.floor(px * back) : py * width + px] ?? 0) >
-    limit;
-  /** The vignette at a pixel. */
-  const dim = (px: number, py: number): number =>
-    own
-      ? vignette(vx[Math.floor(px * back)] ?? 0, vy[Math.floor(py * back)] ?? 0)
-      : vignette(vx[px] ?? 0, vy[py] ?? 0);
+  // The frame's column and row under each pixel drawn, worked out once.
+  const column = new Int32Array(width);
+  for (let px = 0; px < width; px++) column[px] = Math.floor(px * back);
+  const row = new Int32Array(height);
+  for (let py = 0; py < height; py++) row[py] = Math.floor(py * back);
+  /** Whether the relief in front hides what stands at a pixel of a row of the frame's. */
+  const hidden = (px: number, at: number): boolean => (depth[at + (column[px] ?? 0)] ?? 0) > limit;
+  /** The vignette at a pixel, `y2` its row's share. */
+  const dim = (px: number, y2: number): number => vignette(vx[column[px] ?? 0] ?? 0, y2);
   /**
    * Lays a colour over pixel `p`, covering the share `a` of it; (r, g, b) is the
    * colour times that share.
@@ -944,12 +943,20 @@ function toolsOf(frame: Frame, emissive: boolean, target: Surface): Tools {
     touch(x0, y0, x1, y1);
     for (let py = y0; py < y1; py++) {
       const dy = ((py + 0.5) / density - cy) / ry;
-      for (let px = x0; px < x1; px++) {
+      const left = 1 - dy * dy;
+      if (!(left > 0)) continue;
+      // The row's run inside the ellipse, a pixel wider each side: no pixel lost.
+      const half = Math.sqrt(left) * rx;
+      const xa = Math.max(x0, Math.floor((cx - half) * density) - 1);
+      const xb = Math.min(x1, Math.ceil((cx + half) * density) + 1);
+      const at = (row[py] ?? 0) * columns;
+      const y2 = vy[row[py] ?? 0] ?? 0;
+      for (let px = xa; px < xb; px++) {
         const dx = ((px + 0.5) / density - cx) / rx;
         const a = (1 - dx * dx - dy * dy) * alpha;
         if (!(a > 0)) continue;
-        if (hidden(px, py)) continue;
-        const v = dim(px, py) * a;
+        if (hidden(px, at)) continue;
+        const v = dim(px, y2) * a;
         lay(py * width + px, a, r * v, g * v, b * v);
       }
     }
@@ -963,7 +970,7 @@ function toolsOf(frame: Frame, emissive: boolean, target: Surface): Tools {
     },
     touched: () => touched,
     spot,
-    fill(left, top, right, bottom, distance, colour, ink) {
+    fill(left, top, right, bottom, distance, colour, ink, span) {
       const unlit = ink?.unlit === true;
       const opacity = ink?.alpha ?? 1;
       const shade = ink?.shade;
@@ -977,13 +984,19 @@ function toolsOf(frame: Frame, emissive: boolean, target: Surface): Tools {
       touch(x0, y0, x1, y1);
       for (let py = y0; py < y1; py++) {
         const y = (py + 0.5) / density;
-        for (let px = x0; px < x1; px++) {
+        // The pixels whose centres are in the span, if there is one.
+        const [from, to] = span === undefined ? [-Infinity, Infinity] : span(y);
+        const xa = Math.max(x0, Math.floor(from * density));
+        const xb = Math.min(x1, Math.ceil(to * density));
+        const at = (row[py] ?? 0) * columns;
+        const y2 = vy[row[py] ?? 0] ?? 0;
+        for (let px = xa; px < xb; px++) {
           const x = (px + 0.5) / density;
           // The edge over one output pixel: half covered where the distance is 0.
           const a = clamp01(0.5 - distance(x, y) * density) * opacity;
           if (!(a > 0)) continue;
-          if (hidden(px, py)) continue;
-          const v = dim(px, py) * a * (shade === undefined ? 1 : shade(x, y));
+          if (hidden(px, at)) continue;
+          const v = dim(px, y2) * a * (shade === undefined ? 1 : shade(x, y));
           lay(py * width + px, a, r * v, g * v, b * v);
         }
       }
