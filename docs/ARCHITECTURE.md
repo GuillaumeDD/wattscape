@@ -1043,7 +1043,8 @@ each pixel drawn are worked out once. A step of the motion falls from about 1.7 
 | France, still            | 0.4–0.5, 0.7 ms, 27 ms/s | 0.5, 0.8 ms, 28–30 ms/s |
 | Normandie, plants moving | 2.2–2.3, 3.4–3.6, 46–47  | 1.8, 2.5–2.9 ms, 37–42  |
 
-Still **over the budget** with the plants moving. A trace of that view before
+Still **over the budget** with the plants moving, which Guillaume accepted on
+2026-11-18 (PRD Q-39, D-060), closing B-029. A trace of that view before
 these changes (DevTools timeline, 5 s) showed where the time goes: about 27 ms/s
 in the animation frames, the script, and 15 ms/s in the commit that hands the canvas over, nearly all of it
 `Canvas2DResourceProvider::ProduceCanvasResource`, a copy of the whole canvas at
