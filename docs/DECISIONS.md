@@ -1059,3 +1059,19 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** Guillaume does not accept the cost and B-029 finds no way under
   the budget (then 2 pixels again, with the finer shapes); a screen between 2 and
   4 pixels per scene pixel shows the landmarks too soft.
+
+## D-059 — Modern theme: the landmarks' unsourced details are kept
+
+- **Context:** the third and fourth lots of the modern landmarks (B-027, PRs #45
+  and #46) drew five details from the general look of the places, with no source
+  in `docs/SOURCES.md`, marked provisional in their PRs and put to Guillaume in
+  one questionnaire on 2026-11-17 (PRD Q-38): the Dune du Pilat's gentle ocean
+  slope and steeper face into the forest; Fort Boyard's watch turret; the three
+  dormers of the Grand Logis at Nantes; the Hospices de Beaune's roof as a regular
+  weave of lozenges, not its actual layout; the watch boxes of the Citadel of
+  Besançon and the barracks between its bastions.
+- **Options:** keep them; or redraw any of them from a source.
+- **Decision (Guillaume, 2026-11-18, « OK, go pour la suite »):** keep all five.
+- **Why:** they are details of silhouette, a few output pixels each; none is a
+  figure or a caption.
+- **Revisit if:** a source shows one of them misleading at the size it is drawn.
