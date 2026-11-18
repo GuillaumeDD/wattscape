@@ -39,7 +39,8 @@ p {
 }
 
 #status,
-#plants-note {
+#plants-note,
+#weather-note {
   color: var(--muted);
 }
 
@@ -239,7 +240,8 @@ body.scene main.folded {
   padding: 0.5rem 0.75rem;
 }
 
-body.scene main.folded #plants-note {
+body.scene main.folded #plants-note,
+body.scene main.folded #weather-note {
   font-size: 0.8rem;
 }
 

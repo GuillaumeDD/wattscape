@@ -22,6 +22,7 @@ import { ditherLevel } from "../render/dither.ts";
 import { type Light, lightAt } from "../sky/light.ts";
 import { sunPosition } from "../sky/sun.ts";
 import { type Camera } from "./camera.ts";
+import { type RegionalWeather } from "./weather.ts";
 
 /** A town: a commune of 2 000 inhabitants or more, at its chef-lieu (B-015, D-031). */
 export interface Town {
@@ -76,6 +77,11 @@ export interface Scene {
   readonly townLights: TownLights;
   /** The landmarks that may show (GO in docs/POI.md), drawn at full sprite size only. */
   readonly landmarks: readonly Landmark[];
+  /**
+   * Each region's current weather (src/scene/weather.ts); a region without a reading
+   * to show is absent, and shows none.
+   */
+  readonly weather: RegionalWeather;
 }
 
 /**

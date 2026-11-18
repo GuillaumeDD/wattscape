@@ -137,6 +137,7 @@ describe("the landmarks in a frame", () => {
     plants: [],
     townLights: Object.fromEntries(REGION_CODES.map((r) => [r, 0.5])),
     landmarks,
+    weather: {},
   });
   const snow = (scene: Scene): number => {
     const out = createSurface(scene.width, scene.height);

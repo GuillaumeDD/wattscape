@@ -52,6 +52,7 @@ function sceneOf(overrides: Partial<Scene> & { camera: Camera }): Scene {
     // Every region's towns half lit: half their range of consumption.
     townLights: Object.fromEntries(REGION_CODES.map((r) => [r, 0.5])),
     landmarks: [],
+    weather: {},
     ...overrides,
   };
 }

@@ -387,6 +387,7 @@ describe("the rivers in a frame", () => {
     plants: [],
     townLights: Object.fromEntries(REGION_CODES.map((r) => [r, 0.5])),
     landmarks: [],
+    weather: {},
   });
   const pixels = (scene: Scene): Uint8ClampedArray => {
     const out = createSurface(scene.width, scene.height);

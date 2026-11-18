@@ -71,6 +71,7 @@ export function referenceScene(
     plants: recordedPlants(sunElevation < 0),
     townLights: recordedTownLights(sunElevation < 0),
     landmarks: LANDMARKS,
+    weather: {},
   };
 }
 

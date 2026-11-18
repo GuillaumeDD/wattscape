@@ -3,6 +3,7 @@
  * Security): only a known area code or theme is accepted, anything else is ignored.
  */
 import { isEco2mixArea, type Eco2mixArea } from "../data/eco2mix";
+import { WEATHER_GROUPS, type WeatherGroup } from "../data/open-meteo";
 import { isLocale, type Locale } from "../i18n";
 import { DEFAULT_THEME_ID, isThemeId, type ThemeId } from "../render/theme-ids";
 
@@ -196,6 +197,18 @@ export function sampleFromQuery(search: string): Sample | undefined {
   const values = new URLSearchParams(search).getAll("sample");
   if (values.length !== 1) return undefined;
   return SAMPLES.find((s) => s === values[0]);
+}
+
+/**
+ * `?weather=rain` (any group of WEATHER_GROUPS): the same weather imposed on every
+ * region instead of the live one, labelled as such, for demos and screenshots (B-018);
+ * `undefined` when absent, repeated or unknown.
+ */
+export function weatherFromQuery(search: string): WeatherGroup | undefined {
+  if (search.length > 2048) return undefined;
+  const values = new URLSearchParams(search).getAll("weather");
+  if (values.length !== 1) return undefined;
+  return WEATHER_GROUPS.find((g) => g === values[0]);
 }
 
 /**

@@ -21,7 +21,11 @@ import {
   saveLocale,
   saveTheme,
   timelapseFromQuery,
+  weatherFromQuery,
 } from "./ui/settings";
+import { startWeatherFeed, type WeatherFeed, type WeatherState } from "./ui/weather-feed";
+import { overrideWeather } from "./scene/weather";
+import { type WeatherGroup } from "./data/open-meteo";
 
 /** The time-lapse plays a day in this long (PRD § 4.9: a day in a minute). */
 const TIMELAPSE_MS = 60_000;
@@ -64,9 +68,13 @@ function render(locale: Locale): void {
   setText("debug-link", t("debugTitle"));
   document.getElementById("scene")?.setAttribute("aria-label", t("sceneLabel"));
   renderPlantsNote();
+  renderWeatherNote();
 }
 
 let plantsState: FeedState = { kind: "loading" };
+let weatherState: WeatherState = { kind: "loading" };
+/** The weather `?weather=` imposes, if any. */
+const weatherOverride: WeatherGroup | undefined = weatherFromQuery(location.search);
 /** The caption shown now, to write again when the language changes. */
 let caption: ShownCaption | null = null;
 
@@ -111,6 +119,43 @@ function renderPlantsNote(): void {
     replay: "plantsReplay",
   } as const satisfies Record<typeof state.kind, MessageKey>;
   setText("plants-note", t(keys[state.kind]).replace("{time}", time));
+}
+
+const WEATHER_NAMES = {
+  clear: "weatherClear",
+  cloudy: "weatherCloudy",
+  fog: "weatherFog",
+  drizzle: "weatherDrizzle",
+  rain: "weatherRain",
+  snow: "weatherSnow",
+  storm: "weatherStorm",
+} as const satisfies Record<WeatherGroup, MessageKey>;
+
+/** Where the weather comes from, and its time, or that it is imposed by `?weather=`. */
+function renderWeatherNote(): void {
+  const t = (key: MessageKey): string => translate(locale, key);
+  const state = weatherState;
+  if (weatherOverride !== undefined) {
+    setText(
+      "weather-note",
+      t("weatherOverride").replace("{group}", t(WEATHER_NAMES[weatherOverride])),
+    );
+    return;
+  }
+  if (state.kind === "loading" || state.kind === "unavailable") {
+    setText("weather-note", t(state.kind === "loading" ? "weatherLoading" : "weatherUnavailable"));
+    return;
+  }
+  const keys = {
+    live: "weatherLive",
+    stale: "weatherStale",
+    ahead: "weatherAhead",
+  } as const satisfies Record<typeof state.kind, MessageKey>;
+  const time = new Intl.DateTimeFormat(locale, {
+    ...(state.kind === "live" ? {} : { dateStyle: "short" as const }),
+    timeStyle: "short",
+  }).format(new Date(state.timeMs));
+  setText("weather-note", t(keys[state.kind]).replace("{time}", time));
 }
 
 /** The area list: rebuilt only when the language changes, otherwise just selected. */
@@ -239,9 +284,35 @@ else
       showPlants(null, { kind: "unavailable" });
     });
 
+// The weather of every region (B-018): live, or the same one imposed by `?weather=`,
+// labelled as such.
+const viewerOf = (state: AreaState): Parameters<WeatherFeed["setViewer"]>[0] =>
+  state.area === "FR" || state.position === null
+    ? null
+    : { region: state.area, position: state.position };
+const weatherFeed: WeatherFeed | null =
+  weatherOverride === undefined
+    ? startWeatherFeed(
+        clock,
+        (input, init) => fetch(input, init),
+        (byRegion, state) => {
+          weatherState = state;
+          renderWeatherNote();
+          scene?.setWeather(byRegion);
+        },
+      )
+    : null;
+if (weatherOverride !== undefined) {
+  renderWeatherNote();
+  scene?.setWeather(overrideWeather(weatherOverride, clock.now()), true);
+}
+
 let shownArea = areaState.area;
 mountAreaPicker(areaState, () => {
   renderArea(false);
+  // The position comes with the area it was found in, and goes when an area is
+  // picked by hand: the viewer's region takes its weather there, or at its prefecture.
+  weatherFeed?.setViewer(viewerOf(areaState));
   // The picker also calls back for a new note ("looking for your position…"): the
   // camera flies only when the area changes.
   if (areaState.area === shownArea) return;
