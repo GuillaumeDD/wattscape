@@ -36,4 +36,4 @@ Statuses: `todo` / `wip` / `done`.
 | B-026 | Modern theme: the map, the choice | A second theme (G-011), chosen in the panel or by `?theme=`: smooth relief, sky, towns, rivers; same camera, captions, data; frames hashed in Node and Chromium     | done   |
 | B-027 | Modern theme: plants, landmarks   | New drawings for the modern theme (D-057): the eight kinds of plants and all 28 landmarks, in four lots; no smoothed sprite is drawn any more                       | done   |
 | B-028 | Modern theme: the idle drift      | The drift in budget (30 ms/s; 45 to 47 measured, D-056): shift the last frame on a pan and draw only the edge that comes in, the picture unchanged                  | todo   |
-| B-029 | Modern theme: sharp, in budget    | At rest in the budget (30 ms/s; 55 measured with plants moving, D-058): hand the browser less at each step, or draw the motion cheaper; the picture unchanged       | todo   |
+| B-029 | Modern theme: sharp, in budget    | Cheaper motion, every pixel the same: 46 to 37–42 ms/s with plants moving; the rest, the canvas's hand-over, accepted (D-060)                                       | done   |

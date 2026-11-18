@@ -1075,3 +1075,22 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Why:** they are details of silhouette, a few output pixels each; none is a
   figure or a caption.
 - **Revisit if:** a source shows one of them misleading at the size it is drawn.
+
+## D-060 — Modern theme: the sharp frame's remaining cost is accepted
+
+- **Context:** B-029 drew the plants' motion cheaper, every pixel the same: with
+  the plants moving in Normandie, the sharp frame (D-058) fell from 46–47 to 37–42
+  ms/s in headless Chromium, for a budget of 30 (ARCHITECTURE § Performance). France,
+  still, spends 27 to 30 ms/s: the rest is the hand-over of a 1920 × 1080 canvas ten
+  times a second, measured in a Chromium without a GPU, where it may cost more than
+  on a machine with one (not measured).
+- **Options (decision card, 2026-11-18, PRD Q-39):** measure on Guillaume's own
+  machine first (recommended); accept and close B-029; fewer steps of motion (5 a
+  second instead of 10); the motion drawn at 2 pixels per scene pixel instead of 4.
+- **Decision (Guillaume, 2026-11-18, decision card):** accept, and close B-029;
+  what is left goes to Growth (« Le mettre en growth »): G-016.
+- **Why:** the picture and its fluidity are kept; the gap left is small and may be
+  an artefact of the measuring browser.
+- **Revisit if:** a measure on a real screen, or a battery complaint, shows the
+  sharp frame well over the budget; then fewer steps or a coarser motion, the two
+  options left.
