@@ -1002,7 +1002,7 @@ again. Measured on 2026-11-15, same tool, one run by day and one at night:
 A drag is within the 25 ms; the flight and the wheel sit at its edge (the frames
 at p95 are those of the blend between the two layers, and the full frame that ends
 a movement). The idle drift keeps the full frame, since it never stops, and stays
-over its 30 ms/s: open, B-028 (shift the last frame on a pan).
+over its 30 ms/s: B-028 drew it from a plate, below.
 
 With the plants' own drawings (B-027), measured on 2026-11-16, same tool, one run
 by day and one at night: Normandie with its plants moving takes 1.2 to 1.3 ms at
@@ -1076,6 +1076,9 @@ crop and its vignette 8, `spread` 10, the rivers 3, what stands on the map 3.
 The max is the plate's own frame, once per pan. The drift stays **over the
 budget**: it runs with the plants moving, which took 43 to 44 ms/s in the same run
 (37 to 42 in B-029's: the machine varies; D-060), and adds about 10 of its own.
+Accepted on 2026-11-18 (PRD Q-40, D-061), closing B-028; the vignette laid in
+CSS over the canvas, which would spare the crop its vignette, waits in Growth
+(G-017).
 
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame

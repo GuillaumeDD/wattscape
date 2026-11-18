@@ -1094,3 +1094,21 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** a measure on a real screen, or a battery complaint, shows the
   sharp frame well over the budget; then fewer steps or a coarser motion, the two
   options left.
+
+## D-061 — Modern theme: the idle drift's remaining cost is accepted
+
+- **Context:** B-028 draws the idle drift from a plate, the ground drawn once a
+  little larger and cropped at each pixel of the pan, every pixel the same: in
+  headless Chromium, Normandie's drift fell from 55–57 to 52–54 ms/s, for a budget
+  of 30 (ARCHITECTURE § Performance). The plants' motion alone took 43 to 44 of it
+  in the same run, accepted in D-060; the drift adds about 10.
+- **Options (decision card, 2026-11-18, PRD Q-40):** accept, close B-028 and put
+  the rest in Growth (recommended); lay the vignette in CSS over the canvas, so the
+  crop no longer redraws it, which changes the picture (a CSS gradient instead of
+  the theme's own).
+- **Decision (Guillaume, 2026-11-18, decision card):** accept, close B-028; the
+  CSS vignette goes to Growth: G-017.
+- **Why:** the drift costs little more than the plants' motion already accepted;
+  the rest would change the picture for a gain of a few ms/s.
+- **Revisit if:** the same as D-060: a measure on a real screen, or a battery
+  complaint, shows the drift well over the budget.
