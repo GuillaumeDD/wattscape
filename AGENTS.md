@@ -132,7 +132,9 @@ Format:
 
 - In shell chains that gate a commit, never pipe the test runner into a filter
   (`npm test | tail && git commit` masks failures).
-- Check exit codes directly, or use `set -o pipefail`.
+- Check exit codes directly, or use `set -o pipefail`. To read a long test output,
+  send it to a file, check the exit code, then read the file: a `grep` over the
+  output hid a failing frame hash in B-027.
 - Edit a file with an editor tool or a patch, never by reading it into a script and
   writing it back: a bad read truncates it silently (`tools/bake-plants.ts` lost its
   end that way in B-015).
@@ -196,7 +198,8 @@ Format:
   3. documented (PRD/ARCHITECTURE/BACKLOG statuses updated);
   4. strings translated (FR + EN);
   5. the PR shows a screenshot or GIF for any visible change, linked by commit SHA
-     (a permalink), so it survives the branch's deletion. Shoot it at day **and**
+     (a permalink), so it survives the branch's deletion. Take the SHA from
+     `git rev-parse HEAD` after the push, never write it ahead (PR #46). Shoot it at day **and**
      night, and in at least two regions, from fixed data (`?sample=…&at=…`) so the
      picture can be reproduced.
 
@@ -236,6 +239,12 @@ specific. Focus on it:
 - Before optimizing, **profile**: Chrome DevTools Performance panel, or
   `node --cpu-prof` for headless world generation.
 - Fix what the profiler shows, not what the analysis guessed.
+- Compare before and after in the **same run** of `tools/perf.ts`: the machine
+  varies from one run to the next (the plants' motion measured 37–42 ms/s, then
+  43–44, for the same view and code).
+- An option that changes the cost of a frame is measured on a prototype **before**
+  it goes on a decision card, and the card gives the figure: D-058 went out with
+  "cost to measure", came back at 55 ms/s for 30, and took B-029 and B-028.
 
 ### Testing
 
@@ -243,6 +252,9 @@ specific. Focus on it:
   palette dithering), prefer **randomized cross-checks against a naive reference
   implementation** or a published reference (e.g. the NOAA solar calculator) over
   example-based tests alone.
+- An optimization that claims to keep every pixel is tested against the plain
+  path it replaces, frame by frame along a path of inputs (B-029, B-028), and the
+  test is checked to fail when the new path is broken on purpose.
 - Implementation plans and stories **enumerate the unit tests explicitly**:
   - per module, the test files;
   - per test file, the specific behaviors they assert.
@@ -300,7 +312,9 @@ specific. Focus on it:
   and wind). That holds for a count of our own work too (in B-016, "25 landmarks"
   was written for the 28 in `src/map/landmarks.ts`).
 - Before citing a register id (`DS-`, `P-`, `Q-`, `D-`) in a question or on a
-  decision card, re-read its row in the register.
+  decision card, re-read its row in the register. The recommendation in a message,
+  a PR or a card is the one in the question's row, word for word: in Q-34 they
+  differed, and « OK for the reco » had to be guessed (D-056).
 - At the end of a step, put every provisional choice still open to Guillaume in one
   questionnaire: each with a recommendation and room for a free answer. Record the
   answers with their provenance ("Guillaume, date") in one PR.

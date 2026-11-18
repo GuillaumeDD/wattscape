@@ -1112,3 +1112,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   the rest would change the picture for a gain of a few ms/s.
 - **Revisit if:** the same as D-060: a measure on a real screen, or a battery
   complaint, shows the drift well over the budget.
+
+## D-062 — Step 6 review: six lessons written down
+
+- **Context:** at the end of the modern theme (G-011; B-026 to B-029, PRs #40 to
+  #50), Guillaume asked for a review « pour amélioration continue » (2026-11-18).
+- **Options:** keep the lessons in memory only, or write them where the next
+  session reads them.
+- **Decision (proposed by Claude, 2026-11-18; Guillaume to confirm in PR review):**
+  written in `AGENTS.md`: a long test output goes to a file, read after its exit
+  code (a `grep` hid a failing frame hash in B-027); a permalink's SHA comes from
+  `git rev-parse` after the push (PR #46); performance is compared before and after
+  in the same run; a cost-changing option is measured before its decision card
+  (D-058 left with "cost to measure" and took two backlog items); a pixel-identical
+  optimization is tested against the plain path and mutation-checked; the
+  recommendation in a message is the one in the question's row (Q-34, D-056).
+- **Why:** each cost a redo, a follow-up item or a guessed answer in this step.
+- **Revisit if:** a rule turns out to cost more than the slip it prevents.
