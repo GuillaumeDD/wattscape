@@ -477,6 +477,53 @@ describe("drawModernScene", () => {
     expect(drawn.animate(createSurface(normandie.width, normandie.height), 1.3)).toEqual([]);
   });
 
+  it("draws a slow pan from a plate, every pixel and mark as a full draw gives them (B-028)", () => {
+    const base = framed("28");
+    for (const [label, elevation, detail] of [
+      ["4 km, day", 35, 0],
+      ["1 km, night", -20, 8],
+      ["crossfade, day", 35, 3],
+    ] as const) {
+      const at = (dx: number, dy: number, sun = elevation): Scene => ({
+        ...referenceScene(
+          "28",
+          { ...base, x: base.x + dx / base.scale, y: base.y + (2 * dy) / base.scale },
+          sun,
+        ),
+        width: 120,
+        height: 68,
+        detail,
+      });
+      // A pan, a pixel at a time, then a leap past the plate's reach.
+      const path = [
+        [0, 0],
+        [1, 0],
+        [2, 1],
+        [1, 2],
+        [-1, 1],
+        [30, -15],
+        [31, -15],
+      ] as const;
+      const panned = path.map(([dx, dy]) => {
+        const out = draw(at(dx, dy));
+        return hashSurface(out);
+      });
+      const full = path.map(([dx, dy]) => {
+        // Another light in between: what was drawn before is not reused.
+        draw(at(dx + 40, dy, elevation > 0 ? -20 : 35));
+        draw(at(dx + 41, dy, elevation > 0 ? -20 : 35));
+        return hashSurface(draw(at(dx, dy)));
+      });
+      expect(panned, label).toEqual(full);
+      // And the marks, and the motion over the frame, at the same places.
+      const a = drawModernScene(at(2, 1), createSurface(240, 136));
+      draw(at(50, 0, -20));
+      draw(at(51, 0, -20));
+      const b = drawModernScene(at(2, 1), createSurface(240, 136));
+      expect(a.marks, label).toEqual(b.marks);
+    }
+  });
+
   it("shows the 4 km layer alone until the 1 km one is there", () => {
     const camera = framed("28");
     const scene = referenceScene("28", camera, 35);
