@@ -698,6 +698,16 @@ the deployed build. `tools/screenshots.ts` writes its frames
   their details blurred (`docs/screenshots/step-8-modern-sharp-*.png`). Elsewhere
   the canvas scales the frame up smoothly (`#scene.smooth`), as before; while the
   camera moves the frame is the map's, halved (D-056).
+- **Plate** (B-028): when the camera has only panned since the last frame (the
+  idle drift, a drag), the ground is drawn once into a plate larger than the frame
+  by 24 scene pixels east and west and 12 north and south (more than the drift's
+  reach), its colours before the vignette and its depths, and the next frames crop
+  it: the vignette and the sky (screen-fixed) are laid at each crop, the rivers,
+  the landmarks and the plants drawn on it as before. Every pixel is the one a full
+  draw gives (a test pans through a plate and draws each frame in full). A plate
+  at 2 pixels per scene pixel on a full HD screen holds about 15 MB (colours in
+  64-bit floats, so that the vignette rounds as in a full draw); one per layer, two
+  in the crossfade.
 - **Relief:** the altitude of each cell (its class's floor) is smoothed by two
   [1 2 1] passes and read between cells (bilinear). Each row of the ground is drawn
   from the front to the back under a horizon per column, so a mountain hides what
@@ -992,7 +1002,7 @@ again. Measured on 2026-11-15, same tool, one run by day and one at night:
 A drag is within the 25 ms; the flight and the wheel sit at its edge (the frames
 at p95 are those of the blend between the two layers, and the full frame that ends
 a movement). The idle drift keeps the full frame, since it never stops, and stays
-over its 30 ms/s: open, B-028 (shift the last frame on a pan).
+over its 30 ms/s: B-028 drew it from a plate, below.
 
 With the plants' own drawings (B-027), measured on 2026-11-16, same tool, one run
 by day and one at night: Normandie with its plants moving takes 1.2 to 1.3 ms at
@@ -1052,6 +1062,23 @@ each step that changed it. That copy is the headless Chromium's, which draws the
 canvas without a GPU; with one it may cost much less, unmeasured here. France,
 still, where only the national view's plumes move, already spends 27 to 30 ms/s:
 the floor of a canvas of 1920 × 1080 handed over ten times a second.
+
+B-028, measured on 2026-11-18 with the same tool: the idle drift redrew the whole
+frame, about 40 ms in Node (the ground 16, `spread` 7), at each pixel it moved. From
+a plate (§ The modern theme), a frame of the drift takes about 28 ms in Node: the
+crop and its vignette 8, `spread` 10, the rivers 3, what stands on the map 3.
+
+| View (sharp frame)     | Before: p95, busy    | Plate: p95, max, busy       |
+| ---------------------- | -------------------- | --------------------------- |
+| Idle drift (Normandie) | 31–32 ms, 55–57 ms/s | 20–21 ms, 73–86 ms, 52–54   |
+| Drag pan (Normandie)   | 12–13 ms, 149–153    | 10–14 ms, 49–68 ms, 115–116 |
+
+The max is the plate's own frame, once per pan. The drift stays **over the
+budget**: it runs with the plants moving, which took 43 to 44 ms/s in the same run
+(37 to 42 in B-029's: the machine varies; D-060), and adds about 10 of its own.
+Accepted on 2026-11-18 (PRD Q-40, D-061), closing B-028; the vignette laid in
+CSS over the canvas, which would spare the crop its vignette, waits in Growth
+(G-017).
 
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame

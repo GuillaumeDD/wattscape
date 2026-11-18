@@ -549,12 +549,31 @@ function pixelHash(x: number, y: number): number {
 }
 
 /**
+ * The ground of a frame before its vignette and its sky (B-028): each pixel's colour
+ * as the terrain gives it, and its depth (`SKY_DEPTH` where the sky shows). Drawn
+ * once larger than the frame, it gives the frames of a slow pan by cropping
+ * (`fromPlate`), every pixel as a full draw gives it.
+ */
+interface Plate {
+  /** What the ground drawn depends on, but where it is seen from. */
+  key: readonly unknown[];
+  /** The ground pixel at the plate's top-left corner, in output pixels. */
+  ox: number;
+  oy: number;
+  width: number;
+  height: number;
+  rgb: Float64Array;
+  depth: Int16Array;
+}
+
+/**
  * Draws the sky and one terrain layer: each row of the ground from the front
  * (south) to the back (north) under a horizon that rises with the relief, so a
  * mountain hides what is behind it. Past the grid's west, east and south edges the
- * edge cells go on; north of it is the sky.
+ * edge cells go on; north of it is the sky. With `rgb`, the ground's colours go
+ * there instead, before the vignette, and the sky is left to `finish` (B-028).
  */
-function drawTerrain(frame: Frame, scene: Scene, layer: TerrainLayer): void {
+function drawTerrain(frame: Frame, scene: Scene, layer: TerrainLayer, rgb?: Float64Array): void {
   const ground = groundOf(layer, scene.towns);
   const land = textureOf(layer, ground, scene);
   const { height: metres, land: mask, sea } = ground;
@@ -691,20 +710,31 @@ function drawTerrain(frame: Frame, scene: Scene, layer: TerrainLayer): void {
         g += (haze[1] - g) * fog;
         b += (haze[2] - b) * fog;
       }
-      const x2 = vx[x] ?? 0;
-      for (let y = top > 0 ? top : 0; y < above; y++) {
-        const v = vignette(x2, vy[y] ?? 0);
-        const p = y * width + x;
-        data[p * 4] = r * v;
-        data[p * 4 + 1] = g * v;
-        data[p * 4 + 2] = b * v;
-        data[p * 4 + 3] = 255;
-        depth[p] = row;
+      if (rgb !== undefined)
+        for (let y = top > 0 ? top : 0; y < above; y++) {
+          const p = y * width + x;
+          rgb[p * 3] = r;
+          rgb[p * 3 + 1] = g;
+          rgb[p * 3 + 2] = b;
+          depth[p] = row;
+        }
+      else {
+        const x2 = vx[x] ?? 0;
+        for (let y = top > 0 ? top : 0; y < above; y++) {
+          const v = vignette(x2, vy[y] ?? 0);
+          const p = y * width + x;
+          data[p * 4] = r * v;
+          data[p * 4 + 1] = g * v;
+          data[p * 4 + 2] = b * v;
+          data[p * 4 + 3] = 255;
+          depth[p] = row;
+        }
       }
       horizon[x] = top;
       if (top <= 0) open--;
     }
   }
+  if (rgb !== undefined) return;
   // The sky above: a gradient down to the middle of the frame, and stars at night.
   const night = clamp01(darkness - 1.2) / 0.8;
   for (let y = 0; y < height && open > 0; y++) {
@@ -712,18 +742,67 @@ function drawTerrain(frame: Frame, scene: Scene, layer: TerrainLayer): void {
     const y2 = vy[y] ?? 0;
     for (let x = 0; x < width; x++) {
       if (y >= (horizon[x] ?? 0)) continue;
-      const v = vignette(vx[x] ?? 0, y2);
-      let star = 0;
-      if (night > 0) {
-        const hash = pixelHash(x, y);
-        if (hash % 1499 === 0) star = night * (0.35 + ((hash >>> 12) % 8) / 12);
-      }
+      skyPixel(data, y * width + x, x, y, sky, night, vignette(vx[x] ?? 0, y2));
+      depth[y * width + x] = SKY_DEPTH;
+    }
+  }
+}
+
+/** Sets pixel `p`, at (x, y) of the frame, to the sky, with its star if one is there. */
+function skyPixel(
+  data: Uint8ClampedArray,
+  p: number,
+  x: number,
+  y: number,
+  sky: Rgb,
+  night: number,
+  v: number,
+): void {
+  let star = 0;
+  if (night > 0) {
+    const hash = pixelHash(x, y);
+    if (hash % 1499 === 0) star = night * (0.35 + ((hash >>> 12) % 8) / 12);
+  }
+  data[p * 4] = (sky[0] + (STAR[0] - sky[0]) * star) * v;
+  data[p * 4 + 1] = (sky[1] + (STAR[1] - sky[1]) * star) * v;
+  data[p * 4 + 2] = (sky[2] + (STAR[2] - sky[2]) * star) * v;
+  data[p * 4 + 3] = 255;
+}
+
+/**
+ * The frame from a plate (B-028): its ground cropped where the frame sees it, under
+ * the frame's vignette, and the sky where the plate has none of the ground. Every
+ * pixel and every depth as `drawTerrain` gives them for the frame.
+ */
+function finish(plate: Plate, frame: Frame, darkness: number): void {
+  const { data, depth, width, height, vx, vy } = frame;
+  const sx = frame.ox - plate.ox;
+  const sy = frame.oy - plate.oy;
+  const night = clamp01(darkness - 1.2) / 0.8;
+  const { rgb, depth: deep } = plate;
+  for (let y = 0; y < height; y++) {
+    const y2 = vy[y] ?? 0;
+    let sky: Rgb | null = null;
+    const from = (y + sy) * plate.width + sx;
+    for (let x = 0; x < width; x++) {
+      const q = from + x;
       const p = y * width + x;
-      data[p * 4] = (sky[0] + (STAR[0] - sky[0]) * star) * v;
-      data[p * 4 + 1] = (sky[1] + (STAR[1] - sky[1]) * star) * v;
-      data[p * 4 + 2] = (sky[2] + (STAR[2] - sky[2]) * star) * v;
-      data[p * 4 + 3] = 255;
-      depth[p] = SKY_DEPTH;
+      const d = deep[q] ?? SKY_DEPTH;
+      const v = vignette(vx[x] ?? 0, y2);
+      if (d === SKY_DEPTH) {
+        sky ??= modernSky(darkness, clamp01((2 * y) / height));
+        skyPixel(data, p, x, y, sky, night, v);
+        depth[p] = SKY_DEPTH;
+        continue;
+      }
+      const i = p * 4;
+      const j = q * 3;
+      data[i] = (rgb[j] ?? 0) * v;
+      data[i + 1] = (rgb[j + 1] ?? 0) * v;
+      data[i + 2] = (rgb[j + 2] ?? 0) * v;
+      data[i + 3] = 255;
+      // The plate's rows start `sy` above the frame's.
+      depth[p] = d - sy;
     }
   }
 }
@@ -1004,6 +1083,107 @@ function toolsOf(frame: Frame, emissive: boolean, target: Surface): Tools {
   };
 }
 
+/**
+ * How far a plate reaches past each side of its frame, in scene pixels (B-028):
+ * more than the idle drift's reach, 4 % of the width east–west and half as many
+ * pixels north–south (ARCHITECTURE § Camera and controls).
+ */
+const PLATE_MARGIN_X = 24;
+const PLATE_MARGIN_Y = 12;
+
+/** The plates of the last pan, one per layer drawn (two in the crossfade). */
+const plates: [Plate | null, Plate | null] = [null, null];
+/** What the last full draw of each layer depended on, and where it was seen from. */
+const drawnLast: [
+  { key: readonly unknown[]; ox: number; oy: number } | null,
+  null | { key: readonly unknown[]; ox: number; oy: number },
+] = [null, null];
+
+const sameKey = (a: readonly unknown[], b: readonly unknown[]): boolean =>
+  a.length === b.length && a.every((v, i) => v === b[i]);
+
+/**
+ * Draws one terrain layer into `frame`, from a plate when the camera has only panned
+ * since the last draw (B-028): the first pan draws a plate larger than the frame,
+ * centred on it, and the next ones crop it, until the camera leaves it. Otherwise,
+ * a full draw. Either way, every pixel the same.
+ */
+function terrainOf(frame: Frame, scene: Scene, layer: TerrainLayer, slot: 0 | 1): void {
+  // What the ground drawn depends on, but where it is seen from: the layer, its
+  // ground and texture (the towns, their lights, the region in focus, the dusk), the
+  // scale, the size, the light.
+  const ground = groundOf(layer, scene.towns);
+  const key: readonly unknown[] = [
+    layer,
+    ground,
+    textureOf(layer, ground, scene),
+    frame.scale,
+    frame.width,
+    frame.height,
+    frame.light[0],
+    frame.light[1],
+    frame.light[2],
+    scene.light.darkness,
+    scene.light.emissive,
+  ];
+  const mx = PLATE_MARGIN_X * frame.density;
+  const my = PLATE_MARGIN_Y * frame.density;
+  const plate = plates[slot];
+  const covers = (p: Plate): boolean =>
+    frame.ox >= p.ox &&
+    frame.oy >= p.oy &&
+    frame.ox + frame.width <= p.ox + p.width &&
+    frame.oy + frame.height <= p.oy + p.height;
+  if (plate !== null && sameKey(plate.key, key) && covers(plate)) {
+    finish(plate, frame, scene.light.darkness);
+    return;
+  }
+  const last = drawnLast[slot];
+  const panned =
+    last !== null && sameKey(last.key, key) && (last.ox !== frame.ox || last.oy !== frame.oy);
+  if (!panned) {
+    drawTerrain(frame, scene, layer);
+    drawnLast[slot] = { key, ox: frame.ox, oy: frame.oy };
+    return;
+  }
+  // A pan: a plate around the frame, drawn once, cropped from now on.
+  const width = frame.width + 2 * mx;
+  const height = frame.height + 2 * my;
+  const fresh: Plate =
+    plate?.width === width && plate.height === height
+      ? plate
+      : {
+          key,
+          ox: 0,
+          oy: 0,
+          width,
+          height,
+          rgb: new Float64Array(width * height * 3),
+          depth: new Int16Array(width * height),
+        };
+  fresh.key = key;
+  fresh.ox = frame.ox - mx;
+  fresh.oy = frame.oy - my;
+  fresh.depth.fill(SKY_DEPTH);
+  drawTerrain(
+    {
+      ...frame,
+      width,
+      height,
+      ox: fresh.ox,
+      oy: fresh.oy,
+      depth: fresh.depth,
+      vx: new Float64Array(width),
+      vy: new Float64Array(height),
+    },
+    scene,
+    layer,
+    fresh.rgb,
+  );
+  plates[slot] = fresh;
+  finish(fresh, frame, scene.light.darkness);
+}
+
 /** The buffers of the frame drawn last, reused while the size stays the same. */
 let depths: [Int16Array, Int16Array] | null = null;
 let spare: Uint8ClampedArray | null = null;
@@ -1039,20 +1219,20 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
   let layer = scene.coarse;
   let frame = frameOf(scene, map, depths[0], density);
   if (!(detail > 0) || scene.fine === null) {
-    drawTerrain(frame, scene, layer);
+    terrainOf(frame, scene, layer, 0);
     drawRivers(frame, scene, layer);
   } else if (detail >= DITHER_LEVELS) {
     layer = scene.fine;
-    drawTerrain(frame, scene, layer);
+    terrainOf(frame, scene, layer, 0);
     drawRivers(frame, scene, layer);
   } else {
     // Between the two layers: both are drawn, and blended. What stands on the
     // ground stands once, on the layer that shows the most.
-    drawTerrain(frame, scene, scene.coarse);
+    terrainOf(frame, scene, scene.coarse, 0);
     drawRivers(frame, scene, scene.coarse);
     if (spare?.length !== map.length) spare = new Uint8ClampedArray(map.length);
     const detailed = frameOf(scene, spare, depths[1], density);
-    drawTerrain(detailed, scene, scene.fine);
+    terrainOf(detailed, scene, scene.fine, 1);
     drawRivers(detailed, scene, scene.fine);
     const share = detail / DITHER_LEVELS;
     for (let i = 0; i < map.length; i++)

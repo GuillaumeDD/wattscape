@@ -264,6 +264,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-014 | Warm water shimmering on the sea off the coastal nuclear plants (PRD Q-16, Q-20)       | proposed |
 | G-015 | The main rivers of France on the map (Guillaume, 2026-11-13; B-023, D-039)             | done     |
 | G-016 | Sharp frame in budget: measure on a GPU, then fewer steps or coarser motion (D-060)    | proposed |
+| G-017 | Idle drift in budget: the vignette laid in CSS over the canvas (D-061)                 | proposed |
 
 ## 10. Open questions
 
@@ -311,3 +312,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-37 | Modern theme: keep the sharp frame, over the budget at rest?    | Keep: asked for (D-058); 55 ms/s for 30 with the plants moving; B-029 looks for less                 | Keep, optimise later (Guillaume, 2026-11-17, decision card; D-058)    |
 | Q-38 | Landmarks drawn without a source: keep the five shapes?         | Keep: details of silhouette (Pilat, Boyard, Nantes, Beaune, Besançon; D-059)                         | Keep all (Guillaume, 2026-11-18; D-059)                               |
 | Q-39 | Sharp frame still over budget after B-029: how to go on?        | Measure on a GPU first: the rest may be headless Chromium's; or accept, fewer steps, coarser         | Accept, close B-029 (Guillaume, 2026-11-18, decision card; D-060)     |
+| Q-40 | Idle drift over budget after its plate (B-028): how to go on?   | Accept: it adds ~10 ms/s to the plants' 43; a CSS vignette changes the picture                       | Accept, close B-028 (Guillaume, 2026-11-18, decision card; D-061)     |
