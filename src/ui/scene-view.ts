@@ -45,6 +45,7 @@ import {
   townLights,
   viewLight,
 } from "../scene/scene";
+import { type RegionalWeather, sceneWeather } from "../scene/weather";
 import {
   bufferSize,
   type BufferSize,
@@ -91,6 +92,11 @@ export interface SceneView {
    * dated after the clock's time (`?at=` in the past) does not.
    */
   setReadings(readings: RegionalReadings | null, sample?: boolean): void;
+  /**
+   * Each region's current weather (B-018). A reading dated after the clock's time is
+   * not shown; an `override` (`?weather=`) always is.
+   */
+  setWeather(byRegion: RegionalWeather, override?: boolean): void;
   /** Draws the scene with another theme (PRD G-011), from the next frame on. */
   setTheme(id: ThemeId): void;
 }
@@ -157,6 +163,8 @@ export function mountSceneView(
   let plants: readonly ScenePlant[] = scenePlants(PLANT_SITES, null, clock.now());
   let lights: TownLights = {};
   let plantsVersion = 0;
+  let weather: RegionalWeather = {};
+  let weatherVersion = 0;
   let image: ImageData | null = null;
   /** The boxes of `surface` the last step's motion was drawn in, if the theme says. */
   let moved: readonly Rect[] | null = null;
@@ -369,6 +377,7 @@ export function mountSceneView(
       plants,
       townLights: lights,
       landmarks: LANDMARKS,
+      weather,
     };
     // Redraw only when what is drawn changes: the drift moves the camera by a pixel
     // every second or two, and a still scene costs nothing.
@@ -389,6 +398,7 @@ export function mountSceneView(
       light.emissive,
       scene.focus,
       plantsVersion,
+      weatherVersion,
     ].join();
     // The plants' motion, by steps; at half speed with reduced motion.
     const step = Math.floor(now / MOTION_STEP_MS);
@@ -613,6 +623,11 @@ export function mountSceneView(
       plants = scenePlants(PLANT_SITES, readings, now);
       lights = townLights(readings, CONSUMPTION_RANGES, now);
       plantsVersion++;
+      wake();
+    },
+    setWeather(byRegion: RegionalWeather, override = false): void {
+      weather = override ? byRegion : sceneWeather(byRegion, clock.now());
+      weatherVersion++;
       wake();
     },
     setTheme(id: ThemeId): void {

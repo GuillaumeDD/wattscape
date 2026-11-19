@@ -1129,3 +1129,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   recommendation in a message is the one in the question's row (Q-34, D-056).
 - **Why:** each cost a redo, a follow-up item or a guessed answer in this step.
 - **Revisit if:** a rule turns out to cost more than the slip it prevents.
+
+## D-063 — The weather is taken at one point per region
+
+- **Context:** step 7 (weather and seasons, B-018, B-022) starts; the scene had no
+  weather yet, and only the debug page asked Open-Meteo, at the region's
+  prefecture, with none on the national view.
+- **Options (decision card, 2026-11-18, PRD Q-41):** one point per region, its
+  prefecture or the viewer's rounded position for the viewer's region, so that the
+  national view shows each region's own sky (recommended); a single point, the
+  area's, as the debug page does, and no weather on the national view; a grid of
+  about 100 km, so that clouds vary within a region, for some tens of points a call.
+- **Decision (Guillaume, 2026-11-18, decision card):** one point per region.
+- **Why:** the real weather everywhere the map shows, national view included, for
+  12 calls every 15 minutes (1 152 a day), well under a viewer's 10 000.
+- **Revisit if:** a region's single point draws a sky visibly wrong for most of it
+  (a large region with two climates), or a multi-point answer is recorded and makes
+  a grid cheap.

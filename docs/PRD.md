@@ -117,8 +117,10 @@ idea that the grid can be seen.
 
 ### 4.7 Weather
 
-- Live current weather from Open-Meteo (S-005) at the viewer's position (rounded) or
-  at the region's reference point: cloud cover, rain, snow, fog, thunderstorm, wind.
+- Live current weather from Open-Meteo (S-005), one reading per region: at the
+  viewer's position (rounded) for the viewer's region, at its prefecture for every
+  other, so the national view shows each region's own sky (Q-41, D-063): cloud
+  cover, rain, snow, fog, thunderstorm, wind.
 - The weather is drawn (clouds, rain, snow, fog banks), and explains the data: clouds
   over the solar fields, wind bending the trees when the turbines spin.
 
@@ -313,3 +315,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-38 | Landmarks drawn without a source: keep the five shapes?         | Keep: details of silhouette (Pilat, Boyard, Nantes, Beaune, Besançon; D-059)                         | Keep all (Guillaume, 2026-11-18; D-059)                               |
 | Q-39 | Sharp frame still over budget after B-029: how to go on?        | Measure on a GPU first: the rest may be headless Chromium's; or accept, fewer steps, coarser         | Accept, close B-029 (Guillaume, 2026-11-18, decision card; D-060)     |
 | Q-40 | Idle drift over budget after its plate (B-028): how to go on?   | Accept: it adds ~10 ms/s to the plants' 43; a CSS vignette changes the picture                       | Accept, close B-028 (Guillaume, 2026-11-18, decision card; D-061)     |
+| Q-41 | Where is the weather the map shows taken?                       | One point per region: its prefecture, or the viewer's rounded position; each region its own sky      | One per region (Guillaume, 2026-11-18, decision card; D-063)          |

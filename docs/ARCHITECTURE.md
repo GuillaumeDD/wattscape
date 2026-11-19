@@ -245,6 +245,27 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
   `WEATHER_STALE_AFTER_MS`, provisional); one more than 15 minutes ahead of the
   clock counts as unavailable. Requests share the éCO2mix client's rules
   (`src/data/fetch-json.ts`): 30 s timeout, size cap, abort.
+- **How a reading reaches the scene** (B-018): `src/ui/weather-feed.ts` asks for
+  the 12 regions' points (§ Privacy, D-063), one call each, every 15 minutes while
+  the tab is visible: 1 152 calls a day for a viewer watching all day, under the
+  quota of 10 000. One call a point, and not one call for all twelve, because the
+  answer to a multi-point query has not been recorded yet (the cloud's quota was
+  spent on 2026-11-18). A failed call keeps its region's last good reading; the
+  failed calls alone are tried again after 1 minute, then 2, 4, 8 and at most 15.
+  The answers that land within a second of each other reach the scene together
+  (one redraw), so a slow call, up to the 30 s timeout, holds back no other: in the
+  cloud session of 2026-11-18, the last of the 12 answers took over 4 s.
+  An answer that lands after the tab was hidden, or after its region's point
+  changed (the viewer located, or picked an area by hand), is dropped. The scene
+  (`Scene.weather`, `src/scene/weather.ts`) shows a fresh or stale reading, never
+  one dated more than 15 minutes after the clock (`?at=` in the past, the
+  time-lapse): the page note then says so. The note gives the oldest shown
+  reading's time, so it never makes the weather look fresher than it is.
+- **Weather override** (`?weather=clear|cloudy|fog|drizzle|rain|snow|storm`): the
+  same weather on every region, for demos and screenshots, and no call at all. Not
+  a reading: its values are typed by hand in `src/scene/weather.ts` (a WMO code of
+  the group, cloud cover 0 % clear and 100 % otherwise, a wind of 20 km/h from the
+  west), and the page note says that it is imposed, not live.
 - **Weather codes:** the API sends a subset of WMO code table 4677 (S-010). One
   invalid field, or a code outside this table, makes the whole reading
   "unavailable" (D-010).
@@ -269,9 +290,10 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
   weather query, **rounded to 0.1°** (about 10 km). It is never stored, logged,
   put in the URL or sent elsewhere. What is remembered in `localStorage` is the area
   code, the language and whether the panel is folded, nothing else.
-- Without a position, the weather will be taken (B-007) at the area's reference
-  point, its regional prefecture (`referencePoint`); the national view has none
-  (provisional).
+- The scene takes one weather reading per region (D-063): at the viewer's rounded
+  position for the region it lies in, at the regional prefecture
+  (`referencePoint`), rounded too, for every other region and for every region
+  once an area is picked by hand (`src/ui/weather-feed.ts`).
 - The position is rounded to 0.1° as soon as it arrives (`src/ui/area-picker.ts`);
   the raw value is never kept.
 
