@@ -314,6 +314,80 @@ describe("startWeatherFeed", () => {
     expect(urls.length).toBe(calls + 1);
   });
 
+  it("tries the viewer's point again a minute later when its call fails", async () => {
+    let failViewer = true;
+    const { fetchFn, urls } = fakeFetch((url) =>
+      failViewer && url.includes("latitude=49.7&")
+        ? new Response('{"error":true,"reason":"server"}', { status: 503 })
+        : ok(url),
+    );
+    const sent: RegionalWeather[] = [];
+    const feed = startWeatherFeed(clock, fetchFn, (w) => sent.push(w));
+    await vi.advanceTimersByTimeAsync(0);
+    feed.setViewer({ region: "28", position: pos(49.7, 0.2) });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(sent.at(-1)?.["28"]).toBeUndefined();
+    const calls = urls.length;
+    failViewer = false;
+    await vi.advanceTimersByTimeAsync(WEATHER_RETRY_MS);
+    // Normandie only, at the viewer's point; not the 15-minute refresh of all.
+    expect(urls.slice(calls)).toHaveLength(1);
+    expect(urls.at(-1)).toContain("latitude=49.7&longitude=0.2&");
+    expect(sent.at(-1)?.["28"]).toBeDefined();
+  });
+
+  it("asks the viewer's point as soon as the tab is back when it moved while hidden", async () => {
+    const { fetchFn, urls } = fakeFetch(ok);
+    const sent: RegionalWeather[] = [];
+    const feed = startWeatherFeed(clock, fetchFn, (w) => sent.push(w));
+    await vi.advanceTimersByTimeAsync(0);
+    doc.hidden = true;
+    for (const l of listeners) l();
+    feed.setViewer({ region: "28", position: pos(49.7, 0.2) });
+    await vi.advanceTimersByTimeAsync(0);
+    const calls = urls.length;
+    expect(calls).toBe(REGION_CODES.length);
+    doc.hidden = false;
+    for (const l of listeners) l();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(urls.slice(calls).some((u) => u.includes("latitude=49.7&longitude=0.2&"))).toBe(true);
+    await vi.advanceTimersByTimeAsync(SEND_AFTER_MS);
+    expect(sent.at(-1)?.["28"]).toBeDefined();
+  });
+
+  it("keeps the retry of a new load when an older one, hidden and shown again, ends late", async () => {
+    const lille = weatherPoint("32", null)?.latitude.toFixed(1) ?? "";
+    let held: (() => void) | null = null;
+    let round = 0;
+    const { fetchFn, urls } = fakeFetch((url) => {
+      if (new URL(url).searchParams.get("latitude") !== lille) return ok(url);
+      round++;
+      // First call: held until after the tab came back; second: fails.
+      if (round === 1)
+        return new Promise<Response>((resolve) => {
+          held = () => {
+            resolve(ok(url));
+          };
+        });
+      if (round === 2) return new Response('{"error":true,"reason":"server"}', { status: 503 });
+      return ok(url);
+    });
+    startWeatherFeed(clock, fetchFn, () => undefined);
+    await vi.advanceTimersByTimeAsync(0);
+    doc.hidden = true;
+    for (const l of listeners) l();
+    doc.hidden = false;
+    for (const l of listeners) l();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(round).toBe(2);
+    (held as unknown as () => void)();
+    await vi.advanceTimersByTimeAsync(0);
+    const calls = urls.length;
+    await vi.advanceTimersByTimeAsync(WEATHER_RETRY_MS);
+    expect(urls.slice(calls)).toHaveLength(1);
+    expect(round).toBe(3);
+  });
+
   it("shows the answers in hand within a second, without waiting for a slow call", async () => {
     const lille = weatherPoint("32", null)?.latitude.toFixed(1) ?? "";
     const { fetchFn } = fakeFetch((url) =>
