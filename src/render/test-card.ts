@@ -9,7 +9,7 @@ import { COLOUR_NAMES, type ColourName, PALETTE } from "./palette.ts";
 import { createSurface, setPixel, type Surface } from "./surface.ts";
 import { lightAt, skyColour, tinted } from "../sky/light.ts";
 
-export const TEST_CARD_WIDTH = 96;
+export const TEST_CARD_WIDTH = 108;
 export const TEST_CARD_HEIGHT = 72;
 
 /** Solar elevations of the tint strips: day, golden hour, sunset, blue hour, night. */
@@ -18,7 +18,7 @@ export const TEST_CARD_ELEVATIONS: readonly number[] = [30, 3, -1, -7.5, -20];
 export function drawTestCard(): Surface {
   const s = createSurface(TEST_CARD_WIDTH, TEST_CARD_HEIGHT);
   fillDithered(s, 0, 0, TEST_CARD_WIDTH, TEST_CARD_HEIGHT, "skyNight", "skyNight", 0);
-  // Row 1: the 24 colours, 4 × 8 each.
+  // Row 1: the 27 colours, 4 × 8 each.
   COLOUR_NAMES.forEach((name, i) => {
     fillDithered(s, i * 4, 0, 4, 8, name, name, 0);
   });

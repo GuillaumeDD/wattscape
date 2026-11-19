@@ -60,6 +60,8 @@ import {
 const FRAME_MS = 1000 / 30;
 /** A still scene wakes this often, to follow the sun. */
 const LIGHT_EVERY_MS = 60_000;
+/** The clouds move by steps of this long (B-018). */
+const CLOUD_STEP_MS = 60_000;
 /** Below this scale the 1 km relief is not needed yet; from it, it is loaded. */
 const LOAD_FINE_FROM_SCALE = 0.4;
 /** The lesser rivers when their chunk could not be loaded: none. */
@@ -165,6 +167,8 @@ export function mountSceneView(
   let plantsVersion = 0;
   let weather: RegionalWeather = {};
   let weatherVersion = 0;
+  /** Whether any region has weather to show: the clouds then drift. */
+  let weatherShown = false;
   let image: ImageData | null = null;
   /** The boxes of `surface` the last step's motion was drawn in, if the theme says. */
   let moved: readonly Rect[] | null = null;
@@ -378,6 +382,8 @@ export function mountSceneView(
       townLights: lights,
       landmarks: LANDMARKS,
       weather,
+      // By steps, so that a redraw for another reason does not nudge the clouds.
+      timeMs: Math.floor(clock.now() / CLOUD_STEP_MS) * CLOUD_STEP_MS,
     };
     // Redraw only when what is drawn changes: the drift moves the camera by a pixel
     // every second or two, and a still scene costs nothing.
@@ -399,6 +405,8 @@ export function mountSceneView(
       scene.focus,
       plantsVersion,
       weatherVersion,
+      // The clouds drift with the wind, by steps of a minute (the light wakes the loop as often).
+      weatherShown ? scene.timeMs : 0,
     ].join();
     // The plants' motion, by steps; at half speed with reduced motion.
     const step = Math.floor(now / MOTION_STEP_MS);
@@ -627,6 +635,7 @@ export function mountSceneView(
     },
     setWeather(byRegion: RegionalWeather, override = false): void {
       weather = override ? byRegion : sceneWeather(byRegion, clock.now());
+      weatherShown = Object.keys(weather).length > 0;
       weatherVersion++;
       wake();
     },

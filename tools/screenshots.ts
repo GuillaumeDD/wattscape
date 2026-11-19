@@ -14,7 +14,8 @@
  * its own landmarks by lots (`step-8-modern-landmarks.png`, the second lot in
  * `step-9-modern-landmarks.png`, the third in `step-10-modern-landmarks.png`, the
  * fourth in `step-11-modern-landmarks.png`), at the sharp density a full HD screen gets (D-058,
- * `step-8-modern-sharp-*.png`).
+ * `step-8-modern-sharp-*.png`), and the weather in both themes (B-018,
+ * `step-12-weather-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -27,7 +28,14 @@ import { areaBox, type Camera, fitBox, flightAt } from "../src/scene/camera.ts";
 import { LANDMARKS } from "../src/map/landmarks.ts";
 import { detailForScale, bakedTowns, type Scene } from "../src/scene/scene.ts";
 import { lightAt } from "../src/sky/light.ts";
-import { MODERN_DENSITY, recordedTownLights, referenceScene } from "../e2e/reference-frames.ts";
+import {
+  MIXED_WEATHER,
+  MODERN_DENSITY,
+  recordedTownLights,
+  referenceScene,
+  WEATHER_TIME_MS,
+} from "../e2e/reference-frames.ts";
+import { overrideWeather, type RegionalWeather } from "../src/scene/weather.ts";
 import { writePng } from "./png.ts";
 
 const OUT = process.argv[2] ?? "docs/screenshots";
@@ -57,6 +65,7 @@ function draw(camera: Camera, focus: CellRegion | null, elevation: number): Surf
     townLights: recordedTownLights(elevation < 0),
     landmarks: LANDMARKS,
     weather: {},
+    timeMs: 0,
   };
   drawPixelScene(scene, surface);
   return surface;
@@ -391,3 +400,30 @@ for (const [name, focus] of [
     writePng(file, surface);
     console.log(`${file}: ${hashSurface(surface)}`);
   }
+
+// The weather (B-018, D-064), as `?weather=` imposes it, at a fixed time: France
+// under a different sky in each region, then Normandie and Auvergne-Rhône-Alpes
+// under rain by day and a storm at night, in both themes, at 1.3 s of animation.
+for (const theme of ["pixel", "modern"] as const) {
+  const density = theme === "pixel" ? 1 : MODERN_DENSITY;
+  const shots: [string, CellRegion | null, number, RegionalWeather][] = [
+    ["france-mixed-day", null, 35, MIXED_WEATHER],
+    ["normandie-rain-day", "28", 35, overrideWeather("rain", WEATHER_TIME_MS)],
+    ["normandie-storm-night", "28", -20, overrideWeather("storm", WEATHER_TIME_MS)],
+    ["auvergne-rhone-alpes-snow-day", "84", 35, overrideWeather("snow", WEATHER_TIME_MS)],
+    ["auvergne-rhone-alpes-cloudy-night", "84", -20, overrideWeather("cloudy", WEATHER_TIME_MS)],
+  ];
+  for (const [name, focus, elevation, weather] of shots) {
+    const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+    const surface = createSurface(WIDTH * density, HEIGHT * density);
+    const scene = {
+      ...referenceScene(focus, camera, elevation),
+      weather,
+      timeMs: WEATHER_TIME_MS,
+    };
+    (theme === "pixel" ? drawPixelScene : drawModernScene)(scene, surface).animate(surface, 1.3);
+    const file = `${OUT}/step-12-weather-${theme}-${name}.png`;
+    writePng(file, surface, theme === "pixel" ? 2 : 1);
+    console.log(`${file}: ${hashSurface(surface)}`);
+  }
+}

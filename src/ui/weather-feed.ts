@@ -154,8 +154,11 @@ export function startWeatherFeed(
     send();
   };
 
+  /** The latest load: one superseded (hidden and shown again meanwhile) keeps no books. */
+  let generation = 0;
   async function load(regions: readonly RegionCode[]): Promise<void> {
     if (hidden()) return;
+    const run = ++generation;
     const results = await Promise.all(
       regions.map(async (r) => {
         const ok = await loadOne(r);
@@ -164,7 +167,7 @@ export function startWeatherFeed(
       }),
     );
     // Hidden meanwhile: the calls were aborted, and the tab's return calls again.
-    if (hidden()) return;
+    if (hidden() || run !== generation) return;
     failed = new Set(results.filter(([, ok]) => !ok).map(([r]) => r));
     flush();
     if (failed.size === 0) {
@@ -217,9 +220,20 @@ export function startWeatherFeed(
         readings.delete(region);
         inFlight.get(region)?.abort();
         inFlight.delete(region);
-        if (!hidden())
-          void loadOne(region).then(() => {
+        if (hidden()) {
+          // Asked for as soon as the tab is back in view.
+          failed.add(region);
+          nextAt = animationClock.now();
+        } else
+          void loadOne(region).then((done) => {
             send();
+            if (done || hidden()) return;
+            // Failed: tried again at the next retry, not only at the next refresh.
+            failed.add(region);
+            if (nextAt - animationClock.now() > retryMs) {
+              schedule(retryMs);
+              retryMs = Math.min(WEATHER_REFRESH_MS, retryMs * 2);
+            }
           });
       }
       if (sentState !== null) send();

@@ -53,6 +53,7 @@ function sceneOf(overrides: Partial<Scene> & { camera: Camera }): Scene {
     townLights: Object.fromEntries(REGION_CODES.map((r) => [r, 0.5])),
     landmarks: [],
     weather: {},
+    timeMs: 0,
     ...overrides,
   };
 }

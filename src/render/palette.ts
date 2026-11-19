@@ -1,6 +1,6 @@
 /**
  * The fixed palette of the scene (ARCHITECTURE § Art direction, validated with the
- * mockups of B-010, D-019): 24 colours, and for each the palette colour it
+ * mockups of B-010, D-019), and the clouds' three greys (B-018): 27 colours, and for each the palette colour it
  * becomes one step darker, so that light changes stay in palette. Pure data.
  */
 
@@ -37,6 +37,10 @@ export const COLOUR_NAMES = [
   "bioenergy",
   // Lit windows, beacons: drawn at night, untinted.
   "lamp",
+  // Clouds (B-018): a fair cloud is `snow`; rain clouds and storm clouds are greys.
+  "cloud",
+  "cloudDark",
+  "cloudStorm",
 ] as const;
 
 export type ColourName = (typeof COLOUR_NAMES)[number];
@@ -66,6 +70,9 @@ export const PALETTE: Readonly<Record<ColourName, Rgb>> = {
   thermal: [0x8c, 0x76, 0x66],
   bioenergy: [0x6f, 0xb0, 0x4a],
   lamp: [0xff, 0xdc, 0x73],
+  cloud: [0xc9, 0xcd, 0xd3],
+  cloudDark: [0x75, 0x7b, 0x88],
+  cloudStorm: [0x4e, 0x52, 0x60],
 };
 
 /**
@@ -99,6 +106,9 @@ export const DARKER: Readonly<Record<ColourName, ColourName>> = {
   thermal: "soil",
   bioenergy: "grass",
   lamp: "field",
+  cloud: "cloudDark",
+  cloudDark: "cloudStorm",
+  cloudStorm: "skyBlueHour",
 };
 
 /** The colour `steps` steps darker (0 is the colour itself). */

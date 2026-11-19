@@ -121,8 +121,10 @@ idea that the grid can be seen.
   viewer's position (rounded) for the viewer's region, at its prefecture for every
   other, so the national view shows each region's own sky (Q-41, D-063): cloud
   cover, rain, snow, fog, thunderstorm, wind.
-- The weather is drawn (clouds, rain, snow, fog banks), and explains the data: clouds
-  over the solar fields, wind bending the trees when the turbines spin.
+- The weather is drawn (Q-42, D-064): clouds with their shadows, drifting with the
+  wind, rain, snow, fog banks and lightning, in both themes; it explains the data:
+  clouds over the solar fields. Wind bending the trees when the turbines spin
+  waits in Growth (G-018).
 
 ### 4.7b Seasons
 
@@ -267,6 +269,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-015 | The main rivers of France on the map (Guillaume, 2026-11-13; B-023, D-039)             | done     |
 | G-016 | Sharp frame in budget: measure on a GPU, then fewer steps or coarser motion (D-060)    | proposed |
 | G-017 | Idle drift in budget: the vignette laid in CSS over the canvas (D-061)                 | proposed |
+| G-018 | Wind bending the trees when the turbines spin (§ 4.7; B-018 drifts only the clouds)    | proposed |
 
 ## 10. Open questions
 
@@ -316,3 +319,5 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-39 | Sharp frame still over budget after B-029: how to go on?        | Measure on a GPU first: the rest may be headless Chromium's; or accept, fewer steps, coarser         | Accept, close B-029 (Guillaume, 2026-11-18, decision card; D-060)     |
 | Q-40 | Idle drift over budget after its plate (B-028): how to go on?   | Accept: it adds ~10 ms/s to the plants' 43; a CSS vignette changes the picture                       | Accept, close B-028 (Guillaume, 2026-11-18, decision card; D-061)     |
 | Q-41 | Where is the weather the map shows taken?                       | One point per region: its prefecture, or the viewer's rounded position; each region its own sky      | One per region (Guillaume, 2026-11-18, decision card; D-063)          |
+| Q-42 | Weather drawing: clouds with shadows (A), or shadows only (B)?  | A: reads at once as a sky, for about B's cost; the plants stay visible between the clouds            | A (Guillaume, 2026-11-19, decision card; D-064)                       |
+| Q-43 | Clouds: translucent, and how much?                              | Light: 75 % opaque (modern), a quarter dithered away (pixel art); the map and lit towns show through | Light (Guillaume, 2026-11-19, decision card; D-065)                   |

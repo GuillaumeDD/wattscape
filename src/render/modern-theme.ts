@@ -36,6 +36,9 @@ import {
 } from "./pixel-theme.ts";
 import { type Surface } from "./surface.ts";
 import type { Drawn, Mark, Rect, Theme } from "./theme.ts";
+import { anyPrecipitation, viewBox, weatherGrid } from "../scene/clouds.ts";
+import { animateModernWeather, drawModernWeather } from "./modern-weather.ts";
+import { cloudMask } from "./weather-art.ts";
 
 /**
  * The most output pixels a frame is drawn at, beyond a density of 2: a frame costs
@@ -1199,6 +1202,32 @@ let ground: Uint8ClampedArray | null = null;
  * spread smoothly over `out`; what stands on it is then drawn at `out`'s own pixels
  * (D-058).
  */
+/**
+ * How lit each pixel of `out` (`sharp` of them per scene pixel) is by the towns'
+ * lamps, 0 to 1, from the ground each map pixel shows (its depth): the weather lets
+ * them through, so a figure is never hidden by a cloud. Null when no lamp is lit.
+ */
+function lampsOf(
+  frame: Frame,
+  scene: Scene,
+  layer: TerrainLayer,
+  sharp: number,
+): ((x: number, y: number) => number) | null {
+  if (!scene.light.emissive) return null;
+  const texture = textureOf(layer, groundOf(layer, scene.towns), scene);
+  const { depth, width, density, scale, ox, oy } = frame;
+  const { km, columns, rows } = layer;
+  return (x, y) => {
+    const mx = Math.floor((x * density) / sharp);
+    const row = depth[Math.floor((y * density) / sharp) * width + mx] ?? SKY_DEPTH;
+    if (row === SKY_DEPTH) return 0;
+    const c = Math.floor((mx + 0.5 + ox) / scale / km);
+    const r = Math.floor((2 * (row + 0.5 + oy)) / scale / km);
+    if (c < 0 || r < 0 || c >= columns || r >= rows) return 0;
+    return Math.min(1, (texture[(r * columns + c) * 4 + 3] ?? 0) / 255);
+  };
+}
+
 export function drawModernScene(scene: Scene, out: Surface): Drawn {
   const sharp = scene.width > 0 ? out.width / scene.width : 1;
   if (
@@ -1244,6 +1273,21 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
   }
   if (map !== out.data) spread(map, scene.width * density, scene.height * density, out);
 
+  // The weather (B-018), at `out`'s own pixels, under what stands on the map.
+  const grid = weatherGrid(scene.coarse, scene.weather);
+  const weather =
+    grid === null
+      ? null
+      : {
+          grid,
+          mask: cloudMask(grid, scene.camera, scene.width, scene.height, sharp, scene.timeMs),
+        };
+  if (weather !== null)
+    drawModernWeather(scene, weather.grid, weather.mask, out, lampsOf(frame, scene, layer, sharp));
+  const falling =
+    weather !== null &&
+    anyPrecipitation(weather.grid, viewBox(scene.camera, scene.width, scene.height));
+
   const size: SpriteSize = scene.camera.scale >= SPRITES_FROM_SCALE ? "full" : "marker";
   const pen = toolsOf(frame, scene.light.emissive, out);
   // Back to front: what stands further south is drawn over what stands behind it.
@@ -1285,7 +1329,7 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
     (p) => p.plant.activity !== null && p.plant.activity > 0 && hasMotion(p.plant.site, size),
   );
   return {
-    moving: moving.length > 0,
+    moving: moving.length > 0 || falling,
     marks,
     animate(target: Surface, seconds: number): readonly Rect[] {
       if (target.width !== out.width || target.height !== out.height) return [];
@@ -1294,7 +1338,10 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
         motion.stand(p);
         drawModernMotion(motion, p.plant.site, p.plant.activity, p.x, p.y, size, seconds);
       }
-      return motion.touched();
+      if (!falling) return motion.touched();
+      // Rain falls over the whole frame: all of it is drawn anew.
+      animateModernWeather(scene, weather.grid, weather.mask, target, seconds);
+      return [{ left: 0, top: 0, right: target.width, bottom: target.height }];
     },
   };
 }

@@ -506,6 +506,9 @@ checked against real screens.
 | Bioenergy plants                    | `tch_bioenergies` | a small smoke, 2 + 4·a px high; its window lit at night when a ≥ 0.5             |
 | Town windows lit; power lines later | `consommation`    | l = (c − p5) / (p95 − p5), clamped 0–1; lamps on 4 + 12·l of 16 town pixels      |
 | Legend: stacked bar and figures     | MW per source     | shares of total production; import if `ech_physiques` > 0, export if < 0 (B-019) |
+| Clouds and their shadows            | `cloud_cover`     | a cloud per 38 km lattice point with chance min(0.75, 0.95·cover); dim if > 70 % |
+| Rain, drizzle, snow, fog, lightning | `weather_code`    | its group (§ Open-Meteo): streaks, flakes, banks on low ground, a bolt every 6 s |
+| Clouds drifting                     | `wind_*_10m`      | mean wind of the readings shown, in 5 km/h steps; the clouds move with it        |
 
 Both themes draw these rows from the same figures with the same formulas; the
 modern one (`src/render/art/modern-plants.ts`) draws a puff as a soft spot trailing
@@ -549,9 +552,54 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
   at night). A fractional step is drawn by dithering between the two whole steps,
   so the land stays in palette. A `NaN` elevation, or a `NaN` darkness, reads as
   night.
-- **Weather layers:** clouds (count and darkness from `cloud_cover`, drifting with
-  the wind), rain and snow particles, fog banks (dithered), lightning flashes for
-  storms. Particles are seeded (PRNG) so frames stay reproducible.
+- **Weather layers** (B-018, direction A, D-064): clouds float over the map with
+  their shadows on the ground; rain, snow, fog banks and lightning over them. The
+  same shapes in both themes; pixel art draws them in palette colours and dithers,
+  the modern theme blends them smooth.
+  - **Weather grid** (`weatherGrid`, `src/scene/clouds.ts`): each 4 km cell takes
+    the reading of its region; a sea cell, the nearest region's within 10 cells
+    (40 km) of the coast; abroad, the open sea and Corsica (no reading of its own:
+    éCO2mix and the weather points cover the 12 mainland regions) take none. Cover
+    and fog are blurred over 4 cells, so a region's sky fades into the next instead
+    of ending at its border.
+  - **Clouds** (`cloudsOver`): puffs on a lattice of 38 km (wider when zoomed out,
+    so they stay a few pixels across: × the level of 1, 1.5, 2, 3, 4, 6 nearest
+    0.9 / scale, 3 on the national view; a few levels only, so the clouds stay put
+    on the ground while the camera zooms, and change at a level's edge), each lattice point
+    forming a cloud with chance min(0.75, 0.95 · cover), a second one past 50 % of
+    cover; never all the sky (`MAX_CHANCE` 0.75), so the map shows through even
+    overcast. A cloud is 4 to 6 round lobes, their size by an integer hash and the
+    cover. The lattice drifts with the **mean wind** of the readings shown (each
+    reading blowing to the nearest of 8 compass points, the mean rounded to 5
+    km/h), so every cloud moves together, a cell a minute at most (the scene's
+    time is taken by the minute, `CLOUD_STEP_MS`). The cloud's look by its group:
+    white when fair, grey for rain, drizzle and snow, dark for a storm. A cloud
+    lets the map show through (Q-43, D-065): 75 % opaque at its heart in the
+    modern theme; in pixel art, a quarter of its body's pixels left out on a
+    pattern anchored to the ground, its rims whole.
+  - **Shadow:** each cloud's shape, cast 3 to 10 pixels to the south-east (with the
+    light from the north-west, § Art direction), darker by one palette step (pixel
+    art) or a dark blend (modern). An overcast sky (cover over 70 %) dims the land a
+    little more, a storm twice as much.
+  - **Fog** (`fogAt`): only when a region's reading is `fog`, only on land, and more
+    on low ground (the 4 km relief's class), in banks about 40 km by 16; none on
+    the mountains nor at sea.
+  - **Rain, drizzle, snow:** short slanted streaks and slow flakes, by an integer
+    hash of their lane and row, between the clouds only (under one, the rain is
+    hidden); denser in a storm than in rain, sparser in drizzle; a streak stops at
+    the border of a region without rain.
+  - **Lightning:** in a storm, a bolt every 6 s for 0.3 s, from the middle of the
+    lowest row of one of the storm clouds on the view down to the ground.
+  - Town lamps, plants and landmarks are never hidden by the weather, so the
+    figures they show stay on screen: the lamps shine through the clouds, the
+    shadows and the fog (in the modern theme, as much as they glow), and the plants
+    and landmarks stand over them, as they were drawn without it.
+  - A frame animates for the weather only when something falls on its view.
+  - A region without a reading (not loaded, unavailable, ahead of the clock) draws
+    no weather at all, never a guessed sky; the page note says why (§ Open-Meteo).
+  - **Determinism:** where a cloud, a drop or a fog bank stands is decided by
+    integer hashes and + − × / only, the wind's drift included (the 8 compass
+    points' steps are exact, no sine), so Node and Chromium draw the same clouds.
 - **Seasons (provisional, D-008):** a season position from the day of the year (an
   angle over the year, so that transitions are continuous), mapped to four keyframes
   centred on mid-January, mid-April, mid-July and mid-October. Each keyframe is a
@@ -588,8 +636,8 @@ validates them on the deployed build.
   1 km layer from 0.7 (every region, as the app frames it on a landscape screen), and
   in between a crossfade by ordered dithering (`detail`, 0–16), which also eases in
   over half a second when the 1 km relief arrives while the camera is already close.
-- **Palette** (`src/render/palette.ts`, validated, D-019): 24 fixed colours:
-  muted land, sea blues, a sky ramp, a lamp yellow, and **one signature colour per
+- **Palette** (`src/render/palette.ts`, validated, D-019): 27 fixed colours:
+  muted land, sea blues, a sky ramp, a lamp yellow, three cloud greys (B-018), and **one signature colour per
   source**, also used in the legend. Each colour names the palette colour it
   becomes one step darker (`DARKER`): land darkens towards the sea's blues, as under
   moonlight, and never into a source's colour, so that colour keeps its meaning at
@@ -602,6 +650,7 @@ validates them on the deployed build.
   | Land    | forest `2f4a35`, grass `557545`, meadow `86985c`, field `b8a263`, sand `dcca9c`, soil `6e523a`, rock `8b8680`, snow `eef0ee`, roof `a44f3d` |
   | Sky     | skyNight `0e1122`, skyBlueHour `333466`, skyGolden `e39a6a`, skyDay `9cc6e2`                                                                |
   | Emitted | lamp `ffdc73`                                                                                                                               |
+  | Clouds  | cloud `c9cdd3`, cloudDark `757b88`, cloudStorm `4e5260`                                                                                     |
 
   | Source    | Signature colour    | Why                           |
   | --------- | ------------------- | ----------------------------- |
