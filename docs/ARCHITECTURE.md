@@ -573,7 +573,10 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
     reading blowing to the nearest of 8 compass points, the mean rounded to 5
     km/h), so every cloud moves together, a cell a minute at most (the scene's
     time is taken by the minute, `CLOUD_STEP_MS`). The cloud's look by its group:
-    white when fair, grey for rain, drizzle and snow, dark for a storm.
+    white when fair, grey for rain, drizzle and snow, dark for a storm. A cloud
+    lets the map show through (Q-43, D-065): 75 % opaque at its heart in the
+    modern theme; in pixel art, a quarter of its body's pixels left out on a
+    pattern anchored to the ground, its rims whole.
   - **Shadow:** each cloud's shape, cast 3 to 10 pixels to the south-east (with the
     light from the north-west, § Art direction), darker by one palette step (pixel
     art) or a dark blend (modern). An overcast sky (cover over 70 %) dims the land a

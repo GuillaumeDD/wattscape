@@ -633,6 +633,9 @@ function cloudColours(group: WeatherGroup): {
   return { body: "snow", lit: "snow", shade: "cloud" };
 }
 
+/** Sixteenths of a cloud's body that let the map through (Q-43, D-065). */
+const CLOUD_SEE_THROUGH = 4;
+
 /**
  * The weather over a drawn frame (B-018, D-064), before what stands on the map is
  * drawn again on top: the clouds' shadows one palette step darker, an overcast or
@@ -681,7 +684,12 @@ function drawPixelWeather(frame: Frame, scene: Scene, grid: WeatherGrid, mask: C
       const cloud = index < 0 ? undefined : mask.clouds[index];
       // Nor does a cloud hide it.
       if (cloud === undefined || words[y * width + x] === PACKED.lamp) continue;
-      pen.put(x, y, cloudColours(cloud.group)[cloudPart(mask, x, y)]);
+      const part = cloudPart(mask, x, y);
+      // A quarter of a cloud's body lets the map through, on a pattern anchored to the
+      // ground; its rims stay whole, so its shape still reads.
+      if (part === "body" && (BAYER_4[(y + oy) & 3]?.[(x + ox) & 3] ?? 0) < CLOUD_SEE_THROUGH)
+        continue;
+      pen.put(x, y, cloudColours(cloud.group)[part]);
     }
 }
 

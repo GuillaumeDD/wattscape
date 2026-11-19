@@ -30,6 +30,8 @@ const CLOUDS: Readonly<Record<"fair" | "rain" | "storm", readonly [Rgb, Rgb, Rgb
   ],
 };
 const SHADOW: Rgb = [22, 30, 46];
+/** How opaque a cloud is at its heart: the map shows through (Q-43, D-065). */
+const CLOUD_OPACITY = 0.75;
 const FOG_DAY: Rgb = [232, 234, 232];
 const FOG_NIGHT: Rgb = [72, 80, 98];
 const RAIN_DAY: Rgb = [215, 228, 242];
@@ -122,7 +124,7 @@ export function drawModernWeather(
       const shown = mixRgb(colour, [colour[0] * 0.26, colour[1] * 0.3, colour[2] * 0.44], night);
       const edge = Math.min(1, (mask.depth[i] ?? 0) * 6);
       const through = lamps === null ? 1 : 1 - lamps(x, y);
-      blend(data, i, shown, 0.92 * edge * edge * (3 - 2 * edge) * through);
+      blend(data, i, shown, CLOUD_OPACITY * edge * edge * (3 - 2 * edge) * through);
     }
 }
 

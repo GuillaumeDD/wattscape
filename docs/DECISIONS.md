@@ -1167,3 +1167,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   (ARCHITECTURE § Sky, light and weather).
 - **Revisit if:** the clouds hide what the scene is for (the plants, the towns at
   night) on real screens, or a region's sky reads wrong against its reading.
+
+## D-065 — The clouds let the map show through
+
+- **Context:** on the first drawing of the weather (PR #53), Guillaume asked whether
+  the clouds should be a little translucent. A sheet compared the opaque clouds
+  with two levels, in both themes, by day and at night
+  (`/mnt/project-files/weather-mockups/v2-translucent/`, the project's files).
+- **Options (decision card, 2026-11-19, PRD Q-43):** light, the modern theme's
+  clouds 75 % opaque at their heart and a quarter of a pixel-art cloud's body
+  dithered away (recommended); marked, 60 % and half dithered away (the pixel art
+  then reads as a net); the modern theme alone; or opaque everywhere.
+- **Decision (Guillaume, 2026-11-19, decision card):** light: 75 % and a quarter
+  dithered.
+- **Why:** the map and the lit towns read through the clouds, which serves what
+  the scene is for, and the pixel art's dither stays a texture, not a net.
+- **Revisit if:** on real screens the clouds no longer read as clouds, or the
+  dither shimmers while the clouds drift.
