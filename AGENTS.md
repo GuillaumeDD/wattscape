@@ -141,10 +141,16 @@ Format:
 
 ### Git
 
-- One working branch at a time (D-035): the next PR starts once the previous one is
-  merged.
-- Never rewrite published history (no force-push, no amend of a pushed commit). When
-  the branch's PR has merged, bring the branch up to date by merging `main` into it.
+- At most three branches open at once, ideally two (D-066, revising D-035): one
+  branch per thread, one subject per branch, on distinct parts of the code. PRs that
+  depend on each other stack, and count as one branch.
+- Shared docs (`docs/DECISIONS.md`, `AGENTS.md`) change only in a docs PR of their
+  own, so two branches never edit them at once.
+- `main` stays green: before a merge, bring the branch up to date with `main` by
+  merging `main` into it, and let CI pass on the result.
+- Never rewrite published history (no force-push, no amend of a pushed commit, so no
+  rebase of a pushed branch). When the branch's PR has merged, bring the branch up
+  to date by merging `main` into it.
 - Push every local commit before ending a session: a commit that lives only in the
   container is lost with it.
 

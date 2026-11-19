@@ -1184,3 +1184,26 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   the scene is for, and the pixel art's dither stays a texture, not a net.
 - **Revisit if:** on real screens the clouds no longer read as clouds, or the
   dither shimmers while the clouds drift.
+
+## D-066 — Up to three branches at once (revises D-035)
+
+- **Context:** with one working branch (D-035), a thread waited for each merge
+  before it could push the next PR, and two subjects could not move forward side by
+  side (step 7: the weather's drawing waited for #52's merge).
+- **Options:** keep one branch; or several branches at once, under rules that keep
+  conflicts rare.
+- **Decision (Guillaume, 2026-11-19, « OK go », relayed in the project chat):**
+  at most three branches open at once, ideally two. One branch is one thread and
+  one subject, on distinct parts of the code; PRs that depend on each other stack
+  and count as one. The shared docs (`docs/DECISIONS.md`, `AGENTS.md`) change only
+  in a docs PR of their own. `main` stays green: the branch is brought up to date
+  with `main` before its merge.
+- **How the branch is brought up to date:** by merging `main` into it. The rule as
+  asked said « rebase sur main avant merge », but a rebase rewrites the branch's
+  pushed commits and needs a force-push, which AGENTS.md § Git forbids; a merge
+  gives the same tested result without rewriting history. **To confirm** with
+  Guillaume.
+- **Why:** threads no longer stall on a merge; distinct code areas and docs PRs of
+  their own keep the conflicts rare.
+- **Revisit if:** two branches conflict more than once in a step, or three open
+  branches turn out to be too many to review.
