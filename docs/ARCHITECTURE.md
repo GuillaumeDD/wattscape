@@ -600,15 +600,32 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
   - **Determinism:** where a cloud, a drop or a fog bank stands is decided by
     integer hashes and + − × / only, the wind's drift included (the 8 compass
     points' steps are exact, no sine), so Node and Chromium draw the same clouds.
-- **Seasons (provisional, D-008):** a season position from the day of the year (an
-  angle over the year, so that transitions are continuous), mapped to four keyframes
-  centred on mid-January, mid-April, mid-July and mid-October. Each keyframe is a
-  **land palette ramp** (grass, leaves, fields, soil) and a set of seasonal props
-  (blossom, ripe crops, fallen leaves, bare branches); between two keyframes, cells
-  switch from one to the next by a seeded per-cell threshold, so the change spreads
-  across the map like a real season instead of a global fade. Snow cover comes from
-  Open-Meteo's `snow_depth` (metres, checked in B-006), with altitude: the
-  Alps whiten before the plains.
+- **Seasons** (B-022, D-008; pixel art's direction B, Q-44): `src/scene/season.ts`.
+  - **Keyframes:** each season at its fullest on the 15th of January, April, July
+    and October (UTC date of the clock). Between two keyframes, the land turns
+    over 42 days centred on their middle (1 March, 30 May, 30 August, 30 November),
+    a share from 0 to 1 kept to steps of 1/32, so it is redrawn about once a day
+    at most. In a leap year the keyframes from March on fall a day earlier.
+  - **Patches:** a point of the map turns once the share passes its own threshold,
+    a smooth noise over about 60 km flattened by its own quantiles (`turnAt`): the
+    change spreads across the map by patches at an even pace, never on one day for
+    all. Pixel art picks one season per cell; the
+    modern theme blends the two across a soft edge (`turnedAt`).
+  - **Pixel art:** the three green bands below the rock (below 300 m, 300 to
+    800 m, 800 to 1 300 m) take the season's colours: dull, grass, forest in
+    winter; fresh, meadow, grass in spring; meadow, grass, forest in summer; the
+    same in autumn. And each season scatters its marks, one ground pixel in a few
+    by a hash anchored to the ground (`SEASON_DOTS`): frost in winter, blossom in
+    spring, ripe crops in summer, ploughed soil and gold and rust leaves in autumn;
+    only in France or the region in focus, never on the veiled land around.
+  - **Modern theme:** one tint ramp by altitude per season (`MODERN_SEASON_TINTS`):
+    grey-green in winter, fresh in spring, the summer's as before, russet in
+    autumn; the rock and the snow above 1 300 m alike in all.
+  - **Provisional:** the dates, the colours and the marks' density, to check on the
+    deployed build. Vineyards, crops and lavender with their own calendar, and
+    snow on the ground from Open-Meteo's `snow_depth`, are still to come.
+  - **Determinism:** where a patch turns and where a mark falls is decided by
+    integer hashes and + − × / only; the date by `Date.UTC`, which is exact.
 
 ## Art direction
 
@@ -636,8 +653,9 @@ validates them on the deployed build.
   1 km layer from 0.7 (every region, as the app frames it on a landscape screen), and
   in between a crossfade by ordered dithering (`detail`, 0–16), which also eases in
   over half a second when the 1 km relief arrives while the camera is already close.
-- **Palette** (`src/render/palette.ts`, validated, D-019): 27 fixed colours:
-  muted land, sea blues, a sky ramp, a lamp yellow, three cloud greys (B-018), and **one signature colour per
+- **Palette** (`src/render/palette.ts`, validated, D-019): 33 fixed colours:
+  muted land, sea blues, a sky ramp, a lamp yellow, three cloud greys (B-018), six
+  colours of the seasons (B-022), and **one signature colour per
   source**, also used in the legend. Each colour names the palette colour it
   becomes one step darker (`DARKER`): land darkens towards the sea's blues, as under
   moonlight, and never into a source's colour, so that colour keeps its meaning at
@@ -651,6 +669,7 @@ validates them on the deployed build.
   | Sky     | skyNight `0e1122`, skyBlueHour `333466`, skyGolden `e39a6a`, skyDay `9cc6e2`                                                                |
   | Emitted | lamp `ffdc73`                                                                                                                               |
   | Clouds  | cloud `c9cdd3`, cloudDark `757b88`, cloudStorm `4e5260`                                                                                     |
+  | Seasons | dull `747755`, frost `c8d2d0`, fresh `8cb052`, blossom `e8c0cc`, leafGold `c99a3c`, leafRust `9e5630`                                       |
 
   | Source    | Signature colour    | Why                           |
   | --------- | ------------------- | ----------------------------- |

@@ -139,6 +139,7 @@ describe("the landmarks in a frame", () => {
     landmarks,
     weather: {},
     timeMs: 0,
+    season: { from: "summer", to: "summer", share: 0 },
   });
   const snow = (scene: Scene): number => {
     const out = createSurface(scene.width, scene.height);

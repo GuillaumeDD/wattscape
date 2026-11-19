@@ -54,6 +54,7 @@ function sceneOf(overrides: Partial<Scene> & { camera: Camera }): Scene {
     landmarks: [],
     weather: {},
     timeMs: 0,
+    season: { from: "summer", to: "summer", share: 0 },
     ...overrides,
   };
 }

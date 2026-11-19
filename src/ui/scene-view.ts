@@ -55,6 +55,7 @@ import {
   type Press,
   wheelZoomFactor,
 } from "./controls";
+import { seasonAt } from "../scene/season.ts";
 
 /** Frames are drawn at most this often (PRD Q-7: 30 fps). */
 const FRAME_MS = 1000 / 30;
@@ -384,6 +385,7 @@ export function mountSceneView(
       weather,
       // By steps, so that a redraw for another reason does not nudge the clouds.
       timeMs: Math.floor(clock.now() / CLOUD_STEP_MS) * CLOUD_STEP_MS,
+      season: seasonAt(clock.now()),
     };
     // Redraw only when what is drawn changes: the drift moves the camera by a pixel
     // every second or two, and a still scene costs nothing.
@@ -407,6 +409,9 @@ export function mountSceneView(
       weatherVersion,
       // The clouds drift with the wind, by steps of a minute (the light wakes the loop as often).
       weatherShown ? scene.timeMs : 0,
+      scene.season.from,
+      scene.season.to,
+      scene.season.share,
     ].join();
     // The plants' motion, by steps; at half speed with reduced motion.
     const step = Math.floor(now / MOTION_STEP_MS);

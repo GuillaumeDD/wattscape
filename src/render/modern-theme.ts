@@ -36,6 +36,7 @@ import {
 } from "./pixel-theme.ts";
 import { type Surface } from "./surface.ts";
 import type { Drawn, Mark, Rect, Theme } from "./theme.ts";
+import { type Season, type SeasonState, turnedAt } from "../scene/season.ts";
 import { anyPrecipitation, viewBox, weatherGrid } from "../scene/clouds.ts";
 import { animateModernWeather, drawModernWeather } from "./modern-weather.ts";
 import { cloudMask } from "./weather-art.ts";
@@ -154,17 +155,54 @@ const hex = (s: string): Rgb => [
   parseInt(s.slice(5, 7), 16),
 ];
 
-/** The land's tints by altitude in metres, a relief map's; linear in between. */
+/** The rock and the snow above 1 300 m: the same in every season. */
+const HIGH_TINTS: readonly (readonly [number, Rgb])[] = [
+  [1300, hex("#8f948b")],
+  [1900, hex("#b9b8b0")],
+  [2400, hex("#f3f4f1")],
+];
+
+/** The land's tints by altitude in metres, a relief map's; linear in between (summer). */
 export const MODERN_TINTS: readonly (readonly [number, Rgb])[] = [
   [0, hex("#b7c59a")],
   [150, hex("#a3b98a")],
   [300, hex("#86a678")],
   [500, hex("#6c9069")],
   [800, hex("#55785e")],
-  [1300, hex("#8f948b")],
-  [1900, hex("#b9b8b0")],
-  [2400, hex("#f3f4f1")],
+  ...HIGH_TINTS,
 ];
+
+/**
+ * The tints of each season (B-022): grey-green in winter, fresh in spring, the
+ * summer's as they were, russet in autumn; above 1 300 m, the same rock and snow.
+ */
+export const MODERN_SEASON_TINTS: Readonly<Record<Season, readonly (readonly [number, Rgb])[]>> = {
+  winter: [
+    [0, hex("#a8aa8e")],
+    [150, hex("#9ca287")],
+    [300, hex("#87927a")],
+    [500, hex("#717f6c")],
+    [800, hex("#5a6a5f")],
+    ...HIGH_TINTS,
+  ],
+  spring: [
+    [0, hex("#bdd38f")],
+    [150, hex("#accb84")],
+    [300, hex("#91ba75")],
+    [500, hex("#74a066")],
+    [800, hex("#587c5c")],
+    ...HIGH_TINTS,
+  ],
+  summer: MODERN_TINTS,
+  autumn: [
+    [0, hex("#bfb486")],
+    [150, hex("#b5a777")],
+    [300, hex("#a99366")],
+    [500, hex("#937f59")],
+    [800, hex("#5e6e55")],
+    ...HIGH_TINTS,
+  ],
+};
 const SEA_SHALLOW = hex("#6f9fc0");
 const SEA_MID = hex("#44709c");
 const SEA_DEEP = hex("#2b4a76");
@@ -202,15 +240,16 @@ const mix = (a: Rgb, b: Rgb, t: number): Rgb => [
 ];
 
 /** The land's tint at an altitude. */
-export function modernTint(metres: number): Rgb {
-  for (let i = MODERN_TINTS.length - 1; i >= 0; i--) {
-    const [at, colour] = MODERN_TINTS[i] ?? [0, SEA_DEEP];
+export function modernTint(metres: number, season: Season = "summer"): Rgb {
+  const tints = MODERN_SEASON_TINTS[season];
+  for (let i = tints.length - 1; i >= 0; i--) {
+    const [at, colour] = tints[i] ?? [0, SEA_DEEP];
     if (metres >= at) {
-      const next = MODERN_TINTS[i + 1];
+      const next = tints[i + 1];
       return next === undefined ? colour : mix(colour, next[1], (metres - at) / (next[0] - at));
     }
   }
-  return MODERN_TINTS[0]?.[1] ?? SEA_DEEP;
+  return tints[0]?.[1] ?? SEA_DEEP;
 }
 
 /** The sea's colour at a distance from the coast, in kilometres. */
@@ -310,6 +349,8 @@ interface Ground {
   readonly cells: Uint8Array;
   /** The texture drawn last, and what it was made for. */
   texture: Texture | null;
+  /** The season the land's colours were worked out for. */
+  readonly season: SeasonState;
 }
 
 /** The land as a frame draws it: RGB by day with the veil, and the lamps in alpha. */
@@ -322,9 +363,15 @@ interface Texture {
 
 const grounds = new WeakMap<TerrainLayer, Ground>();
 
-function groundOf(layer: TerrainLayer, towns: readonly Town[]): Ground {
+function groundOf(layer: TerrainLayer, towns: readonly Town[], season: SeasonState): Ground {
   const known = grounds.get(layer);
-  if (known?.towns === towns) return known;
+  if (
+    known?.towns === towns &&
+    known.season.from === season.from &&
+    known.season.to === season.to &&
+    known.season.share === season.share
+  )
+    return known;
   const { columns, rows, km, kinds, elevation } = layer;
   const n = kinds.length;
   const raw = new Uint16Array(n);
@@ -345,8 +392,13 @@ function groundOf(layer: TerrainLayer, towns: readonly Town[]): Ground {
   // per value rather than per cell.
   const waters = new Float64Array(301 * 3);
   for (let d = 0; d <= 300; d++) waters.set(modernSea((d * km) / 3), d * 3);
-  const tints = new Float64Array((HIGHEST_METRES + 1) * 3);
-  for (let m = 0; m <= HIGHEST_METRES; m++) tints.set(modernTint(m), m * 3);
+  const tintsOf = (of: Season): Float64Array => {
+    const out = new Float64Array((HIGHEST_METRES + 1) * 3);
+    for (let m = 0; m <= HIGHEST_METRES; m++) out.set(modernTint(m, of), m * 3);
+    return out;
+  };
+  const before = tintsOf(season.from);
+  const after = season.to === season.from ? before : tintsOf(season.to);
   const shore: number[] = [];
   // Slopes are read over about 4 km on both layers, so the shading shows whole
   // slopes, not every bump, and stays alike from one layer to the other.
@@ -386,10 +438,14 @@ function groundOf(layer: TerrainLayer, towns: readonly Town[]): Ground {
       const facing = (gx + gy + 1) / Math.sqrt(gx * gx + gy * gy + 1);
       const shade = Math.min(1.18, Math.max(0.52, 0.5 + 0.5 * facing));
       const t = Math.min(HIGHEST_METRES, height[i] ?? 0) * 3;
+      // How far this cell has turned to the next season: by patches, each with a soft
+      // edge (src/scene/season.ts).
+      const turned = turnedAt(season, (c + 0.5) * km, (r + 0.5) * km);
       // A town: a warm wash by day; its lamps come with the texture.
       const wash = cells[i] !== 0 ? 0.8 : 0;
       for (let k = 0; k < 3; k++) {
-        const tint = (tints[t + k] ?? 0) * shade;
+        const from = before[t + k] ?? 0;
+        const tint = (from + ((after[t + k] ?? 0) - from) * turned) * shade;
         day[i * 3 + k] = tint + ((TOWN_DAY[k] ?? 0) - tint) * wash;
       }
     }
@@ -402,6 +458,7 @@ function groundOf(layer: TerrainLayer, towns: readonly Town[]): Ground {
     shore: Int32Array.from(shore),
     cells,
     texture: null,
+    season,
   };
   grounds.set(layer, ground);
   return ground;
@@ -577,7 +634,7 @@ interface Plate {
  * there instead, before the vignette, and the sky is left to `finish` (B-028).
  */
 function drawTerrain(frame: Frame, scene: Scene, layer: TerrainLayer, rgb?: Float64Array): void {
-  const ground = groundOf(layer, scene.towns);
+  const ground = groundOf(layer, scene.towns, scene.season);
   const land = textureOf(layer, ground, scene);
   const { height: metres, land: mask, sea } = ground;
   const { data, depth, width, height, scale, ox, oy, light, vx, vy } = frame;
@@ -833,7 +890,7 @@ function altitudeAt(layer: TerrainLayer, ground: Ground, x: number, y: number): 
  * focus, and hidden by the relief in front of them.
  */
 function drawRivers(frame: Frame, scene: Scene, layer: TerrainLayer): void {
-  const ground = groundOf(layer, scene.towns);
+  const ground = groundOf(layer, scene.towns, scene.season);
   const { data, depth, width, height, scale, ox, oy, light, vx, vy, density } = frame;
   const { km, columns, rows, kinds } = layer;
   const focus = scene.focus === null ? -1 : kindOfRegion(scene.focus);
@@ -930,7 +987,7 @@ function standingAt(
 ): Standing {
   const s = scene.camera.scale;
   const { density } = frame;
-  const metres = altitudeAt(layer, groundOf(layer, scene.towns), x, y);
+  const metres = altitudeAt(layer, groundOf(layer, scene.towns, scene.season), x, y);
   return {
     x: Math.floor(x * s) - frame.ox / density,
     y: Math.floor((y * s) / 2 - (metres * s) / RISE_METRES_PER_KM) - frame.oy / density,
@@ -1115,7 +1172,7 @@ function terrainOf(frame: Frame, scene: Scene, layer: TerrainLayer, slot: 0 | 1)
   // What the ground drawn depends on, but where it is seen from: the layer, its
   // ground and texture (the towns, their lights, the region in focus, the dusk), the
   // scale, the size, the light.
-  const ground = groundOf(layer, scene.towns);
+  const ground = groundOf(layer, scene.towns, scene.season);
   const key: readonly unknown[] = [
     layer,
     ground,
@@ -1214,7 +1271,7 @@ function lampsOf(
   sharp: number,
 ): ((x: number, y: number) => number) | null {
   if (!scene.light.emissive) return null;
-  const texture = textureOf(layer, groundOf(layer, scene.towns), scene);
+  const texture = textureOf(layer, groundOf(layer, scene.towns, scene.season), scene);
   const { depth, width, density, scale, ox, oy } = frame;
   const { km, columns, rows } = layer;
   return (x, y) => {

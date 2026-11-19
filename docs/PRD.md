@@ -135,6 +135,8 @@ idea that the grid can be seen.
   winter, blossom and fresh greens in spring, ripe fields and dry grass in summer,
   red and gold leaves and ploughed fields in autumn. Vineyards, crops and lavender
   follow their own calendar.
+- Drawn (Q-44): the land's colours change with the season in both themes, and pixel
+  art scatters each season's marks (frost, blossom, ripe crops, turning leaves).
 - Snow on the ground comes from the live weather (snow depth where available), not
   from the calendar alone: a snowless winter stays green-brown.
 - Seasons also show in the data, and the scene must not fight it: long nights and
@@ -321,3 +323,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-41 | Where is the weather the map shows taken?                       | One point per region: its prefecture, or the viewer's rounded position; each region its own sky      | One per region (Guillaume, 2026-11-18, decision card; D-063)          |
 | Q-42 | Weather drawing: clouds with shadows (A), or shadows only (B)?  | A: reads at once as a sky, for about B's cost; the plants stay visible between the clouds            | A (Guillaume, 2026-11-19, decision card; D-064)                       |
 | Q-43 | Clouds: translucent, and how much?                              | Light: 75 % opaque (modern), a quarter dithered away (pixel art); the map and lit towns show through | Light (Guillaume, 2026-11-19, decision card; D-065)                   |
+| Q-44 | Seasons in pixel art: colours only (A), or with marks (B)?      | B: frost, blossom, crops and leaves tell the season at a glance                                      | B (Guillaume, 2026-11-19, decision card)                              |
