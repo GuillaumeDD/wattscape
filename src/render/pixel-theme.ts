@@ -29,9 +29,19 @@ import {
 import { type Landmark } from "../map/landmarks.ts";
 import { isDiffuse } from "../map/sources.ts";
 import { BAYER_4, DITHER_LEVELS } from "./dither.ts";
-import { COLOUR_NAMES, type ColourName, darken, PALETTE, type Rgb } from "./palette.ts";
+import { COLOUR_NAMES, type ColourName, darken, DARKER, PALETTE, type Rgb } from "./palette.ts";
 import { createSurface, type Surface } from "./surface.ts";
 import type { Drawn, Mark, Theme } from "./theme.ts";
+import {
+  anyPrecipitation,
+  fogAt,
+  viewBox,
+  type WeatherGrid,
+  weatherAt,
+  weatherGrid,
+} from "../scene/clouds.ts";
+import { type WeatherGroup } from "../data/open-meteo.ts";
+import { type CloudMask, cloudMask, cloudPart, eachDrop, lightning } from "./weather-art.ts";
 
 /** Whether this engine stores a Uint32 with its low byte first (every common one does). */
 const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
@@ -608,6 +618,73 @@ export function plantMarkId(site: PlantSite): string {
   return `${site.source}@${String(site.x)},${String(site.y)}`;
 }
 
+/** The word of the palette colour one step darker, for every palette colour's word. */
+const DARKER_WORD = new Map(COLOUR_NAMES.map((n) => [PACKED[n], PACKED[DARKER[n]]]));
+
+/** A cloud's colours by its group (D-064): its body, its lit rim, its shaded rim. */
+function cloudColours(group: WeatherGroup): {
+  body: ColourName;
+  lit: ColourName;
+  shade: ColourName;
+} {
+  if (group === "storm") return { body: "cloudDark", lit: "cloud", shade: "cloudStorm" };
+  if (group === "rain" || group === "drizzle" || group === "snow")
+    return { body: "cloud", lit: "snow", shade: "cloudDark" };
+  return { body: "snow", lit: "snow", shade: "cloud" };
+}
+
+/**
+ * The weather over a drawn frame (B-018, D-064), before what stands on the map is
+ * drawn again on top: the clouds' shadows one palette step darker, an overcast or
+ * stormy sky dims the land by dithering, fog banks in the low ground, then the
+ * clouds, lit from the north-west. Every pixel stays a palette colour, and every
+ * pattern is anchored to the ground.
+ */
+function drawPixelWeather(frame: Frame, scene: Scene, grid: WeatherGrid, mask: CloudMask): void {
+  const { words, width, height, ox, oy } = frame;
+  const s = scene.camera.scale;
+  const lift = mask.lift;
+  const fog = pattern(frame, "snow", scene.light.darkness);
+  for (let y = 0; y < height; y++) {
+    const ky = (2 * (y + oy)) / s;
+    if (ky < 0) continue; // the sky above the map
+    const bayer = BAYER_4[(y + oy) & 3] ?? [];
+    for (let x = 0; x < width; x++) {
+      const kx = (x + ox) / s;
+      const i = y * width + x;
+      let word = words[i] ?? 0;
+      // A lit window keeps its light: it shows the consumption.
+      if (word === PACKED.lamp) continue;
+      const threshold = bayer[(x + ox) & 3] ?? 0;
+      const sx = x - lift;
+      const sy = y - lift;
+      if (sx >= 0 && sy >= 0 && (mask.owner[sy * width + sx] ?? -1) >= 0)
+        word = DARKER_WORD.get(word) ?? word;
+      else {
+        const here = weatherAt(grid, kx, ky);
+        if (here !== null && here.group !== "fog") {
+          // An overcast sky dims the land: up to 4 sixteenths a step, 8 in a storm.
+          const dim = Math.max(0, (here.cover - 0.7) / 0.3) * (here.group === "storm" ? 8 : 4);
+          if (threshold < dim) word = DARKER_WORD.get(word) ?? word;
+        }
+      }
+      const thick = fogAt(grid, kx, ky);
+      if (thick > 0.62 || (thick > 0.5 && threshold < 8))
+        word = fog[((y + oy) & 3) * 4 + ((x + ox) & 3)] ?? word;
+      words[i] = word;
+    }
+  }
+  const pen = penOf(frame, scene.light.darkness, scene.light.emissive);
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++) {
+      const index = mask.owner[y * width + x] ?? -1;
+      const cloud = index < 0 ? undefined : mask.clouds[index];
+      // Nor does a cloud hide it.
+      if (cloud === undefined || words[y * width + x] === PACKED.lamp) continue;
+      pen.put(x, y, cloudColours(cloud.group)[cloudPart(mask, x, y)]);
+    }
+}
+
 /** One spare buffer for the crossfade, reused while the size stays the same. */
 let spare: Surface | null = null;
 
@@ -658,6 +735,29 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
     for (const m of shown.landmarks) drawLandmark(pen, m.landmark, m.x, m.y);
     for (const p of shown.plants) drawBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
   }
+  // The weather (B-018), under what stands on the map: the plants and the landmarks
+  // stay readable under any sky. Their pixels that showed before the weather show
+  // again after it, as they were; what hid them (the relief in front, a lit window)
+  // still does.
+  const grid = weatherGrid(scene.coarse, scene.weather);
+  const mask =
+    grid === null ? null : cloudMask(grid, scene.camera, out.width, out.height, 1, scene.timeMs);
+  if (grid !== null && mask !== null) {
+    const before = frame.words.slice();
+    drawPixelWeather(frame, scene, grid, mask);
+    // The sprites alone, on an empty frame (0 is no colour: every word is opaque).
+    const sprites = { ...frame, words: new Uint32Array(frame.words.length) };
+    const pen = penOf(sprites, scene.light.darkness, scene.light.emissive);
+    for (const m of shown.landmarks) drawLandmark(pen, m.landmark, m.x, m.y);
+    for (const p of shown.plants) drawBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
+    const { words } = frame;
+    for (let i = 0; i < words.length; i++) {
+      const sprite = sprites.words[i] ?? 0;
+      if (sprite !== 0 && sprite === before[i]) words[i] = sprite;
+    }
+  }
+  const falling =
+    grid !== null && anyPrecipitation(grid, viewBox(scene.camera, scene.width, scene.height));
   const placed = shown.plants;
   // In the painter's order, roughly: what stands lower on the frame is in front.
   const marks: Mark[] = [
@@ -679,7 +779,7 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
   const { ox, oy } = frame;
   const { darkness, emissive } = scene.light;
   return {
-    moving: moving.length > 0,
+    moving: moving.length > 0 || falling,
     marks,
     animate(target: Surface, seconds: number): undefined {
       if (target.width !== out.width || target.height !== out.height) return;
@@ -687,6 +787,22 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
       const pen = penOf(onTarget, darkness, emissive);
       for (const p of moving)
         drawMotion(pen, p.plant.site, p.plant.activity, p.x, p.y, size, seconds);
+      if (!falling || mask === null) return;
+      // Rain and snow, then a lightning flash, over everything.
+      const s = scene.camera.scale;
+      eachDrop(
+        grid,
+        target.width,
+        target.height,
+        (x, y) => ({ x: (x + ox) / s, y: (2 * (y + oy)) / s }),
+        seconds,
+        (x, y, group) => {
+          // Between the clouds only: under one, the rain is hidden.
+          if ((mask.owner[y * target.width + x] ?? -1) < 0)
+            pen.put(x, y, group === "snow" ? "snow" : "foam");
+        },
+      );
+      for (const [x, y] of lightning(mask, seconds)) pen.glow(x, y);
     },
   };
 }

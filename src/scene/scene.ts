@@ -82,6 +82,8 @@ export interface Scene {
    * to show is absent, and shows none.
    */
   readonly weather: RegionalWeather;
+  /** The clock's time, ms: the clouds drift with the wind (src/scene/clouds.ts). */
+  readonly timeMs: number;
 }
 
 /**

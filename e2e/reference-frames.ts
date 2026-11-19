@@ -4,7 +4,7 @@
  * e2e/frame-hash.spec.ts, and both must agree (AGENTS.md § Determinism). Fixed inputs
  * only: a 480 × 270 buffer, cameras framed as the app frames an area, fixed lights.
  */
-import { parseEco2mixRegions } from "../src/data/eco2mix.ts";
+import { parseEco2mixRegions, type RegionCode } from "../src/data/eco2mix.ts";
 import { CONSUMPTION_RANGES } from "../src/map/consumption.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
@@ -27,6 +27,8 @@ import {
   townLights,
 } from "../src/scene/scene.ts";
 import { lightAt } from "../src/sky/light.ts";
+import { type WeatherGroup, type WeatherReading } from "../src/data/open-meteo.ts";
+import { overrideWeather, type RegionalWeather } from "../src/scene/weather.ts";
 import dayStep from "../tests/fixtures/eco2mix/2026-11-12-all-regions.json" with { type: "json" };
 import nightStep from "../tests/fixtures/eco2mix/2026-11-12-all-regions-0100z.json" with { type: "json" };
 
@@ -72,6 +74,7 @@ export function referenceScene(
     townLights: recordedTownLights(sunElevation < 0),
     landmarks: LANDMARKS,
     weather: {},
+    timeMs: 0,
   };
 }
 
@@ -107,6 +110,53 @@ function modern(
 const framed = (region: CellRegion | null): Camera =>
   fitBox(areaBox(coarseLayer(), region), FRAME_WIDTH, FRAME_HEIGHT);
 
+/** The time of the weather frames: the clouds drift with it. */
+export const WEATHER_TIME_MS = Date.UTC(2026, 10, 12, 9, 45);
+
+/** One sky per region, as `?weather=` would impose each: rain in the west, a storm in the Alps. */
+export const MIXED_WEATHER: RegionalWeather = (() => {
+  const of = (group: WeatherGroup): WeatherReading | undefined =>
+    overrideWeather(group, WEATHER_TIME_MS)["11"];
+  const half = of("cloudy");
+  const groups: Partial<Record<RegionCode, WeatherReading | undefined>> = {
+    "53": of("rain"),
+    "52": of("drizzle"),
+    "28": half === undefined ? undefined : { ...half, cloudCoverPct: 50 },
+    "11": of("cloudy"),
+    "44": of("snow"),
+    "27": of("fog"),
+    "84": of("storm"),
+    "93": of("clear"),
+  };
+  const out: Partial<Record<RegionCode, WeatherReading>> = {};
+  for (const [region, reading] of Object.entries(groups) as [
+    RegionCode,
+    WeatherReading | undefined,
+  ][])
+    if (reading !== undefined) out[region] = reading;
+  return out;
+})();
+
+/** A reference frame under a weather, in either theme. */
+function weathered(
+  theme: "pixel" | "modern",
+  focus: CellRegion | null,
+  sunElevation: number,
+  weather: RegionalWeather,
+  seconds: number,
+): Surface {
+  const density = theme === "pixel" ? 1 : MODERN_DENSITY;
+  const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
+  const s = {
+    ...referenceScene(focus, framed(focus), sunElevation),
+    weather,
+    timeMs: WEATHER_TIME_MS,
+  };
+  const drawn = (theme === "pixel" ? drawPixelScene : drawModernScene)(s, out);
+  drawn.animate(out, seconds);
+  return out;
+}
+
 /** Every reference frame, by the name its hash is recorded under. */
 export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
   "test-card": drawTestCard,
@@ -140,4 +190,17 @@ export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
     modern("28", framed("28"), 35, 1.3, MODERN_SHARP_DENSITY),
   "modern-sharp-normandie-night-t1.3": () =>
     modern("28", framed("28"), -20, 1.3, MODERN_SHARP_DENSITY),
+  // The weather (B-018), as `?weather=` imposes it, at a fixed time: France with a
+  // different sky in each region, Normandie under rain, then under a storm at night,
+  // in both themes, at an animation time that shows the rain and one that flashes.
+  "weather-france-mixed-pixel-t1.3": () => weathered("pixel", null, 35, MIXED_WEATHER, 1.3),
+  "weather-normandie-rain-pixel-t1.3": () =>
+    weathered("pixel", "28", 35, overrideWeather("rain", WEATHER_TIME_MS), 1.3),
+  "weather-normandie-storm-night-pixel-t0.1": () =>
+    weathered("pixel", "28", -20, overrideWeather("storm", WEATHER_TIME_MS), 0.1),
+  "weather-france-mixed-modern-t1.3": () => weathered("modern", null, 35, MIXED_WEATHER, 1.3),
+  "weather-normandie-fog-modern-t1.3": () =>
+    weathered("modern", "28", 35, overrideWeather("fog", WEATHER_TIME_MS), 1.3),
+  "weather-normandie-storm-night-modern-t0.1": () =>
+    weathered("modern", "28", -20, overrideWeather("storm", WEATHER_TIME_MS), 0.1),
 };

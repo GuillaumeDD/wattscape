@@ -57,6 +57,7 @@ function draw(camera: Camera, focus: CellRegion | null, elevation: number): Surf
     townLights: recordedTownLights(elevation < 0),
     landmarks: LANDMARKS,
     weather: {},
+    timeMs: 0,
   };
   drawPixelScene(scene, surface);
   return surface;

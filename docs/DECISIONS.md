@@ -1146,3 +1146,24 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** a region's single point draws a sky visibly wrong for most of it
   (a large region with two climates), or a multi-point answer is recorded and makes
   a grid cheap.
+
+## D-064 — The weather is drawn as clouds with their shadows
+
+- **Context:** B-018 draws the weather that D-063 brings into the scene. Mockups
+  of two directions, in both themes, by day and by night, on the national view and
+  over Normandie, from typed weather (not readings).
+- **Options (decision card, 2026-11-19, PRD Q-42):** A, clouds floating over the
+  map with their shadows on the ground, rain, snow, fog and lightning over them
+  (recommended); B, the clouds' shadows and the rain only, the map fully readable
+  and the sky only guessed; or retouch the mockups first.
+- **Decision (Guillaume, 2026-11-19, decision card):** A, clouds and their shadows.
+- **Why:** A reads at once as a sky, for about the same cost as B, and the plants
+  stay visible between the clouds (and are drawn over them).
+- **Provisional (to check on the deployed build):** the clouds' size and lattice
+  (38 km), the cap on cover (`MAX_CHANCE` 0.75), the shadow's offset (3 to 10
+  pixels), the dim under an overcast sky, the fog's banks, the density of rain and
+  snow, a bolt every 6 s, one mean wind for all the clouds shown (to 8 compass
+  points), and the zoom levels of the clouds
+  (ARCHITECTURE § Sky, light and weather).
+- **Revisit if:** the clouds hide what the scene is for (the plants, the towns at
+  night) on real screens, or a region's sky reads wrong against its reading.

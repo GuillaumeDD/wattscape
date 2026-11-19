@@ -233,6 +233,7 @@ describe("the marks of a frame (src/render/pixel-theme.ts)", () => {
     townLights: Object.fromEntries(REGION_CODES.map((r) => [r, 0.5])),
     landmarks: LANDMARKS,
     weather: {},
+    timeMs: 0,
   });
   const marksOf = (scene: Scene): readonly Mark[] =>
     drawPixelScene(scene, createSurface(scene.width, scene.height)).marks;
