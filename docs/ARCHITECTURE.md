@@ -244,7 +244,7 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
   their address and often get 429; a viewer's browser has its own.
 - **CORS:** `Access-Control-Allow-Origin: *` (2026-11-11).
 - **Freshness:** a reading is labelled stale after 1 hour (four missed refreshes,
-  `WEATHER_STALE_AFTER_MS`, provisional); one more than 15 minutes ahead of the
+  `WEATHER_STALE_AFTER_MS`, D-069); one more than 15 minutes ahead of the
   clock counts as unavailable. Requests share the éCO2mix client's rules
   (`src/data/fetch-json.ts`): 30 s timeout, size cap, abort.
 - **How a reading reaches the scene** (B-018): `src/ui/weather-feed.ts` asks for
@@ -559,10 +559,10 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
   at night). A fractional step is drawn by dithering between the two whole steps,
   so the land stays in palette. A `NaN` elevation, or a `NaN` darkness, reads as
   night.
-- **Weather layers** (B-018, direction A, D-064): clouds float over the map with
-  their shadows on the ground; rain, snow, fog banks and lightning over them. The
-  same shapes in both themes; pixel art draws them in palette colours and dithers,
-  the modern theme blends them smooth.
+- **Weather layers** (B-018, direction A, D-064; its values confirmed, D-069):
+  clouds float over the map with their shadows on the ground; rain, snow, fog
+  banks and lightning over them. The same shapes in both themes; pixel art draws
+  them in palette colours and dithers, the modern theme blends them smooth.
   - **Weather grid** (`weatherGrid`, `src/scene/clouds.ts`): each 4 km cell takes
     the reading of its region; a sea cell, the nearest region's within 10 cells
     (40 km) of the coast; abroad, the open sea and Corsica (no reading of its own:
@@ -607,7 +607,7 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
   - **Determinism:** where a cloud, a drop or a fog bank stands is decided by
     integer hashes and + − × / only, the wind's drift included (the 8 compass
     points' steps are exact, no sine), so Node and Chromium draw the same clouds.
-- **Seasons** (B-022, D-008; pixel art's direction B, Q-44): `src/scene/season.ts`.
+- **Seasons** (B-022, D-008; pixel art's direction B, D-067): `src/scene/season.ts`.
   - **Keyframes:** each season at its fullest on the 15th of January, April, July
     and October (UTC date of the clock). Between two keyframes, the land turns
     over 42 days centred on their middle (1 March, 30 May, 30 August, 30 November),
@@ -628,10 +628,10 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
   - **Modern theme:** one tint ramp by altitude per season (`MODERN_SEASON_TINTS`):
     grey-green in winter, fresh in spring, the summer's as before, russet in
     autumn; the rock and the snow above 1 300 m alike in all.
-  - **Provisional:** the dates, the colours and the marks' density, to check on the
-    deployed build. Vineyards, crops and lavender with their own calendar are
-    still to come.
-- **Snow on the ground** (B-022, Q-45): `src/scene/snow.ts`, from the readings'
+  - **Confirmed** (D-069): the dates, the colours and the marks' density, to look
+    at again on the deployed build. Vineyards, crops and lavender with their own
+    calendar wait, as Growth G-019.
+- **Snow on the ground** (B-022, D-068): `src/scene/snow.ts`, from the readings'
   `snow_depth` (any snow reported, 0.005 m and up) and their point's `elevation`.
   - **Five more weather points**, in the mountain ranges (`MASSIFS`, on 0.1°): the
     Alps (45.5, 6.6; 1 676 m), the Pyrenees (42.8, 0.0; 1 445 m), the Massif
@@ -656,7 +656,7 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
     0.7 ms on the 4 km layer and about 5 ms on the 1 km one with snow on every
     range and a region (Node, 2026-11-20); `?weather=snow`, all the land under
     snow, takes about 60 ms once on the 1 km layer.
-  - **Provisional:** the points, the rule by elevation class, and the white.
+  - **Confirmed** (D-069): the points, the rule by elevation class, and the white.
   - **Determinism:** where a patch turns and where a mark falls is decided by
     integer hashes and + − × / only; the date by `Date.UTC`, which is exact.
 
