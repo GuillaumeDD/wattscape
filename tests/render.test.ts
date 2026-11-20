@@ -278,10 +278,17 @@ describe("frame hashes (AGENTS.md § Determinism)", () => {
     expect(hashSurface(drawTestCard())).toBe(hashes["test-card"]);
   });
 
-  it("draws every reference frame as recorded (also checked in Chromium)", () => {
+  it("records a hash for every reference frame, and none more", () => {
     const names = Object.keys(hashes).filter((name) => name !== "_comment");
     expect(Object.keys(REFERENCE_FRAMES).sort()).toEqual(names.sort());
-    for (const [name, draw] of Object.entries(REFERENCE_FRAMES))
-      expect(hashSurface(draw()), name).toBe((hashes as Record<string, string>)[name]);
   });
+
+  // One test per frame, so that the suite's time limit holds for each, whatever their
+  // number (CI timed out at 5 s once the snow frames came, B-022).
+  it.each(Object.entries(REFERENCE_FRAMES))(
+    "draws %s as recorded (also checked in Chromium)",
+    (name, draw) => {
+      expect(hashSurface(draw()), name).toBe((hashes as Record<string, string>)[name]);
+    },
+  );
 });
