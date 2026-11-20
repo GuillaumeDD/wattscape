@@ -275,6 +275,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-016 | Sharp frame in budget: measure on a GPU, then fewer steps or coarser motion (D-060)    | proposed |
 | G-017 | Idle drift in budget: the vignette laid in CSS over the canvas (D-061)                 | proposed |
 | G-018 | Wind bending the trees when the turbines spin (§ 4.7; B-018 drifts only the clouds)    | proposed |
+| G-019 | Vineyards, crops and lavender on their own calendar (Q-55, D-069)                      | proposed |
 
 ## 10. Open questions
 
@@ -328,3 +329,15 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-43 | Clouds: translucent, and how much?                              | Light: 75 % opaque (modern), a quarter dithered away (pixel art); the map and lit towns show through | Light (Guillaume, 2026-11-19, decision card; D-065)                   |
 | Q-44 | Seasons in pixel art: colours only (A), or with marks (B)?      | B: frost, blossom, crops and leaves tell the season at a glance                                      | B (Guillaume, 2026-11-19, decision card; D-067)                       |
 | Q-45 | Snow on the ground: where, from one reading per region?         | Add 5 mountain points (Alps, Pyrenees, Massif central, Jura, Vosges), 20 km around each              | Mix (Guillaume, 2026-11-20, in the thread; D-068)                     |
+| Q-46 | Weather reading labelled old after 1 hour?                      | Keep: four missed refreshes; the page says so                                                        | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-47 | Clouds: 38 km lattice, at most 75 % of the sky?                 | Keep: the map shows through even overcast                                                            | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-48 | Shadows 3-10 px to the south-east; dim under overcast?          | Keep: light from the north-west; a storm dims twice as much                                          | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-49 | Fog in banks, on land below 600 m only?                         | Keep: fog lies in the valleys and plains                                                             | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-50 | Rain and snow density by group; a bolt every 6 s?               | Keep                                                                                                 | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-51 | One mean wind for all the clouds, to 8 compass points?          | Keep: clouds do not tear at the borders                                                              | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-52 | No weather abroad nor in Corsica?                               | Keep: no reading there                                                                               | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-53 | Seasons at their fullest on the 15th; a 6-week turn?            | Keep                                                                                                 | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-54 | Pixel art's season colours and marks (about 1 ms)?              | Keep; revisit on the deployed build                                                                  | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-55 | Vineyards, crops and lavender on their own calendar?            | Growth, not this step (G-019)                                                                        | Growth (Guillaume, 2026-11-20; D-069)                                 |
+| Q-56 | Snow: the 5 range points, by elevation class, inferred?         | Keep: the page says the snow is inferred                                                             | Yes (Guillaume, 2026-11-20; D-069)                                    |
+| Q-57 | Bring a branch up to date by merging main (D-066)?              | Confirm: a merge rewrites no published history                                                       | Confirmed (Guillaume, 2026-11-20; D-069)                              |

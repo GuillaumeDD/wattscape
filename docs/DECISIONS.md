@@ -1249,3 +1249,28 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** the inferred snow is visibly wrong against reality (a range
   white while its stations report none elsewhere), or a gridded snow source is
   added (`docs/SOURCES.md` § 1).
+
+## D-069 — Answers to the step 7 questionnaire (PRD Q-46 to Q-57)
+
+- **Context:** the end of step 7 (the weather and the seasons, B-018 and B-022,
+  PRs #52 to #57): the choices still provisional, each asked with a recommendation
+  in the project thread on 2026-11-20 (PRD Q-46 to Q-57).
+- **Options:** for each, the recommendation or a free answer.
+- **Decision:** every recommendation, Guillaume, 2026-11-20 ("OK pour tout"):
+  - the weather (D-064, D-065): a reading labelled old after 1 hour (Q-46); clouds
+    on a 38 km lattice, never more than 75 % of the sky (Q-47); shadows 3 to 10
+    pixels to the south-east, the land dimmed under an overcast sky and twice as
+    much in a storm (Q-48); fog in banks, on land below 600 m only (Q-49); the
+    density of rain and snow by group, a bolt every 6 s (Q-50); one mean wind for
+    all the clouds, to 8 compass points (Q-51); no weather abroad nor in Corsica
+    (Q-52);
+  - the seasons (D-067): each at its fullest on the 15th of January, April, July
+    and October, a 6-week turn by patches (Q-53); pixel art's colours and marks,
+    to look at again on the deployed build (Q-54); vineyards, crops and lavender
+    on their own calendar wait, as Growth G-019 (Q-55);
+  - the snow on the ground (D-068): the five ranges' points, the rule by
+    elevation class, the snow said to be inferred (Q-56);
+  - the branches (D-066): a branch is brought up to date by merging `main` into
+    it, not by a rebase; this settles the point D-066 left to confirm (Q-57).
+- **Why:** each was the recommendation, with its reason in PRD § Open questions.
+- **Revisit if:** the conditions in D-064, D-065, D-067 and D-068 arise.
