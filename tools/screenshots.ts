@@ -15,7 +15,8 @@
  * `step-9-modern-landmarks.png`, the third in `step-10-modern-landmarks.png`, the
  * fourth in `step-11-modern-landmarks.png`), at the sharp density a full HD screen gets (D-058,
  * `step-8-modern-sharp-*.png`), the weather in both themes (B-018,
- * `step-12-weather-*.png`), and the seasons (B-022, `step-13-seasons-*.png`).
+ * `step-12-weather-*.png`), the seasons (B-022, `step-13-seasons-*.png`), and the snow
+ * on the ground (B-022, `step-14-snow-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -33,6 +34,7 @@ import {
   MODERN_DENSITY,
   recordedTownLights,
   referenceScene,
+  snowWeather,
   WEATHER_TIME_MS,
 } from "../e2e/reference-frames.ts";
 import { overrideWeather, type RegionalWeather } from "../src/scene/weather.ts";
@@ -466,5 +468,32 @@ for (const theme of ["pixel", "modern"] as const) {
     const nightFile = `${OUT}/step-13-seasons-${theme}-${name}-night.png`;
     writePng(nightFile, night, theme === "pixel" ? 2 : 1);
     console.log(`${nightFile}: ${hashSurface(night)}`);
+  }
+}
+
+// Snow on the ground (B-022, Q-45): in each theme, Auvergne-Rhône-Alpes and Occitanie
+// on a winter day with snow on the ranges, by day and at night; and
+// Auvergne-Rhône-Alpes when it snows in Lyon too.
+for (const theme of ["pixel", "modern"] as const) {
+  const density = theme === "pixel" ? 1 : MODERN_DENSITY;
+  for (const [name, focus, plains, elevation] of [
+    ["auvergne-rhone-alpes", "84", false, 35],
+    ["auvergne-rhone-alpes-night", "84", false, -20],
+    ["auvergne-rhone-alpes-plains", "84", true, 35],
+    ["occitanie", "76", false, 35],
+    ["occitanie-night", "76", false, -20],
+  ] as const) {
+    const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+    const surface = createSurface(WIDTH * density, HEIGHT * density);
+    const scene = {
+      ...referenceScene(focus, camera, elevation),
+      season: { from: "winter", to: "winter", share: 0 } as const,
+      weather: snowWeather(plains),
+      timeMs: WEATHER_TIME_MS,
+    };
+    (theme === "pixel" ? drawPixelScene : drawModernScene)(scene, surface);
+    const file = `${OUT}/step-14-snow-${theme}-${name}.png`;
+    writePng(file, surface, theme === "pixel" ? 2 : 1);
+    console.log(`${file}: ${hashSurface(surface)}`);
   }
 }

@@ -91,6 +91,14 @@ export function weatherGroup(code: number): WeatherGroup | undefined {
 export interface WeatherReading {
   /** Start of the current 15-minute interval, ms since the epoch (UTC). */
   readonly timeMs: number;
+  /**
+   * The model's grid point the reading is for, degrees, and its height, m: where a
+   * reading holds (snow on the ground is drawn around it). In memory only, never
+   * stored nor sent (ARCHITECTURE § Privacy).
+   */
+  readonly latitude: number;
+  readonly longitude: number;
+  readonly elevationM: number;
   readonly temperatureC: number;
   readonly weatherCode: number;
   readonly group: WeatherGroup;
@@ -176,6 +184,8 @@ function parseBody(position: RoundedPosition, body: unknown): WeatherReading {
     Math.abs(longitude - position.longitude) > MAX_GRID_OFFSET_DEG
   )
     throw new Invalid("not the position asked");
+  // The lowest land in France is about -2 m, Mont Blanc 4 806 m.
+  const elevationM = inRange(body, "elevation", -100, 5000);
   const units = body.current_units;
   if (!isRecord(units)) throw new Invalid("current_units: missing");
   for (const [key, unit] of Object.entries(UNITS)) {
@@ -194,6 +204,9 @@ function parseBody(position: RoundedPosition, body: unknown): WeatherReading {
   if (isDay !== 0 && isDay !== 1) throw new Invalid("is_day: not 0 or 1");
   return {
     timeMs: time * 1000,
+    latitude,
+    longitude,
+    elevationM,
     temperatureC: inRange(current, "temperature_2m", -80, 60),
     weatherCode,
     group,

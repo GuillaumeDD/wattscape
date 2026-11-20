@@ -24,7 +24,8 @@ import {
   weatherFromQuery,
 } from "./ui/settings";
 import { startWeatherFeed, type WeatherFeed, type WeatherState } from "./ui/weather-feed";
-import { overrideWeather } from "./scene/weather";
+import { overrideWeather, sceneWeather } from "./scene/weather";
+import { anySnow } from "./scene/snow";
 import { type WeatherGroup } from "./data/open-meteo";
 
 /** The time-lapse plays a day in this long (PRD § 4.9: a day in a minute). */
@@ -73,6 +74,8 @@ function render(locale: Locale): void {
 
 let plantsState: FeedState = { kind: "loading" };
 let weatherState: WeatherState = { kind: "loading" };
+/** Whether the scene lays snow on the ground: the note then says it is inferred. */
+let snowShown = false;
 /** The weather `?weather=` imposes, if any. */
 const weatherOverride: WeatherGroup | undefined = weatherFromQuery(location.search);
 /** The caption shown now, to write again when the language changes. */
@@ -155,7 +158,8 @@ function renderWeatherNote(): void {
     ...(state.kind === "live" ? {} : { dateStyle: "short" as const }),
     timeStyle: "short",
   }).format(new Date(state.timeMs));
-  setText("weather-note", t(keys[state.kind]).replace("{time}", time));
+  const snow = snowShown && state.kind !== "ahead" ? ` ${t("weatherSnowInferred")}` : "";
+  setText("weather-note", t(keys[state.kind]).replace("{time}", time) + snow);
 }
 
 /** The area list: rebuilt only when the language changes, otherwise just selected. */
@@ -297,6 +301,7 @@ const weatherFeed: WeatherFeed | null =
         (input, init) => fetch(input, init),
         (byRegion, state) => {
           weatherState = state;
+          snowShown = anySnow(sceneWeather(byRegion, clock.now()));
           renderWeatherNote();
           scene?.setWeather(byRegion);
         },

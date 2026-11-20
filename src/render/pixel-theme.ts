@@ -42,6 +42,7 @@ import {
 } from "../scene/clouds.ts";
 import { type WeatherGroup } from "../data/open-meteo.ts";
 import { type Season, seasonOf } from "../scene/season.ts";
+import { snowCoverOf } from "../scene/snow.ts";
 import { type CloudMask, cloudMask, cloudPart, eachDrop, lightning } from "./weather-art.ts";
 
 /** Whether this engine stores a Uint32 with its low byte first (every common one does). */
@@ -426,6 +427,8 @@ interface Tints {
   /** The land in the season it turns from, and in the one it turns to. */
   readonly from: SeasonTints;
   readonly to: SeasonTints;
+  /** The land under snow (src/scene/snow.ts): the peaks' white, without marks. */
+  readonly snow: SeasonTints;
   readonly sea: Record<"seaShallow" | "sea" | "seaDeep", Uint32Array>;
   readonly roof: Uint32Array;
   /** A river: the shallow sea's blue; one step back where the land is veiled. */
@@ -463,9 +466,18 @@ function tintsOf(frame: Frame, scene: Scene): Tints {
     return { top, side, dots };
   };
   const from = land(scene.season.from);
+  const snow: SeasonTints = { top: [], side: [], dots: [] };
+  for (let e = 0; e < ELEVATION_CLASSES.length; e++)
+    for (let k = 0; k < 4; k++) {
+      const d = darkness[k] ?? base;
+      snow.top.push(pattern(frame, "snow", d));
+      snow.side.push(pattern(frame, darken("snow", 1), d));
+      snow.dots.push([]);
+    }
   return {
     from,
     to: scene.season.to === scene.season.from ? from : land(scene.season.to),
+    snow,
     sea: {
       seaShallow: pattern(frame, "seaShallow", base),
       sea: pattern(frame, "sea", base),
@@ -520,6 +532,7 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
   // Relief height of each class at this scale.
   const hs = ELEVATION_CLASSES.map((_, e) => heightPx(e, s));
   const tints = tintsOf(frame, scene);
+  const snow = snowCoverOf(layer, scene.weather);
   const focus = scene.focus === null ? -1 : kindOfRegion(scene.focus);
   const { cells: towns, markedRows, highest } = layerIndex(layer, scene.towns);
   const { rivers } = layer;
@@ -677,11 +690,14 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
       const cliff = below === SEA || metres(e) - metres(front) >= 250;
       const veiled = kind === FOREIGN || (focus !== -1 && kind !== focus) ? VEILED : 0;
       const t = e * 4 + shade + veiled;
-      // The season of this cell: the change spreads by patches (src/scene/season.ts).
+      // Snow on the ground (src/scene/snow.ts), else the season of this cell: the
+      // change spreads by patches (src/scene/season.ts).
       const land =
-        seasonOf(scene.season, (c + 0.5) * km, (r + 0.5) * km) === scene.season.to
-          ? tints.to
-          : tints.from;
+        snow !== null && snow[i] === 1
+          ? tints.snow
+          : seasonOf(scene.season, (c + 0.5) * km, (r + 0.5) * km) === scene.season.to
+            ? tints.to
+            : tints.from;
       // The south face shows below the top face: h rows.
       if (h > 0)
         fill(frame, x0, y1 - h, x1, y1, (cliff ? land.side[t] : land.top[t]) ?? tints.roof);

@@ -56,6 +56,7 @@
   "weatherLive": "Météo Open-Meteo de chaque région, relevé de {time}.",
   "weatherStale": "Météo Open-Meteo ancienne, relevé de {time}.",
   "weatherAhead": "Le relevé météo Open-Meteo ({time}) est postérieur à l'heure montrée : pas de météo.",
+  "weatherSnowInferred": "Neige au sol déduite : là où un point météo (un par région, cinq en montagne) mesure de la neige, le relief plus haut de sa région ou de son massif est dessiné enneigé.",
   "weatherUnavailable": "Météo Open-Meteo indisponible : pas de météo.",
   "weatherOverride": "Météo imposée partout ({group}) par le réglage ?weather=, pas le direct.",
   "weatherClear": "ciel dégagé",

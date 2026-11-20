@@ -1,8 +1,9 @@
 /**
  * Keeps the scene's weather current (B-018): the current Open-Meteo reading of every
  * region, at its prefecture or, for the viewer's own region, at the viewer's position
- * rounded to 0.1° (PRD Q-41, D-063). Twelve calls every 15 minutes while the tab is
- * visible, never faster (ARCHITECTURE § Open-Meteo). A region whose call fails keeps
+ * rounded to 0.1° (PRD Q-41, D-063), and of the 5 mountain ranges' fixed points, for
+ * the snow on the ground (Q-45). Seventeen calls every 15 minutes while the tab is
+ * visible, never faster (ARCHITECTURE § Open-Meteo). A point whose call fails keeps
  * its last good reading, which the page labels with its time; the failed calls are
  * tried again after a minute, then after twice as long each time, up to 15 minutes.
  * An answer that lands after the tab was hidden, or after the point it was asked for
@@ -19,7 +20,12 @@ import {
   weatherFreshness,
 } from "../data/open-meteo";
 import { referencePoint } from "../geo/regions";
-import { type RegionalWeather } from "../scene/weather";
+import {
+  MASSIFS,
+  type RegionalWeather,
+  WEATHER_POINT_IDS,
+  type WeatherPointId,
+} from "../scene/weather";
 
 export const WEATHER_REFRESH_MS = 15 * 60 * 1000;
 export const WEATHER_RETRY_MS = 60 * 1000;
@@ -43,7 +49,7 @@ export type WeatherState =
 
 /** The page's note for a set of readings, from the clock's time. */
 export function weatherState(byRegion: RegionalWeather, nowMs: number): WeatherState {
-  const readings = REGION_CODES.flatMap((r) => {
+  const readings = WEATHER_POINT_IDS.flatMap((r) => {
     const reading = byRegion[r];
     return reading === undefined ? [] : [reading];
   });
@@ -59,15 +65,20 @@ export function weatherState(byRegion: RegionalWeather, nowMs: number): WeatherS
 }
 
 /**
- * Where a region's weather is asked for: the viewer's rounded position when it lies
- * in that region, else its prefecture, rounded too (only a rounded value is ever sent).
+ * Where a point's weather is asked for: a range's own point; for a region, the
+ * viewer's rounded position when it lies in that region, else its prefecture, rounded
+ * too (only a rounded value is ever sent).
  */
 export function weatherPoint(
-  region: RegionCode,
+  region: WeatherPointId,
   viewer: { readonly region: RegionCode; readonly position: RoundedPosition } | null,
 ): RoundedPosition | null {
+  // A mountain range's point is fixed, and already on 0.1°.
+  const massif = MASSIFS.find((m) => m.id === region);
+  if (massif !== undefined) return roundPosition(massif.latitude, massif.longitude);
   if (viewer !== null && viewer.region === region) return viewer.position;
-  const point = referencePoint(region);
+  const code = REGION_CODES.find((r) => r === region);
+  const point = code === undefined ? null : referencePoint(code);
   return point === null ? null : roundPosition(point.latitude, point.longitude);
 }
 
@@ -89,21 +100,21 @@ export function startWeatherFeed(
   fetchFn: typeof fetch,
   onWeather: (byRegion: RegionalWeather, state: WeatherState) => void,
 ): WeatherFeed {
-  const readings = new Map<RegionCode, WeatherReading>();
+  const readings = new Map<WeatherPointId, WeatherReading>();
   /** Read through a function: the tab can be hidden while a call is awaited. */
   const hidden = (): boolean => document.hidden;
-  const points = new Map<RegionCode, RoundedPosition | null>();
-  /** The calls in flight, by region. */
-  const inFlight = new Map<RegionCode, AbortController>();
+  const points = new Map<WeatherPointId, RoundedPosition | null>();
+  /** The calls in flight, by point. */
+  const inFlight = new Map<WeatherPointId, AbortController>();
   let viewer: { readonly region: RegionCode; readonly position: RoundedPosition } | null = null;
   let timer: number | null = null;
   let nextAt = 0;
   let retryMs = WEATHER_RETRY_MS;
-  /** Regions whose last call failed, tried again at the retry; all at a full refresh. */
-  let failed = new Set<RegionCode>();
+  /** Points whose last call failed, tried again at the retry; all at a full refresh. */
+  let failed = new Set<WeatherPointId>();
   let sentState: WeatherState | null = null;
 
-  for (const region of REGION_CODES) points.set(region, weatherPoint(region, null));
+  for (const id of WEATHER_POINT_IDS) points.set(id, weatherPoint(id, null));
 
   const send = (): void => {
     const byRegion: RegionalWeather = Object.fromEntries(readings);
@@ -117,22 +128,22 @@ export function startWeatherFeed(
     nextAt = animationClock.now() + ms;
     timer = window.setTimeout(() => {
       timer = null;
-      void load(failed.size > 0 && ms < WEATHER_REFRESH_MS ? [...failed] : [...REGION_CODES]);
+      void load(failed.size > 0 && ms < WEATHER_REFRESH_MS ? [...failed] : [...WEATHER_POINT_IDS]);
     }, ms);
   };
 
-  async function loadOne(region: RegionCode): Promise<boolean> {
-    const point = points.get(region) ?? null;
+  async function loadOne(id: WeatherPointId): Promise<boolean> {
+    const point = points.get(id) ?? null;
     if (point === null) return true;
-    inFlight.get(region)?.abort();
+    inFlight.get(id)?.abort();
     const controller = new AbortController();
-    inFlight.set(region, controller);
+    inFlight.set(id, controller);
     const result: Result<WeatherReading> = await fetchOpenMeteo(point, fetchFn, controller.signal);
     // Hidden, superseded, or asked for a point that has changed since: dropped.
-    if (controller.signal.aborted || inFlight.get(region) !== controller) return true;
-    inFlight.delete(region);
-    if (!samePoint(points.get(region) ?? null, point)) return true;
-    if (result.ok) readings.set(region, result.reading);
+    if (controller.signal.aborted || inFlight.get(id) !== controller) return true;
+    inFlight.delete(id);
+    if (!samePoint(points.get(id) ?? null, point)) return true;
+    if (result.ok) readings.set(id, result.reading);
     return result.ok;
   }
 
@@ -156,11 +167,11 @@ export function startWeatherFeed(
 
   /** The latest load: one superseded (hidden and shown again meanwhile) keeps no books. */
   let generation = 0;
-  async function load(regions: readonly RegionCode[]): Promise<void> {
+  async function load(ids: readonly WeatherPointId[]): Promise<void> {
     if (hidden()) return;
     const run = ++generation;
     const results = await Promise.all(
-      regions.map(async (r) => {
+      ids.map(async (r) => {
         const ok = await loadOne(r);
         if (!hidden()) queueSend();
         return [r, ok] as const;
@@ -192,14 +203,14 @@ export function startWeatherFeed(
     } else if (timer === null && inFlight.size === 0) {
       // Back in view: refresh everything now if the next call was due while hidden.
       const due = Math.max(0, nextAt - animationClock.now());
-      if (due === 0) void load([...REGION_CODES]);
+      if (due === 0) void load([...WEATHER_POINT_IDS]);
       else schedule(due);
     }
   });
 
   sentState = { kind: "loading" };
   onWeather({}, sentState);
-  void load([...REGION_CODES]);
+  void load([...WEATHER_POINT_IDS]);
 
   return {
     setViewer(next): void {

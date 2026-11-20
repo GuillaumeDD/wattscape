@@ -333,6 +333,14 @@ under the terrain; a lit top edge on each slab; light added over the scene (glow
 a vignette of up to 42 % at the corners; one dim backdrop per world. Nothing was
 copied from it: no code, no asset. Reliability high (the project's own documents).
 
+Consulted on 2026-11-20, **S-027**: the Open-Meteo forecast API itself
+(`api.open-meteo.com/v1/forecast`, `current=snow_depth`), at 13 candidate points on
+0.1° in the Alps, the Pyrenees, the Massif central, the Jura and the Vosges, for the
+mountain ranges' weather points (Q-45). Gave each point's `elevation` (from 670 to
+3 064 m) and that morning's `snow_depth`; the five kept are listed in ARCHITECTURE,
+under "Snow on the ground". About one call in two came back empty through the
+session's proxy, and was asked again. Reliability high for the heights (the API's own figures).
+
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
 [s010-enum]: https://github.com/open-meteo/open-meteo/blob/954c561b9868d81a28bfc280a971c13474ea3191/Sources/App/Helper/WeatherCode.swift

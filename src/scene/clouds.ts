@@ -10,7 +10,7 @@
  */
 import { COARSE_KM, regionOfKind, SEA } from "../map/grid.ts";
 import { type TerrainLayer } from "../map/layers.ts";
-import { type RegionCode } from "../data/eco2mix.ts";
+import { REGION_CODES, type RegionCode } from "../data/eco2mix.ts";
 import { type WeatherGroup } from "../data/open-meteo.ts";
 import { type Camera } from "./camera.ts";
 import { type RegionalWeather } from "./weather.ts";
@@ -141,7 +141,12 @@ export function weatherGrid(layer: TerrainLayer, weather: RegionalWeather): Weat
 }
 
 function buildGrid(layer: TerrainLayer, weather: RegionalWeather): WeatherGrid | null {
-  const readings = Object.values(weather);
+  // The regions' readings only: a mountain range's (for the snow on the ground) has
+  // its own wind, up high, and no region's sky.
+  const readings = REGION_CODES.flatMap((r) => {
+    const reading = weather[r];
+    return reading === undefined ? [] : [reading];
+  });
   if (readings.length === 0) return null;
   const { columns, rows } = layer;
   const regions = nearestRegions(layer);

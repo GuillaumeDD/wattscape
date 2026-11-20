@@ -138,7 +138,10 @@ idea that the grid can be seen.
 - Drawn (Q-44): the land's colours change with the season in both themes, and pixel
   art scatters each season's marks (frost, blossom, ripe crops, turning leaves).
 - Snow on the ground comes from the live weather (snow depth where available), not
-  from the calendar alone: a snowless winter stays green-brown.
+  from the calendar alone: a snowless winter stays green-brown. Drawn (Q-45): five
+  more weather points in the mountain ranges; where a point reports snow, the ground
+  at its height or above is drawn under snow, in its range for a range's point, in
+  its region for a region's. Inferred from one reading, and the page says so.
 - Seasons also show in the data, and the scene must not fight it: long nights and
   lit towns in winter (higher consumption), strong solar in summer.
 

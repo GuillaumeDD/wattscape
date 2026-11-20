@@ -45,7 +45,7 @@ import {
   townLights,
   viewLight,
 } from "../scene/scene";
-import { type RegionalWeather, sceneWeather } from "../scene/weather";
+import { hasSky, type RegionalWeather, sceneWeather } from "../scene/weather";
 import {
   bufferSize,
   type BufferSize,
@@ -640,7 +640,7 @@ export function mountSceneView(
     },
     setWeather(byRegion: RegionalWeather, override = false): void {
       weather = override ? byRegion : sceneWeather(byRegion, clock.now());
-      weatherShown = Object.keys(weather).length > 0;
+      weatherShown = hasSky(weather);
       weatherVersion++;
       wake();
     },
