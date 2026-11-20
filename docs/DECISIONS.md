@@ -1207,3 +1207,45 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   their own keep the conflicts rare.
 - **Revisit if:** two branches conflict more than once in a step, or three open
   branches turn out to be too many to review.
+
+## D-067 — The seasons in pixel art: colours and small marks
+
+- **Context:** B-022 draws the four seasons. A sheet of mockups compared, in pixel
+  art, the land's colours alone with colours and marks scattered on the ground, in
+  France, Normandie and Auvergne-Rhône-Alpes
+  (`/mnt/project-files/seasons-mockups/v1/`, the project's files); the modern
+  theme changes its colours in both.
+- **Options (decision card, 2026-11-19, PRD Q-44):** A, colours only; B, colours
+  and small marks: frost, blossom, ripe crops, ploughed soil and turning leaves
+  (recommended).
+- **Decision (Guillaume, 2026-11-19, decision card):** B, colours and small marks.
+  Drawn in PR #55: each season at its fullest on the 15th of January, April, July
+  and October, and a change over 42 days that spreads by patches.
+- **Why:** the marks tell the season at a glance, where colours alone left summer
+  and autumn too close in Normandie.
+- **Revisit if:** on the deployed build the marks read as noise, or cost too much
+  (about 1 ms more for a full redraw in pixel art, measured in PR #55).
+
+## D-068 — Snow on the ground: mountain points, and the higher ground under snow
+
+- **Context:** B-022's snow on the ground comes from the readings' `snow_depth`,
+  but the scene had one reading per region (D-063), at the prefectures, in the
+  plains, where snow lies a few days a year while the ranges hold it all winter. A
+  sheet compared where to draw it, in Auvergne-Rhône-Alpes, on an ordinary winter
+  day and on a day of snow in Lyon (`/mnt/project-files/snow-mockups/v1/`).
+- **Options (PRD Q-45):** 1, around each point, 20 km, on ground at least as
+  high; 2, everywhere higher in the point's region; 3, five more points in the
+  mountain ranges with option 1's rule (recommended on the decision card,
+  2026-11-20); 4, a mix proposed in the thread when Guillaume leaned to option 2:
+  the ranges' points, each laying snow on its range above itself, and option 2 for
+  the regions.
+- **Decision (Guillaume, 2026-11-20, in the thread: « oui OK pour option 4 »):**
+  option 4. Drawn in PR #56: points in the Alps, the Pyrenees, the Massif central,
+  the Jura and the Vosges; a range is the ground at the point's height or above
+  that the point's ground reaches; the page says the snow is inferred.
+- **Why:** the mountains are white in winter as they are, and a snowfall in the
+  plains covers its region; option 2 alone would leave the Alps green on most
+  winter days. The snow is inferred from one reading, so the page says so.
+- **Revisit if:** the inferred snow is visibly wrong against reality (a range
+  white while its stations report none elsewhere), or a gridded snow source is
+  added (`docs/SOURCES.md` § 1).
