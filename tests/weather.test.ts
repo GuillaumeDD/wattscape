@@ -11,7 +11,13 @@ import {
   weatherGroup,
 } from "../src/data/open-meteo";
 import { referencePoint } from "../src/geo/regions";
-import { overrideWeather, type RegionalWeather, sceneWeather } from "../src/scene/weather";
+import {
+  MASSIFS,
+  overrideWeather,
+  type RegionalWeather,
+  sceneWeather,
+  WEATHER_POINT_IDS,
+} from "../src/scene/weather";
 import { weatherFromQuery } from "../src/ui/settings";
 import {
   SEND_AFTER_MS,
@@ -62,13 +68,25 @@ describe("overrideWeather: the weather ?weather= imposes", () => {
   it("gives every region the same reading of the group asked, dated at the clock", () => {
     for (const group of WEATHER_GROUPS) {
       const all = overrideWeather(group, T);
-      expect(Object.keys(all).sort()).toEqual([...REGION_CODES].sort());
-      for (const region of REGION_CODES) {
+      expect(Object.keys(all).sort()).toEqual([...WEATHER_POINT_IDS].sort());
+      for (const region of WEATHER_POINT_IDS) {
         const r = all[region];
         expect(r?.group).toBe(group);
         expect(r?.timeMs).toBe(T);
       }
     }
+  });
+
+  it("places each imposed reading at its region's prefecture or its range's point", () => {
+    const all = overrideWeather("snow", T);
+    for (const region of REGION_CODES) {
+      const ref = referencePoint(region);
+      expect([all[region]?.latitude, all[region]?.longitude]).toEqual([
+        ref?.latitude,
+        ref?.longitude,
+      ]);
+    }
+    for (const m of MASSIFS) expect(all[m.id]?.latitude).toBe(m.latitude);
   });
 
   it("uses a WMO code of its own group and values the parser would accept", () => {
@@ -140,6 +158,14 @@ describe("weatherState: what the page says about the weather", () => {
 });
 
 describe("weatherPoint: where a region's weather is asked for", () => {
+  it("is a mountain range's own point, on 0.1°, whoever the viewer", () => {
+    const viewer = { region: "84" as const, position: pos(45.7, 4.8) };
+    for (const m of MASSIFS) {
+      expect(weatherPoint(m.id, null)).toEqual(pos(m.latitude, m.longitude));
+      expect(weatherPoint(m.id, viewer)).toEqual(pos(m.latitude, m.longitude));
+    }
+  });
+
   it("is the region's prefecture, rounded to 0.1°, for every region", () => {
     for (const region of REGION_CODES) {
       const ref = referencePoint(region);
@@ -216,14 +242,14 @@ describe("startWeatherFeed", () => {
 
   const clock = { now: (): number => T };
 
-  it("asks once per region, at its prefecture, and sends every reading", async () => {
+  it("asks once per region, at its prefecture, and per mountain range, and sends every reading", async () => {
     const { fetchFn, urls } = fakeFetch(ok);
     const sent: RegionalWeather[] = [];
     startWeatherFeed(clock, fetchFn, (w) => sent.push(w));
     await vi.advanceTimersByTimeAsync(0);
-    expect(urls).toHaveLength(REGION_CODES.length);
+    expect(urls).toHaveLength(WEATHER_POINT_IDS.length);
     const last = sent.at(-1) ?? {};
-    expect(Object.keys(last).sort()).toEqual([...REGION_CODES].sort());
+    expect(Object.keys(last).sort()).toEqual([...WEATHER_POINT_IDS].sort());
     // Only rounded positions leave: one decimal.
     for (const url of urls) {
       const q = new URL(url).searchParams;
@@ -236,9 +262,9 @@ describe("startWeatherFeed", () => {
     const { fetchFn, urls } = fakeFetch(ok);
     startWeatherFeed(clock, fetchFn, () => undefined);
     await vi.advanceTimersByTimeAsync(WEATHER_REFRESH_MS - 1000);
-    expect(urls).toHaveLength(REGION_CODES.length);
+    expect(urls).toHaveLength(WEATHER_POINT_IDS.length);
     await vi.advanceTimersByTimeAsync(1000);
-    expect(urls).toHaveLength(2 * REGION_CODES.length);
+    expect(urls).toHaveLength(2 * WEATHER_POINT_IDS.length);
   });
 
   it("retries only the failed regions, a minute later, then twice as long", async () => {
@@ -256,12 +282,12 @@ describe("startWeatherFeed", () => {
     expect(sent.at(-1)?.["84"]).toBeUndefined();
     expect(sent.at(-1)?.["28"]).toBeDefined();
     await vi.advanceTimersByTimeAsync(WEATHER_RETRY_MS);
-    expect(urls).toHaveLength(REGION_CODES.length + 1);
+    expect(urls).toHaveLength(WEATHER_POINT_IDS.length + 1);
     await vi.advanceTimersByTimeAsync(WEATHER_RETRY_MS);
-    expect(urls).toHaveLength(REGION_CODES.length + 1);
+    expect(urls).toHaveLength(WEATHER_POINT_IDS.length + 1);
     failing.clear();
     await vi.advanceTimersByTimeAsync(WEATHER_RETRY_MS);
-    expect(urls).toHaveLength(REGION_CODES.length + 2);
+    expect(urls).toHaveLength(WEATHER_POINT_IDS.length + 2);
     expect(sent.at(-1)?.["84"]).toBeDefined();
   });
 
@@ -274,7 +300,8 @@ describe("startWeatherFeed", () => {
             resolve(ok(url));
           };
           // Normandie's first answer, from its prefecture, is held back.
-          if (urls.length <= REGION_CODES.length && url.includes("latitude=49.4&")) release = r;
+          if (urls.length <= WEATHER_POINT_IDS.length && url.includes("latitude=49.4&"))
+            release = r;
           else r();
         }),
     );
@@ -346,7 +373,7 @@ describe("startWeatherFeed", () => {
     feed.setViewer({ region: "28", position: pos(49.7, 0.2) });
     await vi.advanceTimersByTimeAsync(0);
     const calls = urls.length;
-    expect(calls).toBe(REGION_CODES.length);
+    expect(calls).toBe(WEATHER_POINT_IDS.length);
     doc.hidden = false;
     for (const l of listeners) l();
     await vi.advanceTimersByTimeAsync(0);
@@ -402,7 +429,7 @@ describe("startWeatherFeed", () => {
     expect(sent).toHaveLength(1);
     await vi.advanceTimersByTimeAsync(SEND_AFTER_MS);
     expect(sent).toHaveLength(2);
-    expect(Object.keys(sent.at(-1) ?? {})).toHaveLength(REGION_CODES.length - 1);
+    expect(Object.keys(sent.at(-1) ?? {})).toHaveLength(WEATHER_POINT_IDS.length - 1);
     expect(sent.at(-1)?.["32"]).toBeUndefined();
   });
 
@@ -413,10 +440,10 @@ describe("startWeatherFeed", () => {
     doc.hidden = true;
     for (const l of listeners) l();
     await vi.advanceTimersByTimeAsync(2 * WEATHER_REFRESH_MS);
-    expect(urls).toHaveLength(REGION_CODES.length);
+    expect(urls).toHaveLength(WEATHER_POINT_IDS.length);
     doc.hidden = false;
     for (const l of listeners) l();
     await vi.advanceTimersByTimeAsync(0);
-    expect(urls).toHaveLength(2 * REGION_CODES.length);
+    expect(urls).toHaveLength(2 * WEATHER_POINT_IDS.length);
   });
 });

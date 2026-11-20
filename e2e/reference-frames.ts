@@ -159,6 +159,52 @@ function weathered(
   return out;
 }
 
+/**
+ * Snow on the ground (B-022, Q-45): a clear winter day, snow measured at the mountain
+ * ranges' points (their heights are the API's, asked on 2026-11-20), and, for the
+ * plains' day, at Lyon too. Typed by hand, as `?weather=` imposes: not a reading.
+ */
+export function snowWeather(plains: boolean): RegionalWeather {
+  const clear = overrideWeather("clear", WEATHER_TIME_MS);
+  const at = (
+    id: keyof typeof clear,
+    elevationM: number,
+    snowDepthM: number,
+  ): WeatherReading | undefined => {
+    const r = clear[id];
+    return r === undefined ? undefined : { ...r, elevationM, snowDepthM };
+  };
+  const out: Partial<Record<keyof typeof clear, WeatherReading>> = {};
+  const readings = {
+    alps: at("alps", 1676, 0.8),
+    pyrenees: at("pyrenees", 1445, 0.4),
+    massifCentral: at("massifCentral", 1228, 0.3),
+    jura: at("jura", 1081, 0.2),
+    vosges: at("vosges", 986, 0),
+    ...(plains ? { "84": at("84", 170, 0.05) } : {}),
+  };
+  for (const [id, r] of Object.entries(readings) as [
+    keyof typeof clear,
+    WeatherReading | undefined,
+  ][])
+    if (r !== undefined) out[id] = r;
+  return out;
+}
+
+/** A winter frame under snow, in either theme. */
+function snowed(theme: "pixel" | "modern", focus: CellRegion | null, plains: boolean): Surface {
+  const density = theme === "pixel" ? 1 : MODERN_DENSITY;
+  const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
+  const s = {
+    ...referenceScene(focus, framed(focus), 35),
+    season: { from: "winter", to: "winter", share: 0 } as const,
+    weather: snowWeather(plains),
+    timeMs: WEATHER_TIME_MS,
+  };
+  (theme === "pixel" ? drawPixelScene : drawModernScene)(s, out);
+  return out;
+}
+
 /** A reference frame in a season (B-022), in either theme. */
 function seasoned(
   theme: "pixel" | "modern",
@@ -235,4 +281,10 @@ export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
     seasoned("modern", "84", 35, { from: "autumn", to: "winter", share: 0.5 }),
   "season-france-autumn-modern": () =>
     seasoned("modern", null, 35, { from: "autumn", to: "autumn", share: 0 }),
+  // Snow on the ground (B-022, Q-45): the ranges, then the plains too.
+  "snow-france-mountains-pixel": () => snowed("pixel", null, false),
+  "snow-auvergne-rhone-alpes-mountains-pixel": () => snowed("pixel", "84", false),
+  "snow-auvergne-rhone-alpes-plains-pixel": () => snowed("pixel", "84", true),
+  "snow-auvergne-rhone-alpes-mountains-modern": () => snowed("modern", "84", false),
+  "snow-auvergne-rhone-alpes-plains-modern": () => snowed("modern", "84", true),
 };

@@ -56,6 +56,7 @@
   "weatherLive": "Open-Meteo weather of each region, reading of {time}.",
   "weatherStale": "Old Open-Meteo weather, reading of {time}.",
   "weatherAhead": "The Open-Meteo weather reading ({time}) is later than the time shown: no weather.",
+  "weatherSnowInferred": "Snow on the ground is inferred: where a weather point (one per region, five in the mountains) reports snow, the higher ground of its region or range is drawn under snow.",
   "weatherUnavailable": "Open-Meteo weather unavailable: no weather.",
   "weatherOverride": "Weather imposed everywhere ({group}) by the ?weather= setting, not live.",
   "weatherClear": "clear sky",

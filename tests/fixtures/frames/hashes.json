@@ -21,10 +21,10 @@
   "modern-mont-blanc-day": "001f1329",
   "modern-sharp-normandie-day-t1.3": "8765f829",
   "modern-sharp-normandie-night-t1.3": "757a36aa",
-  "weather-france-mixed-pixel-t1.3": "a6fa4838",
+  "weather-france-mixed-pixel-t1.3": "ed369950",
   "weather-normandie-rain-pixel-t1.3": "dc73f0fb",
   "weather-normandie-storm-night-pixel-t0.1": "14a52e3e",
-  "weather-france-mixed-modern-t1.3": "48f1f91c",
+  "weather-france-mixed-modern-t1.3": "3c8ed3d2",
   "weather-normandie-fog-modern-t1.3": "7709caa8",
   "weather-normandie-storm-night-modern-t0.1": "f81af061",
   "season-normandie-winter-pixel": "f2b97f82",
@@ -33,5 +33,10 @@
   "season-normandie-autumn-night-pixel": "ab55898d",
   "season-normandie-spring-modern": "ae30aa58",
   "season-auvergne-rhone-alpes-turning-winter-modern": "a88c75b7",
-  "season-france-autumn-modern": "c3ef14ce"
+  "season-france-autumn-modern": "c3ef14ce",
+  "snow-france-mountains-pixel": "9b816022",
+  "snow-auvergne-rhone-alpes-mountains-pixel": "1ac654d4",
+  "snow-auvergne-rhone-alpes-plains-pixel": "0314d1df",
+  "snow-auvergne-rhone-alpes-mountains-modern": "cfafad4e",
+  "snow-auvergne-rhone-alpes-plains-modern": "937a8c1b"
 }

@@ -226,6 +226,8 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
   URL prints exactly one decimal).
 - **Answer:** `latitude`/`longitude` of the model's grid point, not the position
   asked (49.4, 1.1 → 49.4017, 1.0999; the Mont Blanc summit → a point at 2 308 m);
+  `elevation`, the point's height in metres (12 at Rouen, 2 308 there, in the
+  recorded answers; kept from -100 to 5 000 m, for the snow on the ground);
   `current_units`; `current` with `time` (seconds, UTC, start of a 15-minute
   interval: `interval` = 900) and one number per field. The parser checks each unit
   (°C, %, mm, cm, m, km/h, °, wmo code), so a change of unit cannot pass as a value,
@@ -246,12 +248,13 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
   clock counts as unavailable. Requests share the éCO2mix client's rules
   (`src/data/fetch-json.ts`): 30 s timeout, size cap, abort.
 - **How a reading reaches the scene** (B-018): `src/ui/weather-feed.ts` asks for
-  the 12 regions' points (§ Privacy, D-063), one call each, every 15 minutes while
-  the tab is visible: 1 152 calls a day for a viewer watching all day, under the
-  quota of 10 000. One call a point, and not one call for all twelve, because the
-  answer to a multi-point query has not been recorded yet (the cloud's quota was
-  spent on 2026-11-18). A failed call keeps its region's last good reading; the
-  failed calls alone are tried again after 1 minute, then 2, 4, 8 and at most 15.
+  the 12 regions' points (§ Privacy, D-063) and the 5 mountain ranges' (`MASSIFS`,
+  Q-45), one call each, every 15 minutes while the tab is visible: 1 632 calls a
+  day for a viewer watching all day, under the quota of 10 000. One call a point,
+  and not one call for all seventeen, because the answer to a multi-point query has
+  not been recorded yet (the cloud's quota was spent on 2026-11-18). A failed call
+  keeps its point's last good reading; the failed calls alone are tried again after
+  1 minute, then 2, 4, 8 and at most 15.
   The answers that land within a second of each other reach the scene together
   (one redraw), so a slow call, up to the 30 s timeout, holds back no other: in the
   cloud session of 2026-11-18, the last of the 12 answers took over 4 s.
@@ -262,7 +265,8 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
   time-lapse): the page note then says so. The note gives the oldest shown
   reading's time, so it never makes the weather look fresher than it is.
 - **Weather override** (`?weather=clear|cloudy|fog|drizzle|rain|snow|storm`): the
-  same weather on every region, for demos and screenshots, and no call at all. Not
+  same weather on every region and range, for demos and screenshots, and no call
+  at all; at sea level, so `?weather=snow` lays snow on all the land. Not
   a reading: its values are typed by hand in `src/scene/weather.ts` (a WMO code of
   the group, cloud cover 0 % clear and 100 % otherwise, a wind of 20 km/h from the
   west), and the page note says that it is imposed, not live.
@@ -293,7 +297,10 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
 - The scene takes one weather reading per region (D-063): at the viewer's rounded
   position for the region it lies in, at the regional prefecture
   (`referencePoint`), rounded too, for every other region and for every region
-  once an area is picked by hand (`src/ui/weather-feed.ts`).
+  once an area is picked by hand (`src/ui/weather-feed.ts`). The 5 mountain
+  ranges' points are fixed (Q-45). The snow a region's reading lays depends on its
+  point's height, never on where the point is, so the map does not show the
+  viewer's position.
 - The position is rounded to 0.1° as soon as it arrives (`src/ui/area-picker.ts`);
   the raw value is never kept.
 
@@ -622,8 +629,34 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
     grey-green in winter, fresh in spring, the summer's as before, russet in
     autumn; the rock and the snow above 1 300 m alike in all.
   - **Provisional:** the dates, the colours and the marks' density, to check on the
-    deployed build. Vineyards, crops and lavender with their own calendar, and
-    snow on the ground from Open-Meteo's `snow_depth`, are still to come.
+    deployed build. Vineyards, crops and lavender with their own calendar are
+    still to come.
+- **Snow on the ground** (B-022, Q-45): `src/scene/snow.ts`, from the readings'
+  `snow_depth` (any snow reported, 0.005 m and up) and their point's `elevation`.
+  - **Five more weather points**, in the mountain ranges (`MASSIFS`, on 0.1°): the
+    Alps (45.5, 6.6; 1 676 m), the Pyrenees (42.8, 0.0; 1 445 m), the Massif
+    central (45.2, 2.8; 1 228 m), the Jura (46.5, 6.1; 1 081 m) and the Vosges
+    (48.1, 7.0; 986 m), heights by the API (asked 2026-11-20, S-027). The
+    prefectures, in the plains, see snow a few days a year; the ranges hold it
+    all winter.
+  - **Inferred, and said so:** a region's point under snow lays snow on its
+    region's land at its height or above; a range's point, on the land at its
+    height or above that its ground reaches without coming down below it (a
+    breadth-first search from the point, so the Pyrenees do not take the Alps'
+    snow), French land only, across regions. The search starts at the point's
+    cell; only if that cell's mean is lower than the point, at the cells within
+    8 km that are high enough. "At its height" is by elevation
+    class. The page note says the snow is inferred whenever a reading reports
+    some (`weatherSnowInferred`).
+  - **Drawn:** pixel art paints the cell in the peaks' white (`snow`), shaded and
+    veiled as the land; the modern theme blends the land's tint to the peaks'
+    white, with a soft edge over 3 × 3 cells (`softSnow`), never abroad. Over the season's colours; the
+    permanent snow above 2 400 m stays.
+  - **Cost:** the cover is worked out once per set of readings and layer: 0.6 to
+    0.7 ms on the 4 km layer and about 5 ms on the 1 km one with snow on every
+    range and a region (Node, 2026-11-20); `?weather=snow`, all the land under
+    snow, takes about 60 ms once on the 1 km layer.
+  - **Provisional:** the points, the rule by elevation class, and the white.
   - **Determinism:** where a patch turns and where a mark falls is decided by
     integer hashes and + − × / only; the date by `Date.UTC`, which is exact.
 
