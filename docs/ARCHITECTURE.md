@@ -559,10 +559,10 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
   at night). A fractional step is drawn by dithering between the two whole steps,
   so the land stays in palette. A `NaN` elevation, or a `NaN` darkness, reads as
   night.
-- **Weather layers** (B-018, direction A, D-064; its values confirmed, D-069): clouds float over the map with
-  their shadows on the ground; rain, snow, fog banks and lightning over them. The
-  same shapes in both themes; pixel art draws them in palette colours and dithers,
-  the modern theme blends them smooth.
+- **Weather layers** (B-018, direction A, D-064; its values confirmed, D-069):
+  clouds float over the map with their shadows on the ground; rain, snow, fog
+  banks and lightning over them. The same shapes in both themes; pixel art draws
+  them in palette colours and dithers, the modern theme blends them smooth.
   - **Weather grid** (`weatherGrid`, `src/scene/clouds.ts`): each 4 km cell takes
     the reading of its region; a sea cell, the nearest region's within 10 cells
     (40 km) of the coast; abroad, the open sea and Corsica (no reading of its own:
