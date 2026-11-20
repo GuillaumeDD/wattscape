@@ -148,6 +148,9 @@ describe("parseOpenMeteo on recorded answers", () => {
   it("reads Rouen", () => {
     expect(reading("2026-11-11-rouen")).toEqual({
       timeMs: Date.UTC(2026, 10, 11, 15, 0),
+      latitude: 49.401657,
+      longitude: 1.0999843,
+      elevationM: 12,
       temperatureC: 15.5,
       weatherCode: 3,
       group: "cloudy",
@@ -164,6 +167,7 @@ describe("parseOpenMeteo on recorded answers", () => {
   it("reads snow on the ground and rain showers at Mont Blanc", () => {
     const r = reading("2026-11-11-mont-blanc");
     expect(r.snowDepthM).toBe(0.02);
+    expect(r.elevationM).toBe(2308);
     expect(r.weatherCode).toBe(81);
     expect(r.group).toBe("rain");
   });
@@ -213,6 +217,15 @@ describe("parseOpenMeteo on malformed and hostile answers", () => {
         else b.current[field] = value;
         expect(parseOpenMeteo(ROUEN, b).ok, `${field} = ${JSON.stringify(value)}`).toBe(false);
       }
+    }
+  });
+
+  it("rejects a grid point's height that is missing, not a number or absurd", () => {
+    for (const value of [undefined, null, "12", Number.NaN, -101, 5001]) {
+      const b: Record<string, unknown> = body();
+      if (value === undefined) Reflect.deleteProperty(b, "elevation");
+      else b.elevation = value;
+      expect(parseOpenMeteo(ROUEN, b).ok, `elevation = ${String(value)}`).toBe(false);
     }
   });
 

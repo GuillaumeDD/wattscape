@@ -5,6 +5,7 @@
  */
 import { REGION_CODES, type RegionCode } from "../data/eco2mix.ts";
 import { type WeatherGroup, type WeatherReading, weatherFreshness } from "../data/open-meteo.ts";
+import { referencePoint } from "../geo/regions.ts";
 
 /** Each region's current weather; a region without a reading to show is absent. */
 export type RegionalWeather = Readonly<Partial<Record<RegionCode, WeatherReading>>>;
@@ -110,14 +111,21 @@ const OVERRIDE_WIND = { windSpeedKmh: 20, windFromDeg: 270 } as const;
  * sun (src/sky/light.ts), never from this field.
  */
 export function overrideWeather(group: WeatherGroup, timeMs: number): RegionalWeather {
-  const reading: WeatherReading = {
-    timeMs,
-    group,
-    ...OVERRIDES[group],
-    ...OVERRIDE_WIND,
-    isDay: true,
-  };
   const all: Partial<Record<RegionCode, WeatherReading>> = {};
-  for (const region of REGION_CODES) all[region] = reading;
+  for (const region of REGION_CODES) {
+    // At each region's prefecture, at sea level, so that snow on the ground shows
+    // around it whatever the ground's height.
+    const point = referencePoint(region);
+    all[region] = {
+      timeMs,
+      latitude: point?.latitude ?? 0,
+      longitude: point?.longitude ?? 0,
+      elevationM: 0,
+      group,
+      ...OVERRIDES[group],
+      ...OVERRIDE_WIND,
+      isDay: true,
+    };
+  }
   return all;
 }
