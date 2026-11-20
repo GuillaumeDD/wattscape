@@ -1274,3 +1274,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
     it, not by a rebase; this settles the point D-066 left to confirm (Q-57).
 - **Why:** each was the recommendation, with its reason in PRD § Open questions.
 - **Revisit if:** the conditions in D-064, D-065, D-067 and D-068 arise.
+
+## D-070 — Step 7 review: three lessons written down
+
+- **Context:** at the end of step 7 (the weather and the seasons, PRs #52 to
+  #58), Guillaume asked for a review of the points worth keeping (2026-11-20).
+- **Options:** keep the lessons in memory only, or write them where the next
+  session reads them.
+- **Decision (proposed by Claude, 2026-11-20; Guillaume to confirm in PR review):**
+  written in `AGENTS.md`: a PR's pictures go one per paragraph as `<img>` tags,
+  not in a table, and the body is read back once posted (escaped in PR #53,
+  mangled in #56); a test over a growing
+  list runs one case per item (the frame-hash test timed out in CI in PR #56); an
+  option proposed after the mockups is drawn on the same board before the choice
+  (D-068).
+- **Why:** each cost a rewrite, a red CI run or an extra round of mockups in this
+  step.
+- **Revisit if:** a rule turns out to cost more than the slip it prevents.

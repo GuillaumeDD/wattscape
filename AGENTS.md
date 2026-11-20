@@ -207,7 +207,10 @@ Format:
      (a permalink), so it survives the branch's deletion. Take the SHA from
      `git rev-parse HEAD` after the push, never write it ahead (PR #46). Shoot it at day **and**
      night, and in at least two regions, from fixed data (`?sample=…&at=…`) so the
-     picture can be reproduced.
+     picture can be reproduced. Put each picture in a paragraph of its own, as
+     `<img src="…/blob/<sha>/docs/screenshots/<file>.png?raw=true" width="480">`,
+     not in a table, then read the body back once posted: the tags came out
+     escaped in PR #53's table and mangled in #56's first body.
 
 ### Security
 
@@ -270,6 +273,9 @@ specific. Focus on it:
   from documentation instead of recorded is labelled as such.
 - A unit test stays under ~5 s. An exhaustive check (every town, every region) runs
   on a deterministic sample in the suite, or in a tool run by hand.
+- A test over a list that grows (the reference frames) runs one case per item
+  (`it.each`): one test over every frame passed locally, then timed out at 5 s in
+  CI once the snow frames were added (PR #56).
 
 ### Determinism & reproducibility
 
@@ -324,6 +330,9 @@ specific. Focus on it:
 - At the end of a step, put every provisional choice still open to Guillaume in one
   questionnaire: each with a recommendation and room for a free answer. Record the
   answers with their provenance ("Guillaume, date") in one PR.
+- An option proposed after the mockups (a mix, a counter-proposal) is drawn on the
+  same board as the others before Guillaume is asked to choose: in D-068 he asked
+  to see the mix next to the three options first.
 - **Decisions are auditable.** Every decision (an answered question, a rejected
   option, a rule) gets an entry in `docs/DECISIONS.md`: context, options, decision,
   who and when, why, and what would make us revisit it. A later change reverses an
