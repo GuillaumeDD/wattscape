@@ -14,8 +14,8 @@
  * its own landmarks by lots (`step-8-modern-landmarks.png`, the second lot in
  * `step-9-modern-landmarks.png`, the third in `step-10-modern-landmarks.png`, the
  * fourth in `step-11-modern-landmarks.png`), at the sharp density a full HD screen gets (D-058,
- * `step-8-modern-sharp-*.png`), and the weather in both themes (B-018,
- * `step-12-weather-*.png`).
+ * `step-8-modern-sharp-*.png`), the weather in both themes (B-018,
+ * `step-12-weather-*.png`), and the seasons (B-022, `step-13-seasons-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -36,6 +36,7 @@ import {
   WEATHER_TIME_MS,
 } from "../e2e/reference-frames.ts";
 import { overrideWeather, type RegionalWeather } from "../src/scene/weather.ts";
+import { type Season, SEASONS } from "../src/scene/season.ts";
 import { writePng } from "./png.ts";
 
 const OUT = process.argv[2] ?? "docs/screenshots";
@@ -66,6 +67,7 @@ function draw(camera: Camera, focus: CellRegion | null, elevation: number): Surf
     landmarks: LANDMARKS,
     weather: {},
     timeMs: 0,
+    season: { from: "summer", to: "summer", share: 0 },
   };
   drawPixelScene(scene, surface);
   return surface;
@@ -425,5 +427,44 @@ for (const theme of ["pixel", "modern"] as const) {
     const file = `${OUT}/step-12-weather-${theme}-${name}.png`;
     writePng(file, surface, theme === "pixel" ? 2 : 1);
     console.log(`${file}: ${hashSurface(surface)}`);
+  }
+}
+
+// The seasons (B-022): in each theme, Normandie and Auvergne-Rhône-Alpes in a sheet
+// of the four seasons by day (winter, spring / summer, autumn), then one at night.
+for (const theme of ["pixel", "modern"] as const) {
+  const density = theme === "pixel" ? 1 : MODERN_DENSITY;
+  for (const [name, focus] of [
+    ["normandie", "28"],
+    ["auvergne-rhone-alpes", "84"],
+  ] as const) {
+    const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+    const shot = (season: Season, elevation: number): Surface => {
+      const surface = createSurface(WIDTH * density, HEIGHT * density);
+      const scene = {
+        ...referenceScene(focus, camera, elevation),
+        season: { from: season, to: season, share: 0 },
+      };
+      (theme === "pixel" ? drawPixelScene : drawModernScene)(scene, surface);
+      return surface;
+    };
+    const sheet = createSurface(WIDTH * density * 2, HEIGHT * density * 2);
+    SEASONS.forEach((season, k) => {
+      const surface = shot(season, 35);
+      const column = k % 2;
+      const row = Math.floor(k / 2);
+      for (let y = 0; y < surface.height; y++)
+        sheet.data.set(
+          surface.data.subarray(y * surface.width * 4, (y + 1) * surface.width * 4),
+          ((row * surface.height + y) * sheet.width + column * surface.width) * 4,
+        );
+    });
+    const file = `${OUT}/step-13-seasons-${theme}-${name}.png`;
+    writePng(file, sheet, theme === "pixel" ? 2 : 1);
+    console.log(`${file}: ${hashSurface(sheet)}`);
+    const night = shot(focus === "28" ? "winter" : "autumn", -20);
+    const nightFile = `${OUT}/step-13-seasons-${theme}-${name}-night.png`;
+    writePng(nightFile, night, theme === "pixel" ? 2 : 1);
+    console.log(`${nightFile}: ${hashSurface(night)}`);
   }
 }

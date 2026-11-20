@@ -113,10 +113,10 @@ describe("Surface", () => {
 });
 
 describe("palette", () => {
-  it("has 27 distinct colours, each a byte triple", () => {
-    expect(COLOUR_NAMES).toHaveLength(27);
+  it("has 33 distinct colours, each a byte triple", () => {
+    expect(COLOUR_NAMES).toHaveLength(33);
     const seen = new Set(COLOUR_NAMES.map((n) => PALETTE[n].join(",")));
-    expect(seen.size).toBe(27);
+    expect(seen.size).toBe(33);
     for (const n of COLOUR_NAMES) {
       for (const v of PALETTE[n]) expect(Number.isInteger(v) && v >= 0 && v <= 255, n).toBe(true);
     }

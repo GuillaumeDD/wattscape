@@ -23,6 +23,7 @@ import { type Light, lightAt } from "../sky/light.ts";
 import { sunPosition } from "../sky/sun.ts";
 import { type Camera } from "./camera.ts";
 import { type RegionalWeather } from "./weather.ts";
+import { type SeasonState } from "./season.ts";
 
 /** A town: a commune of 2 000 inhabitants or more, at its chef-lieu (B-015, D-031). */
 export interface Town {
@@ -84,6 +85,8 @@ export interface Scene {
   readonly weather: RegionalWeather;
   /** The clock's time, ms: the clouds drift with the wind (src/scene/clouds.ts). */
   readonly timeMs: number;
+  /** The season of the clock's date, and how far the land has turned (src/scene/season.ts). */
+  readonly season: SeasonState;
 }
 
 /**

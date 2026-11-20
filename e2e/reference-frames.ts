@@ -29,6 +29,7 @@ import {
 import { lightAt } from "../src/sky/light.ts";
 import { type WeatherGroup, type WeatherReading } from "../src/data/open-meteo.ts";
 import { overrideWeather, type RegionalWeather } from "../src/scene/weather.ts";
+import { type SeasonState } from "../src/scene/season.ts";
 import dayStep from "../tests/fixtures/eco2mix/2026-11-12-all-regions.json" with { type: "json" };
 import nightStep from "../tests/fixtures/eco2mix/2026-11-12-all-regions-0100z.json" with { type: "json" };
 
@@ -75,6 +76,7 @@ export function referenceScene(
     landmarks: LANDMARKS,
     weather: {},
     timeMs: 0,
+    season: { from: "summer", to: "summer", share: 0 },
   };
 }
 
@@ -157,6 +159,20 @@ function weathered(
   return out;
 }
 
+/** A reference frame in a season (B-022), in either theme. */
+function seasoned(
+  theme: "pixel" | "modern",
+  focus: CellRegion | null,
+  sunElevation: number,
+  season: SeasonState,
+): Surface {
+  const density = theme === "pixel" ? 1 : MODERN_DENSITY;
+  const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
+  const s = { ...referenceScene(focus, framed(focus), sunElevation), season };
+  (theme === "pixel" ? drawPixelScene : drawModernScene)(s, out);
+  return out;
+}
+
 /** Every reference frame, by the name its hash is recorded under. */
 export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
   "test-card": drawTestCard,
@@ -203,4 +219,20 @@ export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
     weathered("modern", "28", 35, overrideWeather("fog", WEATHER_TIME_MS), 1.3),
   "weather-normandie-storm-night-modern-t0.1": () =>
     weathered("modern", "28", -20, overrideWeather("storm", WEATHER_TIME_MS), 0.1),
+  // The seasons (B-022): each at its fullest, and one half way through its change, in
+  // both themes, by day and at night.
+  "season-normandie-winter-pixel": () =>
+    seasoned("pixel", "28", 35, { from: "winter", to: "winter", share: 0 }),
+  "season-auvergne-rhone-alpes-spring-pixel": () =>
+    seasoned("pixel", "84", 35, { from: "spring", to: "spring", share: 0 }),
+  "season-auvergne-rhone-alpes-turning-autumn-pixel": () =>
+    seasoned("pixel", "84", 35, { from: "summer", to: "autumn", share: 0.5 }),
+  "season-normandie-autumn-night-pixel": () =>
+    seasoned("pixel", "28", -20, { from: "autumn", to: "autumn", share: 0 }),
+  "season-normandie-spring-modern": () =>
+    seasoned("modern", "28", 35, { from: "spring", to: "spring", share: 0 }),
+  "season-auvergne-rhone-alpes-turning-winter-modern": () =>
+    seasoned("modern", "84", 35, { from: "autumn", to: "winter", share: 0.5 }),
+  "season-france-autumn-modern": () =>
+    seasoned("modern", null, 35, { from: "autumn", to: "autumn", share: 0 }),
 };

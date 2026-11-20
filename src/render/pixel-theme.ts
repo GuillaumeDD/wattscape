@@ -41,6 +41,7 @@ import {
   weatherGrid,
 } from "../scene/clouds.ts";
 import { type WeatherGroup } from "../data/open-meteo.ts";
+import { type Season, seasonOf } from "../scene/season.ts";
 import { type CloudMask, cloudMask, cloudPart, eachDrop, lightning } from "./weather-art.ts";
 
 /** Whether this engine stores a Uint32 with its low byte first (every common one does). */
@@ -58,17 +59,52 @@ const PACKED = Object.fromEntries(COLOUR_NAMES.map((n) => [n, pack(PALETTE[n])])
   number
 >;
 
+/** The three green bands of a season, low (below 300 m) to high (800 to 1 300 m). */
+const BANDS: Readonly<Record<Season, readonly [ColourName, ColourName, ColourName]>> = {
+  winter: ["dull", "grass", "forest"],
+  spring: ["fresh", "meadow", "grass"],
+  summer: ["meadow", "grass", "forest"],
+  autumn: ["meadow", "grass", "forest"],
+};
+
 /**
- * Ground colour of a land cell: one flat colour per altitude band (summer, no season
- * yet), like the tints of a relief map, so the land reads as a few calm shapes.
+ * Ground colour of a land cell: one flat colour per altitude band, like the tints of
+ * a relief map, so the land reads as a few calm shapes; the bands below the rock
+ * change with the season (B-022).
  */
-export function groundColour(elevation: number): ColourName {
+export function groundColour(elevation: number, season: Season = "summer"): ColourName {
   if (elevation >= 12) return "snow"; // 2 400 m and up
   if (elevation >= 9) return "rock"; // 1 300 m
-  if (elevation >= 7) return "forest"; // 800 m
-  if (elevation >= 4) return "grass"; // 300 m
-  return "meadow";
+  const [low, mid, high] = BANDS[season];
+  if (elevation >= 7) return high; // 800 m
+  if (elevation >= 4) return mid; // 300 m
+  return low;
 }
+
+/**
+ * The small marks a season scatters on a ground colour (B-022, Q-44): one pixel in
+ * `every`, by a hash of the ground pixel, so they stay put while the camera moves.
+ * Frost in winter, blossom in spring, ripe crops in summer, ploughed soil and
+ * turning leaves in autumn.
+ */
+export const SEASON_DOTS: Readonly<
+  Record<Season, Partial<Record<ColourName, readonly (readonly [ColourName, number])[]>>>
+> = {
+  winter: { dull: [["frost", 9]], grass: [["frost", 23]] },
+  spring: { fresh: [["blossom", 13]], meadow: [["blossom", 19]] },
+  summer: { meadow: [["field", 3]], grass: [["meadow", 7]] },
+  autumn: {
+    meadow: [
+      ["soil", 4],
+      ["field", 9],
+    ],
+    grass: [
+      ["leafGold", 4],
+      ["leafRust", 7],
+    ],
+    forest: [["leafRust", 13]],
+  },
+};
 
 /** Sea colour: three flat bands by distance from the coast, in kilometres. */
 export function seaColour(km: number): "seaShallow" | "sea" | "seaDeep" {
@@ -141,6 +177,42 @@ function fill(frame: Frame, x0: number, y0: number, x1: number, y1: number, p: U
     const row = ((y + oy) & 3) * 4;
     let i = y * width + left;
     for (let x = left; x < right; x++) words[i++] = p[row + ((x + ox) & 3)] ?? 0;
+  }
+}
+
+/**
+ * Fills like `fill`, with a season's marks scattered over it: a ground pixel takes
+ * the first mark whose `every` divides its hash.
+ */
+function fillDotted(
+  frame: Frame,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  p: Uint32Array,
+  dots: readonly (readonly [Uint32Array, number])[],
+): void {
+  const left = Math.max(0, x0);
+  const right = Math.min(frame.width, x1);
+  const top = Math.max(0, y0);
+  const bottom = Math.min(frame.height, y1);
+  if (left >= right || top >= bottom) return;
+  const { words, width, ox, oy } = frame;
+  // At most two marks per band (SEASON_DOTS): unrolled, as this runs for every
+  // pixel of the land.
+  const [m0, e0] = dots[0] ?? [p, 0];
+  const [m1, e1] = dots[1] ?? [p, 0];
+  for (let y = top; y < bottom; y++) {
+    const gy = y + oy;
+    const row = (gy & 3) * 4;
+    let i = y * width + left;
+    for (let x = left; x < right; x++) {
+      const gx = x + ox;
+      const h = pixelHash(gx, gy);
+      const k = row + (gx & 3);
+      words[i++] = (e0 > 0 && h % e0 === 0 ? m0[k] : e1 > 0 && h % e1 === 0 ? m1[k] : p[k]) ?? 0;
+    }
   }
 }
 
@@ -343,9 +415,17 @@ const VEILED = 2;
  * four ways a land cell can be lit (lit or shaded, veiled or not), its top and south
  * faces; and the sea's three bands.
  */
-interface Tints {
+interface SeasonTints {
   readonly top: Uint32Array[];
   readonly side: Uint32Array[];
+  /** The marks scattered on each top face: a pattern and how sparse it is. */
+  readonly dots: (readonly (readonly [Uint32Array, number])[])[];
+}
+
+interface Tints {
+  /** The land in the season it turns from, and in the one it turns to. */
+  readonly from: SeasonTints;
+  readonly to: SeasonTints;
   readonly sea: Record<"seaShallow" | "sea" | "seaDeep", Uint32Array>;
   readonly roof: Uint32Array;
   /** A river: the shallow sea's blue; one step back where the land is veiled. */
@@ -360,20 +440,32 @@ function tintsOf(frame: Frame, scene: Scene): Tints {
   // sea's blues and read as sea; at night the lamps set France apart.
   const veil = Math.max(0, 1 - base / 2);
   const darkness = [base, base + 1, base + veil, base + 1 + veil];
-  const top: Uint32Array[] = [];
-  const side: Uint32Array[] = [];
-  for (let e = 0; e < ELEVATION_CLASSES.length; e++) {
-    const ground = groundColour(e);
-    for (let k = 0; k < 4; k++) {
-      const d = darkness[k] ?? base;
-      top.push(pattern(frame, ground, d));
-      // The south face, one step darker than the top.
-      side.push(pattern(frame, darken(ground, 1), d));
+  const land = (season: Season): SeasonTints => {
+    const top: Uint32Array[] = [];
+    const side: Uint32Array[] = [];
+    const dots: (readonly (readonly [Uint32Array, number])[])[] = [];
+    for (let e = 0; e < ELEVATION_CLASSES.length; e++) {
+      const ground = groundColour(e, season);
+      const marks = SEASON_DOTS[season][ground] ?? [];
+      for (let k = 0; k < 4; k++) {
+        const d = darkness[k] ?? base;
+        top.push(pattern(frame, ground, d));
+        // The south face, one step darker than the top.
+        side.push(pattern(frame, darken(ground, 1), d));
+        // The land veiled around the region keeps calm: no marks there.
+        dots.push(
+          k >= VEILED
+            ? []
+            : marks.map(([colour, every]) => [pattern(frame, colour, d), every] as const),
+        );
+      }
     }
-  }
+    return { top, side, dots };
+  };
+  const from = land(scene.season.from);
   return {
-    top,
-    side,
+    from,
+    to: scene.season.to === scene.season.from ? from : land(scene.season.to),
     sea: {
       seaShallow: pattern(frame, "seaShallow", base),
       sea: pattern(frame, "sea", base),
@@ -585,10 +677,17 @@ function drawLayer(frame: Frame, scene: Scene, layer: TerrainLayer, bodies: bool
       const cliff = below === SEA || metres(e) - metres(front) >= 250;
       const veiled = kind === FOREIGN || (focus !== -1 && kind !== focus) ? VEILED : 0;
       const t = e * 4 + shade + veiled;
+      // The season of this cell: the change spreads by patches (src/scene/season.ts).
+      const land =
+        seasonOf(scene.season, (c + 0.5) * km, (r + 0.5) * km) === scene.season.to
+          ? tints.to
+          : tints.from;
       // The south face shows below the top face: h rows.
       if (h > 0)
-        fill(frame, x0, y1 - h, x1, y1, (cliff ? tints.side[t] : tints.top[t]) ?? tints.roof);
-      fill(frame, x0, y0 - h, x1, y1 - h, tints.top[t] ?? tints.roof);
+        fill(frame, x0, y1 - h, x1, y1, (cliff ? land.side[t] : land.top[t]) ?? tints.roof);
+      const dots = land.dots[t] ?? [];
+      if (dots.length === 0) fill(frame, x0, y0 - h, x1, y1 - h, land.top[t] ?? tints.roof);
+      else fillDotted(frame, x0, y0 - h, x1, y1 - h, land.top[t] ?? tints.roof, dots);
 
       // A river or a town on this cell covers its top face, at least a pixel: water;
       // roofs by day, lamps once the sun is down.

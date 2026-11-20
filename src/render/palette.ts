@@ -1,7 +1,8 @@
 /**
  * The fixed palette of the scene (ARCHITECTURE § Art direction, validated with the
- * mockups of B-010, D-019), and the clouds' three greys (B-018): 27 colours, and for each the palette colour it
- * becomes one step darker, so that light changes stay in palette. Pure data.
+ * mockups of B-010, D-019), the clouds' three greys (B-018) and six colours of the
+ * seasons (B-022): 33 colours, and for each the palette colour it becomes one step
+ * darker, so that light changes stay in palette. Pure data.
  */
 
 export type Rgb = readonly [number, number, number];
@@ -41,6 +42,14 @@ export const COLOUR_NAMES = [
   "cloud",
   "cloudDark",
   "cloudStorm",
+  // Seasons (B-022): winter's dull grass and frost, spring's fresh green and blossom,
+  // autumn's gold and rust leaves.
+  "dull",
+  "frost",
+  "fresh",
+  "blossom",
+  "leafGold",
+  "leafRust",
 ] as const;
 
 export type ColourName = (typeof COLOUR_NAMES)[number];
@@ -73,6 +82,12 @@ export const PALETTE: Readonly<Record<ColourName, Rgb>> = {
   cloud: [0xc9, 0xcd, 0xd3],
   cloudDark: [0x75, 0x7b, 0x88],
   cloudStorm: [0x4e, 0x52, 0x60],
+  dull: [0x74, 0x77, 0x55],
+  frost: [0xc8, 0xd2, 0xd0],
+  fresh: [0x8c, 0xb0, 0x52],
+  blossom: [0xe8, 0xc0, 0xcc],
+  leafGold: [0xc9, 0x9a, 0x3c],
+  leafRust: [0x9e, 0x56, 0x30],
 };
 
 /**
@@ -109,6 +124,13 @@ export const DARKER: Readonly<Record<ColourName, ColourName>> = {
   cloud: "cloudDark",
   cloudDark: "cloudStorm",
   cloudStorm: "skyBlueHour",
+  // Like the land they stand for: towards the greens, then the sea's blues.
+  dull: "forest",
+  frost: "foam",
+  fresh: "grass",
+  blossom: "meadow",
+  leafGold: "grass",
+  leafRust: "soil",
 };
 
 /** The colour `steps` steps darker (0 is the colour itself). */

@@ -389,6 +389,7 @@ describe("the rivers in a frame", () => {
     landmarks: [],
     weather: {},
     timeMs: 0,
+    season: { from: "summer", to: "summer", share: 0 },
   });
   const pixels = (scene: Scene): Uint8ClampedArray => {
     const out = createSurface(scene.width, scene.height);

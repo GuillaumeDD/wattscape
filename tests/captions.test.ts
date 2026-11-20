@@ -234,6 +234,7 @@ describe("the marks of a frame (src/render/pixel-theme.ts)", () => {
     landmarks: LANDMARKS,
     weather: {},
     timeMs: 0,
+    season: { from: "summer", to: "summer", share: 0 },
   });
   const marksOf = (scene: Scene): readonly Mark[] =>
     drawPixelScene(scene, createSurface(scene.width, scene.height)).marks;
