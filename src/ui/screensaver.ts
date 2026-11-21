@@ -39,6 +39,8 @@ export function mountScreensaver(onChange: (on: boolean) => void): Screensaver {
   let asked: Promise<void> | null = null;
   /** The browser refused the full screen: F then leaves the mode, as Escape does. */
   let refused = false;
+  /** The mode ended while its full screen was asked for: a late grant is left at once. */
+  let leaving = false;
   let lock: WakeLockSentinel | null = null;
   /** A wake lock is being asked for: one request at a time, so none is orphaned. */
   let asking = false;
@@ -95,6 +97,7 @@ export function mountScreensaver(onChange: (on: boolean) => void): Screensaver {
       if (fullscreen && document.fullscreenElement === null && document.fullscreenEnabled) {
         ownsFullscreen = true;
         refused = false;
+        leaving = false;
         const request = document.documentElement.requestFullscreen().catch(() => {
           // Refused: the mode goes on without the full screen.
           ownsFullscreen = false;
@@ -120,15 +123,25 @@ export function mountScreensaver(onChange: (on: boolean) => void): Screensaver {
       if (lock !== null) void lock.release();
       lock = null;
       // Also when the request is still pending: it may be granted after this.
-      if (ownsFullscreen) leaveFullscreen();
+      if (ownsFullscreen) {
+        leaving = true;
+        leaveFullscreen();
+      }
       ownsFullscreen = false;
       onChange(false);
     },
   };
 
   document.addEventListener("fullscreenchange", () => {
+    if (document.fullscreenElement !== null) {
+      // Granted after the mode had ended (the request outlived it): leave it.
+      if (!on && leaving) void document.exitFullscreen().catch(() => undefined);
+      return;
+    }
     // Escape, or the browser's own control, left the full screen: the mode ends too.
-    if (document.fullscreenElement === null && ownsFullscreen) {
+    // Not while a request is pending: that change is the end of an earlier full
+    // screen, arriving after a quick F asked for a new one.
+    if (ownsFullscreen && asked === null) {
       ownsFullscreen = false;
       self.exit();
     }

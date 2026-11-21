@@ -158,10 +158,12 @@ test("a quick second press leaves no full screen and no wake lock behind", async
     page.evaluate(() => (window as unknown as { __held: { count: number } }).__held.count);
   await page.goto("/screensaver.html");
   await page.keyboard.press("f");
+  // Wait for the full screen, then for its end, before the second F: a full screen
+  // still being granted or left would end the mode on its `fullscreenchange`, after
+  // that F (Chromium in CI), and Firefox may take Escape for its own way out and end
+  // the mode only then. The first lock is still pending meanwhile (1 s).
+  await expect.poll(() => fullscreen(page)).toBe(true);
   await page.keyboard.press("Escape");
-  // Firefox may take Escape for its own way out of the full screen, and end the mode
-  // only on `fullscreenchange`: F pressed before that would leave the mode instead of
-  // entering it. The first lock is still pending meanwhile (1 s).
   await expect(page.locator("#panel-body")).toBeVisible();
   await expect.poll(() => fullscreen(page)).toBe(false);
   await page.keyboard.press("f");
@@ -178,4 +180,73 @@ test("a quick second press leaves no full screen and no wake lock behind", async
   await expect(page.locator("#panel-body")).toBeVisible();
   expect(await fullscreen(page)).toBe(false);
   expect(await held()).toBe(0);
+});
+
+test("an earlier full screen's end, or a late grant, does not outlive a quick F", async ({
+  page,
+}) => {
+  // A Fullscreen API answered late, under the test's control: regression for a mode
+  // ended by the `fullscreenchange` of the full screen just left (it came after a
+  // quick F had asked for a new one, Chromium in CI on #68), and for a full screen
+  // granted after the mode had ended.
+  await page.addInitScript(() => {
+    let element: Element | null = null;
+    const change = (next: Element | null): void => {
+      element = next;
+      document.dispatchEvent(new Event("fullscreenchange"));
+    };
+    const pending: (() => void)[] = [];
+    Object.defineProperty(Document.prototype, "fullscreenElement", {
+      configurable: true,
+      get: () => element,
+    });
+    Object.defineProperty(Document.prototype, "fullscreenEnabled", {
+      configurable: true,
+      get: () => true,
+    });
+    Object.defineProperty(Element.prototype, "requestFullscreen", {
+      configurable: true,
+      value(this: Element) {
+        return new Promise<void>((resolve) => {
+          pending.push(() => {
+            change(this);
+            resolve();
+          });
+        });
+      },
+    });
+    Object.defineProperty(Document.prototype, "exitFullscreen", {
+      configurable: true,
+      value: () => {
+        change(null);
+        return Promise.resolve();
+      },
+    });
+    Object.assign(window, {
+      __grant: () => pending.shift()?.(),
+      __staleExit: () => document.dispatchEvent(new Event("fullscreenchange")),
+    });
+  });
+  const call = (name: "__grant" | "__staleExit"): Promise<void> =>
+    page.evaluate((n) => (window as unknown as Record<string, () => void>)[n]?.(), name);
+  const saver = page.locator("#panel-body");
+  await page.goto("/screensaver.html");
+
+  // F asks; the end of an earlier full screen arrives meanwhile: the mode stays.
+  await page.keyboard.press("f");
+  await call("__staleExit");
+  await expect(saver).toBeHidden();
+  await call("__grant");
+  expect(await fullscreen(page)).toBe(true);
+  await expect(saver).toBeHidden();
+
+  // F, then Escape before the grant: the late full screen is left at once.
+  await page.keyboard.press("Escape");
+  await expect(saver).toBeVisible();
+  await page.keyboard.press("f");
+  await page.keyboard.press("Escape");
+  await expect(saver).toBeVisible();
+  await call("__grant");
+  await expect.poll(() => fullscreen(page)).toBe(false);
+  await expect(saver).toBeVisible();
 });
