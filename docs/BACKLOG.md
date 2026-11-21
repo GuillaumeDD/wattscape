@@ -44,6 +44,8 @@ Statuses: `todo` / `wip` / `done`.
 | B-034 | P-012 caption sourced             | The Terrils du 11/19 caption checked against a source logged in SOURCES, its `provisional` mark removed                                                             | done   |
 | B-035 | Four-hour soak                    | Memory and frame time over 4 hours in one stretch (G-013), both themes; flat memory, as § Performance asks                                                          | todo   |
 | B-036 | Camera still                      | A switch in the panel, `?drift=off` and `Space`, remembered: the camera then moves only on input or in survey mode (D-074)                                          | done   |
+| B-037 | Modern theme by default           | The page opens in the modern theme; a stored choice kept as Q-63 says; `?theme=pixel` still works; tests, frames, screenshots and docs that assume pixel art, swept | todo   |
+| B-038 | Towerless nuclear: on or off      | The 7 sites without towers tell running from stopped by day and at night, both themes; options drawn on one board, chosen (Q-64); mapping row and frames updated    | todo   |
 
 ## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
 
@@ -145,3 +147,71 @@ Proposed order (Q-58), at most three threads at once:
 A third theme, futuristic, minimal and neon (Guillaume, 2026-11-21), waits in
 Growth (G-024): it needs mockups and a choice first, as the modern theme did
 (D-055), and fits after wave 1, when a branch is free.
+
+### Added 2026-11-21: the default theme and the towerless nuclear plants
+
+Two asks from Guillaume (2026-11-21), to place in the waves above (PRD Q-65):
+
+9. **Modern theme by default** (B-037; Growth G-027).
+   - Goal: a first visit opens in the modern theme; the pixel art stays a choice in
+     the panel and `?theme=pixel`.
+   - Today: `DEFAULT_THEME_ID` is `pixel` (`src/render/theme-ids.ts`), a default
+     proposed by Claude in D-055; a choice is stored (`wattscape.theme`) only when
+     the viewer changes the selector (`src/main.ts`), so a visitor who never chose
+     follows the default either way.
+   - Acceptance:
+     1. the default is `modern`; `?theme=` and a stored choice still win, as Q-63
+        decides for a stored `pixel`;
+     2. `tests/settings.test.ts` asserts the new default and the order URL, then
+        storage, then default; a test for whatever Q-63 decides about a stored
+        `pixel`;
+     3. the frames, e2e scenes and screenshots that relied on the default name
+        their theme (none silently changes theme);
+     4. every statement that the pixel art is the default swept (PRD § 4.9,
+        ARCHITECTURE § Art direction, the README's first line), and a decision
+        entry that revises D-055.
+   - Effort: S, one PR.
+   - Risks: the modern theme costs more per second than the pixel art (ARCHITECTURE
+     § Performance: idle drift accepted over budget, D-061), and a screensaver runs
+     on battery: the measures of B-024 and B-035 then matter for the default, and
+     should cover the modern theme first.
+10. **Towerless nuclear plants: running or stopped** (B-038; Growth G-028).
+    - Goal: at a glance, by day as at night, tell a nuclear site without cooling
+      towers that produces from one that does not, in both themes.
+    - Today: 7 of the 18 nuclear sites have no towers (`src/map/plants.ts`:
+      Paluel, Flamanville, Penly, Gravelines, Blayais, Tricastin, Saint-Alban).
+      Their only motion is lit windows, at night only, round(3·a) of 3 (ARCHITECTURE
+      § Data-to-scene mapping, PRD Q-16, D-027): by day a running plant and a
+      stopped one look the same.
+    - The figure: `a` is the load factor of nuclear in the plant's region
+      (`tch_nucleaire`, D-025), not the plant's own. Normandie's three towerless
+      sites share one figure, and so do Saint-Alban, Tricastin and the two sites
+      with towers of Auvergne-Rhône-Alpes. A plant stopped alone, while the others
+      run, cannot be shown from it: that needs output per unit (DS-08, Growth
+      G-003, TO CHECK). Q-64 asks which to build on.
+    - Acceptance:
+      1. a board of options, both themes, by day and at night, at a = 0, 0.5, 1 and
+         with no figure, the current drawing beside them; G-014's warm-water
+         shimmer among the options; any option proposed after it drawn on the same
+         board before the choice (D-068, D-070);
+      2. the chosen option drawn in both themes; with no figure, the site stays
+         idle, as § Data-to-scene mapping asks: if « stopped » gets a cue of its
+         own, a missing figure never shows it;
+      3. the row « Nuclear plants without towers » of ARCHITECTURE § Data-to-scene
+         mapping rewritten with its formula; a decision entry that revises D-027;
+      4. unit tests per state (0, partial, full, null) in `tests/pixel-theme.test.ts`
+         and `tests/modern-theme.test.ts`; frames re-recorded and checked in
+         Chromium;
+      5. if the caption gains a state (« à l'arrêt »), its FR and EN strings land
+         together, and it says the figure is the region's.
+    - Effort: M: the board, then one PR for both themes.
+    - Depends on: Q-64; for a per-plant state, DS-08 GO in SOURCES § 1 first.
+    - Risks: a cue that reads as a figure must stay true to it (AGENTS.md § 1); a
+      new motion by day costs frames (measure it before the card, AGENTS.md §
+      Performance).
+
+Proposed place (Q-65): one thread of their own in wave 2, B-037 then B-038 on one
+branch (they touch the settings, then the plants' art: distinct from the legend's
+files), so wave 2 holds two branches. B-037 goes first, before B-024 and B-035 are
+measured if they are not yet, and both before B-033, whose screenshots must show
+the default and the new drawing.
