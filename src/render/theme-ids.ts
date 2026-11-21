@@ -4,10 +4,11 @@
  */
 
 /** The ids of the themes, the default first. */
-export const THEME_IDS = ["pixel", "modern"] as const;
+export const THEME_IDS = ["modern", "pixel"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 
-export const DEFAULT_THEME_ID: ThemeId = "pixel";
+/** The modern theme by default (D-079, revising D-055); the pixel art stays a choice. */
+export const DEFAULT_THEME_ID: ThemeId = "modern";
 
 /** Whether an untrusted value (a URL setting, a stored one) names a theme. */
 export function isThemeId(value: unknown): value is ThemeId {

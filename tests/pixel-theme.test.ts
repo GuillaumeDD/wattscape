@@ -121,9 +121,10 @@ describe("tintPattern", () => {
 });
 
 describe("the pixel-art theme", () => {
-  it("is the default theme, by id", () => {
-    expect(DEFAULT_THEME.id).toBe("pixel");
-    expect(THEMES.pixel).toBe(DEFAULT_THEME);
+  it("is a theme under its own id, no longer the default (D-079)", () => {
+    expect(THEMES.pixel.id).toBe("pixel");
+    expect(DEFAULT_THEME).toBe(THEMES.modern);
+    expect(THEMES.pixel).not.toBe(DEFAULT_THEME);
   });
 
   it("draws only palette colours, and no source colour on the bare map", () => {

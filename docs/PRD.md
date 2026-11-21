@@ -179,9 +179,10 @@ idea that the grid can be seen.
 - `prefers-reduced-motion`: no camera drift, slow animations.
 - The page's panel (title, region, language) folds to its title, so a phone shows
   the map (Guillaume, 2026-11-14; B-025).
-- Two visual themes, chosen in the panel (« Style ») or by `?theme=modern`, and
-  remembered: the pixel art, the default, and a modern one, smooth, « minimaliste,
-  élégant, apaisant » (Guillaume, 2026-11-12; G-011, B-026). Only the drawing
+- Two visual themes, chosen in the panel (« Style ») or by `?theme=`, and
+  remembered: the pixel art, and a modern one, smooth, « minimaliste, élégant,
+  apaisant » (Guillaume, 2026-11-12; G-011, B-026), the default since D-079
+  (Guillaume, 2026-11-21; G-027, B-037), a stored choice kept. Only the drawing
   changes: the camera, the data, the captions and the light are the same.
 
 ### 4.10 Localization
@@ -303,7 +304,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
 | G-026 | Survey lap in budget: longer stays, fewer frames in slow flights (D-075)               | proposed |
-| G-027 | The modern theme by default (Guillaume, 2026-11-21; B-037)                             | planned  |
+| G-027 | The modern theme by default (Guillaume, 2026-11-21; B-037)                             | done     |
 | G-028 | Towerless nuclear plants: running told from stopped (Guillaume, 2026-11-21; B-038)     | planned  |
 
 ## 10. Open questions

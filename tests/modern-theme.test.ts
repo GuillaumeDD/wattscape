@@ -41,10 +41,12 @@ function brightest(surface: Surface): number {
 }
 
 describe("theme names", () => {
-  it("has a theme for every id, each under its own id, pixel art the default", () => {
+  it("has a theme for every id, each under its own id, the modern one the default", () => {
     expect(Object.keys(THEMES).sort()).toEqual([...THEME_IDS].sort());
     for (const id of THEME_IDS) expect(THEMES[id].id).toBe(id);
-    expect(DEFAULT_THEME_ID).toBe("pixel");
+    // D-079: the modern theme by default, listed first in the panel.
+    expect(DEFAULT_THEME_ID).toBe("modern");
+    expect(THEME_IDS[0]).toBe("modern");
   });
 
   it("accepts the known ids only", () => {

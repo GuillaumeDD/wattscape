@@ -105,7 +105,7 @@ export function saveTheme(storage: Pick<Storage, "setItem"> | undefined, theme: 
   }
 }
 
-/** The theme to open with: the URL wins, then the remembered choice, then pixel art. */
+/** The theme to open with: the URL wins, then the remembered choice, then the default (D-079). */
 export function initialTheme(
   search: string,
   storage: Pick<Storage, "getItem"> | undefined,

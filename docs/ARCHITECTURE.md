@@ -753,11 +753,12 @@ validates them on the deployed build.
 The scene model (`src/scene/scene.ts`) says what a frame shows: its size, the
 camera, the light, the region in focus, the terrain layers, the level of detail and
 the towns. A **theme** (`src/render/theme.ts`) turns it into pixels: the pixel-art
-theme (`src/render/pixel-theme.ts`), the default, and the modern one
-(`src/render/modern-theme.ts`, § The modern theme), which came without touching the
+theme (`src/render/pixel-theme.ts`), and the modern one (`src/render/modern-theme.ts`,
+§ The modern theme), the default since D-079, which came without touching the
 model but for the rivers' lines, added to a layer (`TerrainLayer.courses`). The
-viewer chooses in the panel or by `?theme=modern` (`src/ui/settings.ts`; the names
-are in `src/render/theme-ids.ts`), and the choice is remembered in `localStorage`.
+viewer chooses in the panel or by `?theme=pixel` (`src/ui/settings.ts`; the names
+are in `src/render/theme-ids.ts`), and the choice is remembered in `localStorage`:
+a stored choice wins over the default, a stored `pixel` too (D-079).
 A theme says how many output pixels it draws per scene pixel (`density`: 1 for
 pixel art; the modern one halves its own while the camera moves, D-056); the scene, its camera, the marks and the inputs stay in scene pixels,
 so the framing, the captions and the controls are the same under both. The step-2 mockups
@@ -812,7 +813,9 @@ apaisant », after his game Return of the runners (S-026). Two mockups were show
 continuous tints, and B, flat layers stacked like cut paper. Guillaume chose A the
 same day (PRD Q-33, D-055); what follows is **proposed** until he has seen it on
 the deployed build. `tools/screenshots.ts` writes its frames
-(`step-6-modern-*.png`).
+(`step-6-modern-*.png`). It is the default theme since 2026-11-21 (Guillaume, D-079,
+revising D-055): a first visit opens in it, so its cost at rest (§ Performance,
+D-061) is the one a laptop on battery meets first.
 
 - **Same view:** north up, 2:1, the relief raised by the same 250 m per kilometre of
   width, and the pixel-art theme's own offsets, so a camera frames the same ground

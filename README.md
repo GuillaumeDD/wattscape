@@ -1,8 +1,8 @@
 # Wattscape
 
-A pixel-art browser screensaver of France's live electricity mix, centered on your
-region: its power plants move with the grid's real numbers (RTE éCO2mix), under the
-real sky (sun, moon and weather).
+A browser screensaver of France's live electricity mix, in a calm modern style or in
+pixel art, centered on your region: its power plants move with the grid's real
+numbers (RTE éCO2mix), under the real sky (sun, moon and weather).
 
 **Open it:** <https://guillaumedd.github.io/wattscape/> · live figures:
 [Live data](https://guillaumedd.github.io/wattscape/debug.html)
