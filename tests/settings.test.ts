@@ -15,6 +15,8 @@ import {
   savePanelFolded,
   saveTheme,
   sampleFromQuery,
+  screensaverFromQuery,
+  seasonFromQuery,
   themeFromQuery,
 } from "../src/ui/settings";
 
@@ -190,6 +192,39 @@ describe("sampleFromQuery (B-012)", () => {
       `?sample=day&x=${"a".repeat(3000)}`,
     ])
       expect(sampleFromQuery(bad), bad).toBeUndefined();
+  });
+});
+
+describe("screensaverFromQuery (?screensaver, B-021)", () => {
+  it("opens the screensaver mode with ?screensaver or ?screensaver=1, once", () => {
+    expect(screensaverFromQuery("?screensaver")).toBe(true);
+    expect(screensaverFromQuery("?area=28&screensaver=1")).toBe(true);
+    for (const bad of [
+      "",
+      "?screensaver=0",
+      "?screensaver=yes",
+      "?screensaver&screensaver",
+      "?Screensaver",
+      `?screensaver&x=${"a".repeat(3000)}`,
+    ])
+      expect(screensaverFromQuery(bad), bad).toBe(false);
+  });
+});
+
+describe("seasonFromQuery (?season=, B-021)", () => {
+  it("accepts one of the four seasons, once, and nothing else", () => {
+    expect(seasonFromQuery("?season=winter")).toBe("winter");
+    expect(seasonFromQuery("?area=84&season=autumn")).toBe("autumn");
+    for (const bad of [
+      "",
+      "?season=",
+      "?season=Winter",
+      "?season=hiver",
+      "?season=winter&season=winter",
+      "?season=__proto__",
+      `?season=summer&x=${"a".repeat(3000)}`,
+    ])
+      expect(seasonFromQuery(bad), bad).toBeUndefined();
   });
 });
 

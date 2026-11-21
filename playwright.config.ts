@@ -9,7 +9,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   reporter: "list",
   use: { baseURL: "http://localhost:4180" },
-  // Chromium only for now: Firefox and WebKit join when the scene renders (B-021).
+  // Every test in Chromium; the screensaver mode's (B-021: full screen, cursor, keys)
+  // in Firefox and WebKit too. The frame hashes and the scene's controls stay
+  // Chromium-only until they are measured in the other two (ARCHITECTURE § Browser
+  // quirks).
   projects: [
     {
       name: "chromium",
@@ -22,6 +25,23 @@ export default defineConfig({
           : {},
       },
     },
+    // A cloud session has only its own Chromium (PW_CHROMIUM_PATH): there, the other
+    // two engines are left to CI. Elsewhere they need
+    // `npx playwright install firefox webkit` once.
+    ...(process.env.PW_CHROMIUM_PATH
+      ? []
+      : [
+          {
+            name: "firefox",
+            testMatch: "screensaver.spec.ts",
+            use: { ...devices["Desktop Firefox"] },
+          },
+          {
+            name: "webkit",
+            testMatch: "screensaver.spec.ts",
+            use: { ...devices["Desktop Safari"] },
+          },
+        ]),
   ],
   webServer: {
     command: "npx vite preview --config vite.e2e.config.ts",

@@ -2,6 +2,7 @@
  * Settings from the URL and from browser storage. Both are untrusted (ARCHITECTURE §
  * Security): only a known area code or theme is accepted, anything else is ignored.
  */
+import { type Season, SEASONS } from "../scene/season";
 import { isEco2mixArea, type Eco2mixArea } from "../data/eco2mix";
 import { WEATHER_GROUPS, type WeatherGroup } from "../data/open-meteo";
 import { isLocale, type Locale } from "../i18n";
@@ -220,4 +221,27 @@ export function timelapseFromQuery(search: string): "day" | undefined {
   if (search.length > 2048) return undefined;
   const values = new URLSearchParams(search).getAll("timelapse");
   return values.length === 1 && values[0] === "day" ? "day" : undefined;
+}
+
+/**
+ * `?screensaver` (no value, or `1`): the page opens in screensaver mode (B-021), with
+ * no panel, the cursor hidden when idle and the survey mode playing; false when
+ * absent, repeated or anything else.
+ */
+export function screensaverFromQuery(search: string): boolean {
+  if (search.length > 2048) return false;
+  const values = new URLSearchParams(search).getAll("screensaver");
+  return values.length === 1 && (values[0] === "" || values[0] === "1");
+}
+
+/**
+ * `?season=winter` (any of SEASONS): the land shows that season whatever the date,
+ * labelled as such, for demos and screenshots (B-021); `undefined` when absent,
+ * repeated or unknown.
+ */
+export function seasonFromQuery(search: string): Season | undefined {
+  if (search.length > 2048) return undefined;
+  const values = new URLSearchParams(search).getAll("season");
+  if (values.length !== 1) return undefined;
+  return SEASONS.find((s) => s === values[0]);
 }

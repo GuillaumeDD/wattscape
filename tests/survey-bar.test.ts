@@ -11,6 +11,7 @@ describe("surveyBarText", () => {
       expect(text.toggle).toBe(t("surveyPlay"));
       expect(text.area).toBe("");
       expect(text.stop).toBe(t("surveyStop"));
+      expect(text.home).toBe(t("homeButton"));
     });
 
     it(`offers Pause and names the region while it plays (${locale})`, () => {
@@ -33,6 +34,7 @@ describe("surveyBarText", () => {
       for (const key of ["surveyPlay", "surveyPause", "surveyResume"] as const)
         expect(translate(locale, key)).toContain("(P)");
       expect(translate(locale, "surveyArea")).toContain("{area}");
+      expect(translate(locale, "seasonOverride")).toContain("{season}");
       expect(translate(locale, "surveyPaused")).toContain("{area}");
     }
   });

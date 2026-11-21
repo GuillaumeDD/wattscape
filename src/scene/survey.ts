@@ -47,7 +47,8 @@ export const SURVEY_RHO = 1.2;
 /** A pause slows the tour down to a stop, and a play speeds it up, over this long. */
 export const TOUR_RAMP_MS = 1200;
 
-export type SurveyCommand = "play" | "pause" | "stop";
+/** What the controls ask for; `home` flies home, and ends a tour (B-021). */
+export type SurveyCommand = "play" | "pause" | "stop" | "home";
 
 /** What the survey mode is doing, for its controls. */
 export interface SurveyState {

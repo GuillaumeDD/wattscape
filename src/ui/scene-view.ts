@@ -56,7 +56,7 @@ import {
   type Press,
   wheelZoomFactor,
 } from "./controls";
-import { seasonAt } from "../scene/season.ts";
+import { type Season, seasonAt } from "../scene/season.ts";
 import {
   createTour,
   dwellMs,
@@ -127,9 +127,12 @@ export interface SceneView {
   setTheme(id: ThemeId): void;
   /**
    * The survey mode (B-032): `play` starts the tour, or resumes it where it was
-   * paused; `pause` slows it down to a stop; `stop` ends it and flies home.
+   * paused; `pause` slows it down to a stop; `stop` ends it and flies home; `home`
+   * flies home, as the `Home` key does, and ends a tour.
    */
   survey(command: SurveyCommand): void;
+  /** The land shows `season` whatever the date (`?season=`, B-021); null: the date's. */
+  setSeason(season: Season | null): void;
 }
 
 interface Flight {
@@ -227,6 +230,8 @@ export function mountSceneView(
   let fineRequested = false;
   let detail = 0;
   let lastKey = "";
+  /** A season imposed by `?season=`, or null for the date's. */
+  let forcedSeason: Season | null = null;
   let lastFrame = Number.NEGATIVE_INFINITY;
   let frameRequest: number | null = null;
 
@@ -443,6 +448,15 @@ export function mountSceneView(
     return moment.flying ? 0 : Math.max(1, moment.stillMs);
   }
 
+  /** Home ends a tour, as its Stop does; otherwise it flies home at once. */
+  function goHome(): void {
+    if (surveyMode !== "off") stopSurvey(true);
+    else {
+      homeShown = true;
+      flyTo(home);
+    }
+  }
+
   function playSurvey(): void {
     if (surveyMode === "playing") return;
     const now = animationClock.now();
@@ -554,7 +568,10 @@ export function mountSceneView(
       weather,
       // By steps, so that a redraw for another reason does not nudge the clouds.
       timeMs: Math.floor(clock.now() / CLOUD_STEP_MS) * CLOUD_STEP_MS,
-      season: seasonAt(clock.now()),
+      season:
+        forcedSeason === null
+          ? seasonAt(clock.now())
+          : { from: forcedSeason, to: forcedSeason, share: 0 },
     };
     // Redraw only when what is drawn changes: the drift moves the camera by a pixel
     // every second or two, and a still scene costs nothing.
@@ -773,12 +790,7 @@ export function mountSceneView(
       if (surveyMode === "playing") pauseSurvey();
       else playSurvey();
     } else if (intent.kind === "home") {
-      // Home ends a tour, as its Stop does; otherwise it flies home at once.
-      if (surveyMode !== "off") stopSurvey(true);
-      else {
-        homeShown = true;
-        flyTo(home);
-      }
+      goHome();
     } else if (intent.kind === "zoom")
       flyTo((c) =>
         zoomAt(c, intent.factor, size.width / 2, size.height / 2, size.width, size.height),
@@ -859,7 +871,12 @@ export function mountSceneView(
     survey(command: SurveyCommand): void {
       if (command === "play") playSurvey();
       else if (command === "pause") pauseSurvey();
-      else stopSurvey(true);
+      else if (command === "stop") stopSurvey(true);
+      else goHome();
+    },
+    setSeason(season: Season | null): void {
+      forcedSeason = season;
+      wake();
     },
   };
 }

@@ -9,7 +9,8 @@
  * The survey mode (B-032, `step-15-survey-*.png`): Play pressed from Bretagne by day
  * (pixel art) and from Provence-Alpes-Côte d'Azur at night (modern theme), on a
  * 1280 × 720 window, and from Bretagne on a phone; a picture mid-flight, 5 s after
- * Play, and one on arrival, the controls woken by a move of the mouse.
+ * Play, and one on arrival, the controls woken by a move of the mouse. The
+ * screensaver mode (B-021, `step-16-screensaver-*.png`), as its section below says.
  */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
@@ -70,6 +71,31 @@ for (const shot of shots) {
   await page.mouse.move(shot.width - 30, shot.height - 120);
   await page.waitForTimeout(2200);
   await page.screenshot({ path: `${OUT}/step-15-survey-${shot.name}.png` });
+  console.log(shot.name, await page.locator("#survey-area").textContent());
+  await page.close();
+}
+
+// The screensaver mode (B-021, `step-16-screensaver-*.png`): opened by `?screensaver`
+// by day (pixel art), then in winter by `?season=`; and entered with F from
+// Provence-Alpes-Côte d'Azur at night (modern theme). Each on arrival at the tour's
+// first stop, the mouse left still: no controls, no cursor.
+const savers = [
+  { name: "day", query: `screensaver&area=53&${DAY}`, pressF: false },
+  { name: "winter", query: `screensaver&area=53&${DAY}&season=winter`, pressF: false },
+  { name: "night-modern", query: `area=93&${NIGHT}&theme=modern`, pressF: true },
+];
+for (const shot of savers) {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  page.on("pageerror", (error) => {
+    throw error;
+  });
+  await page.goto(`${BASE}?${shot.query}`);
+  if (shot.pressF) {
+    await page.waitForTimeout(4000);
+    await page.keyboard.press("f");
+  }
+  await page.waitForTimeout(16_000);
+  await page.screenshot({ path: `${OUT}/step-16-screensaver-${shot.name}.png` });
   console.log(shot.name, await page.locator("#survey-area").textContent());
   await page.close();
 }
