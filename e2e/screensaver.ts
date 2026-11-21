@@ -32,8 +32,10 @@ if (canvas instanceof HTMLCanvasElement) {
   bar.render({ mode: "off", area: null }, t);
   const screensaver = mountScreensaver((on) => {
     if (on) view.survey("play");
+    bar.stir();
   });
-  document.getElementById("screensaver")?.addEventListener("click", () => {
+  document.getElementById("screensaver")?.addEventListener("click", (event) => {
+    if (event.detail > 0 && event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
     if (screensaver.on) screensaver.exit();
     else screensaver.enter(true);
   });

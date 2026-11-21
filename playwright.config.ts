@@ -26,7 +26,8 @@ export default defineConfig({
       },
     },
     // A cloud session has only its own Chromium (PW_CHROMIUM_PATH): there, the other
-    // two engines are left to CI.
+    // two engines are left to CI. Elsewhere they need
+    // `npx playwright install firefox webkit` once.
     ...(process.env.PW_CHROMIUM_PATH
       ? []
       : [

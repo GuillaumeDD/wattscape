@@ -109,3 +109,61 @@ test("?season= imposes a season whatever the date", async ({ page }) => {
   expect(await shown("?season=winter")).not.toBe(summer);
   expect(await shown("")).toBe(summer);
 });
+
+test("a click on the button lets the controls fade, and so does a pause", async ({ page }) => {
+  // Regression: the click left the focus on the button, and the controls never faded.
+  await page.goto("/screensaver.html");
+  await page.click("#screensaver");
+  await expect(page.locator("#survey")).toHaveClass(/quiet/, { timeout: 6000 });
+  // Regression: a paused tour kept its controls on screen in the mode.
+  await page.keyboard.press("p");
+  await expect(page.locator("#survey-area")).toHaveText("Flyover paused: Hauts-de-France");
+  await expect(page.locator("#survey")).not.toHaveClass(/quiet/);
+  await expect(page.locator("#survey")).toHaveClass(/quiet/, { timeout: 6000 });
+});
+
+test("a quick second press leaves no full screen and no wake lock behind", async ({ page }) => {
+  // A wake lock answered late, counting the locks held (the real one may be refused
+  // headless): regression for a lock orphaned by a second request, and a full screen
+  // granted after the mode had already ended.
+  await page.addInitScript(() => {
+    const held = { count: 0 };
+    Object.assign(window, { __held: held });
+    Object.defineProperty(navigator, "wakeLock", {
+      value: {
+        request: () =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              held.count++;
+              let released = false;
+              const sentinel = new EventTarget();
+              Object.assign(sentinel, {
+                release: () => {
+                  if (!released) held.count--;
+                  released = true;
+                  return Promise.resolve();
+                },
+              });
+              resolve(sentinel);
+            }, 300);
+          }),
+      },
+    });
+  });
+  const held = (): Promise<number> =>
+    page.evaluate(() => (window as unknown as { __held: { count: number } }).__held.count);
+  await page.goto("/screensaver.html");
+  await page.keyboard.press("f");
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("f");
+  await expect.poll(held).toBe(1);
+  await page.keyboard.press("Escape");
+  await expect.poll(held).toBe(0);
+  await expect.poll(() => fullscreen(page)).toBe(false);
+
+  await page.dblclick("#screensaver");
+  await page.waitForTimeout(800);
+  await expect(page.locator("#panel-body")).toBeVisible();
+  expect(await fullscreen(page)).toBe(false);
+  expect(await held()).toBe(0);
+});

@@ -46,6 +46,8 @@ export function surveyBarText(state: SurveyState, t: Translate): SurveyBarText {
 export interface SurveyBar {
   /** Shows a state, in the current language. */
   render(state: SurveyState, t: Translate): void;
+  /** Shows the controls, and fades them again later if they should. */
+  stir(): void;
 }
 
 /** Wires the controls in the page; `onCommand` gets what a press asks for. */
@@ -63,7 +65,8 @@ export function mountSurveyBar(onCommand: (command: SurveyCommand) => void): Sur
     bar?.classList.remove("quiet");
     if (quietTimer !== null) window.clearTimeout(quietTimer);
     quietTimer = null;
-    if (state.mode !== "playing") return;
+    // While the tour plays, or in the screensaver mode (B-021) whatever it does.
+    if (state.mode !== "playing" && !document.body.classList.contains("screensaver")) return;
     quietTimer = window.setTimeout(() => {
       quietTimer = null;
       bar?.classList.add("quiet");
@@ -108,5 +111,6 @@ export function mountSurveyBar(onCommand: (command: SurveyCommand) => void): Sur
       if (area !== null) area.textContent = text.area;
       if (changedMode) stir();
     },
+    stir,
   };
 }

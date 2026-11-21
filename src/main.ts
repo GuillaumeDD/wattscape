@@ -111,8 +111,12 @@ function renderSurvey(): void {
 const screensaver = mountScreensaver((on) => {
   if (on) scene?.survey("play");
   renderSurvey();
+  surveyBar.stir();
 });
-document.getElementById("screensaver")?.addEventListener("click", () => {
+document.getElementById("screensaver")?.addEventListener("click", (event) => {
+  // A click leaves the focus on the button, which would keep the controls on
+  // screen (they never fade while they hold it); a key press keeps it there.
+  if (event.detail > 0 && event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
   if (screensaver.on) screensaver.exit();
   else screensaver.enter(true);
 });

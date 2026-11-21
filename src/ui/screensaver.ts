@@ -35,17 +35,25 @@ export function mountScreensaver(onChange: (on: boolean) => void): Screensaver {
   let on = false;
   /** Whether this mode asked for the full screen: leaving it then leaves the mode. */
   let ownsFullscreen = false;
+  /** The last request for the full screen, until it is answered. */
+  let asked: Promise<void> | null = null;
+  /** The browser refused the full screen: F then leaves the mode, as Escape does. */
+  let refused = false;
   let lock: WakeLockSentinel | null = null;
+  /** A wake lock is being asked for: one request at a time, so none is orphaned. */
+  let asking = false;
   let cursorTimer: number | null = null;
 
   /** Asks the browser to keep the screen on, while the mode is on and the tab shows. */
   function keepAwake(): void {
-    if (!on || lock !== null || document.hidden || !("wakeLock" in navigator)) return;
+    if (!on || lock !== null || asking || document.hidden || !("wakeLock" in navigator)) return;
+    asking = true;
     navigator.wakeLock
       .request("screen")
       .then((sentinel) => {
-        // The mode may have ended while the request was pending.
-        if (!on) {
+        asking = false;
+        // The mode may have ended, or the tab hidden, while the request was pending.
+        if (!on || lock !== null) {
           void sentinel.release();
           return;
         }
@@ -56,7 +64,16 @@ export function mountScreensaver(onChange: (on: boolean) => void): Screensaver {
       })
       .catch(() => {
         // Refused (battery saver, a policy): the screen may sleep, nothing else changes.
+        asking = false;
       });
+  }
+
+  /** Leaves the full screen this mode asked for, once the request is answered. */
+  function leaveFullscreen(): void {
+    void (asked ?? Promise.resolve()).then(() => {
+      if (!on && document.fullscreenElement != null)
+        void document.exitFullscreen().catch(() => undefined);
+    });
   }
 
   function idleCursor(): void {
@@ -77,9 +94,15 @@ export function mountScreensaver(onChange: (on: boolean) => void): Screensaver {
     enter(fullscreen) {
       if (fullscreen && document.fullscreenElement === null && document.fullscreenEnabled) {
         ownsFullscreen = true;
-        document.documentElement.requestFullscreen().catch(() => {
+        refused = false;
+        const request = document.documentElement.requestFullscreen().catch(() => {
           // Refused: the mode goes on without the full screen.
           ownsFullscreen = false;
+          refused = true;
+        });
+        asked = request;
+        void request.then(() => {
+          if (asked === request) asked = null;
         });
       }
       if (on) return;
@@ -96,8 +119,8 @@ export function mountScreensaver(onChange: (on: boolean) => void): Screensaver {
       idleCursor();
       if (lock !== null) void lock.release();
       lock = null;
-      if (ownsFullscreen && document.fullscreenElement !== null)
-        void document.exitFullscreen().catch(() => undefined);
+      // Also when the request is still pending: it may be granted after this.
+      if (ownsFullscreen) leaveFullscreen();
       ownsFullscreen = false;
       onChange(false);
     },
@@ -120,7 +143,9 @@ export function mountScreensaver(onChange: (on: boolean) => void): Screensaver {
     if (e.key === "Escape" && on) self.exit();
     else if ((e.key === "f" || e.key === "F") && !e.repeat) {
       // Opened by `?screensaver`, the mode is not full screen yet: F makes it so.
-      if (on && document.fullscreenElement != null) self.exit();
+      // Full screen, refused or impossible, F leaves it.
+      if (on && (document.fullscreenElement != null || refused || !document.fullscreenEnabled))
+        self.exit();
       else self.enter(true);
     }
   });
