@@ -11,6 +11,8 @@ const AREA_KEY = "wattscape.area";
 const LOCALE_KEY = "wattscape.locale";
 const PANEL_KEY = "wattscape.panel";
 const THEME_KEY = "wattscape.theme";
+const WEATHER_KEY = "wattscape.weather";
+const DRIFT_KEY = "wattscape.drift";
 
 /** `localStorage`, or `undefined` where merely touching it throws (blocked storage). */
 export function browserStorage(): Storage | undefined {
@@ -220,4 +222,80 @@ export function timelapseFromQuery(search: string): "day" | undefined {
   if (search.length > 2048) return undefined;
   const values = new URLSearchParams(search).getAll("timelapse");
   return values.length === 1 && values[0] === "day" ? "day" : undefined;
+}
+
+/** `?name=on` or `?name=off`: true or false; `undefined` when absent, repeated or anything else. */
+function switchFromQuery(search: string, name: string): boolean | undefined {
+  if (search.length > 2048) return undefined;
+  const values = new URLSearchParams(search).getAll(name);
+  if (values.length !== 1) return undefined;
+  return values[0] === "on" ? true : values[0] === "off" ? false : undefined;
+}
+
+/** A switch remembered in this browser, if storage works and holds "on" or "off". */
+function savedSwitch(
+  storage: Pick<Storage, "getItem"> | undefined,
+  key: string,
+): boolean | undefined {
+  try {
+    const value = storage?.getItem(key);
+    return value === "on" ? true : value === "off" ? false : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function saveSwitch(storage: Pick<Storage, "setItem"> | undefined, key: string, on: boolean): void {
+  try {
+    storage?.setItem(key, on ? "on" : "off");
+  } catch {
+    // Storage can be blocked (private mode, settings): the choice then lasts the visit.
+  }
+}
+
+/** `?weather=off` or `?weather=on` (B-030); a weather group there is an override instead. */
+export function weatherSwitchFromQuery(search: string): boolean | undefined {
+  return switchFromQuery(search, "weather");
+}
+
+export function savedWeatherOn(storage: Pick<Storage, "getItem"> | undefined): boolean | undefined {
+  return savedSwitch(storage, WEATHER_KEY);
+}
+
+export function saveWeatherOn(storage: Pick<Storage, "setItem"> | undefined, on: boolean): void {
+  saveSwitch(storage, WEATHER_KEY, on);
+}
+
+/**
+ * Whether the sky's weather shows (clouds, rain, fog; D-072): an imposed weather
+ * (`?weather=rain`) does, since it was asked for; else `?weather=off|on`, then the
+ * remembered choice, then on.
+ */
+export function initialWeatherOn(
+  search: string,
+  storage: Pick<Storage, "getItem"> | undefined,
+): boolean {
+  if (weatherFromQuery(search) !== undefined) return true;
+  return weatherSwitchFromQuery(search) ?? savedWeatherOn(storage) ?? true;
+}
+
+/** `?drift=off` or `?drift=on` (B-036). */
+export function driftFromQuery(search: string): boolean | undefined {
+  return switchFromQuery(search, "drift");
+}
+
+export function savedDriftOn(storage: Pick<Storage, "getItem"> | undefined): boolean | undefined {
+  return savedSwitch(storage, DRIFT_KEY);
+}
+
+export function saveDriftOn(storage: Pick<Storage, "setItem"> | undefined, on: boolean): void {
+  saveSwitch(storage, DRIFT_KEY, on);
+}
+
+/** Whether the camera drifts at rest (D-074): `?drift=`, then the remembered choice, then on. */
+export function initialDriftOn(
+  search: string,
+  storage: Pick<Storage, "getItem"> | undefined,
+): boolean {
+  return driftFromQuery(search) ?? savedDriftOn(storage) ?? true;
 }

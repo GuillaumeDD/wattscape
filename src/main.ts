@@ -13,13 +13,17 @@ import {
   atFromQuery,
   browserStorage,
   initialArea,
+  initialDriftOn,
   initialPanelFolded,
   initialTheme,
+  initialWeatherOn,
   sampleFromQuery,
+  saveDriftOn,
   savePanelFolded,
   savedLocale,
   saveLocale,
   saveTheme,
+  saveWeatherOn,
   timelapseFromQuery,
   weatherFromQuery,
 } from "./ui/settings";
@@ -53,6 +57,7 @@ function render(locale: Locale): void {
   setText("tagline", t("tagline"));
   setText("status", t("status"));
   setText("language", t("switchLanguage"));
+  setText("repo-link", t("repoLink"));
   setText("credits-data", t("creditsData"));
   setText("credits-eco2mix-licence", t("creditsEco2mixLicence"));
   setText("credits-weather-licence", t("creditsWeatherLicence"));
@@ -65,6 +70,9 @@ function render(locale: Locale): void {
   setText("area-label", t("areaLabel"));
   setText("theme-label", t("themeLabel"));
   renderThemeOptions();
+  setText("weather-switch-label", t("weatherSwitch"));
+  setText("drift-switch-label", t("driftSwitch"));
+  renderSwitches();
   setText("locate", t("useMyLocation"));
   setText("debug-link", t("debugTitle"));
   document.getElementById("scene")?.setAttribute("aria-label", t("sceneLabel"));
@@ -134,21 +142,28 @@ const WEATHER_NAMES = {
   storm: "weatherStorm",
 } as const satisfies Record<WeatherGroup, MessageKey>;
 
-/** Where the weather comes from, and its time, or that it is imposed by `?weather=`. */
+/**
+ * Where the weather comes from, and its time, or that it is imposed by `?weather=`;
+ * turned off, that it is hidden, and where the snow still on the ground comes from.
+ */
 function renderWeatherNote(): void {
+  if (!weatherOn) {
+    const t = (key: MessageKey): string => translate(locale, key);
+    const hidden = t(snowShown ? "weatherHiddenSnow" : "weatherHidden");
+    setText("weather-note", snowShown ? `${hidden} ${weatherSource()}` : hidden);
+    return;
+  }
+  setText("weather-note", weatherSource());
+}
+
+/** Where the weather comes from, and its time, or that it is imposed by `?weather=`. */
+function weatherSource(): string {
   const t = (key: MessageKey): string => translate(locale, key);
   const state = weatherState;
-  if (weatherOverride !== undefined) {
-    setText(
-      "weather-note",
-      t("weatherOverride").replace("{group}", t(WEATHER_NAMES[weatherOverride])),
-    );
-    return;
-  }
-  if (state.kind === "loading" || state.kind === "unavailable") {
-    setText("weather-note", t(state.kind === "loading" ? "weatherLoading" : "weatherUnavailable"));
-    return;
-  }
+  if (weatherOverride !== undefined)
+    return t("weatherOverride").replace("{group}", t(WEATHER_NAMES[weatherOverride]));
+  if (state.kind === "loading" || state.kind === "unavailable")
+    return t(state.kind === "loading" ? "weatherLoading" : "weatherUnavailable");
   const keys = {
     live: "weatherLive",
     stale: "weatherStale",
@@ -159,7 +174,15 @@ function renderWeatherNote(): void {
     timeStyle: "short",
   }).format(new Date(state.timeMs));
   const snow = snowShown && state.kind !== "ahead" ? ` ${t("weatherSnowInferred")}` : "";
-  setText("weather-note", t(keys[state.kind]).replace("{time}", time) + snow);
+  return t(keys[state.kind]).replace("{time}", time) + snow;
+}
+
+/** The panel's switches, as the viewer left them. */
+function renderSwitches(): void {
+  const weatherSwitch = document.getElementById("weather-switch");
+  if (weatherSwitch instanceof HTMLInputElement) weatherSwitch.checked = weatherOn;
+  const driftSwitch = document.getElementById("drift-switch");
+  if (driftSwitch instanceof HTMLInputElement) driftSwitch.checked = driftOn;
 }
 
 /** The area list: rebuilt only when the language changes, otherwise just selected. */
@@ -193,6 +216,10 @@ function renderThemeOptions(): void {
 
 const storage = browserStorage();
 let theme: ThemeId = initialTheme(location.search, storage);
+/** Whether the sky's weather shows (B-030, D-072); the ground snow always does. */
+let weatherOn = initialWeatherOn(location.search, storage);
+/** Whether the camera drifts at rest (B-036, D-074). */
+let driftOn = initialDriftOn(location.search, storage);
 
 const areaState: AreaState = {
   area: initialArea(location.search, storage),
@@ -254,8 +281,32 @@ const scene: SceneView | null =
           renderCaption();
         },
         theme,
+        driftOn,
+        () => {
+          setDrift(!driftOn);
+        },
       )
     : null;
+scene?.setWeatherHidden(!weatherOn);
+
+function setDrift(on: boolean): void {
+  driftOn = on;
+  saveDriftOn(storage, on);
+  renderSwitches();
+  scene?.setDrift(on);
+}
+
+document.getElementById("weather-switch")?.addEventListener("change", (event) => {
+  if (!(event.target instanceof HTMLInputElement)) return;
+  weatherOn = event.target.checked;
+  saveWeatherOn(storage, weatherOn);
+  scene?.setWeatherHidden(!weatherOn);
+  renderWeatherNote();
+});
+
+document.getElementById("drift-switch")?.addEventListener("change", (event) => {
+  if (event.target instanceof HTMLInputElement) setDrift(event.target.checked);
+});
 
 document.getElementById("theme")?.addEventListener("change", (event) => {
   const value = event.target instanceof HTMLSelectElement ? event.target.value : undefined;
@@ -308,8 +359,10 @@ const weatherFeed: WeatherFeed | null =
       )
     : null;
 if (weatherOverride !== undefined) {
+  const imposed = overrideWeather(weatherOverride, clock.now());
+  snowShown = anySnow(imposed);
   renderWeatherNote();
-  scene?.setWeather(overrideWeather(weatherOverride, clock.now()), true);
+  scene?.setWeather(imposed, true);
 }
 
 let shownArea = areaState.area;

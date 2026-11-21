@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { fixedClock } from "../src/clock/clock";
 import {
   areaFromQuery,
+  driftFromQuery,
+  initialDriftOn,
+  initialWeatherOn,
+  saveDriftOn,
+  savedDriftOn,
+  savedWeatherOn,
+  saveWeatherOn,
+  weatherFromQuery,
+  weatherSwitchFromQuery,
   atFromQuery,
   initialArea,
   initialPanelFolded,
@@ -230,5 +239,83 @@ describe("theme (?theme=, G-011)", () => {
     expect(initialTheme("?theme=neon", remembered)).toBe("modern");
     expect(initialTheme("", memoryStorage())).toBe("pixel");
     expect(initialTheme("", throwing)).toBe("pixel");
+  });
+});
+
+describe("weather switch (?weather=off, B-030)", () => {
+  it("reads on and off, and leaves a weather group to the override", () => {
+    expect(weatherSwitchFromQuery("?weather=off")).toBe(false);
+    expect(weatherSwitchFromQuery("?weather=on")).toBe(true);
+    expect(weatherSwitchFromQuery("?weather=rain")).toBeUndefined();
+    // "off" is not a group: it imposes no weather.
+    expect(weatherFromQuery("?weather=off")).toBeUndefined();
+  });
+
+  it("ignores anything else", () => {
+    for (const search of [
+      "",
+      "?weather=",
+      "?weather=OFF",
+      "?weather=false",
+      "?weather=off&weather=off",
+      `?weather=off&pad=${"x".repeat(3000)}`,
+    ])
+      expect(weatherSwitchFromQuery(search), search).toBeUndefined();
+  });
+
+  it("round-trips the choice and stores nothing else", () => {
+    const storage = memoryStorage();
+    saveWeatherOn(storage, false);
+    expect(savedWeatherOn(storage)).toBe(false);
+    saveWeatherOn(storage, true);
+    expect(savedWeatherOn(storage)).toBe(true);
+    expect(storage.length).toBe(1);
+  });
+
+  it("ignores a stored value that is not on or off, and blocked storage", () => {
+    expect(savedWeatherOn(memoryStorage({ "wattscape.weather": "maybe" }))).toBeUndefined();
+    expect(savedWeatherOn(throwing)).toBeUndefined();
+    expect(() => {
+      saveWeatherOn(throwing, false);
+    }).not.toThrow();
+  });
+
+  it("opens with the URL, then the remembered choice, then on; an override shows", () => {
+    const off = memoryStorage({ "wattscape.weather": "off" });
+    expect(initialWeatherOn("", undefined)).toBe(true);
+    expect(initialWeatherOn("", off)).toBe(false);
+    expect(initialWeatherOn("?weather=on", off)).toBe(true);
+    expect(initialWeatherOn("?weather=off", memoryStorage())).toBe(false);
+    // The weather imposed for a demo is asked for: it shows over a remembered "off".
+    expect(initialWeatherOn("?weather=snow", off)).toBe(true);
+  });
+});
+
+describe("drift switch (?drift=off, B-036)", () => {
+  it("reads on and off, and ignores anything else", () => {
+    expect(driftFromQuery("?drift=off")).toBe(false);
+    expect(driftFromQuery("?drift=on&area=28")).toBe(true);
+    for (const search of ["", "?drift=", "?drift=0", "?drift=off&drift=on"])
+      expect(driftFromQuery(search), search).toBeUndefined();
+  });
+
+  it("round-trips the choice, and survives blocked storage", () => {
+    const storage = memoryStorage();
+    saveDriftOn(storage, false);
+    expect(savedDriftOn(storage)).toBe(false);
+    expect(storage.length).toBe(1);
+    expect(savedDriftOn(memoryStorage({ "wattscape.drift": "yes" }))).toBeUndefined();
+    expect(savedDriftOn(throwing)).toBeUndefined();
+    expect(() => {
+      saveDriftOn(throwing, true);
+    }).not.toThrow();
+  });
+
+  it("opens with the URL, then the remembered choice, then on", () => {
+    const off = memoryStorage({ "wattscape.drift": "off" });
+    expect(initialDriftOn("", undefined)).toBe(true);
+    expect(initialDriftOn("", off)).toBe(false);
+    expect(initialDriftOn("?drift=on", off)).toBe(true);
+    expect(initialDriftOn("?drift=off", undefined)).toBe(false);
   });
 });

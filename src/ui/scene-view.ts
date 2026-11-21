@@ -102,6 +102,13 @@ export interface SceneView {
   setWeather(byRegion: RegionalWeather, override?: boolean): void;
   /** Draws the scene with another theme (PRD G-011), from the next frame on. */
   setTheme(id: ThemeId): void;
+  /**
+   * Hides the sky's weather, or shows it again (B-030, D-072): the clouds, rain and
+   * fog go; the snow on the ground stays.
+   */
+  setWeatherHidden(hidden: boolean): void;
+  /** Lets the camera drift at rest, or keeps it still where it is (B-036, D-074). */
+  setDrift(on: boolean): void;
 }
 
 interface Flight {
@@ -148,6 +155,10 @@ export function mountSceneView(
   onCaption: (shown: ShownCaption | null) => void = () => undefined,
   /** The theme the scene opens with. */
   initialTheme: ThemeId = DEFAULT_THEME.id,
+  /** Whether the camera drifts at rest (D-074). */
+  initialDrift = true,
+  /** Called when the viewer presses Space, to turn the drift off or on. */
+  onDriftKey: () => void = () => undefined,
 ): SceneView {
   const context = canvas.getContext("2d");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -170,6 +181,10 @@ export function mountSceneView(
   let weatherVersion = 0;
   /** Whether any region has weather to show: the clouds then drift. */
   let weatherShown = false;
+  /** The viewer turned the sky's weather off (B-030). */
+  let weatherHidden = false;
+  /** The camera drifts at rest: as the viewer chose, and never with reduced motion. */
+  let drift = initialDrift;
   let image: ImageData | null = null;
   /** The boxes of `surface` the last step's motion was drawn in, if the theme says. */
   let moved: readonly Rect[] | null = null;
@@ -287,7 +302,8 @@ export function mountSceneView(
       flight = null;
     }
     const idle = now - lastInput - IDLE_DRIFT_AFTER_MS;
-    if (!reducedMotion && idle > 0) return clampCamera(driftAt(base, idle, size.width), roam, base);
+    if (drift && !reducedMotion && idle > 0)
+      return clampCamera(driftAt(base, idle, size.width), roam, base);
     return camera;
   }
 
@@ -383,6 +399,7 @@ export function mountSceneView(
       townLights: lights,
       landmarks: LANDMARKS,
       weather,
+      weatherHidden,
       // By steps, so that a redraw for another reason does not nudge the clouds.
       timeMs: Math.floor(clock.now() / CLOUD_STEP_MS) * CLOUD_STEP_MS,
       season: seasonAt(clock.now()),
@@ -407,8 +424,9 @@ export function mountSceneView(
       scene.focus,
       plantsVersion,
       weatherVersion,
+      weatherHidden,
       // The clouds drift with the wind, by steps of a minute (the light wakes the loop as often).
-      weatherShown ? scene.timeMs : 0,
+      weatherShown && !weatherHidden ? scene.timeMs : 0,
       scene.season.from,
       scene.season.to,
       scene.season.share,
@@ -463,11 +481,11 @@ export function mountSceneView(
       detail !== target ||
       settling ||
       fastClock ||
-      (!reducedMotion && untilDrift <= 0)
+      (drift && !reducedMotion && untilDrift <= 0)
     )
       wake();
     else if (drawn?.moving === true) sleep((step + 1) * MOTION_STEP_MS - now);
-    else sleep(reducedMotion ? LIGHT_EVERY_MS : Math.min(LIGHT_EVERY_MS, untilDrift));
+    else sleep(reducedMotion || !drift ? LIGHT_EVERY_MS : Math.min(LIGHT_EVERY_MS, untilDrift));
   }
 
   let timer: number | null = null;
@@ -597,7 +615,10 @@ export function mountSceneView(
     const intent = keyIntent(e.key, e.code);
     if (intent === null) return;
     e.preventDefault();
-    if (intent.kind === "home") flyTo(home);
+    // A held Space repeats: the drift switches once per press.
+    if (intent.kind === "drift") {
+      if (!e.repeat) onDriftKey();
+    } else if (intent.kind === "home") flyTo(home);
     else if (intent.kind === "zoom")
       flyTo((c) =>
         zoomAt(c, intent.factor, size.width / 2, size.height / 2, size.width, size.height),
@@ -642,6 +663,19 @@ export function mountSceneView(
       weather = override ? byRegion : sceneWeather(byRegion, clock.now());
       weatherShown = hasSky(weather);
       weatherVersion++;
+      wake();
+    },
+    setWeatherHidden(hidden: boolean): void {
+      if (weatherHidden === hidden) return;
+      weatherHidden = hidden;
+      wake();
+    },
+    setDrift(on: boolean): void {
+      if (drift === on) return;
+      // The camera stays where it is on screen, mid-drift too; switched back on, it
+      // starts drifting from there after the usual rest.
+      takeOver(animationClock.now());
+      drift = on;
       wake();
     },
     setTheme(id: ThemeId): void {

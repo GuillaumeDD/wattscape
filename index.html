@@ -34,7 +34,21 @@
           <label for="theme" id="theme-label"></label>
           <select id="theme"></select>
         </div>
+        <div id="switches">
+          <label
+            ><input type="checkbox" id="weather-switch" /> <span id="weather-switch-label"></span
+          ></label>
+          <label
+            ><input type="checkbox" id="drift-switch" /> <span id="drift-switch-label"></span
+          ></label>
+        </div>
         <button id="language" type="button"></button>
+        <!-- A plain link out: nothing is fetched from it (B-031). -->
+        <a
+          id="repo-link"
+          href="https://github.com/GuillaumeDD/wattscape"
+          rel="noopener noreferrer"
+        ></a>
       </div>
       <!-- Outside the folding part: where the figures come from stays on screen. -->
       <p id="plants-note" role="status"></p>

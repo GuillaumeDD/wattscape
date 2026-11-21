@@ -1345,7 +1345,8 @@ export function drawModernScene(scene: Scene, out: Surface): Drawn {
   if (map !== out.data) spread(map, scene.width * density, scene.height * density, out);
 
   // The weather (B-018), at `out`'s own pixels, under what stands on the map.
-  const grid = weatherGrid(scene.coarse, scene.weather);
+  // Hidden by the viewer, the sky's weather is not drawn; the ground snow was, above.
+  const grid = scene.weatherHidden === true ? null : weatherGrid(scene.coarse, scene.weather);
   const weather =
     grid === null
       ? null

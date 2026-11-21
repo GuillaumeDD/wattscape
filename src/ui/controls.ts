@@ -37,7 +37,8 @@ export function bufferSize(cssWidth: number, cssHeight: number, pixelRatio: numb
 export type KeyIntent =
   | { readonly kind: "pan"; readonly dx: number; readonly dy: number }
   | { readonly kind: "zoom"; readonly factor: number }
-  | { readonly kind: "home" };
+  | { readonly kind: "home" }
+  | { readonly kind: "drift" };
 
 /** Share of the view one press of an arrow moves it by. */
 export const KEY_PAN_SHARE = 0.15;
@@ -47,7 +48,8 @@ export const KEY_ZOOM = 1.5;
 /**
  * The camera intent of a key (`KeyboardEvent.key`), or null: arrows and WASD pan
  * (ZQSD is the same keys on a French keyboard, by `code`), + and − zoom, Home goes
- * home. `dx`, `dy` are the share of the view the ground moves by.
+ * home, Space turns the idle drift off or on (D-074). `dx`, `dy` are the share of
+ * the view the ground moves by.
  */
 export function keyIntent(key: string, code: string): KeyIntent | null {
   switch (key) {
@@ -59,6 +61,8 @@ export function keyIntent(key: string, code: string): KeyIntent | null {
       return { kind: "zoom", factor: 1 / KEY_ZOOM };
     case "Home":
       return { kind: "home" };
+    case " ":
+      return { kind: "drift" };
     case "ArrowLeft":
       return { kind: "pan", dx: KEY_PAN_SHARE, dy: 0 };
     case "ArrowRight":

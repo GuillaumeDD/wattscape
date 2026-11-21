@@ -62,6 +62,8 @@ describe("keyIntent", () => {
     expect(keyIntent("=", "Equal")).toEqual({ kind: "zoom", factor: KEY_ZOOM });
     expect(keyIntent("-", "Minus")).toEqual({ kind: "zoom", factor: 1 / KEY_ZOOM });
     expect(keyIntent("Home", "Home")).toEqual({ kind: "home" });
+    // Space turns the idle drift off or on (B-036, D-074).
+    expect(keyIntent(" ", "Space")).toEqual({ kind: "drift" });
   });
 
   it("pans with the arrows: the ground moves the other way, as the view moves", () => {
@@ -86,7 +88,6 @@ describe("keyIntent", () => {
   it("leaves every other key alone", () => {
     for (const [key, code] of [
       ["Enter", "Enter"],
-      [" ", "Space"],
       ["Tab", "Tab"],
       ["x", "KeyX"],
       ["", ""],
