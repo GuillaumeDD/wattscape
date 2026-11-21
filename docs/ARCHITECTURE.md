@@ -1344,6 +1344,10 @@ All **unverified** until measured in Chromium, Firefox and WebKit (AGENTS.md §5
   then it still sees the full screen, so an `F` pressed at once leaves the mode
   instead of entering it (#66). WebKit ignores a `wakeLock` stub defined on
   `navigator` itself; one on `Navigator.prototype`, as a getter, holds (#63).
+  The end of a full screen can reach the page after a quick `F` has asked for a
+  new one (Chromium under load, CI on #68): while a request is pending, the mode
+  ignores a `fullscreenchange` to no full screen, and leaves a full screen granted
+  after it ended.
 - The controls (B-011) were measured in Chromium only (`e2e/scene.spec.ts`): wheel,
   drag, keys, double-click. Pinch and double-tap use Pointer Events and
   `touch-action: none`; some browsers also send `dblclick` after a double-tap, which
