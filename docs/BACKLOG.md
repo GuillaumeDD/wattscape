@@ -141,6 +141,7 @@ Proposed order (Q-58), at most three threads at once:
 | 1    | Survey mode, then screensaver mode (stacked)         | B-032, then B-021     |
 | 1    | Performance measures, on Guillaume's machine         | B-024, B-035          |
 | 2    | Legend, once the small settings thread is done       | B-019                 |
+| 2    | Modern theme by default, then towerless nuclear      | B-037, then B-038     |
 | 3    | Polish and share                                     | B-033                 |
 | 4    | New data: one idea, chosen on mockups                | G-002, G-004, G-023 … |
 
@@ -210,7 +211,7 @@ Two asks from Guillaume (2026-11-21), to place in the waves above (PRD Q-65):
       new motion by day costs frames (measure it before the card, AGENTS.md §
       Performance).
 
-Proposed place (Q-65): one thread of their own in wave 2, B-037 then B-038 on one
+Place, chosen by Guillaume (Q-65, D-081): one thread of their own in wave 2, B-037 then B-038 on one
 branch (they touch the settings, then the plants' art: distinct from the legend's
 files), so wave 2 holds two branches. B-037 goes first, before B-024 and B-035 are
 measured if they are not yet, and both before B-033, whose screenshots must show

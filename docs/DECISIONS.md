@@ -1448,3 +1448,16 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   delay are not checked yet.
 - **Revisit if:** DS-08 turns GO: a plant stopped alone while its neighbours run
   could then be shown (G-003).
+
+## D-081 — The default theme and the towerless plants: wave 2, one thread
+
+- **Context:** B-037 (D-079) and B-038 (D-080) were added to the backlog on
+  2026-11-21 without a place in the waves of D-071 (PRD Q-65).
+- **Options:** wave 2, one thread, B-037 then B-038 on one branch, beside the
+  legend (recommended); after the legend; B-037 alone first, B-038 later.
+- **Decision:** wave 2, one thread (Guillaume, 2026-11-21, decision card): B-037,
+  then B-038 on the same branch, beside the legend (B-019); both before B-033.
+- **Why:** they touch the settings and the plants' art, apart from the legend's
+  files, so wave 2 holds two branches (D-066); B-033's screenshots must show the
+  new default and the new drawing.
+- **Revisit if:** the legend and B-038 turn out to edit the same files.
