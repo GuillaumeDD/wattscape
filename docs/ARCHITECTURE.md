@@ -1223,6 +1223,24 @@ Accepted on 2026-11-18 (PRD Q-40, D-061), closing B-028; the vignette laid in
 CSS over the canvas, which would spare the crop its vignette, waits in Growth
 (G-017).
 
+**The survey mode** (B-032), same tool, 2026-11-21, one run per theme (pixel art,
+then modern), each row by day and at night: the first flight of the tour from
+Normandie to Centre-Val de Loire (8.5 s, its speed's ramp included), then its stay
+there, 2 s after landing (8 s, the plants of Centre-Val de Loire moving).
+
+| View (`frames`)                   | Pixel art: p95, busy | Modern: p95, busy |
+| --------------------------------- | -------------------- | ----------------- |
+| Flight France ↔ Normandie (B-011) | 42–46 ms, 339–360    | 35–37 ms, 294–310 |
+| Survey flight (6–12 s)            | 13–16 ms, 204–218    | 15–17 ms, 365–367 |
+| Survey stay (Centre-Val de Loire) | 15–23 ms, 39–46      | 11–12 ms, 79–82   |
+
+A slow flight costs less per frame than a quick one (each frame moves the view by
+less), but draws every frame of its 6 to 12 s. Over a lap (102 s of flights for
+540 s of stays, at 480 × 270), the tour would cost about 70 ms/s in pixel art and
+125 in the modern theme, worked out from these rows, not measured over a lap: over
+the steady state's 30 ms/s, as the modern theme's idle drift already is (D-061).
+For Guillaume to weigh (B-032's PR), with B-024's measures on a quiet machine.
+
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame
 walks 300 000 to 500 000 cells for 130 000 pixels (10 to 20 ms in Node), and the

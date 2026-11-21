@@ -74,3 +74,5 @@ for (const shot of shots) {
   await page.close();
 }
 await browser.close();
+// The preview server is a child of npx: end everything at once.
+process.exit(0);

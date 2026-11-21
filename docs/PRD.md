@@ -161,9 +161,10 @@ idea that the grid can be seen.
 - Full screen (`F`, button), cursor hidden when idle, a Wake Lock request to keep the
   screen on while in full screen (if the browser supports it).
 - Keys: zoom, pan, `R` next region, `H` hide/show the legend, `?` help, `Space`
-  pause the drift, `P` play or pause the survey mode, `Home` end it (B-032). Settings: time-lapse (to watch a day in a minute, with the day's
-  real figures: `?timelapse=day`, B-014), weather override and fixed data, for demos
-  and screenshots (also as URL settings).
+  pause the drift, `P` play or pause the survey mode, `Home` end it (B-032).
+  Settings: time-lapse (to watch a day in a minute, with the day's real figures:
+  `?timelapse=day`, B-014), weather override and fixed data, for demos and
+  screenshots (also as URL settings).
 - Weather on or off, in the panel and by `?weather=off`, remembered: off hides the
   clouds, rain and fog; the ground snow stays, so its readings go on (Guillaume,
   2026-11-21; G-020, B-030, D-072).

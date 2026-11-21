@@ -163,9 +163,10 @@ if (mode === "frames") {
     await page.waitForTimeout(22_000);
     await measure(`idle drift, ${label}`, page, cdp, 10_000);
     // The survey mode (B-032): its first, slow flight, Normandie → Centre-Val de
-    // Loire (about 7 s), then the start of its stay there, still.
+    // Loire (about 8 s with the speed's ramp), then its stay there, still.
     await page.keyboard.press("p");
-    await measure(`survey flight, ${label}`, page, cdp, 7500);
+    await measure(`survey flight, ${label}`, page, cdp, 8500);
+    await page.waitForTimeout(2000);
     await measure(`survey stay, ${label}`, page, cdp, 8000);
     await page.context().close();
   }
