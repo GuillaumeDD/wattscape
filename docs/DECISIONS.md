@@ -1381,3 +1381,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   the project thread).
 - **Why:** the traceability rule wins over a bare screen.
 - **Revisit if:** in use, the notes distract from the scene.
+
+## D-077 — Survey and screensaver review: two browser lessons written down
+
+- **Context:** at the end of the survey and screensaver work (PRs #62 to #66),
+  Claude offered to write down what was not obvious, and Guillaume agreed
+  (2026-11-21, « Oui OK pour noter dans AGENTS.md les points pertinents »).
+- **Options:** keep the lessons in memory only, or write them where the next
+  session reads them.
+- **Decision:** written in `AGENTS.md` § End-to-end tests, and the measured facts
+  in ARCHITECTURE § Browser quirks: an e2e test of a browser API waits for
+  states, not for key presses (Firefox's `Escape` leaves the full screen before
+  the page learns of it; CI on #64, fixed in #66); a `navigator` stub goes on
+  `Navigator.prototype` as a getter (WebKit; CI on #63).
+- **Why:** each cost a red CI run that the cloud, with Chromium only, could not
+  reproduce.
+- **Revisit if:** the cloud sessions gain Firefox and WebKit, so such a test can
+  be run before the push.
