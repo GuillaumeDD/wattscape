@@ -80,7 +80,7 @@
   "surveyPlay": "Start the flyover (P)",
   "surveyResume": "Resume the flyover (P)",
   "surveyPause": "Pause the flyover (P)",
-  "surveyStop": "Stop the flyover and go back to the region (Home)",
+  "surveyStop": "Stop the flyover and fly home (Home)",
   "surveyArea": "Flyover: {area}",
   "surveyPaused": "Flyover paused: {area}"
 }

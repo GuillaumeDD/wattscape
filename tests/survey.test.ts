@@ -179,6 +179,8 @@ describe("surveyFlightMs", () => {
     const long = smoothPath(stops[0] as Camera, stops[5] as Camera, W);
     expect(surveyFlightMs(long)).toBeGreaterThan(surveyFlightMs(short));
     expect(surveyFlightMs({ length: Number.NaN, at: () => france })).toBe(SURVEY_FLIGHT_MIN_MS);
+    // Regression: a flight that goes nowhere lasted 6 s, drawing the same frame.
+    expect(surveyFlightMs(smoothPath(france, france, W))).toBe(0);
   });
 });
 
@@ -251,6 +253,13 @@ describe("createTour", () => {
     for (let t = 0; t < 2 * loopMs; t += 1000) expect(cut.at(t).flying).toBe(false);
     expect(cut.at(0).camera).toEqual(stops[0]);
     expect(cut.at(REGION_DWELL_MS + 1).camera).toEqual(stops[1]);
+  });
+
+  it("starts with its stay when it starts at its first stop (a resize during a stay)", () => {
+    const here = createTour(stops[3] as Camera, stops, 3, W);
+    expect(here.at(0).flying).toBe(false);
+    expect(here.at(0).stillMs).toBe(REGION_DWELL_MS);
+    expect(here.at(REGION_DWELL_MS + 1).flying).toBe(true);
   });
 
   it("treats a bad tour time as its start", () => {

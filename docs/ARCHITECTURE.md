@@ -924,7 +924,9 @@ the deployed build. `tools/screenshots.ts` writes its frames
   flights are cuts and the ramps go. An input (a drag, the wheel, a key, not a tap)
   takes the camera and pauses the tour; Play then flies back to its stop. Stop and
   `Home` end it and fly home slowly, along the same kind of path; picking an area
-  ends it too. The controls (Play or Pause, Stop, the area shown) sit bottom right
+  ends it too, but not an area found from the position, which may land late: the
+  tour goes on, and Stop flies there. A resize reframes the stop at once during a
+  stay, the time spent there kept. `P` held down changes the mode once. The controls (Play or Pause, Stop, the area shown) sit bottom right
   above the credits, and fade away while the tour plays, 4 s after the last move of
   the mouse or key, until the next one.
 - **Idle drift:** 20 s after the last input, the camera drifts on a slow ellipse

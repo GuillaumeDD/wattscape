@@ -7,7 +7,7 @@
  * the note tells the state and the step's time. `#caption` names the landmark whose
  * caption shows (B-020), and its box. `?theme=modern` opens with the modern theme
  * (G-011), and `#theme-toggle` switches. `#survey-note` tells the survey mode's state
- * and the area it shows (B-032).
+ * and the area it shows (B-032), and `#survey-log` every mode it went through.
  */
 import { fixedClock, replayClock } from "../src/clock/clock";
 import { isThemeId, type ThemeId } from "../src/render/theme-ids";
@@ -60,6 +60,8 @@ if (canvas instanceof HTMLCanvasElement) {
         (state) => {
           const note = document.getElementById("survey-note");
           if (note) note.textContent = `${state.mode} ${state.area ?? ""}`.trim();
+          const log = document.getElementById("survey-log");
+          if (log) log.textContent += `${state.mode};`;
         },
       );
   // `#theme-toggle` goes from one theme to the other, as the page's list does.

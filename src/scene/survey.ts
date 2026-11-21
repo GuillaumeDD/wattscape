@@ -125,8 +125,12 @@ export function smoothPath(from: Camera, to: Camera, width: number, rho = SURVEY
   };
 }
 
-/** How long the flight along `path` lasts: steady, between the survey's bounds. */
+/**
+ * How long the flight along `path` lasts: steady, between the survey's bounds; none
+ * for a path that goes nowhere (the camera is already there).
+ */
 export function surveyFlightMs(path: SmoothPath): number {
+  if (path.length < 1e-3) return 0;
   const ms = SURVEY_FLIGHT_MIN_MS + 2500 * path.length;
   return Number.isFinite(ms) ? Math.min(SURVEY_FLIGHT_MAX_MS, ms) : SURVEY_FLIGHT_MIN_MS;
 }

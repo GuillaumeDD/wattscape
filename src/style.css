@@ -300,12 +300,13 @@ body.scene #credits {
   opacity: 0.8;
   transition: opacity 2s ease;
 }
+#survey.quiet {
+  opacity: 0;
+}
+/* After `.quiet`, so that controls under the mouse or holding the focus never fade. */
 #survey:hover,
 #survey:focus-within {
   opacity: 1;
-}
-#survey.quiet {
-  opacity: 0;
 }
 #survey button {
   display: flex;

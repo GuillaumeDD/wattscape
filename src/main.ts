@@ -339,7 +339,8 @@ mountAreaPicker(areaState, () => {
   // camera flies only when the area changes.
   if (areaState.area === shownArea) return;
   shownArea = areaState.area;
-  scene?.showArea(areaState.area);
+  // An area found from the position may land after a tour started: the tour goes on.
+  scene?.showArea(areaState.area, areaState.position !== null);
 });
 
 document.getElementById("panel-toggle")?.addEventListener("click", () => {

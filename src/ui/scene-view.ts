@@ -59,6 +59,7 @@ import {
 import { seasonAt } from "../scene/season.ts";
 import {
   createTour,
+  dwellMs,
   firstStop,
   rampLeftMs,
   setTourPlaying,
@@ -104,8 +105,12 @@ const TAP_SLACK = 4;
 const TAP_CAPTION_MS = 8000;
 
 export interface SceneView {
-  /** Flies to an area: the whole of France, or a region. */
-  showArea(area: Eco2mixArea): void;
+  /**
+   * Flies to an area: the whole of France, or a region; that ends a tour. With
+   * `keepTour` (an area found from the position, which may land late), a tour goes
+   * on, and only its Stop flies to the new area.
+   */
+  showArea(area: Eco2mixArea, keepTour?: boolean): void;
   /**
    * The latest step of every region, which drives the plants; null when there is
    * none (not yet loaded, or unavailable): every plant is then idle. A recorded
@@ -236,6 +241,8 @@ export function mountSceneView(
   /** The area in focus: the tour's while it drives the camera, else the viewer's. */
   let focusArea: Eco2mixArea = area;
   let lastSurveyState: SurveyState = { mode: "off", area: null };
+  /** Whether the viewer's area has been shown: until the intro flies, France is. */
+  let homeShown = area === "FR";
 
   /** The cameras of the tour's stops, framed for the view as the app frames an area. */
   const surveyStops = (): Camera[] =>
@@ -418,7 +425,9 @@ export function mountSceneView(
     if (reducedMotion) camera = base = to;
     else if (slow) {
       const path = smoothPath(camera, to, size.width);
-      flight = { from: camera, to, start: now, ms: surveyFlightMs(path), path };
+      const ms = surveyFlightMs(path);
+      if (ms > 0) flight = { from: camera, to, start: now, ms, path };
+      else camera = base = to;
     } else flight = { from: camera, to, start: now, ms: flightMs(camera, to) };
     wake();
   }
@@ -439,7 +448,8 @@ export function mountSceneView(
     const now = animationClock.now();
     if (survey !== null) survey.clock = setTourPlaying(survey.clock, now, true);
     else {
-      const stop = surveyMode === "paused" ? resumeStop : firstStop(area);
+      // One stop after the area on screen: France during the intro.
+      const stop = surveyMode === "paused" ? resumeStop : firstStop(homeShown ? area : "FR");
       // The tour starts from the camera on screen, wherever it is (in flight too).
       takeOver(now);
       survey = startTour(camera, stop, now);
@@ -463,13 +473,20 @@ export function mountSceneView(
   /** Ends the tour; `flyHome` then flies back to the viewer's area, slowly. */
   function stopSurvey(flyHome: boolean): void {
     if (surveyMode === "off") return;
-    if (flyHome) flyTo(home, true);
-    else takeOver(animationClock.now());
+    // The tour lets the camera go where it is now, and ends, before any flight:
+    // the controls hear "off" once, never a pause on the way.
+    const now = animationClock.now();
+    camera = base = currentCamera(now);
+    lastInput = now;
     survey = null;
     surveyMode = "off";
     focusArea = area;
     lastKey = "";
     notifySurvey();
+    if (flyHome) {
+      homeShown = true;
+      flyTo(home, true);
+    } else wake();
   }
 
   function loadFine(): void {
@@ -751,12 +768,17 @@ export function mountSceneView(
     if (intent === null) return;
     e.preventDefault();
     if (intent.kind === "survey") {
+      // Held down, P would play and pause by turns: one press, one change.
+      if (e.repeat) return;
       if (surveyMode === "playing") pauseSurvey();
       else playSurvey();
     } else if (intent.kind === "home") {
       // Home ends a tour, as its Stop does; otherwise it flies home at once.
-      if (surveyMode === "off") flyTo(home);
-      else stopSurvey(true);
+      if (surveyMode !== "off") stopSurvey(true);
+      else {
+        homeShown = true;
+        flyTo(home);
+      }
     } else if (intent.kind === "zoom")
       flyTo((c) =>
         zoomAt(c, intent.factor, size.width / 2, size.height / 2, size.width, size.height),
@@ -767,8 +789,18 @@ export function mountSceneView(
     const now = animationClock.now();
     const from = currentCamera(now);
     resize();
-    // The tour's stops are framed for the view: it goes on to the same stop, framed anew.
-    if (survey !== null) survey = startTour(from, survey.stop, now, survey.clock);
+    // The tour's stops are framed for the view: it goes on to the same stop, framed
+    // anew. During a stay, the camera goes to the new framing at once, and the time
+    // already spent there counts.
+    if (survey !== null) {
+      const moment = survey.tour.at(tourTime(survey.clock, now));
+      if (moment.flying) survey = startTour(from, survey.stop, now, survey.clock);
+      else {
+        const next = startTour(surveyStops()[survey.stop] ?? from, survey.stop, now, survey.clock);
+        next.clock = { ...next.clock, tau: Math.max(0, dwellMs(moment.area) - moment.stillMs) };
+        survey = next;
+      }
+    }
     wake();
   });
   document.addEventListener("visibilitychange", () => {
@@ -783,17 +815,22 @@ export function mountSceneView(
   if (area !== "FR")
     window.setTimeout(
       () => {
-        if (lastInput === untouched && flight === null && surveyMode === "off") flyTo(home);
+        if (lastInput === untouched && flight === null && surveyMode === "off") {
+          homeShown = true;
+          flyTo(home);
+        }
       },
       reducedMotion ? 0 : INTRO_MS,
     );
 
   return {
-    showArea(next: Eco2mixArea): void {
+    showArea(next: Eco2mixArea, keepTour = false): void {
+      area = next;
+      if (keepTour && surveyMode !== "off") return;
       // Picking an area ends the tour: the camera goes there.
       stopSurvey(false);
-      area = next;
       focusArea = next;
+      homeShown = true;
       lastKey = "";
       flyTo(home);
     },

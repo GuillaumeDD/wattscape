@@ -139,6 +139,17 @@ test("the survey tours the regions, pauses on P or a drag, and Home ends it (B-0
   // It stays there, still: no drift during a stay.
   await page.waitForTimeout(2000);
   expect(await picture(page)).toBe(north);
+  // A resize during the stay reframes the stop at once, without a flight
+  // (regression: it flew 6 s to the same place, then stayed 40 s again).
+  await page.setViewportSize({ width: 900, height: 540 });
+  await page.waitForTimeout(600);
+  const reframed = await picture(page);
+  await page.waitForTimeout(1000);
+  expect(await picture(page)).toBe(reframed);
+  await expect(note).toHaveText("playing 32");
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.waitForTimeout(600);
+  expect(await picture(page)).toBe(north);
 
   await page.keyboard.press("p");
   await expect(note).toHaveText("paused 32");
@@ -153,8 +164,12 @@ test("the survey tours the regions, pauses on P or a drag, and Home ends it (B-0
   await expect(note).toHaveText("paused 32");
 
   // Home ends it, and flies back home, slowly.
+  await page.keyboard.press("p");
+  await expect(note).toHaveText("playing 32");
   await page.keyboard.press("Home");
   await expect(note).toHaveText("off");
+  // Regression: a stop reported a pause on its way to "off".
+  await expect(page.locator("#survey-log")).toHaveText(/playing;off;$/);
   await page.waitForTimeout(12_000);
   expect(await settled(page)).toBe(france);
 });

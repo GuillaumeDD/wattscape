@@ -80,7 +80,7 @@
   "surveyPlay": "Lancer le survol (P)",
   "surveyResume": "Reprendre le survol (P)",
   "surveyPause": "Mettre le survol en pause (P)",
-  "surveyStop": "Arrêter le survol et revenir à la région (Origine)",
+  "surveyStop": "Arrêter le survol et revenir chez vous (Origine)",
   "surveyArea": "Survol : {area}",
   "surveyPaused": "Survol en pause : {area}"
 }
