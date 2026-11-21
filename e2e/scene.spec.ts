@@ -118,6 +118,76 @@ test("a wheel turn during a flight zooms from where the camera is, not from wher
   expect(duringFlight).not.toBe(wheelOnly);
 });
 
+test("the survey tours the regions, pauses on P or a drag, and Home ends it (B-032)", async ({
+  page,
+}) => {
+  // Two slow flights of up to 12 s each, and a stay to check that the camera holds still.
+  test.setTimeout(60_000);
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html");
+  const france = await settled(page);
+  const note = page.locator("#survey-note");
+
+  // From France, the tour starts with the north.
+  await page.keyboard.press("p");
+  await expect(note).toHaveText("playing 32");
+  await page.waitForTimeout(1000);
+  expect(await picture(page)).not.toBe(france);
+  await page.waitForTimeout(12_000);
+  const north = await settled(page);
+  expect(north).not.toBe(france);
+  // It stays there, still: no drift during a stay.
+  await page.waitForTimeout(2000);
+  expect(await picture(page)).toBe(north);
+  // A resize during the stay reframes the stop at once, without a flight
+  // (regression: it flew 6 s to the same place, then stayed 40 s again).
+  await page.setViewportSize({ width: 900, height: 540 });
+  await page.waitForTimeout(600);
+  const reframed = await picture(page);
+  await page.waitForTimeout(1000);
+  expect(await picture(page)).toBe(reframed);
+  await expect(note).toHaveText("playing 32");
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.waitForTimeout(600);
+  expect(await picture(page)).toBe(north);
+
+  await page.keyboard.press("p");
+  await expect(note).toHaveText("paused 32");
+  await page.keyboard.press("p");
+  await expect(note).toHaveText("playing 32");
+
+  // A drag takes the camera, and pauses the tour.
+  await page.mouse.move(400, 300);
+  await page.mouse.down();
+  await page.mouse.move(300, 250, { steps: 5 });
+  await page.mouse.up();
+  await expect(note).toHaveText("paused 32");
+
+  // Home ends it, and flies back home, slowly.
+  await page.keyboard.press("p");
+  await expect(note).toHaveText("playing 32");
+  await page.keyboard.press("Home");
+  await expect(note).toHaveText("off");
+  // Regression: a stop reported a pause on its way to "off".
+  await expect(page.locator("#survey-log")).toHaveText(/playing;off;$/);
+  await page.waitForTimeout(12_000);
+  expect(await settled(page)).toBe(france);
+});
+
+test("a key still reaches the map after a click on a button, but not Enter or Space", async ({
+  page,
+}) => {
+  // Regression: after a click on Play, the button kept the focus and P did nothing.
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html");
+  await settled(page);
+  await page.click("#theme-toggle");
+  await page.keyboard.press("p");
+  await expect(page.locator("#survey-note")).toHaveText("playing 32");
+  await page.keyboard.press("Enter"); // presses the button: the theme changes back, the tour plays on
+  await expect(page.locator("#survey-note")).toHaveText("playing 32");
+});
+
 /** The caption the page shows: the landmark's id and its left edge, or "". */
 async function caption(page: Page): Promise<string> {
   return (await page.locator("#caption").textContent()) ?? "";
@@ -384,4 +454,21 @@ test("lets the intro's flight land when Space is pressed during it (B-036)", asy
   await page.keyboard.press("Space");
   await page.clock.runFor(7500);
   expect(await picture(page)).toBe(landed);
+});
+
+test("Space during the survey switches the drift and leaves the tour playing (B-036)", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html");
+  await page.clock.runFor(3000);
+  await page.keyboard.press("p");
+  await expect(page.locator("#survey-note")).toHaveText("playing 32");
+  // Over 20 s into the tour, past the rest after the press of P.
+  await page.clock.runFor(25_000);
+  await page.keyboard.press("Space");
+  await page.clock.runFor(1000);
+  await expect(page.locator("#survey-note")).toHaveText(/^playing /);
+  await expect(page.locator("#survey-log")).toHaveText("playing;");
 });

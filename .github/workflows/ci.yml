@@ -28,7 +28,8 @@ jobs:
 
   e2e:
     # Frame hashes in a second engine (AGENTS.md § Determinism): Chromium must draw
-    # the frames Node draws in the unit tests.
+    # the frames Node draws in the unit tests. The screensaver mode (B-021) runs in
+    # Firefox and WebKit too.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -39,7 +40,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run e2e
 
   secrets:

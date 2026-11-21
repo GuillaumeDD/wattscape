@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'"
+    />
+    <title>Screensaver</title>
+    <link rel="stylesheet" href="../src/style.css" />
+  </head>
+  <body class="scene">
+    <canvas id="scene"></canvas>
+    <main>
+      <div id="panel-head"><h1 id="title">Wattscape</h1></div>
+      <div id="panel-body"><p id="tagline">panel</p></div>
+      <p id="plants-note">no data</p>
+      <p id="season-note" hidden></p>
+    </main>
+    <footer id="credits">
+      <div id="survey">
+        <span id="survey-area" role="status"></span>
+        <button id="survey-play" type="button">
+          <svg class="icon-play" viewBox="0 0 10 10"><path d="M2.5 1.5 L8.5 5 L2.5 8.5 Z" /></svg>
+          <svg class="icon-pause" viewBox="0 0 10 10"><path d="M2 1.5 H4 V8.5 H2 Z" /></svg>
+        </button>
+        <button id="survey-stop" type="button" hidden>stop</button>
+        <button id="home" type="button">home</button>
+        <button id="screensaver" type="button">screensaver</button>
+      </div>
+      <span>credits</span>
+    </footer>
+    <script type="module" src="./screensaver.ts"></script>
+  </body>
+</html>

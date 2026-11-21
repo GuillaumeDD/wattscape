@@ -9,8 +9,9 @@
  * `frames`: a 1920 × 1080 window (a 480 × 270 buffer, factor 4) through the views a
  * screensaver spends its time in, from fixed inputs (`?sample=`, `?at=`): France
  * still, a region with its plants moving, by day and at night, the flight France →
- * region, the idle drift, and the wheel zooming in and out across the crossfade (the
- * worst case: a full redraw every frame). For each it gives the main-thread time of
+ * region, the idle drift, the survey mode's slow flight and stay (B-032), and the
+ * wheel zooming in and out across the crossfade (the worst case: a full redraw every
+ * frame). For each it gives the main-thread time of
  * every animation-frame callback (all of the scene's work, `putImageData` included)
  * and the main thread's busy time per second, from the DevTools metrics. With
  * `--throttle N`, Chromium slows the CPU N times (a slower laptop).
@@ -161,6 +162,12 @@ if (mode === "frames") {
     // Left alone: the drift starts 20 s after the last input.
     await page.waitForTimeout(22_000);
     await measure(`idle drift, ${label}`, page, cdp, 10_000);
+    // The survey mode (B-032): its first, slow flight, Normandie → Centre-Val de
+    // Loire (about 8 s with the speed's ramp), then its stay there, still.
+    await page.keyboard.press("p");
+    await measure(`survey flight, ${label}`, page, cdp, 8500);
+    await page.waitForTimeout(2000);
+    await measure(`survey stay, ${label}`, page, cdp, 8000);
     await page.context().close();
   }
 } else if (mode === "soak") {

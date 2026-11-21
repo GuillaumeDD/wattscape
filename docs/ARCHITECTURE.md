@@ -31,7 +31,7 @@ Provisional; each folder lands with the backlog item that needs it.
 | `src/data/`   | éCO2mix and Open-Meteo clients: URL building, strict parsers, refresh and staleness        | network (fetchers only)            |
 | `src/sky/`    | Sun and moon position, moon phase, light keyframes                                         | no                                 |
 | `src/map/`    | The baked map of France (land, sea, regions, relief, plant sites) and its grid             | no                                 |
-| `src/scene/`  | The scene model (what a frame shows) and the camera (zoom, pan, flights, drift)            | no                                 |
+| `src/scene/`  | The scene model (what a frame shows), the camera (zoom, pan, flights, drift), the tour     | no                                 |
 | `src/world/`  | Seeded PRNG; placement of plants, towns, trees and landmarks                               | no                                 |
 | `src/render/` | Themes (how a scene looks), palette, dithering, sprites drawn in code, `Surface`           | no (the canvas blit is in `ui/`)   |
 | `src/i18n/`   | FR and EN catalogs (`fr.json`, `en.json`), language detection                              | no                                 |
@@ -909,13 +909,49 @@ the deployed build. `tools/screenshots.ts` writes its frames
   a double-tap zooms ×2 on the point (a tap: under 300 ms and 10 px of movement; a
   double-tap: two taps within 300 ms and 24 px). `+`/`−` zoom, the arrows and WASD
   (ZQSD on a French keyboard, by key position) pan by 15 % of the view, `Home` flies
-  back to the viewer's area, `Space` turns the idle drift off or on (once per
-  press). Keys typed into the region list or a button are left
-  to them. Any input takes the camera from where it is on screen, mid-flight or
-  drifting.
+  back to the viewer's area (and ends the survey), `P` plays or pauses the survey,
+  `Space` turns the idle drift off or on (once per press).
+  Keys typed into the region list are left to it, and so are Enter and Space on a
+  button or a link; other keys reach the map after a click on a button. Any input
+  takes the camera from where it is on screen, mid-flight, drifting or on tour.
 - **Flights:** a change of area, a key or a double-click flies the camera, 0.6 to
   3 s, the scale moving evenly in log space. On load, a viewer with a region sees
   France for 1.5 s, then flies to it, unless they took the camera first (PRD Q-12).
+- **Survey mode** (B-032, D-073; `src/scene/survey.ts`, `src/ui/survey-bar.ts`): a
+  tour of the 12 regions clockwise from the north, each bordering the next
+  (Hauts-de-France, Grand Est, Bourgogne-Franche-Comté, Auvergne-Rhône-Alpes, PACA,
+  Occitanie, Nouvelle-Aquitaine, Pays de la Loire, Bretagne, Normandie,
+  Centre-Val de Loire, Île-de-France), then France, round and round. It starts one
+  stop after the area shown, from the camera on screen. Each region is framed as
+  the app frames it and held still for 40 s (France 60 s): no drift on tour. The
+  flights between stops are slow and rise a little (van Wijk and Nuij's smooth path,
+  ρ = 1.2, at most 7 % above the farther stop between regions), eased, 6 to 12 s; a
+  lap lasts about 10 min 40 s (flights 102 s of it, at 480 × 270). The region in
+  focus is the stop the tour flies to. A pause slows the tour to a stop over 1.2 s,
+  and Play speeds it up again as smoothly (the tour runs on its own clock, the
+  integral of a speed ramping between 0 and 1); with `prefers-reduced-motion`,
+  flights are cuts and the ramps go. An input (a drag, the wheel, a key, not a tap)
+  takes the camera and pauses the tour; Play then flies back to its stop. Stop and
+  `Home` end it and fly home slowly, along the same kind of path; picking an area
+  ends it too, but not an area found from the position, which may land late: the
+  tour goes on, and Stop flies there. A resize reframes the stop at once during a
+  stay, the time spent there kept. `P` held down changes the mode once. The controls (Play or Pause, Stop, the area shown) sit bottom right
+  above the credits, and fade away while the tour plays, 4 s after the last move of
+  the mouse or key, until the next one.
+- **Screensaver mode** (B-021, `src/ui/screensaver.ts`): the map alone. Its button
+  (next to the survey's) or `F` enters it and asks for the full screen; `?screensaver`
+  opens the page in it, without full screen, which a browser grants only to a press
+  (`F` then adds it). It hides the panel, the credits and the captions; the survey's
+  controls show only while the mouse moves; the cursor hides after 3 s without a
+  move. Where the figures come from (the plants' and the weather's notes, and an
+  imposed season's) stays on screen, small and faint, so that every animated
+  figure stays traceable. It starts the survey (D-073) and asks for a screen wake
+  lock while the tab shows (asked again on `visibilitychange`). `Escape`, the
+  button, or leaving the full screen ends it; the survey plays on. Without the
+  Fullscreen API it still hides the interface; without the Wake Lock API the screen
+  may sleep. `Home` has a button too, in Stop's place while the tour is off (D-006).
+  `?season=winter` (or spring, summer, autumn) imposes a season whatever the date,
+  labelled on the page like an imposed weather.
 - **Idle drift:** 20 s after the last input, the camera drifts on a slow ellipse
   around where it stopped (4 % of the view's width, one loop in 4 minutes, under 2
   pixels a second), fading in over 10 s. None with `prefers-reduced-motion`, where
@@ -1219,6 +1255,24 @@ Accepted on 2026-11-18 (PRD Q-40, D-061), closing B-028; the vignette laid in
 CSS over the canvas, which would spare the crop its vignette, waits in Growth
 (G-017).
 
+**The survey mode** (B-032), same tool, 2026-11-21, one run per theme (pixel art,
+then modern), each row by day and at night: the first flight of the tour from
+Normandie to Centre-Val de Loire (8.5 s, its speed's ramp included), then its stay
+there, 2 s after landing (8 s, the plants of Centre-Val de Loire moving).
+
+| View (`frames`)                   | Pixel art: p95, busy | Modern: p95, busy |
+| --------------------------------- | -------------------- | ----------------- |
+| Flight France ↔ Normandie (B-011) | 42–46 ms, 339–360    | 35–37 ms, 294–310 |
+| Survey flight (6–12 s)            | 13–16 ms, 204–218    | 15–17 ms, 365–367 |
+| Survey stay (Centre-Val de Loire) | 15–23 ms, 39–46      | 11–12 ms, 79–82   |
+
+A slow flight costs less per frame than a quick one (each frame moves the view by
+less), but draws every frame of its 6 to 12 s. Over a lap (102 s of flights for
+540 s of stays, at 480 × 270), the tour would cost about 70 ms/s in pixel art and
+125 in the modern theme, worked out from these rows, not measured over a lap: over
+the steady state's 30 ms/s, as the modern theme's idle drift already is (D-061).
+For Guillaume to weigh (B-032's PR), with B-024's measures on a quiet machine.
+
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame
 walks 300 000 to 500 000 cells for 130 000 pixels (10 to 20 ms in Node), and the
@@ -1278,8 +1332,12 @@ All **unverified** until measured in Chromium, Firefox and WebKit (AGENTS.md §5
   Browsers may remember a refusal, so the app must offer the region list without
   asking again.
 - The Screen Wake Lock API is missing in some browsers and is released when the tab
-  is hidden: request it again on `visibilitychange`.
+  is hidden: request it again on `visibilitychange` (done, B-021). Whether a lock is
+  granted is not checked by the tests: headless browsers may refuse it.
 - The Fullscreen API is limited on iPhone Safari; the scene must work without it.
+  The screensaver mode (B-021) is checked in Chromium, Firefox and WebKit by
+  `e2e/screensaver.spec.ts` (`playwright.config.ts` runs that file in the three
+  engines): entering with `F`, the full screen, `Escape`, the hidden cursor.
 - The controls (B-011) were measured in Chromium only (`e2e/scene.spec.ts`): wheel,
   drag, keys, double-click. Pinch and double-tap use Pointer Events and
   `touch-action: none`; some browsers also send `dblclick` after a double-tap, which

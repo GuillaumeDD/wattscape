@@ -33,12 +33,16 @@ export function bufferSize(cssWidth: number, cssHeight: number, pixelRatio: numb
   return { width: Math.ceil(w / factor), height: Math.ceil(h / factor), factor };
 }
 
-/** What a key asks for: a pan by a share of the view, a zoom by a factor, or home. */
+/**
+ * What a key asks for: a pan by a share of the view, a zoom by a factor, home, or
+ * to play or pause the survey mode (B-032).
+ */
 export type KeyIntent =
   | { readonly kind: "pan"; readonly dx: number; readonly dy: number }
   | { readonly kind: "zoom"; readonly factor: number }
   | { readonly kind: "home" }
-  | { readonly kind: "drift" };
+  | { readonly kind: "drift" }
+  | { readonly kind: "survey" };
 
 /** Share of the view one press of an arrow moves it by. */
 export const KEY_PAN_SHARE = 0.15;
@@ -48,8 +52,8 @@ export const KEY_ZOOM = 1.5;
 /**
  * The camera intent of a key (`KeyboardEvent.key`), or null: arrows and WASD pan
  * (ZQSD is the same keys on a French keyboard, by `code`), + and − zoom, Home goes
- * home, Space turns the idle drift off or on (D-074). `dx`, `dy` are the share of
- * the view the ground moves by.
+ * home, P plays or pauses the survey, Space turns the idle drift off or on (D-074).
+ * `dx`, `dy` are the share of the view the ground moves by.
  */
 export function keyIntent(key: string, code: string): KeyIntent | null {
   switch (key) {
@@ -63,6 +67,9 @@ export function keyIntent(key: string, code: string): KeyIntent | null {
       return { kind: "home" };
     case " ":
       return { kind: "drift" };
+    case "p":
+    case "P":
+      return { kind: "survey" };
     case "ArrowLeft":
       return { kind: "pan", dx: KEY_PAN_SHARE, dy: 0 };
     case "ArrowRight":

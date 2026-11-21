@@ -315,3 +315,102 @@ body.scene #credits {
   z-index: 1;
   background: rgb(16 19 28 / 75%);
 }
+
+/* The survey mode's controls (B-032): small and quiet, bottom right, just above the
+   credits (they wrap to several lines on a phone), out of the panel's way; they fade
+   away while the tour plays, and come back with the next input. */
+#survey {
+  position: absolute;
+  right: 1rem;
+  bottom: 100%;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.8;
+  transition: opacity 2s ease;
+}
+#survey.quiet {
+  opacity: 0;
+}
+/* After `.quiet`, so that controls under the mouse or holding the focus never fade. */
+#survey:hover,
+#survey:focus-within {
+  opacity: 1;
+}
+#survey button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-color: rgb(154 160 173 / 50%);
+  background: rgb(16 19 28 / 60%);
+}
+#survey button[hidden] {
+  display: none;
+}
+#survey svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: var(--fg);
+}
+#survey .icon-pause,
+#survey.playing .icon-play {
+  display: none;
+}
+#survey.playing .icon-pause {
+  display: block;
+}
+#survey-area {
+  padding: 0.2rem 0.5rem;
+  background: rgb(16 19 28 / 60%);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+#survey-area:empty {
+  display: none;
+}
+
+/* The screensaver mode (B-021): the map alone. The panel goes, but where the figures
+   come from stays, small and faint (every figure is traceable); the credits go, and
+   the survey's controls show only when the mouse moves. */
+body.screensaver #panel-head,
+body.screensaver #panel-body,
+body.screensaver #caption {
+  display: none;
+}
+body.screensaver main {
+  gap: 0.15rem;
+  max-width: 28rem;
+  margin: 0.75rem;
+  padding: 0;
+  background: none;
+  pointer-events: none;
+}
+/* On a faint backdrop of their own, so that they read over a pale sky too. */
+body.screensaver main p {
+  padding: 0.1rem 0.4rem;
+  background: rgb(16 19 28 / 45%);
+  color: var(--fg);
+  font-size: 0.7rem;
+  opacity: 0.65;
+}
+body.screensaver #credits {
+  visibility: hidden;
+}
+body.screensaver #survey {
+  visibility: visible;
+}
+body.screensaver.idle,
+body.screensaver.idle #scene {
+  cursor: none;
+}
+/* An imposed season says so, as an imposed weather does. */
+#season-note {
+  color: var(--muted);
+}
+#season-note[hidden] {
+  display: none;
+}

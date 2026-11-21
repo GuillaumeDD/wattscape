@@ -154,16 +154,21 @@ idea that the grid can be seen.
 - Hover or tap on a plant or landmark: a short caption (name, what it is, the live
   figure it shows). Every caption fact is sourced (AGENTS.md §5).
 - The legend and captions never cover the scene for long; the screensaver mode shows
-  no UI at all.
+  no UI but where the figures come from, small and faint, so that they stay
+  traceable (B-021; provisional, for Guillaume to confirm).
 
 ### 4.9 Screensaver controls
 
-- Full screen (`F`, button), cursor hidden when idle, a Wake Lock request to keep the
-  screen on while in full screen (if the browser supports it).
+- Screensaver mode (B-021): full screen (`F`, button; `?screensaver` opens it without
+  the full screen, which only a press can ask for), cursor hidden when idle, the
+  survey mode playing, a Wake Lock request to keep the screen on while in the mode
+  (if the browser supports it); `Escape` leaves it. `?season=` imposes a season,
+  labelled, for demos and screenshots.
 - Keys: zoom, pan, `R` next region, `H` hide/show the legend, `?` help, `Space`
-  pause the drift. Settings: time-lapse (to watch a day in a minute, with the day's
-  real figures: `?timelapse=day`, B-014), weather override and fixed data, for demos
-  and screenshots (also as URL settings).
+  pause the drift, `P` play or pause the survey mode, `Home` end it (B-032).
+  Settings: time-lapse (to watch a day in a minute, with the day's real figures:
+  `?timelapse=day`, B-014), weather override and fixed data, for demos and
+  screenshots (also as URL settings).
 - Weather on or off, in the panel and by `?weather=off`, remembered: off hides the
   clouds, rain and fog; the ground snow stays, so its readings go on (Guillaume,
   2026-11-21; G-020, B-030, D-072).
@@ -293,7 +298,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-019 | Vineyards, crops and lavender on their own calendar (Q-55, D-069)                      | proposed |
 | G-020 | Weather on or off, chosen by the viewer (Guillaume, 2026-11-21; B-030)                 | done     |
 | G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | done     |
-| G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | planned  |
+| G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | done     |
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
 | G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
