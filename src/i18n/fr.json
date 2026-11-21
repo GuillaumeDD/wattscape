@@ -44,7 +44,7 @@
   "themeLabel": "Style :",
   "themePixel": "Pixel art",
   "themeModern": "Moderne",
-  "sceneLabel": "Carte de France en relief. Molette, pincement, flèches ou + et − pour zoomer et se déplacer ; P pour lancer ou suspendre le survol ; Origine pour revenir à la région.",
+  "sceneLabel": "Carte de France en relief. Molette, pincement, flèches ou + et − pour zoomer et se déplacer ; P pour lancer ou suspendre le survol ; Origine pour revenir à la région ; F pour l'économiseur d'écran.",
   "plantsLoading": "Centrales : chargement des données RTE éCO2mix…",
   "plantsLive": "Centrales animées par RTE éCO2mix, relevé de {time}.",
   "plantsStale": "Centrales animées par un relevé RTE éCO2mix ancien, de {time}.",
@@ -82,5 +82,13 @@
   "surveyPause": "Mettre le survol en pause (P)",
   "surveyStop": "Arrêter le survol et revenir chez vous (Origine)",
   "surveyArea": "Survol : {area}",
-  "surveyPaused": "Survol en pause : {area}"
+  "surveyPaused": "Survol en pause : {area}",
+  "homeButton": "Revenir chez vous (Origine)",
+  "screensaverEnter": "Économiseur d'écran : plein écran, sans interface, survol (F)",
+  "screensaverExit": "Quitter l'économiseur d'écran (Échap)",
+  "seasonOverride": "Saison imposée ({season}) par le réglage ?season=, pas celle de la date.",
+  "seasonWinter": "hiver",
+  "seasonSpring": "printemps",
+  "seasonSummer": "été",
+  "seasonAutumn": "automne"
 }

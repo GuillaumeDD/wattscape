@@ -342,3 +342,45 @@ body.scene #credits {
 #survey-area:empty {
   display: none;
 }
+
+/* The screensaver mode (B-021): the map alone. The panel goes, but where the figures
+   come from stays, small and faint (every figure is traceable); the credits go, and
+   the survey's controls show only when the mouse moves. */
+body.screensaver #panel-head,
+body.screensaver #panel-body,
+body.screensaver #caption {
+  display: none;
+}
+body.screensaver main {
+  gap: 0.15rem;
+  max-width: 28rem;
+  margin: 0.75rem;
+  padding: 0;
+  background: none;
+  pointer-events: none;
+}
+/* On a faint backdrop of their own, so that they read over a pale sky too. */
+body.screensaver main p {
+  padding: 0.1rem 0.4rem;
+  background: rgb(16 19 28 / 45%);
+  color: var(--fg);
+  font-size: 0.7rem;
+  opacity: 0.65;
+}
+body.screensaver #credits {
+  visibility: hidden;
+}
+body.screensaver #survey {
+  visibility: visible;
+}
+body.screensaver.idle,
+body.screensaver.idle #scene {
+  cursor: none;
+}
+/* An imposed season says so, as an imposed weather does. */
+#season-note {
+  color: var(--muted);
+}
+#season-note[hidden] {
+  display: none;
+}

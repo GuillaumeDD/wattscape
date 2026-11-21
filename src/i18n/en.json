@@ -44,7 +44,7 @@
   "themeLabel": "Style:",
   "themePixel": "Pixel art",
   "themeModern": "Modern",
-  "sceneLabel": "Relief map of France. Wheel, pinch, arrows or + and − to zoom and move; P to start or pause the flyover; Home to go back to the region.",
+  "sceneLabel": "Relief map of France. Wheel, pinch, arrows or + and − to zoom and move; P to start or pause the flyover; Home to go back to the region; F for the screensaver.",
   "plantsLoading": "Power plants: loading RTE éCO2mix data…",
   "plantsLive": "Power plants driven by RTE éCO2mix, reading of {time}.",
   "plantsStale": "Power plants driven by an old RTE éCO2mix reading, of {time}.",
@@ -82,5 +82,13 @@
   "surveyPause": "Pause the flyover (P)",
   "surveyStop": "Stop the flyover and fly home (Home)",
   "surveyArea": "Flyover: {area}",
-  "surveyPaused": "Flyover paused: {area}"
+  "surveyPaused": "Flyover paused: {area}",
+  "homeButton": "Fly home (Home)",
+  "screensaverEnter": "Screensaver: full screen, no interface, flyover (F)",
+  "screensaverExit": "Leave the screensaver (Esc)",
+  "seasonOverride": "Season imposed ({season}) by the ?season= setting, not the date's.",
+  "seasonWinter": "winter",
+  "seasonSpring": "spring",
+  "seasonSummer": "summer",
+  "seasonAutumn": "autumn"
 }

@@ -929,6 +929,20 @@ the deployed build. `tools/screenshots.ts` writes its frames
   stay, the time spent there kept. `P` held down changes the mode once. The controls (Play or Pause, Stop, the area shown) sit bottom right
   above the credits, and fade away while the tour plays, 4 s after the last move of
   the mouse or key, until the next one.
+- **Screensaver mode** (B-021, `src/ui/screensaver.ts`): the map alone. Its button
+  (next to the survey's) or `F` enters it and asks for the full screen; `?screensaver`
+  opens the page in it, without full screen, which a browser grants only to a press
+  (`F` then adds it). It hides the panel, the credits and the captions; the survey's
+  controls show only while the mouse moves; the cursor hides after 3 s without a
+  move. Where the figures come from (the plants' and the weather's notes, and an
+  imposed season's) stays on screen, small and faint, so that every animated
+  figure stays traceable. It starts the survey (D-073) and asks for a screen wake
+  lock while the tab shows (asked again on `visibilitychange`). `Escape`, the
+  button, or leaving the full screen ends it; the survey plays on. Without the
+  Fullscreen API it still hides the interface; without the Wake Lock API the screen
+  may sleep. `Home` has a button too, in Stop's place while the tour is off (D-006).
+  `?season=winter` (or spring, summer, autumn) imposes a season whatever the date,
+  labelled on the page like an imposed weather.
 - **Idle drift:** 20 s after the last input, the camera drifts on a slow ellipse
   around where it stopped (4 % of the view's width, one loop in 4 minutes, under 2
   pixels a second), fading in over 10 s. None with `prefers-reduced-motion`, where
@@ -1300,8 +1314,12 @@ All **unverified** until measured in Chromium, Firefox and WebKit (AGENTS.md §5
   Browsers may remember a refusal, so the app must offer the region list without
   asking again.
 - The Screen Wake Lock API is missing in some browsers and is released when the tab
-  is hidden: request it again on `visibilitychange`.
+  is hidden: request it again on `visibilitychange` (done, B-021). Whether a lock is
+  granted is not checked by the tests: headless browsers may refuse it.
 - The Fullscreen API is limited on iPhone Safari; the scene must work without it.
+  The screensaver mode (B-021) is checked in Chromium, Firefox and WebKit by
+  `e2e/screensaver.spec.ts` (`playwright.config.ts` runs that file in the three
+  engines): entering with `F`, the full screen, `Escape`, the hidden cursor.
 - The controls (B-011) were measured in Chromium only (`e2e/scene.spec.ts`): wheel,
   drag, keys, double-click. Pinch and double-tap use Pointer Events and
   `touch-action: none`; some browsers also send `dblclick` after a double-tap, which

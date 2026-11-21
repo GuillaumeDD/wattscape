@@ -17,6 +17,7 @@ export default defineConfig({
       input: {
         "frame-hash": fileURLToPath(new URL("./e2e/frame-hash.html", import.meta.url)),
         scene: fileURLToPath(new URL("./e2e/scene.html", import.meta.url)),
+        screensaver: fileURLToPath(new URL("./e2e/screensaver.html", import.meta.url)),
       },
     },
   },

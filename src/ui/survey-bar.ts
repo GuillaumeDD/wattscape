@@ -1,6 +1,6 @@
 /**
- * The survey mode's controls (B-032): Play or Pause, Stop, and the area the tour
- * shows. Discreet: while the tour plays, they fade away after a few seconds without
+ * The survey mode's controls (B-032): Play or Pause, Stop (Home while the tour is
+ * off, B-021), and the area the tour shows. Discreet: while the tour plays, they fade away after a few seconds without
  * a move of the mouse or a key, and come back with the next one. Text only, never
  * HTML.
  */
@@ -13,13 +13,14 @@ export const SURVEY_QUIET_AFTER_MS = 4000;
 
 type Translate = (key: MessageKey) => string;
 
-/** What the controls say for a state: the toggle's label, the area line, Stop's label. */
+/** What the controls say for a state: the toggle's label, the area line, Stop's and Home's labels. */
 export interface SurveyBarText {
   /** Play's label (and tooltip), or Pause's. */
   readonly toggle: string;
   /** The area the tour shows, or an empty line when it is off. */
   readonly area: string;
   readonly stop: string;
+  readonly home: string;
 }
 
 export function surveyBarText(state: SurveyState, t: Translate): SurveyBarText {
@@ -38,6 +39,7 @@ export function surveyBarText(state: SurveyState, t: Translate): SurveyBarText {
         ? ""
         : t(state.mode === "playing" ? "surveyArea" : "surveyPaused").replace("{area}", name),
     stop: t("surveyStop"),
+    home: t("homeButton"),
   };
 }
 
@@ -51,6 +53,8 @@ export function mountSurveyBar(onCommand: (command: SurveyCommand) => void): Sur
   const bar = document.getElementById("survey");
   const toggle = document.getElementById("survey-play");
   const stop = document.getElementById("survey-stop");
+  // Home stands in Stop's place while the tour is off (D-006, D-073).
+  const home = document.getElementById("home");
   let state: SurveyState = { mode: "off", area: null };
   let quietTimer: number | null = null;
 
@@ -76,6 +80,9 @@ export function mountSurveyBar(onCommand: (command: SurveyCommand) => void): Sur
   stop?.addEventListener("click", () => {
     onCommand("stop");
   });
+  home?.addEventListener("click", () => {
+    onCommand("home");
+  });
 
   return {
     render(next, t) {
@@ -91,6 +98,11 @@ export function mountSurveyBar(onCommand: (command: SurveyCommand) => void): Sur
         stop.hidden = next.mode === "off";
         stop.setAttribute("aria-label", text.stop);
         stop.title = text.stop;
+      }
+      if (home !== null) {
+        home.hidden = next.mode !== "off";
+        home.setAttribute("aria-label", text.home);
+        home.title = text.home;
       }
       const area = document.getElementById("survey-area");
       if (area !== null) area.textContent = text.area;

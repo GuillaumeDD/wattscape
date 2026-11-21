@@ -154,12 +154,16 @@ idea that the grid can be seen.
 - Hover or tap on a plant or landmark: a short caption (name, what it is, the live
   figure it shows). Every caption fact is sourced (AGENTS.md §5).
 - The legend and captions never cover the scene for long; the screensaver mode shows
-  no UI at all.
+  no UI but where the figures come from, small and faint, so that they stay
+  traceable (B-021; provisional, for Guillaume to confirm).
 
 ### 4.9 Screensaver controls
 
-- Full screen (`F`, button), cursor hidden when idle, a Wake Lock request to keep the
-  screen on while in full screen (if the browser supports it).
+- Screensaver mode (B-021): full screen (`F`, button; `?screensaver` opens it without
+  the full screen, which only a press can ask for), cursor hidden when idle, the
+  survey mode playing, a Wake Lock request to keep the screen on while in the mode
+  (if the browser supports it); `Escape` leaves it. `?season=` imposes a season,
+  labelled, for demos and screenshots.
 - Keys: zoom, pan, `R` next region, `H` hide/show the legend, `?` help, `Space`
   pause the drift, `P` play or pause the survey mode, `Home` end it (B-032).
   Settings: time-lapse (to watch a day in a minute, with the day's real figures:

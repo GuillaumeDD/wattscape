@@ -16,6 +16,8 @@ import {
   initialPanelFolded,
   initialTheme,
   sampleFromQuery,
+  screensaverFromQuery,
+  seasonFromQuery,
   savePanelFolded,
   savedLocale,
   saveLocale,
@@ -28,6 +30,8 @@ import { overrideWeather, sceneWeather } from "./scene/weather";
 import { anySnow } from "./scene/snow";
 import { type WeatherGroup } from "./data/open-meteo";
 import { mountSurveyBar } from "./ui/survey-bar";
+import { mountScreensaver } from "./ui/screensaver";
+import { type Season } from "./scene/season";
 import { type SurveyState } from "./scene/survey";
 
 /** The time-lapse plays a day in this long (PRD § 4.9: a day in a minute). */
@@ -73,6 +77,7 @@ function render(locale: Locale): void {
   renderPlantsNote();
   renderWeatherNote();
   renderSurvey();
+  renderSeasonNote();
 }
 
 let plantsState: FeedState = { kind: "loading" };
@@ -92,6 +97,44 @@ const surveyBar = mountSurveyBar((command) => {
 
 function renderSurvey(): void {
   surveyBar.render(surveyState, (key) => translate(locale, key));
+  const button = document.getElementById("screensaver");
+  if (button === null) return;
+  const label = translate(locale, screensaver.on ? "screensaverExit" : "screensaverEnter");
+  button.setAttribute("aria-label", label);
+  button.title = label;
+}
+
+/**
+ * The screensaver mode (B-021): it starts the survey (D-073). It is left with the
+ * survey playing, which the viewer stops if they wish.
+ */
+const screensaver = mountScreensaver((on) => {
+  if (on) scene?.survey("play");
+  renderSurvey();
+});
+document.getElementById("screensaver")?.addEventListener("click", () => {
+  if (screensaver.on) screensaver.exit();
+  else screensaver.enter(true);
+});
+
+const SEASON_NAMES = {
+  winter: "seasonWinter",
+  spring: "seasonSpring",
+  summer: "seasonSummer",
+  autumn: "seasonAutumn",
+} as const satisfies Record<Season, MessageKey>;
+/** The season `?season=` imposes, if any: labelled, as an imposed weather is. */
+const seasonOverride: Season | undefined = seasonFromQuery(location.search);
+
+function renderSeasonNote(): void {
+  const note = document.getElementById("season-note");
+  if (note === null) return;
+  note.hidden = seasonOverride === undefined;
+  if (seasonOverride !== undefined)
+    note.textContent = translate(locale, "seasonOverride").replace(
+      "{season}",
+      translate(locale, SEASON_NAMES[seasonOverride]),
+    );
 }
 
 /**
@@ -356,3 +399,8 @@ document.getElementById("language")?.addEventListener("click", () => {
   render(locale);
   renderArea(true);
 });
+
+if (seasonOverride !== undefined) scene?.setSeason(seasonOverride);
+// `?screensaver` opens the page in screensaver mode, the survey playing; without
+// full screen, which only a press can ask for (F, or the button, then).
+if (screensaverFromQuery(location.search)) screensaver.enter(false);

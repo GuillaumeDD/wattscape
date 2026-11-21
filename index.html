@@ -39,6 +39,7 @@
       <!-- Outside the folding part: where the figures come from stays on screen. -->
       <p id="plants-note" role="status"></p>
       <p id="weather-note" role="status"></p>
+      <p id="season-note" role="status" hidden></p>
     </main>
     <footer id="credits">
       <!-- The survey mode's controls (B-032): discreet, they fade away while it plays;
@@ -55,6 +56,18 @@
         </button>
         <button id="survey-stop" type="button" hidden>
           <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 2 H8 V8 H2 Z" /></svg>
+        </button>
+        <button id="home" type="button">
+          <svg viewBox="0 0 10 10" aria-hidden="true">
+            <path d="M5 1 L9.5 5 H8 V9 H6 V6.5 H4 V9 H2 V5 H0.5 Z" />
+          </svg>
+        </button>
+        <button id="screensaver" type="button">
+          <svg viewBox="0 0 10 10" aria-hidden="true">
+            <path
+              d="M1 1 H4 V2 H2 V4 H1 Z M6 1 H9 V4 H8 V2 H6 Z M1 6 H2 V8 H4 V9 H1 Z M8 6 H9 V9 H6 V8 H8 Z"
+            />
+          </svg>
         </button>
       </div>
       <span id="credits-data"></span>
