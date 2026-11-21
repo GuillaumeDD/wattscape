@@ -43,6 +43,7 @@ Statuses: `todo` / `wip` / `done`.
 | B-033 | Polish and share                  | Canvas labelled (FR + EN), every control reached by keyboard, contrast checked; tried on a phone and a 4K screen; README with screenshots                           | todo   |
 | B-034 | P-012 caption sourced             | The Terrils du 11/19 caption checked against a source logged in SOURCES, its `provisional` mark removed                                                             | todo   |
 | B-035 | Four-hour soak                    | Memory and frame time over 4 hours in one stretch (G-013), both themes; flat memory, as § Performance asks                                                          | todo   |
+| B-036 | Camera still                      | A switch in the panel, `?drift=off` and `Space`, remembered: the camera then moves only on input or in survey mode (D-074)                                          | todo   |
 
 ## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
 
@@ -66,10 +67,13 @@ Each option names its threads, so that no more than three branches are open at o
      changes the picture (D-061).
    - Note: the modern theme's open ideas are G-016 and G-017, both about its cost,
      so they sit here.
-2. **Weather switch and repository link** (B-030, B-031; Growth G-020, G-021).
-   - Goal: let the viewer turn the weather off; link the code from the page.
-   - Value: a calmer scene for whoever wants the map alone, fewer calls to
-     Open-Meteo; the project shows where it lives.
+2. **Weather switch, repository link, camera still** (B-030, B-031, B-036; Growth
+   G-020, G-021, G-025).
+   - Goal: let the viewer turn the weather and the idle drift off; link the code
+     from the page.
+   - Value: a calmer scene for whoever wants the map alone, or a still one (the
+     drift was noticed and unwanted, Guillaume, 2026-11-21); the project shows
+     where it lives.
    - Effort: XS each, one small thread, one PR each.
    - Depends on: Q-59, answered: off hides the sky's weather, the ground snow and
      its calls stay (D-072).
@@ -129,11 +133,15 @@ Each option names its threads, so that no more than three branches are open at o
 
 Proposed order (Q-58), at most three threads at once:
 
-| Wave | Thread                                                 | Items                 |
-| ---- | ------------------------------------------------------ | --------------------- |
-| 1    | Small settings: weather switch, repository link, P-012 | B-030, B-031, B-034   |
-| 1    | Survey mode, then screensaver mode (stacked)           | B-032, then B-021     |
-| 1    | Performance measures, on Guillaume's machine           | B-024, B-035          |
-| 2    | Legend, once the small settings thread is done         | B-019                 |
-| 3    | Polish and share                                       | B-033                 |
-| 4    | New data: one idea, chosen on mockups                  | G-002, G-004, G-023 … |
+| Wave | Thread                                               | Items                 |
+| ---- | ---------------------------------------------------- | --------------------- |
+| 1    | Small settings: weather, repo link, drift off, P-012 | B-030/31/34/36        |
+| 1    | Survey mode, then screensaver mode (stacked)         | B-032, then B-021     |
+| 1    | Performance measures, on Guillaume's machine         | B-024, B-035          |
+| 2    | Legend, once the small settings thread is done       | B-019                 |
+| 3    | Polish and share                                     | B-033                 |
+| 4    | New data: one idea, chosen on mockups                | G-002, G-004, G-023 … |
+
+A third theme, futuristic, minimal and neon (Guillaume, 2026-11-21), waits in
+Growth (G-024): it needs mockups and a choice first, as the modern theme did
+(D-055), and fits after wave 1, when a branch is free.

@@ -81,7 +81,8 @@ idea that the grid can be seen.
     landmarks (§4.4), towns and terrain; the regional mix in the legend.
   - Between the two, detail fades in and out smoothly (level of detail), never pops.
 - **Pan** by drag, arrows or WASD; the camera drifts slowly on its own after a few
-  seconds of inactivity, like a screensaver.
+  seconds of inactivity, like a screensaver; the viewer can switch the drift off
+  (Guillaume, 2026-11-21; B-036, D-074).
 - **Survey mode:** play, pause and stop; slow, soft flights from region to region,
   then over France, under discreet controls (Guillaume, 2026-11-21; G-022, B-032).
   It starts with Play, and by itself in screensaver mode; stop flies home. It is
@@ -290,6 +291,8 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | planned  |
 | G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | planned  |
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
+| G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
+| G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | planned  |
 
 ## 10. Open questions
 

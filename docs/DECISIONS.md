@@ -1336,3 +1336,18 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Why:** two tours that look alike confuse; D-006's was never built.
 - **Revisit if:** viewers want the scene to leave the home region on its own
   outside the screensaver mode.
+
+## D-074 — The idle drift can be switched off
+
+- **Context:** Guillaume noticed the camera's small moves on the deployed site
+  (2026-11-21): the idle drift, a 4-minute loop after 20 s without input
+  (`src/scene/camera.ts`). PRD § 4.9 planned `Space` to pause it; it was never
+  built, and only `prefers-reduced-motion` stops it.
+- **Options:** keep the drift as it is; a switch to turn it off (proposed by
+  Claude).
+- **Decision:** a switch, Guillaume, 2026-11-21 (« Oui », in the project thread):
+  in the panel, by `?drift=off` and by `Space`, remembered; the camera then moves
+  only on input or in the survey mode (B-036, with the small settings of D-071).
+- **Why:** a contemplative scene can be still; the survey mode (D-073) is the
+  motion the viewer chooses.
+- **Revisit if:** the drift's default (on) reads wrong once the survey mode is in.
