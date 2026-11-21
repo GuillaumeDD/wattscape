@@ -155,7 +155,7 @@ idea that the grid can be seen.
   figure it shows). Every caption fact is sourced (AGENTS.md §5).
 - The legend and captions never cover the scene for long; the screensaver mode shows
   no UI but where the figures come from, small and faint, so that they stay
-  traceable (B-021; provisional, for Guillaume to confirm).
+  traceable (B-021, D-076).
 
 ### 4.9 Screensaver controls
 
@@ -302,6 +302,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
 | G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
+| G-026 | Survey lap in budget: longer stays, fewer frames in slow flights (D-075)               | proposed |
 
 ## 10. Open questions
 
@@ -370,3 +371,5 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-58 | Next steps: in which order (BACKLOG § Next steps)?              | Three threads: small settings (B-030, B-031, B-034), survey then screensaver, measures               | Three threads (Guillaume, 2026-11-21, decision card; D-071)           |
 | Q-59 | Weather off: stop the weather calls too, and so the snow?       | Yes: off means no call to Open-Meteo; ground snow comes from the same readings                       | Keep the ground snow (Guillaume, 2026-11-21, decision card; D-072)    |
 | Q-60 | Survey mode instead of the idle tour of Q-6 (D-006)?            | Yes: one tour, started by Play, and by itself in screensaver mode; stop flies home                   | One tour (Guillaume, 2026-11-21, decision card; D-073)                |
+| Q-61 | Survey lap over the 30 ms/s budget: accept, or measure levers?  | None given: accept it, or measure the levers first (PR #62)                                          | Note them for the optimization work (Guillaume, 2026-11-21; D-075)    |
+| Q-62 | Screensaver mode: keep the source notes, small and faint?       | Yes: every figure stays traceable (AGENTS.md § 1)                                                    | Yes, to judge in use (Guillaume, 2026-11-21; D-076)                   |
