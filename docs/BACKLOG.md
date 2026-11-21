@@ -37,14 +37,16 @@ Statuses: `todo` / `wip` / `done`.
 | B-027 | Modern theme: plants, landmarks   | New drawings for the modern theme (D-057): the eight kinds of plants and all 28 landmarks, in four lots; no smoothed sprite is drawn any more                       | done   |
 | B-028 | Modern theme: the idle drift      | The drift in budget (30 ms/s): a plate drawn once, cropped (every pixel the same); 52–54, the plants' motion 43 of it; accepted (D-061)                             | done   |
 | B-029 | Modern theme: sharp, in budget    | Cheaper motion, every pixel the same: 46 to 37–42 ms/s with plants moving; the rest, the canvas's hand-over, accepted (D-060)                                       | done   |
-| B-030 | Weather on or off                 | A switch in the panel and `?weather=off`, remembered; off draws no weather and makes no weather call, and the page says so (Q-59)                                   | todo   |
+| B-030 | Weather on or off                 | A switch in the panel and `?weather=off`, remembered; off hides clouds, rain and fog, keeps the ground snow and its calls; the page says so (D-072)                 | todo   |
 | B-031 | Link to the repository            | A link to the GitHub repository in the panel, FR + EN label, `rel="noopener"`; nothing fetched, the CSP unchanged                                                   | todo   |
-| B-032 | Survey mode                       | Play, pause, stop: slow flights from region to region, then France; discreet controls; stop flies home; replaces the idle tour of Q-6 (Q-60)                        | todo   |
+| B-032 | Survey mode                       | Play, pause, stop: slow flights from region to region, then France; discreet controls; stop flies home; replaces the idle tour of Q-6 (D-073)                       | todo   |
 | B-033 | Polish and share                  | Canvas labelled (FR + EN), every control reached by keyboard, contrast checked; tried on a phone and a 4K screen; README with screenshots                           | todo   |
 | B-034 | P-012 caption sourced             | The Terrils du 11/19 caption checked against a source logged in SOURCES, its `provisional` mark removed                                                             | todo   |
 | B-035 | Four-hour soak                    | Memory and frame time over 4 hours in one stretch (G-013), both themes; flat memory, as § Performance asks                                                          | todo   |
 
 ## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
+
+Guillaume chose the proposed order, three threads at once (2026-11-21, D-071).
 
 After step 7, the open work grouped into options. Efforts are estimates, counted
 in pull requests (XS: a few lines; S: one PR; M: two or three; L: four or more).
@@ -69,9 +71,9 @@ Each option names its threads, so that no more than three branches are open at o
    - Value: a calmer scene for whoever wants the map alone, fewer calls to
      Open-Meteo; the project shows where it lives.
    - Effort: XS each, one small thread, one PR each.
-   - Depends on: Q-59 (does off also stop the weather calls, and the snow?).
-   - Risks: low; with the weather off the ground snow goes too, since it comes from
-     the same readings.
+   - Depends on: Q-59, answered: off hides the sky's weather, the ground snow and
+     its calls stay (D-072).
+   - Risks: low; the page must say the weather is hidden while snow still shows.
 3. **Survey mode** (B-032; Growth G-022), in a thread of its own.
    - Goal: a contemplative tour: play, pause, stop; slow, soft flights from region
      to region, then over France; controls that fade away.
@@ -79,7 +81,8 @@ Each option names its threads, so that no more than three branches are open at o
      of Q-6 was never built).
    - Effort: M: the path and its timing, the controls, reduced motion, frame hashes
      along the path.
-   - Depends on: Q-60 (it replaces the idle tour of Q-6); B-024's flight figures.
+   - Depends on: Q-60, answered: it replaces the idle tour of Q-6 (D-073); B-024's
+     flight figures.
    - Risks: a flight costs more than a still frame (B-024); the regional data and
      the 1 km relief must be ready before the camera lands, or the detail pops in.
 4. **Screensaver mode** (B-021), after the survey mode, in the same thread.
