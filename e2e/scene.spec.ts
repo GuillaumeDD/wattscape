@@ -370,3 +370,18 @@ test("keeps the camera still with the drift off, and Space switches it (B-036)",
   await page.clock.runFor(60_000);
   expect(await picture(page)).toBe(stopped);
 });
+
+test("lets the intro's flight land when Space is pressed during it (B-036)", async ({ page }) => {
+  await page.clock.install();
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/scene.html?area=28");
+  await page.clock.runFor(10_000);
+  const landed = await picture(page);
+
+  await page.goto("/scene.html?area=28");
+  // Mid-flight: the intro shows France for 1.5 s, then flies for up to 3 s.
+  await page.clock.runFor(2500);
+  await page.keyboard.press("Space");
+  await page.clock.runFor(7500);
+  expect(await picture(page)).toBe(landed);
+});

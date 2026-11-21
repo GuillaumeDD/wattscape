@@ -676,6 +676,8 @@ export function mountSceneView(
       // switched back on, it starts drifting from there after the usual rest, never
       // with a jump. A flight (the intro among them) goes on.
       const now = animationClock.now();
+      // A flight whose time is up, its last frame not yet drawn, lands first.
+      currentCamera(now);
       if (flight === null && now - lastInput > IDLE_DRIFT_AFTER_MS) takeOver(now);
       drift = on;
       wake();
