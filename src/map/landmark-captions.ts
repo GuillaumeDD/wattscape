@@ -49,10 +49,9 @@ export const LANDMARK_CAPTIONS: Readonly<Record<string, LandmarkCaption>> = {
   },
   "P-012": {
     name: "Terrils du 11/19",
-    fr: "Les deux terrils de la fosse 11/19 de Loos-en-Gohelle, faits des déblais des mines de charbon.",
-    en: "The two slag heaps of the 11/19 pit at Loos-en-Gohelle, made of coal-mining spoil.",
-    sources: ["S-023"],
-    provisional: true,
+    fr: "Terrils de la fosse 11/19, charbonnage fermé en 1986 ; patrimoine mondial de l'Unesco depuis 2012.",
+    en: "Slag heaps of the 11/19 coal pit, closed in 1986; UNESCO World Heritage since 2012.",
+    sources: ["S-023", "S-028"],
   },
   "P-013": {
     name: "Beffroi de Lille",
