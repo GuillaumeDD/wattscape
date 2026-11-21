@@ -303,6 +303,8 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
 | G-026 | Survey lap in budget: longer stays, fewer frames in slow flights (D-075)               | proposed |
+| G-027 | The modern theme by default (Guillaume, 2026-11-21; B-037)                             | planned  |
+| G-028 | Towerless nuclear plants: running told from stopped (Guillaume, 2026-11-21; B-038)     | planned  |
 
 ## 10. Open questions
 
@@ -373,3 +375,6 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-60 | Survey mode instead of the idle tour of Q-6 (D-006)?            | Yes: one tour, started by Play, and by itself in screensaver mode; stop flies home                   | One tour (Guillaume, 2026-11-21, decision card; D-073)                |
 | Q-61 | Survey lap over the 30 ms/s budget: accept, or measure levers?  | None given: accept it, or measure the levers first (PR #62)                                          | Note them for the optimization work (Guillaume, 2026-11-21; D-075)    |
 | Q-62 | Screensaver mode: keep the source notes, small and faint?       | Yes: every figure stays traceable (AGENTS.md § 1)                                                    | Yes, to judge in use (Guillaume, 2026-11-21; D-076)                   |
+| Q-63 | Modern by default: does a stored « pixel » choice stay?         | Yes: a stored choice was made by hand; only visitors who never chose switch (B-037)                  |                                                                       |
+| Q-64 | Towerless nuclear on or off: the region's figure, or per unit?  | The region's figure now, said in the caption; per unit (DS-08) checked later, as G-003 (B-038)       |                                                                       |
+| Q-65 | Where do B-037 and B-038 go in the waves?                       | Wave 2, one thread, B-037 then B-038 on one branch, beside the legend; both before B-033             |                                                                       |
