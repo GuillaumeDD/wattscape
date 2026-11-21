@@ -6,7 +6,8 @@
  * (src/ui/replay-feed.ts) replays the three hours the test serves in 6 seconds, and
  * the note tells the state and the step's time. `#caption` names the landmark whose
  * caption shows (B-020), and its box. `?theme=modern` opens with the modern theme
- * (G-011), and `#theme-toggle` switches.
+ * (G-011), and `#theme-toggle` switches. `?drift=off` opens with the idle drift off,
+ * and Space turns it off or on (B-036).
  */
 import { fixedClock, replayClock } from "../src/clock/clock";
 import { isThemeId, type ThemeId } from "../src/render/theme-ids";
@@ -22,6 +23,7 @@ if (canvas instanceof HTMLCanvasElement) {
   const replay = params.get("plants") === "replay";
   const asked = params.get("theme");
   let theme: ThemeId = isThemeId(asked) ? asked : "pixel";
+  let drift = params.get("drift") !== "off";
   // 2026-11-12 10:30 UTC: 45 minutes after the step recorded that day.
   const clock = fixedClock(live ? Date.UTC(2026, 10, 12, 10, 30) : Date.UTC(2026, 5, 21, 12));
   if (replay) {
@@ -56,6 +58,11 @@ if (canvas instanceof HTMLCanvasElement) {
               shown === null ? "" : `${shown.mark.id} ${String(Math.round(shown.box.left))}`;
         },
         theme,
+        drift,
+        () => {
+          drift = !drift;
+          view?.setDrift(drift);
+        },
       );
   // `#theme-toggle` goes from one theme to the other, as the page's list does.
   document.getElementById("theme-toggle")?.addEventListener("click", () => {

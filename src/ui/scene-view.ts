@@ -672,9 +672,11 @@ export function mountSceneView(
     },
     setDrift(on: boolean): void {
       if (drift === on) return;
-      // The camera stays where it is on screen, mid-drift too; switched back on, it
-      // starts drifting from there after the usual rest.
-      takeOver(animationClock.now());
+      // After the rest, the camera stays where it is on screen, mid-drift too;
+      // switched back on, it starts drifting from there after the usual rest, never
+      // with a jump. A flight (the intro among them) goes on.
+      const now = animationClock.now();
+      if (flight === null && now - lastInput > IDLE_DRIFT_AFTER_MS) takeOver(now);
       drift = on;
       wake();
     },

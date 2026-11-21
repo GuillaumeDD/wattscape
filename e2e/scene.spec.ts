@@ -340,3 +340,33 @@ test("switches theme in place: the camera stays, and pixel art comes back as it 
   expect(await settled(page)).toBe(pixel);
   expect(await page.locator("#scene").evaluate((c) => c.classList.contains("smooth"))).toBe(false);
 });
+
+test("keeps the camera still with the drift off, and Space switches it (B-036)", async ({
+  page,
+}) => {
+  // A fake clock, so that minutes of rest pass at once.
+  await page.clock.install();
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/scene.html?drift=off");
+  await page.clock.runFor(3000);
+  const still = await picture(page);
+
+  // Off: a minute of rest, long after the drift would have started, moves nothing.
+  await page.clock.runFor(60_000);
+  expect(await picture(page)).toBe(still);
+
+  // On, after that long rest: no jump, then the drift starts after its own rest.
+  await page.keyboard.press("Space");
+  await page.clock.runFor(500);
+  expect(await picture(page)).toBe(still);
+  await page.clock.runFor(60_000);
+  const drifting = await picture(page);
+  expect(drifting).not.toBe(still);
+
+  // Off again, mid-drift: the camera stays where it is on screen.
+  await page.keyboard.press("Space");
+  await page.clock.runFor(500);
+  const stopped = await picture(page);
+  await page.clock.runFor(60_000);
+  expect(await picture(page)).toBe(stopped);
+});
