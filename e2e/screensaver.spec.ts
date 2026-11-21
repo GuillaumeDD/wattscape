@@ -129,25 +129,29 @@ test("a quick second press leaves no full screen and no wake lock behind", async
   await page.addInitScript(() => {
     const held = { count: 0 };
     Object.assign(window, { __held: held });
-    Object.defineProperty(navigator, "wakeLock", {
-      value: {
-        request: () =>
-          new Promise((resolve) => {
-            setTimeout(() => {
-              held.count++;
-              let released = false;
-              const sentinel = new EventTarget();
-              Object.assign(sentinel, {
-                release: () => {
-                  if (!released) held.count--;
-                  released = true;
-                  return Promise.resolve();
-                },
-              });
-              resolve(sentinel);
-            }, 300);
-          }),
-      },
+    // On the prototype, as a getter: WebKit's `navigator` keeps its own `wakeLock`
+    // over a value defined on the instance.
+    const stub = {
+      request: () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            held.count++;
+            let released = false;
+            const sentinel = new EventTarget();
+            Object.assign(sentinel, {
+              release: () => {
+                if (!released) held.count--;
+                released = true;
+                return Promise.resolve();
+              },
+            });
+            resolve(sentinel);
+          }, 300);
+        }),
+    };
+    Object.defineProperty(Navigator.prototype, "wakeLock", {
+      configurable: true,
+      get: () => stub,
     });
   });
   const held = (): Promise<number> =>
@@ -161,7 +165,10 @@ test("a quick second press leaves no full screen and no wake lock behind", async
   await expect.poll(held).toBe(0);
   await expect.poll(() => fullscreen(page)).toBe(false);
 
-  await page.dblclick("#screensaver");
+  // Out again before the full screen and the lock are answered (a double click on the
+  // button does the same in Chromium, but Firefox drops its second click).
+  await page.keyboard.press("f");
+  await page.keyboard.press("Escape");
   await page.waitForTimeout(800);
   await expect(page.locator("#panel-body")).toBeVisible();
   expect(await fullscreen(page)).toBe(false);
