@@ -138,6 +138,10 @@ Format:
 - Edit a file with an editor tool or a patch, never by reading it into a script and
   writing it back: a bad read truncates it silently (`tools/bake-plants.ts` lost its
   end that way in B-015).
+- Never split a change into commits with a patch without context
+  (`git diff -U0` then `git apply --unidiff-zero`): it moved lines to the wrong
+  places without an error (B-030, D-078). Split by files, or land the items in one
+  commit and say why in its message.
 
 ### Git
 
@@ -317,7 +321,10 @@ specific. Focus on it:
 - Wikimedia's APIs (Wikipedia, Wikidata) answer HTTP 429 after a few quick calls,
   and then refuse every request for a while: batch (up to 20 titles per
   `prop=extracts` call), space the calls, and fetch everything a step needs in one
-  go (D-054).
+  go (D-054). When they still refuse, ask Guillaume to paste the article's
+  introduction in the thread: log it in SOURCES as the article, « pasted by
+  Guillaume », and compare it with the claim word by word (B-034 found « two »
+  heaps where the source counts three; D-078).
 - The national registry (DS-07) files a unit under its `codeinseecommune`, which can
   be a neighbour of where it stands (`codeinseecommuneimplantation`): the Tricastin's
   units sit under Pierrelatte. Match a site by both codes, never by the commune's

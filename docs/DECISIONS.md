@@ -1398,3 +1398,20 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   reproduce.
 - **Revisit if:** the cloud sessions gain Firefox and WebKit, so such a test can
   be run before the push.
+
+## D-078 — Small settings review: two lessons written down
+
+- **Context:** at the end of the small settings (PRs #65 and #67), Claude offered
+  to write down what was not obvious, and Guillaume agreed (2026-11-21, « Oui », in
+  the project thread).
+- **Options:** keep the lessons in memory only, or write them where the next
+  session reads them.
+- **Decision:** written in `AGENTS.md`. § Faithfulness: when Wikimedia keeps
+  answering 429, the article's introduction pasted by Guillaume serves as the
+  source (S-028), checked word by word against the claim. § Shell: no commit split
+  with a context-free patch (`git apply --unidiff-zero`).
+- **Why:** the paste unblocked B-034 after two sessions of 429s, and it corrected
+  the caption (three heaps, not two). The context-free patch staged a broken
+  `main.ts`, `style.css` and `fr.json` without an error; it was caught by reading
+  the diff before the commit.
+- **Revisit if:** the cloud gets a Wikimedia access that is not rate-limited.
