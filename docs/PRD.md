@@ -172,6 +172,10 @@ idea that the grid can be seen.
 - Weather on or off, in the panel and by `?weather=off`, remembered: off hides the
   clouds, rain and fog; the ground snow stays, so its readings go on (Guillaume,
   2026-11-21; G-020, B-030, D-072).
+- The idle drift on or off, in the panel, by `?drift=off` and by `Space`,
+  remembered: off, the camera moves only on input (Guillaume, 2026-11-21; G-025,
+  B-036, D-074).
+- A link to the code repository in the panel (Guillaume, 2026-11-21; G-021, B-031).
 - `prefers-reduced-motion`: no camera drift, slow animations.
 - The page's panel (title, region, language) folds to its title, so a phone shows
   the map (Guillaume, 2026-11-14; B-025).
@@ -292,12 +296,12 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-017 | Idle drift in budget: the vignette laid in CSS over the canvas (D-061)                 | proposed |
 | G-018 | Wind bending the trees when the turbines spin (§ 4.7; B-018 drifts only the clouds)    | proposed |
 | G-019 | Vineyards, crops and lavender on their own calendar (Q-55, D-069)                      | proposed |
-| G-020 | Weather on or off, chosen by the viewer (Guillaume, 2026-11-21; B-030)                 | planned  |
-| G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | planned  |
+| G-020 | Weather on or off, chosen by the viewer (Guillaume, 2026-11-21; B-030)                 | done     |
+| G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | done     |
 | G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | done     |
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
 | G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
-| G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | planned  |
+| G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
 | G-026 | Survey lap in budget: longer stays, fewer frames in slow flights (D-075)               | proposed |
 
 ## 10. Open questions

@@ -83,6 +83,11 @@ export interface Scene {
    * to show is absent, and shows none.
    */
   readonly weather: RegionalWeather;
+  /**
+   * The viewer turned the weather off (B-030, D-072): no clouds, rain or fog; the
+   * snow on the ground, from the same readings, still lies. Absent: the weather shows.
+   */
+  readonly weatherHidden?: boolean;
   /** The clock's time, ms: the clouds drift with the wind (src/scene/clouds.ts). */
   readonly timeMs: number;
   /** The season of the clock's date, and how far the land has turned (src/scene/season.ts). */

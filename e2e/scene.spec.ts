@@ -410,3 +410,65 @@ test("switches theme in place: the camera stays, and pixel art comes back as it 
   expect(await settled(page)).toBe(pixel);
   expect(await page.locator("#scene").evaluate((c) => c.classList.contains("smooth"))).toBe(false);
 });
+
+test("keeps the camera still with the drift off, and Space switches it (B-036)", async ({
+  page,
+}) => {
+  // A fake clock, so that minutes of rest pass at once.
+  await page.clock.install();
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/scene.html?drift=off");
+  await page.clock.runFor(3000);
+  const still = await picture(page);
+
+  // Off: a minute of rest, long after the drift would have started, moves nothing.
+  await page.clock.runFor(60_000);
+  expect(await picture(page)).toBe(still);
+
+  // On, after that long rest: no jump, then the drift starts after its own rest.
+  await page.keyboard.press("Space");
+  await page.clock.runFor(500);
+  expect(await picture(page)).toBe(still);
+  await page.clock.runFor(60_000);
+  const drifting = await picture(page);
+  expect(drifting).not.toBe(still);
+
+  // Off again, mid-drift: the camera stays where it is on screen.
+  await page.keyboard.press("Space");
+  await page.clock.runFor(500);
+  const stopped = await picture(page);
+  await page.clock.runFor(60_000);
+  expect(await picture(page)).toBe(stopped);
+});
+
+test("lets the intro's flight land when Space is pressed during it (B-036)", async ({ page }) => {
+  await page.clock.install();
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/scene.html?area=28");
+  await page.clock.runFor(10_000);
+  const landed = await picture(page);
+
+  await page.goto("/scene.html?area=28");
+  // Mid-flight: the intro shows France for 1.5 s, then flies for up to 3 s.
+  await page.clock.runFor(2500);
+  await page.keyboard.press("Space");
+  await page.clock.runFor(7500);
+  expect(await picture(page)).toBe(landed);
+});
+
+test("Space during the survey switches the drift and leaves the tour playing (B-036)", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.setViewportSize({ width: 960, height: 540 });
+  await page.goto("/scene.html");
+  await page.clock.runFor(3000);
+  await page.keyboard.press("p");
+  await expect(page.locator("#survey-note")).toHaveText("playing 32");
+  // Over 20 s into the tour, past the rest after the press of P.
+  await page.clock.runFor(25_000);
+  await page.keyboard.press("Space");
+  await page.clock.runFor(1000);
+  await expect(page.locator("#survey-note")).toHaveText(/^playing /);
+  await expect(page.locator("#survey-log")).toHaveText("playing;");
+});

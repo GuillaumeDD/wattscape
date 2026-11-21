@@ -146,7 +146,7 @@ test("a quick second press leaves no full screen and no wake lock behind", async
               },
             });
             resolve(sentinel);
-          }, 300);
+          }, 1000);
         }),
     };
     Object.defineProperty(Navigator.prototype, "wakeLock", {
@@ -159,6 +159,11 @@ test("a quick second press leaves no full screen and no wake lock behind", async
   await page.goto("/screensaver.html");
   await page.keyboard.press("f");
   await page.keyboard.press("Escape");
+  // Firefox may take Escape for its own way out of the full screen, and end the mode
+  // only on `fullscreenchange`: F pressed before that would leave the mode instead of
+  // entering it. The first lock is still pending meanwhile (1 s).
+  await expect(page.locator("#panel-body")).toBeVisible();
+  await expect.poll(() => fullscreen(page)).toBe(false);
   await page.keyboard.press("f");
   await expect.poll(held).toBe(1);
   await page.keyboard.press("Escape");
@@ -169,7 +174,7 @@ test("a quick second press leaves no full screen and no wake lock behind", async
   // button does the same in Chromium, but Firefox drops its second click).
   await page.keyboard.press("f");
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1500);
   await expect(page.locator("#panel-body")).toBeVisible();
   expect(await fullscreen(page)).toBe(false);
   expect(await held()).toBe(0);

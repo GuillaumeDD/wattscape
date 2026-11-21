@@ -56,3 +56,41 @@ describe("the weather over the towns' lamps", () => {
     expect(kept / glow).toBeGreaterThan(0.6);
   });
 });
+
+describe("the weather turned off by the viewer (B-030, D-072)", () => {
+  function frame(weather: RegionalWeather, hidden: boolean, theme: "pixel" | "modern"): Surface {
+    const scene = {
+      ...referenceScene("28", normandie, 30),
+      weather,
+      weatherHidden: hidden,
+      timeMs: T,
+    };
+    const density = theme === "pixel" ? 1 : 2;
+    const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
+    (theme === "pixel" ? drawPixelScene : drawModernScene)(scene, out);
+    return out;
+  }
+  const same = (a: Surface, b: Surface): boolean => a.data.every((v, i) => v === b.data[i]);
+
+  it.each(["pixel", "modern"] as const)(
+    "%s: hides the clouds, rain and fog, to the pixel",
+    (theme) => {
+      const bare = frame({}, false, theme);
+      for (const group of ["rain", "fog", "storm"] as const) {
+        const weather = overrideWeather(group, T);
+        expect(same(frame(weather, false, theme), bare), group).toBe(false);
+        expect(same(frame(weather, true, theme), bare), group).toBe(true);
+      }
+    },
+  );
+
+  it.each(["pixel", "modern"] as const)(
+    "%s: keeps the snow on the ground, without the falling snow and its clouds",
+    (theme) => {
+      const weather = overrideWeather("snow", T);
+      const hidden = frame(weather, true, theme);
+      expect(same(hidden, frame({}, false, theme))).toBe(false);
+      expect(same(hidden, frame(weather, false, theme))).toBe(false);
+    },
+  );
+});

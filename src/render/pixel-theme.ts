@@ -862,7 +862,8 @@ export function drawPixelScene(scene: Scene, out: Surface): Drawn {
   // stay readable under any sky. Their pixels that showed before the weather show
   // again after it, as they were; what hid them (the relief in front, a lit window)
   // still does.
-  const grid = weatherGrid(scene.coarse, scene.weather);
+  // Hidden by the viewer, the sky's weather is not drawn; the ground snow was, above.
+  const grid = scene.weatherHidden === true ? null : weatherGrid(scene.coarse, scene.weather);
   const mask =
     grid === null ? null : cloudMask(grid, scene.camera, out.width, out.height, 1, scene.timeMs);
   if (grid !== null && mask !== null) {
