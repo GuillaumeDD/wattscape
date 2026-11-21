@@ -162,6 +162,12 @@ Format:
   instead (the cloud sessions), point at it:
   `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run e2e`; that runs Chromium
   only (the cloud cannot download the other two), and CI runs all three.
+- An e2e test of a browser API holds in all three engines only if it waits for
+  states, not for key presses: Firefox leaves the full screen on `Escape` by
+  itself and tells the page later (`fullscreenchange`), so a key pressed at once
+  met the old state (CI on #64). A stub of a `navigator` API goes on
+  `Navigator.prototype` as a getter: WebKit ignored one defined on `navigator`
+  itself (CI on #63). See ARCHITECTURE § Browser quirks (D-077).
 - After an intended drawing change, re-record the reference frames with
   `node --experimental-strip-types tools/record-frames.ts` (it prints which frames
   changed), commit `tests/fixtures/frames/hashes.json` with the change, and run

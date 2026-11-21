@@ -1339,6 +1339,11 @@ All **unverified** until measured in Chromium, Firefox and WebKit (AGENTS.md §5
   The screensaver mode (B-021) is checked in Chromium, Firefox and WebKit by
   `e2e/screensaver.spec.ts` (`playwright.config.ts` runs that file in the three
   engines): entering with `F`, the full screen, `Escape`, the hidden cursor.
+  Measured there (CI, 2026-11-21): in full screen, Firefox can take `Escape` as
+  its own way out, and the page learns of it only on `fullscreenchange`; until
+  then it still sees the full screen, so an `F` pressed at once leaves the mode
+  instead of entering it (#66). WebKit ignores a `wakeLock` stub defined on
+  `navigator` itself; one on `Navigator.prototype`, as a getter, holds (#63).
 - The controls (B-011) were measured in Chromium only (`e2e/scene.spec.ts`): wheel,
   drag, keys, double-click. Pinch and double-tap use Pointer Events and
   `touch-action: none`; some browsers also send `dblclick` after a double-tap, which
