@@ -60,7 +60,8 @@ describe("the landmarks' captions (src/map/landmark-captions.ts)", () => {
     const provisional = Object.entries(LANDMARK_CAPTIONS)
       .filter(([, c]) => c.provisional === true)
       .map(([id]) => id);
-    expect(provisional).toEqual(["P-012"]);
+    // P-012, the last one, was sourced in B-034 (S-028).
+    expect(provisional).toEqual([]);
   });
 
   it("are read by mark, in the viewer's language", () => {

@@ -308,7 +308,8 @@ Notre-Dame de Fourvière »: on the hill over Lyon since the end of the 19th cen
 peak of 149 m that overlooks the city. « Calanque de Sormiou »: in the Calanques
 massif, in the national park. « Cathédrale Notre-Dame de Rouen »: Gothic. Not found:
 « Port de Fécamp » and « Base 11/19 »; then the API answered HTTP 429 to every
-request, on Wikipedia and Wikidata alike, so the slag heaps' caption is provisional.
+request, on Wikipedia and Wikidata alike, so the slag heaps' caption is provisional
+(sourced on 2026-11-21, S-028).
 Reliability medium (a community encyclopedia).
 
 Consulted on 2026-11-14, **S-025**: the national registry of installations
@@ -340,6 +341,15 @@ mountain ranges' weather points (Q-45). Gave each point's `elevation` (from 670 
 3 064 m) and that morning's `snow_depth`; the five kept are listed in ARCHITECTURE,
 under "Snow on the ground". About one call in two came back empty through the
 session's proxy, and was asked again. Reliability high for the heights (the API's own figures).
+
+Consulted on 2026-11-21, **S-028**: [French Wikipedia][s022], the introduction of
+« Fosse no 11 - 19 des mines de Lens », pasted by Guillaume in the project thread
+(the API answered 429 from the cloud, D-054), for the caption of the Terrils du
+11/19 (P-012, B-034). Gave: an old coal pit of the Nord-Pas-de-Calais basin at
+Loos-en-Gohelle, of the Compagnie des mines de Lens; three heaps, nos 74, 74A and
+74B, grown from 1960 when other pits were concentrated on it; closed on 31 January
+1986; the pit and the heaps on the UNESCO World Heritage List since 30 June 2012.
+Reliability medium (an encyclopedia, its sources not checked).
 
 [s010-codes]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/lib/components/variables/wmo-codes-table.svelte
 [s010-docs]: https://github.com/open-meteo/open-meteo-website/blob/8fbb311caa9d9f72d5bb127a7e0303e28bdfa62f/src/routes/en/docs/%2Bpage.svelte
