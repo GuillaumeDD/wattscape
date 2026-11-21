@@ -41,7 +41,7 @@ Statuses: `todo` / `wip` / `done`.
 | B-031 | Link to the repository            | A link to the GitHub repository in the panel, FR + EN label, `rel="noopener"`; nothing fetched, the CSP unchanged                                                   | done   |
 | B-032 | Survey mode                       | Play, pause, stop: slow flights from region to region, then France; discreet controls; stop flies home; replaces the idle tour of Q-6 (D-073)                       | done   |
 | B-033 | Polish and share                  | Canvas labelled (FR + EN), every control reached by keyboard, contrast checked; tried on a phone and a 4K screen; README with screenshots                           | todo   |
-| B-034 | P-012 caption sourced             | The Terrils du 11/19 caption checked against a source logged in SOURCES, its `provisional` mark removed                                                             | todo   |
+| B-034 | P-012 caption sourced             | The Terrils du 11/19 caption checked against a source logged in SOURCES, its `provisional` mark removed                                                             | done   |
 | B-035 | Four-hour soak                    | Memory and frame time over 4 hours in one stretch (G-013), both themes; flat memory, as § Performance asks                                                          | todo   |
 | B-036 | Camera still                      | A switch in the panel, `?drift=off` and `Space`, remembered: the camera then moves only on input or in survey mode (D-074)                                          | done   |
 
