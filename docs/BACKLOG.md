@@ -28,7 +28,7 @@ Statuses: `todo` / `wip` / `done`.
 | B-018 | Weather effects                   | Clouds, rain, snow, fog, storm from the grouped WMO code; weather override setting                                                                                  | done   |
 | B-019 | Legend                            | Stacked mix bar, consumption, import/export, reading time and staleness, sample label; auto-hide                                                                    | todo   |
 | B-020 | Captions                          | Hover/tap a plant or landmark: name, what it is, live figure; every fact sourced                                                                                    | done   |
-| B-021 | Screensaver mode                  | Fullscreen, idle cursor hidden, wake lock, idle tour with off switch, home button, reduced motion; checked in 3 engines                                             | todo   |
+| B-021 | Screensaver mode                  | Fullscreen, idle cursor hidden, wake lock, home button, reduced motion; `?screensaver` opens it with no UI, `?season=` forces a season; 3 engines                   | todo   |
 | B-022 | Seasons                           | Four seasonal land palettes and props; continuous, per-cell transitions by date; live snow cover; frame snapshots for each season                                   | done   |
 | B-023 | Rivers on the map                 | Rivers of reach 100 or more baked from BD TOPO (DS-13, D-039): the great ones on the national view, all from close; day and night; frame snapshots                  | done   |
 | B-024 | Camera budget, measured again     | `tools/perf.ts frames` on a quiet machine, three runs: wheel zoom and flight at p95 against the 25 ms of D-028; profile and fix if over                             | todo   |
@@ -37,3 +37,100 @@ Statuses: `todo` / `wip` / `done`.
 | B-027 | Modern theme: plants, landmarks   | New drawings for the modern theme (D-057): the eight kinds of plants and all 28 landmarks, in four lots; no smoothed sprite is drawn any more                       | done   |
 | B-028 | Modern theme: the idle drift      | The drift in budget (30 ms/s): a plate drawn once, cropped (every pixel the same); 52–54, the plants' motion 43 of it; accepted (D-061)                             | done   |
 | B-029 | Modern theme: sharp, in budget    | Cheaper motion, every pixel the same: 46 to 37–42 ms/s with plants moving; the rest, the canvas's hand-over, accepted (D-060)                                       | done   |
+| B-030 | Weather on or off                 | A switch in the panel and `?weather=off`, remembered; off draws no weather and makes no weather call, and the page says so (Q-59)                                   | todo   |
+| B-031 | Link to the repository            | A link to the GitHub repository in the panel, FR + EN label, `rel="noopener"`; nothing fetched, the CSP unchanged                                                   | todo   |
+| B-032 | Survey mode                       | Play, pause, stop: slow flights from region to region, then France; discreet controls; stop flies home; replaces the idle tour of Q-6 (Q-60)                        | todo   |
+| B-033 | Polish and share                  | Canvas labelled (FR + EN), every control reached by keyboard, contrast checked; tried on a phone and a 4K screen; README with screenshots                           | todo   |
+| B-034 | P-012 caption sourced             | The Terrils du 11/19 caption checked against a source logged in SOURCES, its `provisional` mark removed                                                             | todo   |
+| B-035 | Four-hour soak                    | Memory and frame time over 4 hours in one stretch (G-013), both themes; flat memory, as § Performance asks                                                          | todo   |
+
+## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
+
+After step 7, the open work grouped into options. Efforts are estimates, counted
+in pull requests (XS: a few lines; S: one PR; M: two or three; L: four or more).
+Each option names its threads, so that no more than three branches are open at once
+(D-066).
+
+1. **Performance and the long soak** (B-024, B-035; Growth G-016, G-017).
+   - Goal: confirm the budget of ARCHITECTURE § Performance on a real machine:
+     camera at p95 (B-024), memory flat over 4 hours (B-035); then decide on
+     G-016 (sharp frame, measured on a GPU first) and G-017 (CSS vignette).
+   - Value: a screensaver runs for hours on battery; the last figures come from
+     headless Chromium in the cloud, which has no GPU (D-060).
+   - Effort: S for the measures; M if a fix is needed.
+   - Depends on: a quiet machine, ideally Guillaume's (a 4-hour run in the cloud
+     holds a session for 4 hours).
+   - Risks: the figures vary from run to run (AGENTS.md § Performance); G-017
+     changes the picture (D-061).
+   - Note: the modern theme's open ideas are G-016 and G-017, both about its cost,
+     so they sit here.
+2. **Weather switch and repository link** (B-030, B-031; Growth G-020, G-021).
+   - Goal: let the viewer turn the weather off; link the code from the page.
+   - Value: a calmer scene for whoever wants the map alone, fewer calls to
+     Open-Meteo; the project shows where it lives.
+   - Effort: XS each, one small thread, one PR each.
+   - Depends on: Q-59 (does off also stop the weather calls, and the snow?).
+   - Risks: low; with the weather off the ground snow goes too, since it comes from
+     the same readings.
+3. **Survey mode** (B-032; Growth G-022), in a thread of its own.
+   - Goal: a contemplative tour: play, pause, stop; slow, soft flights from region
+     to region, then over France; controls that fade away.
+   - Value: the heart of a screensaver; nothing tours the map today (the idle tour
+     of Q-6 was never built).
+   - Effort: M: the path and its timing, the controls, reduced motion, frame hashes
+     along the path.
+   - Depends on: Q-60 (it replaces the idle tour of Q-6); B-024's flight figures.
+   - Risks: a flight costs more than a still frame (B-024); the regional data and
+     the 1 km relief must be ready before the camera lands, or the detail pops in.
+4. **Screensaver mode** (B-021), after the survey mode, in the same thread.
+   - Goal: fullscreen, cursor hidden, wake lock, a launch with no UI
+     (`?screensaver`), a forced season; the survey mode starts by itself there.
+   - Value: what makes Wattscape a screensaver rather than a page.
+   - Effort: S to M.
+   - Depends on: B-032 (the tour it shows); claims about fullscreen and wake lock
+     are checked in Chromium, Firefox and WebKit (AGENTS.md § Determinism).
+   - Risks: browsers differ (wake lock is missing in some); a forced season must be
+     labelled, like a forced weather.
+5. **Legend** (B-019), still to do from step 5.
+   - Goal: the stacked mix bar, consumption, imports and exports, reading time.
+   - Value: the scene says what it shows; the panel still reads « la légende
+     arrive ».
+   - Effort: M.
+   - Depends on: nothing; before B-033, whose screenshots should show it.
+   - Risks: it must not cover the map for long (PRD § 4.8).
+6. **P-012 caption** (B-034).
+   - Goal: source the Terrils du 11/19 caption, left provisional in step 5.
+   - Value: the last caption without a source (« every figure is true »).
+   - Effort: XS; fits in option 2's thread.
+   - Depends on: fr.wikipedia.org answering (it answered 429 on 2026-11-14, and
+     again on 2026-11-21 from the cloud); Guillaume's browser can read the page.
+   - Risks: none.
+7. **Polish and share** (B-033), last, once the visible work is in.
+   - Goal: accessibility, a phone and a large screen tried, a README with
+     screenshots in both themes.
+   - Value: the project can be shown.
+   - Effort: S to M.
+   - Depends on: options 3 to 5, so that the pictures stay true.
+   - Risks: screenshots age with each visible change.
+8. **New data or effects** (Growth G-002, G-004, G-008, G-023), to discuss.
+   - Goal: show more of the grid: flows with the neighbours (G-002), CO₂ intensity
+     (G-004), pumped storage (G-008), the wholesale price (G-023).
+   - Value: the strongest link to Electricity Maps; the national feed DS-02 already
+     carries `ech_comm_*` for five borders and `taux_co2` (recorded fixture
+     `tests/fixtures/eco2mix/2026-11-11-national.json`).
+   - Effort: M to L per idea, plus mockups.
+   - Depends on: a choice among them; for the price, a source GO in SOURCES § 1
+     (none is listed today).
+   - Risks: commercial exchanges are not physical flows, and the regional feed has
+     only one net exchange: what the scene draws must say which it is.
+
+Proposed order (Q-58), at most three threads at once:
+
+| Wave | Thread                                                 | Items                 |
+| ---- | ------------------------------------------------------ | --------------------- |
+| 1    | Small settings: weather switch, repository link, P-012 | B-030, B-031, B-034   |
+| 1    | Survey mode, then screensaver mode (stacked)           | B-032, then B-021     |
+| 1    | Performance measures, on Guillaume's machine           | B-024, B-035          |
+| 2    | Legend, once the small settings thread is done         | B-019                 |
+| 3    | Polish and share                                       | B-033                 |
+| 4    | New data: one idea, chosen on mockups                  | G-002, G-004, G-023 … |

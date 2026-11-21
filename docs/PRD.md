@@ -251,6 +251,12 @@ Each step ends with a playable deployed build and a questionnaire of open choice
 6. **Step 5 — Weather, seasons and learning layer:** weather effects, seasons,
    legend, captions, screensaver mode (B-018 to B-022).
 
+Steps 5 to 7 ran in a different cut (captions, the modern theme, then weather and
+seasons); B-019 and B-021 are still open. What comes next is proposed, with its
+order, in
+[`BACKLOG.md` § Next steps](BACKLOG.md#next-steps-proposed-2026-11-21-for-guillaume-to-order-prd-q-58)
+(Q-58).
+
 ## 9. Growth
 
 The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
@@ -269,13 +275,17 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-010 | Seasonal touches (snow on the Alps in winter, vineyards in autumn colours)             | planned  |
 | G-011 | A modern visual theme (smooth, layered), chosen by the user (Guillaume, 2026-11-12)    | done     |
 | G-012 | Relief of the neighbouring countries, so the Alps do not end in a cliff at the border  | planned  |
-| G-013 | A soak of 4 hours or more, in one stretch (Guillaume, 2026-11-12; B-013 ran 2 hours)   | proposed |
+| G-013 | A soak of 4 hours or more, in one stretch (Guillaume, 2026-11-12; B-035)               | planned  |
 | G-014 | Warm water shimmering on the sea off the coastal nuclear plants (PRD Q-16, Q-20)       | proposed |
 | G-015 | The main rivers of France on the map (Guillaume, 2026-11-13; B-023, D-039)             | done     |
 | G-016 | Sharp frame in budget: measure on a GPU, then fewer steps or coarser motion (D-060)    | proposed |
 | G-017 | Idle drift in budget: the vignette laid in CSS over the canvas (D-061)                 | proposed |
 | G-018 | Wind bending the trees when the turbines spin (§ 4.7; B-018 drifts only the clouds)    | proposed |
 | G-019 | Vineyards, crops and lavender on their own calendar (Q-55, D-069)                      | proposed |
+| G-020 | Weather on or off, chosen by the viewer (Guillaume, 2026-11-21; B-030)                 | planned  |
+| G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | planned  |
+| G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | planned  |
+| G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
 
 ## 10. Open questions
 
@@ -341,3 +351,6 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-55 | Vineyards, crops and lavender on their own calendar?            | Growth, not this step (G-019)                                                                        | Growth (Guillaume, 2026-11-20; D-069)                                 |
 | Q-56 | Snow: the 5 range points, by elevation class, inferred?         | Keep: the page says the snow is inferred                                                             | Yes (Guillaume, 2026-11-20; D-069)                                    |
 | Q-57 | Bring a branch up to date by merging main (D-066)?              | Confirm: a merge rewrites no published history                                                       | Confirmed (Guillaume, 2026-11-20; D-069)                              |
+| Q-58 | Next steps: in which order (BACKLOG § Next steps)?              | Three threads: small settings (B-030, B-031, B-034), survey then screensaver, measures               |                                                                       |
+| Q-59 | Weather off: stop the weather calls too, and so the snow?       | Yes: off means no call to Open-Meteo; ground snow comes from the same readings                       |                                                                       |
+| Q-60 | Survey mode instead of the idle tour of Q-6 (D-006)?            | Yes: one tour, started by Play, and by itself in screensaver mode; stop flies home                   |                                                                       |
