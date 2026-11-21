@@ -1351,3 +1351,33 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Why:** a contemplative scene can be still; the survey mode (D-073) is the
   motion the viewer chooses.
 - **Revisit if:** the drift's default (on) reads wrong once the survey mode is in.
+
+## D-075 — The survey lap's cost is accepted for now, its levers noted
+
+- **Context:** a lap of the survey mode (B-032) is estimated at about 70 ms/s in
+  pixel art and 125 in the modern theme, worked out from the measured flight and
+  stay, not measured over a lap: over the steady state's 30 ms/s (D-028;
+  ARCHITECTURE § Performance; PRD Q-61, asked in PR #62).
+- **Options:** accept it as it is; measure levers first (longer stays, fewer
+  frames per second in the slow flights).
+- **Decision:** note the observations and the levers for the optimization work
+  to come, Guillaume, 2026-11-21 (in the project thread): the survey ships as
+  merged (PR #62); the levers wait in Growth (G-026), to measure on a prototype
+  with B-024's measures on a quiet machine.
+- **Why:** the survey plays on demand and in the screensaver mode, not at rest;
+  the optimization work will weigh it with the other costs over budget (G-016,
+  G-017).
+- **Revisit if:** a measured lap, on Guillaume's machine, shows the survey drains
+  a laptop's battery or drops frames.
+
+## D-076 — The screensaver mode keeps its source notes, small and faint
+
+- **Context:** the PRD's screensaver mode showed "no UI at all"; every figure on
+  screen must stay traceable (AGENTS.md § 1). B-021 kept where the figures come
+  from (the plants' and the weather's notes, an imposed season's) small and faint, as a
+  provisional choice (PRD Q-62, asked in PR #63).
+- **Options:** keep the notes, small and faint (recommended); hide every note.
+- **Decision:** keep them, Guillaume, 2026-11-21 (« OK, je verrais à l'usage », in
+  the project thread).
+- **Why:** the traceability rule wins over a bare screen.
+- **Revisit if:** in use, the notes distract from the scene.

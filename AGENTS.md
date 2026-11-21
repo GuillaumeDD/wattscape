@@ -156,9 +156,12 @@ Format:
 
 ### End-to-end tests and frame hashes
 
-- `npm run e2e` drives Playwright's Chromium. Where a Chromium is preinstalled
+- `npm run e2e` drives Playwright's Chromium, and Firefox and WebKit for the
+  browser-API tests (`e2e/screensaver.spec.ts`; install them once with
+  `npx playwright install firefox webkit`). Where a Chromium is preinstalled
   instead (the cloud sessions), point at it:
-  `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run e2e`.
+  `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run e2e`; that runs Chromium
+  only (the cloud cannot download the other two), and CI runs all three.
 - After an intended drawing change, re-record the reference frames with
   `node --experimental-strip-types tools/record-frames.ts` (it prints which frames
   changed), commit `tests/fixtures/frames/hashes.json` with the change, and run

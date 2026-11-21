@@ -1271,7 +1271,8 @@ less), but draws every frame of its 6 to 12 s. Over a lap (102 s of flights for
 540 s of stays, at 480 × 270), the tour would cost about 70 ms/s in pixel art and
 125 in the modern theme, worked out from these rows, not measured over a lap: over
 the steady state's 30 ms/s, as the modern theme's idle drift already is (D-061).
-For Guillaume to weigh (B-032's PR), with B-024's measures on a quiet machine.
+Accepted for now, the levers noted for the optimization work (D-075, G-026), with
+B-024's measures on a quiet machine.
 
 Where the time goes, from `node --cpu-prof` on the flight's frames: the 1 km layer
 between scales 0.55 and 1.35, where a cell is thinner than a pixel and a frame
