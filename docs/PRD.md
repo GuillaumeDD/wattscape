@@ -81,10 +81,12 @@ idea that the grid can be seen.
     landmarks (§4.4), towns and terrain; the regional mix in the legend.
   - Between the two, detail fades in and out smoothly (level of detail), never pops.
 - **Pan** by drag, arrows or WASD; the camera drifts slowly on its own after a few
-  seconds of inactivity, like a screensaver.
-- **Idle tour:** left alone, the camera stays on the viewer's region and, every 5
-  minutes, takes a 1-minute flight to another region or the national view (Q-6).
-  The tour can be switched off (setting, remembered in the browser).
+  seconds of inactivity, like a screensaver; the viewer can switch the drift off
+  (Guillaume, 2026-11-21; B-036, D-074).
+- **Survey mode:** play, pause and stop; slow, soft flights from region to region,
+  then over France, under discreet controls (Guillaume, 2026-11-21; G-022, B-032).
+  It starts with Play, and by itself in screensaver mode; stop flies home. It is
+  the only tour, in place of Q-6's idle tour, which was never built (Q-60, D-073).
 - **Home button:** one button (and the `Home` key) flies back to the viewer's own
   position (or home region) from anywhere, at any zoom (Q-6).
 
@@ -162,6 +164,9 @@ idea that the grid can be seen.
   pause the drift. Settings: time-lapse (to watch a day in a minute, with the day's
   real figures: `?timelapse=day`, B-014), weather override and fixed data, for demos
   and screenshots (also as URL settings).
+- Weather on or off, in the panel and by `?weather=off`, remembered: off hides the
+  clouds, rain and fog; the ground snow stays, so its readings go on (Guillaume,
+  2026-11-21; G-020, B-030, D-072).
 - `prefers-reduced-motion`: no camera drift, slow animations.
 - The page's panel (title, region, language) folds to its title, so a phone shows
   the map (Guillaume, 2026-11-14; B-025).
@@ -286,6 +291,8 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | planned  |
 | G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | planned  |
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
+| G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
+| G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | planned  |
 
 ## 10. Open questions
 
@@ -351,6 +358,6 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-55 | Vineyards, crops and lavender on their own calendar?            | Growth, not this step (G-019)                                                                        | Growth (Guillaume, 2026-11-20; D-069)                                 |
 | Q-56 | Snow: the 5 range points, by elevation class, inferred?         | Keep: the page says the snow is inferred                                                             | Yes (Guillaume, 2026-11-20; D-069)                                    |
 | Q-57 | Bring a branch up to date by merging main (D-066)?              | Confirm: a merge rewrites no published history                                                       | Confirmed (Guillaume, 2026-11-20; D-069)                              |
-| Q-58 | Next steps: in which order (BACKLOG § Next steps)?              | Three threads: small settings (B-030, B-031, B-034), survey then screensaver, measures               |                                                                       |
-| Q-59 | Weather off: stop the weather calls too, and so the snow?       | Yes: off means no call to Open-Meteo; ground snow comes from the same readings                       |                                                                       |
-| Q-60 | Survey mode instead of the idle tour of Q-6 (D-006)?            | Yes: one tour, started by Play, and by itself in screensaver mode; stop flies home                   |                                                                       |
+| Q-58 | Next steps: in which order (BACKLOG § Next steps)?              | Three threads: small settings (B-030, B-031, B-034), survey then screensaver, measures               | Three threads (Guillaume, 2026-11-21, decision card; D-071)           |
+| Q-59 | Weather off: stop the weather calls too, and so the snow?       | Yes: off means no call to Open-Meteo; ground snow comes from the same readings                       | Keep the ground snow (Guillaume, 2026-11-21, decision card; D-072)    |
+| Q-60 | Survey mode instead of the idle tour of Q-6 (D-006)?            | Yes: one tour, started by Play, and by itself in screensaver mode; stop flies home                   | One tour (Guillaume, 2026-11-21, decision card; D-073)                |

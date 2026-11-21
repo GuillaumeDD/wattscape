@@ -1291,3 +1291,63 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Why:** each cost a rewrite, a red CI run or an extra round of mockups in this
   step.
 - **Revisit if:** a rule turns out to cost more than the slip it prevents.
+
+## D-071 — The next steps after step 7, in three threads at once
+
+- **Context:** after step 7, Guillaume asked for an overview of the options and a
+  backlog to prioritise (2026-11-21); the options and their order are in
+  `docs/BACKLOG.md` § Next steps (PR #60, PRD Q-58).
+- **Options:** three threads at once (recommended); the survey mode alone first;
+  the small settings first, then talk again.
+- **Decision:** three threads at once, Guillaume, 2026-11-21 (decision card): the
+  small settings (B-030, B-031, B-034); the survey mode, then the screensaver mode,
+  stacked (B-032, B-021); the performance measures, on Guillaume's machine (B-024,
+  B-035). Then the legend (B-019), the polish (B-033), and one new data idea chosen
+  on mockups.
+- **Why:** the three threads touch distinct parts of the code and fit the limit of
+  three branches (D-066).
+- **Revisit if:** two of the threads turn out to edit the same files.
+
+## D-072 — Weather off hides the sky's weather, keeps the ground snow
+
+- **Context:** a switch to turn the weather off (Guillaume, 2026-11-21; G-020,
+  B-030). The ground snow (D-068) comes from the same Open-Meteo readings as the
+  clouds (PRD Q-59).
+- **Options:** off stops every weather call, and so the ground snow
+  (recommended); off hides the clouds, rain and fog, and keeps the ground snow.
+- **Decision:** keep the ground snow, Guillaume, 2026-11-21 (decision card): off
+  hides the clouds, rain and fog; the weather readings go on, for the snow on the
+  ground; the page says the weather is hidden.
+- **Why:** Guillaume's choice; the season's look stays true with the weather off.
+- **Revisit if:** viewers read the switch as cutting every call, or the calls
+  must be cut (quota, privacy).
+
+## D-073 — One tour: the survey mode replaces the idle tour (revises D-006)
+
+- **Context:** Guillaume asked for a survey mode, play, pause and stop, flying
+  slowly from region to region and then over France (2026-11-21; G-022, B-032).
+  D-006 planned an idle tour (every 5 minutes, a 1-minute flight), never built
+  (PRD Q-60).
+- **Options:** one tour, the survey mode (recommended); both, the survey on demand
+  and D-006's tour at rest.
+- **Decision:** one tour, Guillaume, 2026-11-21 (decision card): the survey mode
+  starts with Play, and by itself in screensaver mode; stop flies home. The home
+  button of D-006 stays; its idle tour and off switch go.
+- **Why:** two tours that look alike confuse; D-006's was never built.
+- **Revisit if:** viewers want the scene to leave the home region on its own
+  outside the screensaver mode.
+
+## D-074 — The idle drift can be switched off
+
+- **Context:** Guillaume noticed the camera's small moves on the deployed site
+  (2026-11-21): the idle drift, a 4-minute loop after 20 s without input
+  (`src/scene/camera.ts`). PRD § 4.9 planned `Space` to pause it; it was never
+  built, and only `prefers-reduced-motion` stops it.
+- **Options:** keep the drift as it is; a switch to turn it off (proposed by
+  Claude).
+- **Decision:** a switch, Guillaume, 2026-11-21 (« Oui », in the project thread):
+  in the panel, by `?drift=off` and by `Space`, remembered; the camera then moves
+  only on input or in the survey mode (B-036, with the small settings of D-071).
+- **Why:** a contemplative scene can be still; the survey mode (D-073) is the
+  motion the viewer chooses.
+- **Revisit if:** the drift's default (on) reads wrong once the survey mode is in.
