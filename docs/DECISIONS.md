@@ -1415,3 +1415,49 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   `main.ts`, `style.css` and `fr.json` without an error; it was caught by reading
   the diff before the commit.
 - **Revisit if:** the cloud gets a Wikimedia access that is not rate-limited.
+
+## D-079 — The modern theme by default; a stored choice stays (revises D-055)
+
+- **Context:** Guillaume asked for the modern theme as the default (2026-11-21,
+  G-027, B-037). D-055 made the pixel art the default, as proposed by Claude. A
+  theme is stored (`wattscape.theme`) only when the viewer changes the selector
+  (`src/main.ts`), so a stored `pixel` was chosen by hand (PRD Q-63).
+- **Options:** keep a stored `pixel` choice, so that only visitors who never chose
+  switch (recommended); switch everyone once, a stored `pixel` ignored.
+- **Decision:** the modern theme is the default (Guillaume, 2026-11-21, in the
+  project thread); a stored choice stays (Guillaume, 2026-11-21, decision card).
+  The order is unchanged: `?theme=`, then the stored choice, then the default.
+- **Why:** Guillaume's choice; a choice made by hand is respected.
+- **Revisit if:** the modern theme's cost on a laptop (B-024, B-035) is too high
+  for a default on battery.
+
+## D-080 — Towerless nuclear plants: their state from the region's figure
+
+- **Context:** Guillaume asked that the nuclear plants without cooling towers tell
+  running from stopped more clearly, in both themes (2026-11-21, G-028, B-038).
+  Each plant's activity is the load factor of nuclear in its region
+  (`tch_nucleaire`, D-025), shared by every site of the region; output per unit
+  (DS-08, G-003) is TO CHECK in SOURCES § 1 (PRD Q-64).
+- **Options:** draw the states now from the region's figure, the caption saying
+  so, per unit later (recommended); check DS-08 first, and draw from each unit's
+  output.
+- **Decision:** the region's figure (Guillaume, 2026-11-21, decision card). The
+  drawing itself is chosen later, on a board of options (B-038), and revises
+  D-027 then.
+- **Why:** the regional figure is GO and true for the region; DS-08's terms and
+  delay are not checked yet.
+- **Revisit if:** DS-08 turns GO: a plant stopped alone while its neighbours run
+  could then be shown (G-003).
+
+## D-081 — The default theme and the towerless plants: wave 2, one thread
+
+- **Context:** B-037 (D-079) and B-038 (D-080) were added to the backlog on
+  2026-11-21 without a place in the waves of D-071 (PRD Q-65).
+- **Options:** wave 2, one thread, B-037 then B-038 on one branch, beside the
+  legend (recommended); after the legend; B-037 alone first, B-038 later.
+- **Decision:** wave 2, one thread (Guillaume, 2026-11-21, decision card): B-037,
+  then B-038 on the same branch, beside the legend (B-019); both before B-033.
+- **Why:** they touch the settings and the plants' art, apart from the legend's
+  files, so wave 2 holds two branches (D-066); B-033's screenshots must show the
+  new default and the new drawing.
+- **Revisit if:** the legend and B-038 turn out to edit the same files.

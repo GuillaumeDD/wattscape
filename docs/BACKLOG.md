@@ -141,6 +141,7 @@ Proposed order (Q-58), at most three threads at once:
 | 1    | Survey mode, then screensaver mode (stacked)         | B-032, then B-021     |
 | 1    | Performance measures, on Guillaume's machine         | B-024, B-035          |
 | 2    | Legend, once the small settings thread is done       | B-019                 |
+| 2    | Modern theme by default, then towerless nuclear      | B-037, then B-038     |
 | 3    | Polish and share                                     | B-033                 |
 | 4    | New data: one idea, chosen on mockups                | G-002, G-004, G-023 … |
 
@@ -160,16 +161,16 @@ Two asks from Guillaume (2026-11-21), to place in the waves above (PRD Q-65):
      the viewer changes the selector (`src/main.ts`), so a visitor who never chose
      follows the default either way.
    - Acceptance:
-     1. the default is `modern`; `?theme=` and a stored choice still win, as Q-63
-        decides for a stored `pixel`;
+     1. the default is `modern`; `?theme=` and a stored choice still win, a stored
+        `pixel` too (D-079);
      2. `tests/settings.test.ts` asserts the new default and the order URL, then
-        storage, then default; a test for whatever Q-63 decides about a stored
-        `pixel`;
+        storage, then default; a test that a stored `pixel` still opens the pixel
+        art;
      3. the frames, e2e scenes and screenshots that relied on the default name
         their theme (none silently changes theme);
      4. every statement that the pixel art is the default swept (PRD § 4.9,
-        ARCHITECTURE § Art direction, the README's first line), and a decision
-        entry that revises D-055.
+        ARCHITECTURE § Art direction, the README's first line), as D-079 revises
+        D-055.
    - Effort: S, one PR.
    - Risks: the modern theme costs more per second than the pixel art (ARCHITECTURE
      § Performance: idle drift accepted over budget, D-061), and a screensaver runs
@@ -188,7 +189,7 @@ Two asks from Guillaume (2026-11-21), to place in the waves above (PRD Q-65):
       sites share one figure, and so do Saint-Alban, Tricastin and the two sites
       with towers of Auvergne-Rhône-Alpes. A plant stopped alone, while the others
       run, cannot be shown from it: that needs output per unit (DS-08, Growth
-      G-003, TO CHECK). Q-64 asks which to build on.
+      G-003, TO CHECK). Guillaume chose the region's figure (Q-64, D-080).
     - Acceptance:
       1. a board of options, both themes, by day and at night, at a = 0, 0.5, 1 and
          with no figure, the current drawing beside them; G-014's warm-water
@@ -205,12 +206,12 @@ Two asks from Guillaume (2026-11-21), to place in the waves above (PRD Q-65):
       5. if the caption gains a state (« à l'arrêt »), its FR and EN strings land
          together, and it says the figure is the region's.
     - Effort: M: the board, then one PR for both themes.
-    - Depends on: Q-64; for a per-plant state, DS-08 GO in SOURCES § 1 first.
+    - Depends on: nothing more (D-080); a per-plant state later needs DS-08 GO.
     - Risks: a cue that reads as a figure must stay true to it (AGENTS.md § 1); a
       new motion by day costs frames (measure it before the card, AGENTS.md §
       Performance).
 
-Proposed place (Q-65): one thread of their own in wave 2, B-037 then B-038 on one
+Place, chosen by Guillaume (Q-65, D-081): one thread of their own in wave 2, B-037 then B-038 on one
 branch (they touch the settings, then the plants' art: distinct from the legend's
 files), so wave 2 holds two branches. B-037 goes first, before B-024 and B-035 are
 measured if they are not yet, and both before B-033, whose screenshots must show
