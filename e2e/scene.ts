@@ -8,6 +8,7 @@
  * caption shows (B-020), and its box. `?theme=modern` opens with the modern theme
  * (G-011), and `#theme-toggle` switches. `#survey-note` tells the survey mode's state
  * and the area it shows (B-032), and `#survey-log` every mode it went through.
+ * `?drift=off` opens with the idle drift off, and Space turns it off or on (B-036).
  */
 import { fixedClock, replayClock } from "../src/clock/clock";
 import { isThemeId, type ThemeId } from "../src/render/theme-ids";
@@ -23,6 +24,7 @@ if (canvas instanceof HTMLCanvasElement) {
   const replay = params.get("plants") === "replay";
   const asked = params.get("theme");
   let theme: ThemeId = isThemeId(asked) ? asked : "pixel";
+  let drift = params.get("drift") !== "off";
   // 2026-11-12 10:30 UTC: 45 minutes after the step recorded that day.
   const clock = fixedClock(live ? Date.UTC(2026, 10, 12, 10, 30) : Date.UTC(2026, 5, 21, 12));
   if (replay) {
@@ -62,6 +64,11 @@ if (canvas instanceof HTMLCanvasElement) {
           if (note) note.textContent = `${state.mode} ${state.area ?? ""}`.trim();
           const log = document.getElementById("survey-log");
           if (log) log.textContent += `${state.mode};`;
+        },
+        drift,
+        () => {
+          drift = !drift;
+          view?.setDrift(drift);
         },
       );
   // `#theme-toggle` goes from one theme to the other, as the page's list does.

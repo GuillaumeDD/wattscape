@@ -270,6 +270,13 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
   a reading: its values are typed by hand in `src/scene/weather.ts` (a WMO code of
   the group, cloud cover 0 % clear and 100 % otherwise, a wind of 20 km/h from the
   west), and the page note says that it is imposed, not live.
+- **Weather off** (B-030, D-072): the panel's switch, or `?weather=off` (or `on`),
+  remembered in `localStorage` (the URL wins, then the remembered choice, then
+  on; an imposed `?weather=rain` shows even over a remembered off). Off, the
+  themes draw no clouds, shadows, rain, snowfall, fog or lightning
+  (`Scene.weatherHidden`); the readings go on being fetched, for the snow on the
+  ground, which stays. The page note says the weather is hidden, and, while snow
+  lies, where it comes from and its time.
 - **Weather codes:** the API sends a subset of WMO code table 4677 (S-010). One
   invalid field, or a code outside this table, makes the whole reading
   "unavailable" (D-010).
@@ -293,7 +300,8 @@ of weather codes (S-010). The client is `src/data/open-meteo.ts`.
 - The position is used for: (1) the offline area lookup (§ Geolocation); (2) the
   weather query, **rounded to 0.1°** (about 10 km). It is never stored, logged,
   put in the URL or sent elsewhere. What is remembered in `localStorage` is the area
-  code, the language and whether the panel is folded, nothing else.
+  code, the language, the theme, whether the panel is folded, and whether the
+  weather and the idle drift are on, nothing else.
 - The scene takes one weather reading per region (D-063): at the viewer's rounded
   position for the region it lies in, at the regional prefecture
   (`referencePoint`), rounded too, for every other region and for every region
@@ -901,7 +909,8 @@ the deployed build. `tools/screenshots.ts` writes its frames
   a double-tap zooms ×2 on the point (a tap: under 300 ms and 10 px of movement; a
   double-tap: two taps within 300 ms and 24 px). `+`/`−` zoom, the arrows and WASD
   (ZQSD on a French keyboard, by key position) pan by 15 % of the view, `Home` flies
-  back to the viewer's area (and ends the survey), `P` plays or pauses the survey.
+  back to the viewer's area (and ends the survey), `P` plays or pauses the survey,
+  `Space` turns the idle drift off or on (once per press).
   Keys typed into the region list are left to it, and so are Enter and Space on a
   button or a link; other keys reach the map after a click on a button. Any input
   takes the camera from where it is on screen, mid-flight, drifting or on tour.
@@ -946,7 +955,11 @@ the deployed build. `tools/screenshots.ts` writes its frames
 - **Idle drift:** 20 s after the last input, the camera drifts on a slow ellipse
   around where it stopped (4 % of the view's width, one loop in 4 minutes, under 2
   pixels a second), fading in over 10 s. None with `prefers-reduced-motion`, where
-  flights become cuts.
+  flights become cuts. The viewer turns it off (B-036, D-074) with the panel's
+  switch, `?drift=off` (or `on`) or `Space`, remembered in `localStorage` (the URL
+  wins, then the remembered choice, then on): the camera then stays where it is on
+  screen, mid-drift too, and moves only on input; a still scene wakes once a minute,
+  for the light.
 - **Light:** one light for the view, from the sun at its centre (`viewLight`),
   every frame, its darkness rounded to a sixteenth of a step so the picture changes
   only when the light visibly does.
@@ -971,7 +984,10 @@ the deployed build. `tools/screenshots.ts` writes its frames
   their time, stay on screen), and a "+" opens again. It opens as the viewer left it
   (`localStorage`), else folded on a narrow screen (under 40 rem wide or 30 rem high:
   a phone), where it would cover half the map, and open elsewhere. Measured in
-  Chromium, on a Pixel 7 emulation and a 1280 × 720 window.
+  Chromium, on a Pixel 7 emulation and a 1280 × 720 window. Below the style list,
+  two switches (the weather, B-030; the idle drift, B-036), and a plain link to the
+  code repository (B-031), `rel="noopener noreferrer"`: nothing is fetched from it,
+  and the CSP is unchanged (`tests/page.test.ts`).
 
 ### Landmarks
 
@@ -1286,6 +1302,8 @@ only a coarser layer between 0.5 and 1.4 would cut it, which changes the picture
   `?at=` read field by field and checked against the calendar, `?sample=` among
   `day` and `night` only (a recorded step, loaded as a chunk from the site itself),
   `?theme=` and the remembered theme among `pixel` and `modern` only,
+  `?drift=` and the remembered weather and drift switches among `on` and `off`
+  only, `?weather=` among those two and the weather groups,
   `?timelapse=` `day` only, and its answer a bare array of at most 1 212 rows and
   2 MB, each row through the same parser as the live step;
   they never throw past
