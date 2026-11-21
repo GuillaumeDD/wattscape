@@ -41,6 +41,22 @@
       <p id="weather-note" role="status"></p>
     </main>
     <footer id="credits">
+      <!-- The survey mode's controls (B-032): discreet, they fade away while it plays;
+           just above the credits, whatever their height. -->
+      <div id="survey">
+        <span id="survey-area" role="status"></span>
+        <button id="survey-play" type="button">
+          <svg class="icon-play" viewBox="0 0 10 10" aria-hidden="true">
+            <path d="M2.5 1.5 L8.5 5 L2.5 8.5 Z" />
+          </svg>
+          <svg class="icon-pause" viewBox="0 0 10 10" aria-hidden="true">
+            <path d="M2 1.5 H4 V8.5 H2 Z M6 1.5 H8 V8.5 H6 Z" />
+          </svg>
+        </button>
+        <button id="survey-stop" type="button" hidden>
+          <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 2 H8 V8 H2 Z" /></svg>
+        </button>
+      </div>
       <span id="credits-data"></span>
       <a href="https://odre.opendatasoft.com/explore/dataset/eco2mix-regional-tr/" rel="noreferrer"
         >RTE éCO2mix</a
