@@ -31,7 +31,7 @@ Provisional; each folder lands with the backlog item that needs it.
 | `src/data/`   | éCO2mix and Open-Meteo clients: URL building, strict parsers, refresh and staleness        | network (fetchers only)            |
 | `src/sky/`    | Sun and moon position, moon phase, light keyframes                                         | no                                 |
 | `src/map/`    | The baked map of France (land, sea, regions, relief, plant sites) and its grid             | no                                 |
-| `src/scene/`  | The scene model (what a frame shows) and the camera (zoom, pan, flights, drift)            | no                                 |
+| `src/scene/`  | The scene model (what a frame shows), the camera (zoom, pan, flights, drift), the tour     | no                                 |
 | `src/world/`  | Seeded PRNG; placement of plants, towns, trees and landmarks                               | no                                 |
 | `src/render/` | Themes (how a scene looks), palette, dithering, sprites drawn in code, `Surface`           | no (the canvas blit is in `ui/`)   |
 | `src/i18n/`   | FR and EN catalogs (`fr.json`, `en.json`), language detection                              | no                                 |
@@ -901,12 +901,32 @@ the deployed build. `tools/screenshots.ts` writes its frames
   a double-tap zooms ×2 on the point (a tap: under 300 ms and 10 px of movement; a
   double-tap: two taps within 300 ms and 24 px). `+`/`−` zoom, the arrows and WASD
   (ZQSD on a French keyboard, by key position) pan by 15 % of the view, `Home` flies
-  back to the viewer's area. Keys typed into the region list or a button are left
-  to them. Any input takes the camera from where it is on screen, mid-flight or
-  drifting.
+  back to the viewer's area (and ends the survey), `P` plays or pauses the survey.
+  Keys typed into the region list are left to it, and so are Enter and Space on a
+  button or a link; other keys reach the map after a click on a button. Any input
+  takes the camera from where it is on screen, mid-flight, drifting or on tour.
 - **Flights:** a change of area, a key or a double-click flies the camera, 0.6 to
   3 s, the scale moving evenly in log space. On load, a viewer with a region sees
   France for 1.5 s, then flies to it, unless they took the camera first (PRD Q-12).
+- **Survey mode** (B-032, D-073; `src/scene/survey.ts`, `src/ui/survey-bar.ts`): a
+  tour of the 12 regions clockwise from the north, each bordering the next
+  (Hauts-de-France, Grand Est, Bourgogne-Franche-Comté, Auvergne-Rhône-Alpes, PACA,
+  Occitanie, Nouvelle-Aquitaine, Pays de la Loire, Bretagne, Normandie,
+  Centre-Val de Loire, Île-de-France), then France, round and round. It starts one
+  stop after the area shown, from the camera on screen. Each region is framed as
+  the app frames it and held still for 40 s (France 60 s): no drift on tour. The
+  flights between stops are slow and rise a little (van Wijk and Nuij's smooth path,
+  ρ = 1.2, at most 7 % above the farther stop between regions), eased, 6 to 12 s; a
+  lap lasts about 10 min 40 s (flights 102 s of it, at 480 × 270). The region in
+  focus is the stop the tour flies to. A pause slows the tour to a stop over 1.2 s,
+  and Play speeds it up again as smoothly (the tour runs on its own clock, the
+  integral of a speed ramping between 0 and 1); with `prefers-reduced-motion`,
+  flights are cuts and the ramps go. An input (a drag, the wheel, a key, not a tap)
+  takes the camera and pauses the tour; Play then flies back to its stop. Stop and
+  `Home` end it and fly home slowly, along the same kind of path; picking an area
+  ends it too. The controls (Play or Pause, Stop, the area shown) sit bottom right
+  above the credits, and fade away while the tour plays, 4 s after the last move of
+  the mouse or key, until the next one.
 - **Idle drift:** 20 s after the last input, the camera drifts on a slow ellipse
   around where it stopped (4 % of the view's width, one loop in 4 minutes, under 2
   pixels a second), fading in over 10 s. None with `prefers-reduced-motion`, where

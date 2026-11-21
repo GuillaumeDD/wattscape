@@ -6,7 +6,8 @@
  * (src/ui/replay-feed.ts) replays the three hours the test serves in 6 seconds, and
  * the note tells the state and the step's time. `#caption` names the landmark whose
  * caption shows (B-020), and its box. `?theme=modern` opens with the modern theme
- * (G-011), and `#theme-toggle` switches.
+ * (G-011), and `#theme-toggle` switches. `#survey-note` tells the survey mode's state
+ * and the area it shows (B-032).
  */
 import { fixedClock, replayClock } from "../src/clock/clock";
 import { isThemeId, type ThemeId } from "../src/render/theme-ids";
@@ -56,6 +57,10 @@ if (canvas instanceof HTMLCanvasElement) {
               shown === null ? "" : `${shown.mark.id} ${String(Math.round(shown.box.left))}`;
         },
         theme,
+        (state) => {
+          const note = document.getElementById("survey-note");
+          if (note) note.textContent = `${state.mode} ${state.area ?? ""}`.trim();
+        },
       );
   // `#theme-toggle` goes from one theme to the other, as the page's list does.
   document.getElementById("theme-toggle")?.addEventListener("click", () => {

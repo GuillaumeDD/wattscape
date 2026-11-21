@@ -161,7 +161,7 @@ idea that the grid can be seen.
 - Full screen (`F`, button), cursor hidden when idle, a Wake Lock request to keep the
   screen on while in full screen (if the browser supports it).
 - Keys: zoom, pan, `R` next region, `H` hide/show the legend, `?` help, `Space`
-  pause the drift. Settings: time-lapse (to watch a day in a minute, with the day's
+  pause the drift, `P` play or pause the survey mode, `Home` end it (B-032). Settings: time-lapse (to watch a day in a minute, with the day's
   real figures: `?timelapse=day`, B-014), weather override and fixed data, for demos
   and screenshots (also as URL settings).
 - Weather on or off, in the panel and by `?weather=off`, remembered: off hides the
@@ -289,7 +289,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-019 | Vineyards, crops and lavender on their own calendar (Q-55, D-069)                      | proposed |
 | G-020 | Weather on or off, chosen by the viewer (Guillaume, 2026-11-21; B-030)                 | planned  |
 | G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | planned  |
-| G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | planned  |
+| G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | done     |
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
 | G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | planned  |

@@ -27,6 +27,8 @@ import { startWeatherFeed, type WeatherFeed, type WeatherState } from "./ui/weat
 import { overrideWeather, sceneWeather } from "./scene/weather";
 import { anySnow } from "./scene/snow";
 import { type WeatherGroup } from "./data/open-meteo";
+import { mountSurveyBar } from "./ui/survey-bar";
+import { type SurveyState } from "./scene/survey";
 
 /** The time-lapse plays a day in this long (PRD § 4.9: a day in a minute). */
 const TIMELAPSE_MS = 60_000;
@@ -70,6 +72,7 @@ function render(locale: Locale): void {
   document.getElementById("scene")?.setAttribute("aria-label", t("sceneLabel"));
   renderPlantsNote();
   renderWeatherNote();
+  renderSurvey();
 }
 
 let plantsState: FeedState = { kind: "loading" };
@@ -80,6 +83,16 @@ let snowShown = false;
 const weatherOverride: WeatherGroup | undefined = weatherFromQuery(location.search);
 /** The caption shown now, to write again when the language changes. */
 let caption: ShownCaption | null = null;
+/** What the survey mode does now (B-032), to write again when the language changes. */
+let surveyState: SurveyState = { mode: "off", area: null };
+/** The survey's controls; they send their commands to the scene, mounted below. */
+const surveyBar = mountSurveyBar((command) => {
+  scene?.survey(command);
+});
+
+function renderSurvey(): void {
+  surveyBar.render(surveyState, (key) => translate(locale, key));
+}
 
 /**
  * The panel folds to its title and the figures' note, so a phone sees the map: a
@@ -254,6 +267,10 @@ const scene: SceneView | null =
           renderCaption();
         },
         theme,
+        (state) => {
+          surveyState = state;
+          renderSurvey();
+        },
       )
     : null;
 

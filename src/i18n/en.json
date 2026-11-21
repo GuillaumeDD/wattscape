@@ -44,7 +44,7 @@
   "themeLabel": "Style:",
   "themePixel": "Pixel art",
   "themeModern": "Modern",
-  "sceneLabel": "Relief map of France. Wheel, pinch, arrows or + and − to zoom and move; Home to go back to the region.",
+  "sceneLabel": "Relief map of France. Wheel, pinch, arrows or + and − to zoom and move; P to start or pause the flyover; Home to go back to the region.",
   "plantsLoading": "Power plants: loading RTE éCO2mix data…",
   "plantsLive": "Power plants driven by RTE éCO2mix, reading of {time}.",
   "plantsStale": "Power plants driven by an old RTE éCO2mix reading, of {time}.",
@@ -76,5 +76,11 @@
   "plantCapacityCommune": "{mw} MW installed in the commune (national registry at 31/12/2024).",
   "plantLoad": "Load factor of the sector, {region}: {pct}% (RTE éCO2mix, {time}).",
   "plantNoLoad": "RTE éCO2mix gives no load factor for this sector, {region}: idle.",
-  "plantNoData": "No RTE éCO2mix reading to show: the plant is idle."
+  "plantNoData": "No RTE éCO2mix reading to show: the plant is idle.",
+  "surveyPlay": "Start the flyover (P)",
+  "surveyResume": "Resume the flyover (P)",
+  "surveyPause": "Pause the flyover (P)",
+  "surveyStop": "Stop the flyover and go back to the region (Home)",
+  "surveyArea": "Flyover: {area}",
+  "surveyPaused": "Flyover paused: {area}"
 }

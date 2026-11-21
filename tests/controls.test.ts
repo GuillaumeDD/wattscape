@@ -64,6 +64,13 @@ describe("keyIntent", () => {
     expect(keyIntent("Home", "Home")).toEqual({ kind: "home" });
   });
 
+  it("plays or pauses the survey with P, either case (B-032)", () => {
+    expect(keyIntent("p", "KeyP")).toEqual({ kind: "survey" });
+    expect(keyIntent("P", "KeyP")).toEqual({ kind: "survey" });
+    // Space is the drift's (B-036), not the survey's.
+    expect(keyIntent(" ", "Space")).not.toEqual({ kind: "survey" });
+  });
+
   it("pans with the arrows: the ground moves the other way, as the view moves", () => {
     expect(keyIntent("ArrowLeft", "ArrowLeft")).toEqual({ kind: "pan", dx: KEY_PAN_SHARE, dy: 0 });
     expect(keyIntent("ArrowRight", "ArrowRight")).toEqual({
