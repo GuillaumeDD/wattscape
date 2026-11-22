@@ -13,14 +13,17 @@ import {
   weatherSwitchFromQuery,
   atFromQuery,
   initialArea,
+  initialLegendFolded,
   initialPanelFolded,
   initialTheme,
   saveArea,
   savedArea,
   savedLocale,
+  savedLegendFolded,
   savedPanelFolded,
   savedTheme,
   saveLocale,
+  saveLegendFolded,
   savePanelFolded,
   saveTheme,
   sampleFromQuery,
@@ -133,6 +136,31 @@ describe("folded panel", () => {
     expect(initialPanelFolded(throwing, true)).toBe(true);
     expect(initialPanelFolded(memoryStorage({ "wattscape.panel": "open" }), true)).toBe(false);
     expect(initialPanelFolded(memoryStorage({ "wattscape.panel": "folded" }), false)).toBe(true);
+  });
+});
+
+describe("folded legend", () => {
+  it("round-trips the choice, apart from the panel's, and ignores anything else", () => {
+    const storage = memoryStorage();
+    saveLegendFolded(storage, true);
+    expect(savedLegendFolded(storage)).toBe(true);
+    expect(savedPanelFolded(storage)).toBeUndefined();
+    saveLegendFolded(storage, false);
+    expect(savedLegendFolded(storage)).toBe(false);
+    expect(savedLegendFolded(memoryStorage({ "wattscape.legend": "yes" }))).toBeUndefined();
+    expect(savedLegendFolded(throwing)).toBeUndefined();
+    expect(() => {
+      saveLegendFolded(throwing, true);
+    }).not.toThrow();
+  });
+
+  it("opens folded on a narrow screen and open elsewhere, unless the viewer chose", () => {
+    expect(initialLegendFolded(memoryStorage(), true)).toBe(true);
+    expect(initialLegendFolded(memoryStorage(), false)).toBe(false);
+    expect(initialLegendFolded(memoryStorage({ "wattscape.legend": "open" }), true)).toBe(false);
+    expect(initialLegendFolded(memoryStorage({ "wattscape.legend": "folded" }), false)).toBe(true);
+    // The panel's choice is its own.
+    expect(initialLegendFolded(memoryStorage({ "wattscape.panel": "folded" }), false)).toBe(false);
   });
 });
 

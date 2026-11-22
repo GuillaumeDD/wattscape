@@ -20,8 +20,11 @@ export interface Screensaver {
   exit(): void;
 }
 
-/** Whether a key press belongs to a form field or asks for a browser shortcut. */
-function notForUs(e: KeyboardEvent): boolean {
+/**
+ * Whether a key press belongs to a form field or asks for a browser shortcut: the
+ * page's own keys (F here, H for the legend) leave it alone.
+ */
+export function notForUs(e: KeyboardEvent): boolean {
   if (e.ctrlKey || e.metaKey || e.altKey) return true;
   return e.target instanceof HTMLElement && e.target.closest("select, input") !== null;
 }

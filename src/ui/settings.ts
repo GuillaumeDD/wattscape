@@ -11,6 +11,7 @@ import { DEFAULT_THEME_ID, isThemeId, type ThemeId } from "../render/theme-ids";
 const AREA_KEY = "wattscape.area";
 const LOCALE_KEY = "wattscape.locale";
 const PANEL_KEY = "wattscape.panel";
+const LEGEND_KEY = "wattscape.legend";
 const THEME_KEY = "wattscape.theme";
 const WEATHER_KEY = "wattscape.weather";
 const DRIFT_KEY = "wattscape.drift";
@@ -145,6 +146,40 @@ export function initialPanelFolded(
   narrow: boolean,
 ): boolean {
   return savedPanelFolded(storage) ?? narrow;
+}
+
+/** Whether the legend (B-019) was left folded in this browser, if storage says so. */
+export function savedLegendFolded(
+  storage: Pick<Storage, "getItem"> | undefined,
+): boolean | undefined {
+  try {
+    const value = storage?.getItem(LEGEND_KEY);
+    return value === "folded" ? true : value === "open" ? false : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function saveLegendFolded(
+  storage: Pick<Storage, "setItem"> | undefined,
+  folded: boolean,
+): void {
+  try {
+    storage?.setItem(LEGEND_KEY, folded ? "folded" : "open");
+  } catch {
+    // Storage can be blocked (private mode, settings): the choice then lasts the visit.
+  }
+}
+
+/**
+ * Whether the legend opens folded to its title, bar and source: as the viewer left
+ * it, else folded on a narrow screen (a phone), as the panel is, and open elsewhere.
+ */
+export function initialLegendFolded(
+  storage: Pick<Storage, "getItem"> | undefined,
+  narrow: boolean,
+): boolean {
+  return savedLegendFolded(storage) ?? narrow;
 }
 
 /** The earliest and latest instants `?at=` accepts (UTC). */
