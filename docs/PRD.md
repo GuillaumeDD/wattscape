@@ -305,7 +305,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
 | G-026 | Survey lap in budget: longer stays, fewer frames in slow flights (D-075)               | proposed |
 | G-027 | The modern theme by default (Guillaume, 2026-11-21; B-037)                             | done     |
-| G-028 | Towerless nuclear plants: running told from stopped (Guillaume, 2026-11-21; B-038)     | planned  |
+| G-028 | Towerless nuclear plants: running told from stopped (Guillaume, 2026-11-21; B-038)     | done     |
 
 ## 10. Open questions
 

@@ -249,9 +249,24 @@ const TOWER_TOPS: readonly (readonly [number, number])[] = [
   [-1, -8],
 ];
 
+/**
+ * Whether the beacon on a towerless nuclear plant's dome is lit at `seconds`
+ * (B-038, chosen by Guillaume on a board of options): it blinks while the activity is above 0, lit half of each period of
+ * 2 / (0.5 + a) s, so 0.25 + 0.5·a blinks a second (0.75 at full power, 0.5 at half);
+ * never with no figure or at 0.
+ */
+export function beaconLit(activity: number | null, seconds: number): boolean {
+  if (activity === null || !(activity > 0)) return false;
+  const a = Math.min(1, activity);
+  return frac((seconds * (0.5 + a)) / 2) < 0.5;
+}
+
+/** Where the beacon stands, from the sprite's anchor: one pixel above the dome's top. */
+export const BEACON: readonly [number, number] = [-4, -6];
+
 /** Whether a plant shows any motion at this size when working (for the loop to sleep). */
 export function hasMotion(site: PlantSite, size: SpriteSize): boolean {
-  if (site.source === "nuclear") return site.towers;
+  if (site.source === "nuclear") return site.towers || size === "full";
   return size === "full" || site.source === "thermal";
 }
 
@@ -262,6 +277,8 @@ export function hasMotion(site: PlantSite, size: SpriteSize): boolean {
  *
  * - nuclear with towers, thermal, bioenergy: puffs whose height and rate grow with
  *   the activity;
+ * - nuclear without towers: a beacon blinking on the dome, faster with the activity
+ *   (`beaconLit`);
  * - wind: rotors turning at up to half a turn a second (blades pass at 1.5 Hz);
  * - solar: glints on the panels, a share of them lit ∝ the activity;
  * - hydro: water falling from the spillway, in up to three streams ∝ the activity.
@@ -280,7 +297,14 @@ export function drawMotion(
   const big = size === "full";
   switch (site.source) {
     case "nuclear": {
-      if (!site.towers) return;
+      if (!site.towers) {
+        // No towers, so no steam: a beacon on the dome blinks while the plant works.
+        if (!big || !beaconLit(a, seconds)) return;
+        const [bx, by] = BEACON;
+        if (pen.emissive) pen.glow(ax + bx, ay + by);
+        else pen.put(ax + bx, ay + by, "nuclear");
+        return;
+      }
       if (!big) {
         puffs(
           pen,

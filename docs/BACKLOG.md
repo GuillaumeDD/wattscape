@@ -45,7 +45,7 @@ Statuses: `todo` / `wip` / `done`.
 | B-035 | Four-hour soak                    | Memory and frame time over 4 hours in one stretch (G-013), both themes; flat memory, as § Performance asks                                                          | todo   |
 | B-036 | Camera still                      | A switch in the panel, `?drift=off` and `Space`, remembered: the camera then moves only on input or in survey mode (D-074)                                          | done   |
 | B-037 | Modern theme by default           | The page opens in the modern theme; a stored choice kept as Q-63 says; `?theme=pixel` still works; tests, frames, screenshots and docs that assume pixel art, swept | done   |
-| B-038 | Towerless nuclear: on or off      | The 7 sites without towers tell running from stopped by day and at night, both themes; options drawn on one board, chosen (Q-64); mapping row and frames updated    | todo   |
+| B-038 | Towerless nuclear: on or off      | The 7 sites without towers tell running from stopped by day and at night, both themes; options drawn on one board, chosen (Q-64); mapping row and frames updated    | done   |
 
 ## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
 

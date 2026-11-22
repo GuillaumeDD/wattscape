@@ -14,6 +14,7 @@ import {
   MAST_PX,
   type SpriteSize,
   SPRITES,
+  beaconLit,
   spriteOf,
   TURBINE_GAP,
   turbineCount,
@@ -322,7 +323,15 @@ export function drawModernMotion(
   const foot = ay + 1;
   switch (site.source) {
     case "nuclear": {
-      if (!site.towers) return;
+      if (!site.towers) {
+        // The pixel art's beacon, on the top of the west dome; a halo around it at night.
+        if (!big || !beaconLit(a, seconds)) return;
+        const bx = ax - 6 + 3.4;
+        const by = foot - 5.1;
+        if (brush.emissive) brush.spot(bx, by, 1.9, 1.9, LAMP, 0.35, true);
+        disc(brush, bx, by, 0.42, PALETTE.nuclear, { unlit: true });
+        return;
+      }
       if (!big) {
         puffs(brush, x, foot - 3, 2 + 4 * a, 0.4 + 0.6 * a, seconds, SNOW, false);
         return;

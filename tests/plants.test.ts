@@ -16,6 +16,8 @@ import { DIFFUSE_SOURCES, isDiffuse } from "../src/map/sources";
 import {
   drawBody,
   drawMotion,
+  BEACON,
+  beaconLit,
   hasMotion,
   type Pen,
   plantBox,
@@ -308,12 +310,53 @@ describe("the source sprites (src/render/art/plants.ts)", () => {
       }
   });
 
-  it("move when working: two times give two pictures (not a seaside nuclear plant)", () => {
+  it("move when working: two times give two pictures", () => {
     for (const p of ALL) {
       const frames = new Set(TIMES.map((t) => JSON.stringify([...motion(p, 0.8, t)])));
-      if (p.source === "nuclear" && !p.towers) expect(frames.size).toBe(1);
-      else expect(frames.size, p.source).toBeGreaterThan(1);
+      expect(frames.size, `${p.source} ${String(p.towers)}`).toBeGreaterThan(1);
     }
+  });
+
+  it("blink the beacon of a towerless nuclear plant faster the harder it works (B-038)", () => {
+    // Lit for half of each period of 2 / (0.5 + a) s: count the times it lights in 12 s.
+    const lightings = (a: number | null): number => {
+      let count = 0;
+      let before = false;
+      for (let k = 0; k < 1200; k++) {
+        const lit = beaconLit(a, k / 100);
+        if (lit && !before) count++;
+        before = lit;
+      }
+      return count;
+    };
+    expect(lightings(1)).toBe(9);
+    expect(lightings(0.5)).toBe(6);
+    expect(lightings(1.25)).toBe(9);
+    for (const a of [null, 0, -0.5, Number.NaN]) expect(lightings(a)).toBe(0);
+    // Lit half the time (nine whole periods at full power).
+    const lit = Array.from({ length: 1200 }, (_, k) => beaconLit(1, k / 100)).filter(Boolean);
+    expect(Math.abs(lit.length - 600)).toBeLessThanOrEqual(2);
+  });
+
+  it("draw the beacon as one pixel over the dome: the nuclear colour by day, a lamp at night", () => {
+    const seaside = site("nuclear", { towers: false });
+    const at = (emissive: boolean, a: number | null, t: number, size: "full" | "marker") => {
+      const pen = recorder(emissive);
+      drawMotion(pen, seaside, a, 0, 0, size, t);
+      return [...pen.pixels];
+    };
+    const [bx, by] = BEACON;
+    const box = plantBox(seaside, 0, 0, "full");
+    expect(by).toBe(box.top - 1);
+    expect(bx).toBeGreaterThanOrEqual(box.left);
+    // At t = 0 the beacon is lit; half a period later, dark.
+    expect(at(false, 1, 0, "full")).toEqual([[`${String(bx)},${String(by)}`, "nuclear"]]);
+    expect(at(true, 1, 0, "full")).toEqual([[`${String(bx)},${String(by)}`, "lamp"]]);
+    expect(at(false, 1, 2 / 1.5 / 2 + 0.01, "full")).toEqual([]);
+    expect(at(false, 0.5, 0, "full")).toHaveLength(1);
+    // Never with no figure or at 0, and not on the national view's marker.
+    for (const a of [null, 0]) expect(at(true, a, 0, "full")).toEqual([]);
+    expect(at(false, 1, 0, "marker")).toEqual([]);
   });
 
   it("say which plants move, so that the loop sleeps when none on screen does", () => {

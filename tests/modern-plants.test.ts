@@ -172,6 +172,35 @@ describe("the modern plants' motion", () => {
     }
   });
 
+  it("blinks a beacon on the west dome of a towerless plant, haloed at night (B-038)", () => {
+    const site = siteOf("nuclear");
+    const night = (activity: number | null, seconds: number) => {
+      const brush = recorder(true);
+      drawModernMotion(brush, site, activity, AX, AY, "full", seconds);
+      return brush.calls;
+    };
+    const lit = fills(motion(site, 1, "full", 0));
+    expect(lit).toHaveLength(1);
+    const [beacon] = lit;
+    expect(beacon?.colour).toEqual(PALETTE.nuclear);
+    expect(beacon?.ink?.unlit).toBe(true);
+    // Above the top of the domes and the hall, within the sprite's columns.
+    const domes = fills(body(site, 1, "full")).filter((f) => f.left > AX - 6);
+    const top = Math.min(...domes.map((f) => f.top));
+    const box = plantBox(site, AX, AY, "full");
+    expect(beacon?.bottom).toBeLessThanOrEqual(top + 0.25);
+    expect(beacon?.left).toBeGreaterThanOrEqual(box.left);
+    expect(beacon?.right).toBeLessThan(AX);
+    // At night, a halo of lamp light, unlit, around it.
+    expect(spots(night(1, 0)).filter((s) => s.unlit && s.colour === PALETTE.lamp)).toHaveLength(1);
+    // Dark half of each period of 2 / (0.5 + a) s, and never with no figure or at 0.
+    expect(motion(site, 1, "full", 2 / 1.5 / 2 + 0.01)).toHaveLength(0);
+    expect(motion(site, 0.5, "full", 0)).toHaveLength(1);
+    expect(motion(site, 0.5, "full", 1.01)).toHaveLength(0);
+    for (const activity of [null, 0]) expect(night(activity, 0)).toHaveLength(0);
+    expect(motion(site, 1, "marker", 0)).toHaveLength(0);
+  });
+
   it("steams from both cooling towers, above their mouths", () => {
     const site = siteOf("nuclearTowers");
     const puffs = spots(motion(site, 1, "full", 0.7));
