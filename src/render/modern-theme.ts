@@ -1017,7 +1017,7 @@ interface MutableRect {
 }
 
 /** What draws on the ground: the brush of the plants and the landmarks. */
-export interface Tools extends Brush {
+interface Tools extends Brush {
   /** What is drawn next stands there: the relief in front of it hides it. */
   stand(on: Standing): void;
   /** The boxes drawn in so far, one for each thing that stood, in the pixels drawn. */
@@ -1035,7 +1035,7 @@ export interface Tools extends Brush {
  * They draw into `target`: the frame's own pixels, or finer ones (the frame then
  * still says what the relief hides, and the vignette).
  */
-export function toolsOf(frame: Frame, emissive: boolean, target: Surface): Tools {
+function toolsOf(frame: Frame, emissive: boolean, target: Surface): Tools {
   const { depth, vx, vy } = frame;
   const { data, width, height } = target;
   // The pixels drawn per scene pixel, and the frame's pixels per pixel drawn: `target`

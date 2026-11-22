@@ -524,13 +524,14 @@ checked against real screens.
 | Clouds and their shadows            | `cloud_cover`     | a cloud per 38 km lattice point with chance min(0.75, 0.95·cover); dim if > 70 % |
 | Rain, drizzle, snow, fog, lightning | `weather_code`    | its group (§ Open-Meteo): streaks, flakes, banks on low ground, a bolt every 6 s |
 | Clouds drifting                     | `wind_*_10m`      | mean wind of the readings shown, in 5 km/h steps; the clouds move with it        |
+| Neon: a plant's outline brightness  | `tch_*` (a)       | its source's colour × (0.35 + 0.65·a); 0.35 with no figure: dim, never dark      |
 
 Both themes draw these rows from the same figures with the same formulas; the
 modern one (`src/render/art/modern-plants.ts`) draws a puff as a soft spot trailing
 two fainter ones, and the blades of a farm that does not turn stand still, one up.
 
 A missing figure shows the element **idle**: no motion, no glow, never a guessed
-value. That is a region without a reading (not loaded, unavailable, late for the
+value (in the neon theme its outline stays dim, as at rest). That is a region without a reading (not loaded, unavailable, late for the
 newest step), a reading dated more than 15 minutes in the future, or a technology
 éCO2mix gives no load factor for (`null`). The page note says why ("données
 indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
@@ -962,8 +963,21 @@ by `tools/screenshots.ts` (`step-22-neon-*.png`).
   larger than the frame and cropped while the camera only pans; the sky, fixed to
   the screen, is drawn after the crop. Every pixel is the one a full draw gives (a
   test pans through a plate and draws each frame in full).
-- **Plants, landmarks, weather:** the modern theme's drawings and weather for now;
-  their neon drawings are B-042 and B-043.
+- **Plants and landmarks** (B-042): the modern theme's drawings, drawn by the neon
+  brush (`neonToolsOf`) as outlines of light from the same distance to each shape's
+  edge, with a halo; the light adds to the ground under it. A plant is in its
+  source's colour (`NEON_SOURCES`), as bright as its activity (§ Data-to-scene
+  mapping), a landmark in one lavender. Lamps (lit windows, beacons) are drawn
+  solid, shadows and see-through shades are left out, and a puff of steam or smoke
+  is a faint glow of the plant's colour. Hidden by the relief in front, as in the
+  modern theme.
+- **Abroad:** the coast is dimmer outside the area in focus, and no contour line is
+  drawn on land within about two cells of where the relief data stops (BD ALTI
+  covers France only), so the cliff at the border draws no hatching. Where a
+  column's run of ground is taller than a scene pixel (a cliff), its lines are
+  spread, dim, over the whole run.
+- **Weather and seasons:** the modern theme's for now; their neon drawings are
+  B-043.
 - **Determinism:** as the modern theme's, additions, multiplications, divisions,
   floors and square roots only for the still frame. Its frames are hashed in Node
   and in Chromium like the others.
@@ -1378,6 +1392,23 @@ per second, and the flight's frames at p95 near 45 ms, over the 25 ms of D-028,
 where the modern theme sits at 32 to 34 the same day. Where the extra time goes is
 not profiled yet: that is for the optimisation over the three themes (D-083), with
 B-024's measures on a real machine.
+
+**With the neon plants and landmarks** (B-042), same tool on 2026-11-22, two runs
+of each theme alternated in one session (modern, neon, modern, neon):
+
+| View                          | Modern: p95, busy      | Neon: p95, busy        |
+| ----------------------------- | ---------------------- | ---------------------- |
+| Normandie, plants moving      | 2.9–4.0 ms, 43–52 ms/s | 5.8–7.1 ms, 61–69 ms/s |
+| Idle drift (Normandie)        | 20–23 ms, 57–67 ms/s   | 14–15 ms, 53–61 ms/s   |
+| Flight France ↔ Normandie     | 30–35 ms, 266–296 ms/s | 52–57 ms, 419–432 ms/s |
+| Wheel zoom in and out (worst) | 22–27 ms, 245–287 ms/s | 37–40 ms, 385–394 ms/s |
+| Survey stay                   | 10–11 ms, 85–88 ms/s   | 23–35 ms, 112–128 ms/s |
+
+A step of the plants' motion costs about 1.8 times the modern theme's (p95), so the
+view with plants moving costs some 18 ms/s more: the outline is worked out over the
+shape's box widened by its halo (1.2 scene pixels each side), where the modern brush
+stops at the edge. Still and drifting views cost what they did. Not profiled yet:
+for the optimisation over the three themes (D-083).
 
 ## Internationalization
 
