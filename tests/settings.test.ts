@@ -237,7 +237,7 @@ describe("seasonFromQuery (?season=, B-021)", () => {
   });
 });
 
-describe("theme (?theme=, G-011)", () => {
+describe("theme (?theme=, G-011, G-024)", () => {
   it("reads a known theme, once, and nothing else", () => {
     expect(themeFromQuery("?theme=modern")).toBe("modern");
     expect(themeFromQuery("?area=28&theme=pixel")).toBe("pixel");
@@ -259,7 +259,7 @@ describe("theme (?theme=, G-011)", () => {
     expect(savedTheme(storage)).toBeUndefined();
     saveTheme(storage, "modern");
     expect(savedTheme(storage)).toBe("modern");
-    expect(savedTheme(memoryStorage({ "wattscape.theme": "neon" }))).toBeUndefined();
+    expect(savedTheme(memoryStorage({ "wattscape.theme": "sepia" }))).toBeUndefined();
     expect(savedTheme(throwing)).toBeUndefined();
     expect(savedTheme(undefined)).toBeUndefined();
     expect(() => {
@@ -271,17 +271,28 @@ describe("theme (?theme=, G-011)", () => {
     const remembered = memoryStorage({ "wattscape.theme": "modern" });
     expect(initialTheme("?theme=pixel", remembered)).toBe("pixel");
     expect(initialTheme("", remembered)).toBe("modern");
-    expect(initialTheme("?theme=neon", remembered)).toBe("modern");
+    expect(initialTheme("?theme=sepia", remembered)).toBe("modern");
     expect(initialTheme("", memoryStorage())).toBe("modern");
     expect(initialTheme("", throwing)).toBe("modern");
-    expect(initialTheme("?theme=neon", memoryStorage())).toBe("modern");
+    expect(initialTheme("?theme=sepia", memoryStorage())).toBe("modern");
   });
 
   it("keeps a stored pixel-art choice over the modern default (D-079)", () => {
     const pixel = memoryStorage({ "wattscape.theme": "pixel" });
     expect(initialTheme("", pixel)).toBe("pixel");
-    expect(initialTheme("?theme=neon", pixel)).toBe("pixel");
+    expect(initialTheme("?theme=sepia", pixel)).toBe("pixel");
     expect(initialTheme("?theme=modern", pixel)).toBe("modern");
+  });
+
+  it("knows the neon theme, by URL and remembered (G-024, B-041)", () => {
+    expect(themeFromQuery("?theme=neon")).toBe("neon");
+    for (const bad of ["?theme=Neon", "?theme=n%C3%A9on", "?theme=neon&theme=neon"])
+      expect(themeFromQuery(bad), bad).toBeUndefined();
+    const storage = memoryStorage();
+    saveTheme(storage, "neon");
+    expect(savedTheme(storage)).toBe("neon");
+    expect(initialTheme("", storage)).toBe("neon");
+    expect(initialTheme("?theme=pixel", storage)).toBe("pixel");
   });
 });
 

@@ -1,10 +1,12 @@
 /**
  * A visual theme: how a scene (src/scene/scene.ts) becomes pixels. The scene says
- * what is there; the theme decides how it looks. Two themes, chosen by the viewer
- * (PRD G-011): the pixel art of ARCHITECTURE § Art direction, and the modern one.
+ * what is there; the theme decides how it looks. Three themes, chosen by the viewer
+ * (PRD G-011, G-024): the pixel art of ARCHITECTURE § Art direction, the modern one
+ * and the neon one.
  */
 import { type Scene, type ScenePlant } from "../scene/scene.ts";
 import { modernTheme } from "./modern-theme.ts";
+import { neonTheme } from "./neon-theme.ts";
 import { pixelTheme } from "./pixel-theme.ts";
 import { type Surface } from "./surface.ts";
 import { DEFAULT_THEME_ID, type ThemeId } from "./theme-ids.ts";
@@ -81,6 +83,7 @@ export interface Theme {
 export const THEMES: Readonly<Record<ThemeId, Theme>> = {
   pixel: pixelTheme,
   modern: modernTheme,
+  neon: neonTheme,
 };
 
 export const DEFAULT_THEME: Theme = THEMES[DEFAULT_THEME_ID];

@@ -234,6 +234,7 @@ function renderArea(rebuild: boolean): void {
 const THEME_NAMES = {
   pixel: "themePixel",
   modern: "themeModern",
+  neon: "themeNeon",
 } as const satisfies Record<ThemeId, MessageKey>;
 
 /** The list of themes (PRD G-011), in the viewer's language, the current one selected. */
