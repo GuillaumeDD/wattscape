@@ -342,6 +342,15 @@ mountain ranges' weather points (Q-45). Gave each point's `elevation` (from 670 
 under "Snow on the ground". About one call in two came back empty through the
 session's proxy, and was asked again. Reliability high for the heights (the API's own figures).
 
+Consulted on 2026-11-22, **S-029**: the ODRÉ API itself (DS-01, DS-02), the 96 newest
+rows of `eco2mix-regional-tr` and the national rows of the same steps, for the
+national legend (B-019). Gave, at the 8 steps from 07:00 to 08:45 UTC that day, the
+gap between the sum of the 12 regions and the national row: at most 37 MW for
+`consommation`, 36 for thermal (`thermique` against `gaz` + `fioul` + `charbon`),
+22 for `solaire`, 19 for `hydraulique`, 17 for `eolien`, 2 for `ech_physiques`
+and 1 for `nucleaire` and `bioenergies` (a script in the session, not committed).
+Reliability high (the publisher's own figures).
+
 Consulted on 2026-11-21, **S-028**: [French Wikipedia][s022], the introduction of
 « Fosse no 11 - 19 des mines de Lens », pasted by Guillaume in the project thread
 (the API answered 429 from the cloud, D-054), for the caption of the Terrils du

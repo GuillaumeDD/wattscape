@@ -11,7 +11,8 @@
  * 1280 × 720 window, and from Bretagne on a phone; a picture mid-flight, 5 s after
  * Play, and one on arrival, the controls woken by a move of the mouse. The
  * screensaver mode (B-021, `step-16-screensaver-*.png`) and the default theme
- * (B-037, `step-18-default-*.png`), as their sections below say.
+ * (B-037, `step-18-default-*.png`) and the legend (B-019, `step-21-legend-*.png`), as
+ * their sections below say.
  */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
@@ -125,6 +126,33 @@ for (const shot of firsts) {
   await page.waitForTimeout(10_000);
   await page.screenshot({ path: `${OUT}/step-18-default-${shot.name}.png` });
   console.log(shot.name, await page.locator("#theme").inputValue());
+  await page.close();
+}
+// The legend (B-019, `step-21-legend-*.png`): Normandie by day (modern theme),
+// Auvergne-Rhône-Alpes at night (pixel art), France at night (the sum of the 12
+// regions), and Auvergne-Rhône-Alpes on a phone; once the intro has landed, the
+// legend woken by a move of the mouse (it fades after 8 s without one).
+const legends = [
+  { name: "normandie-day", query: `area=28&${DAY}&theme=modern`, phone: false },
+  { name: "ara-night", query: `area=84&${NIGHT}&theme=pixel`, phone: false },
+  { name: "france-night", query: `area=FR&${NIGHT}&theme=modern`, phone: false },
+  { name: "phone", query: `area=84&${DAY}&theme=modern`, phone: true },
+];
+for (const shot of legends) {
+  const page = await browser.newPage({
+    viewport: shot.phone ? { width: 390, height: 844 } : { width: 1280, height: 720 },
+    deviceScaleFactor: shot.phone ? 2 : 1,
+  });
+  page.on("pageerror", (error) => {
+    throw error;
+  });
+  await page.goto(`${BASE}?${shot.query}`);
+  await page.waitForTimeout(10_000);
+  // In the middle of the window: a move outside it reaches no page.
+  await page.mouse.move(shot.phone ? 195 : 640, shot.phone ? 420 : 400);
+  await page.waitForTimeout(2200);
+  await page.screenshot({ path: `${OUT}/step-21-legend-${shot.name}.png` });
+  console.log(shot.name, await page.locator("#legend-title").textContent());
   await page.close();
 }
 await browser.close();
