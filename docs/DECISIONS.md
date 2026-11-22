@@ -1558,3 +1558,23 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** the theme, built with its plate, stays well above the modern
   theme's cost at rest on a real machine, or the lines read as clutter on a real
   screen.
+
+## D-085 — The legend's figures for France: the 12 regions summed
+
+- **Context:** the legend (B-019, PR #78) shows the mix of the area in view from
+  the step the plants show, which is one request for every region at once
+  (D-025). France has no row of its own in that request; D-025 said to revisit if
+  the legend needed the national row (a second request then). Measured on
+  2026-11-22 (S-029): at 8 steps, the sum of the 12 regions is within 37 MW of the
+  national row (DS-02) for each field, so the national row leaves Corsica out too.
+- **Options (decision card, 2026-11-22, PRD Q-69):** the sum of the 12 regions,
+  shown only when all 12 published the step and labelled as a sum (recommended);
+  the national row, a second request every 15 minutes and a national history for
+  the time-lapse.
+- **Decision:** the sum of the 12 regions (Guillaume, 2026-11-22, decision card).
+- **Why:** no second request; the same step as the plants; the same code in live,
+  sample and time-lapse modes; figures within 37 MW of RTE's national ones. A
+  partial sum is never shown, so no figure is made up.
+- **Revisit if:** the sum drifts from the national row by more than a rounding of
+  the shares (say 1 % of production), or the regions stop publishing a step
+  together, leaving France's legend often empty.
