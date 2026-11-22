@@ -541,7 +541,7 @@ area in view (the tour's while it runs): each source's MW as éCO2mix gives it a
 its share of the six together, the consumption, and `ech_physiques` as an import
 (> 0) or an export (< 0), with the reading's time, « ancien » past 3 hours, and an
 « exemple » or « accéléré » label for a sample or the time-lapse. France has no row
-of its own in that request (D-025): its legend is the **sum of the 12 regions**,
+of its own in that request (D-025): its legend is the **sum of the 12 regions** (D-085),
 shown only when all 12 published the step, never a partial sum, and says so. The
 sum agrees with the national row (DS-02) within 37 MW per field at the 8 steps
 checked on 2026-11-22 (S-029; so the national row leaves Corsica out too). Without a figure (loading,
