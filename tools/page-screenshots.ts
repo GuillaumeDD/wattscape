@@ -134,7 +134,7 @@ for (const shot of firsts) {
 // legend woken by a move of the mouse (it fades after 8 s without one).
 const legends = [
   { name: "normandie-day", query: `area=28&${DAY}&theme=modern`, phone: false },
-  { name: "auvergne-rhone-alpes-night", query: `area=84&${NIGHT}&theme=pixel`, phone: false },
+  { name: "ara-night", query: `area=84&${NIGHT}&theme=pixel`, phone: false },
   { name: "france-night", query: `area=FR&${NIGHT}&theme=modern`, phone: false },
   { name: "phone", query: `area=84&${DAY}&theme=modern`, phone: true },
 ];
