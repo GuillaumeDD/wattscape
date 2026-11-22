@@ -175,7 +175,8 @@ idea that the grid can be seen.
 - The idle drift on or off, in the panel, by `?drift=off` and by `Space`,
   remembered: off, the camera moves only on input (Guillaume, 2026-11-21; G-025,
   B-036, D-074).
-- A link to the code repository in the panel (Guillaume, 2026-11-21; G-021, B-031).
+- A link to the code repository in the panel (Guillaume, 2026-11-21; G-021, B-031),
+  and at the end of the credits (Guillaume, 2026-11-22; B-040).
 - `prefers-reduced-motion`: no camera drift, slow animations.
 - The page's panel (title, region, language) folds to its title, so a phone shows
   the map (Guillaume, 2026-11-14; B-025).

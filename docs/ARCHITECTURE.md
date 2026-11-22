@@ -992,7 +992,8 @@ D-061) is the one a laptop on battery meets first.
   a phone), where it would cover half the map, and open elsewhere. Measured in
   Chromium, on a Pixel 7 emulation and a 1280 × 720 window. Below the style list,
   two switches (the weather, B-030; the idle drift, B-036), and a plain link to the
-  code repository (B-031), `rel="noopener noreferrer"`: nothing is fetched from it,
+  code repository (B-031), repeated at the end of the credits (B-040),
+  `rel="noopener noreferrer"`: nothing is fetched from it,
   and the CSP is unchanged (`tests/page.test.ts`).
 
 ### Landmarks

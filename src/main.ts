@@ -65,6 +65,7 @@ function render(locale: Locale): void {
   setText("status", t("status"));
   setText("language", t("switchLanguage"));
   setText("repo-link", t("repoLink"));
+  setText("credits-repo", t("repoLink"));
   setText("credits-data", t("creditsData"));
   setText("credits-eco2mix-licence", t("creditsEco2mixLicence"));
   setText("credits-weather-licence", t("creditsWeatherLicence"));
