@@ -2,9 +2,13 @@
  * The screensaver mode (B-021) on a page of its own, wired as src/main.ts wires it:
  * the scene view at a fixed time, the survey's controls and the mode, for
  * e2e/screensaver.spec.ts. `?screensaver` opens it, `?season=` imposes a season, and
- * `#survey-area` tells the survey's state.
+ * `#survey-area` tells the survey's state. The legend (B-019) shows the recorded
+ * sample of `?sample=day`, for Normandie.
  */
 import { fixedClock } from "../src/clock/clock";
+import { parseEco2mixRegions } from "../src/data/eco2mix";
+import { legendFigures, legendText, mountLegend } from "../src/ui/legend";
+import sample from "../tests/fixtures/eco2mix/2026-11-12-all-regions.json";
 import { translate } from "../src/i18n";
 import { type SurveyState } from "../src/scene/survey";
 import { mountScreensaver } from "../src/ui/screensaver";
@@ -39,6 +43,18 @@ if (canvas instanceof HTMLCanvasElement) {
     if (screensaver.on) screensaver.exit();
     else screensaver.enter(true);
   });
+  const parsed = parseEco2mixRegions(sample);
+  const readings = parsed.ok ? parsed.reading : null;
+  mountLegend().render(
+    legendText(
+      legendFigures(readings, "28"),
+      "28",
+      readings === null ? { kind: "unavailable" } : { kind: "sample", timeMs: readings.timeMs },
+      "en",
+      t,
+      (ms) => new Date(ms).toISOString().slice(11, 16),
+    ),
+  );
   const season = seasonFromQuery(location.search);
   if (season !== undefined) view.setSeason(season);
   if (screensaverFromQuery(location.search)) screensaver.enter(false);

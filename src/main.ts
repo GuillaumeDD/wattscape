@@ -1,7 +1,7 @@
 import { detectLocale, translate, type Locale, type MessageKey } from "./i18n";
 import { MAP_BAKED_ON } from "./map/france";
 import { fixedClock, replayClock, systemClock } from "./clock/clock";
-import { HISTORY_MS } from "./data/eco2mix";
+import { HISTORY_MS, type Eco2mixArea, type RegionalReadings } from "./data/eco2mix";
 import { mountAreaPicker, renderAreaOptions, type AreaState } from "./ui/area-picker";
 import { loadSample } from "./data/samples";
 import { feedState, type FeedState, startPlantFeed } from "./ui/plant-feed";
@@ -35,6 +35,7 @@ import { overrideWeather, sceneWeather } from "./scene/weather";
 import { anySnow } from "./scene/snow";
 import { type WeatherGroup } from "./data/open-meteo";
 import { mountSurveyBar } from "./ui/survey-bar";
+import { legendFigures, legendText, mountLegend } from "./ui/legend";
 import { mountScreensaver } from "./ui/screensaver";
 import { type Season } from "./scene/season";
 import { type SurveyState } from "./scene/survey";
@@ -88,9 +89,12 @@ function render(locale: Locale): void {
   renderWeatherNote();
   renderSurvey();
   renderSeasonNote();
+  renderLegend();
 }
 
 let plantsState: FeedState = { kind: "loading" };
+/** The step the plants show: the legend shows the same one (B-019). */
+let plantsReadings: RegionalReadings | null = null;
 let weatherState: WeatherState = { kind: "loading" };
 /** Whether the scene lays snow on the ground: the note then says it is inferred. */
 let snowShown = false;
@@ -104,6 +108,29 @@ let surveyState: SurveyState = { mode: "off", area: null };
 const surveyBar = mountSurveyBar((command) => {
   scene?.survey(command);
 });
+const legend = mountLegend();
+
+/** The area the legend speaks of: the one the tour shows while it runs, else the chosen one. */
+function legendArea(): Eco2mixArea {
+  return surveyState.mode !== "off" && surveyState.area !== null
+    ? surveyState.area
+    : areaState.area;
+}
+
+/** The legend (B-019): the mix of the area in view, from the step the plants show. */
+function renderLegend(): void {
+  const area = legendArea();
+  legend.render(
+    legendText(
+      legendFigures(plantsReadings, area),
+      area,
+      plantsState,
+      locale,
+      (key) => translate(locale, key),
+      readingTime,
+    ),
+  );
+}
 
 function renderSurvey(): void {
   surveyBar.render(surveyState, (key) => translate(locale, key));
@@ -321,6 +348,7 @@ const scene: SceneView | null =
         (state) => {
           surveyState = state;
           renderSurvey();
+          renderLegend();
         },
         driftOn,
         () => {
@@ -362,7 +390,9 @@ document.getElementById("theme")?.addEventListener("change", (event) => {
 const sample = sampleFromQuery(location.search);
 const showPlants = (readings: Parameters<SceneView["setReadings"]>[0], state: FeedState): void => {
   plantsState = state;
+  plantsReadings = readings;
   renderPlantsNote();
+  renderLegend();
   scene?.setReadings(readings, state.kind === "sample" || state.kind === "replay");
 };
 if (timelapse !== undefined)
@@ -409,6 +439,7 @@ if (weatherOverride !== undefined) {
 let shownArea = areaState.area;
 mountAreaPicker(areaState, () => {
   renderArea(false);
+  renderLegend();
   // The position comes with the area it was found in, and goes when an area is
   // picked by hand: the viewer's region takes its weather there, or at its prefecture.
   weatherFeed?.setViewer(viewerOf(areaState));

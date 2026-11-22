@@ -67,6 +67,39 @@ test("?screensaver hides the panel, keeps the figures' note, plays the survey", 
   expect(await cursor(page)).not.toBe("none");
 });
 
+test("the legend shows the mix, fades without input, comes back, and H hides it", async ({
+  page,
+}) => {
+  await page.goto("/screensaver.html");
+  const legend = page.locator("#legend");
+  await expect(legend).toBeVisible();
+  await expect(page.locator("#legend-title")).toHaveText("Generation: Normandie");
+  await expect(page.locator("#legend-badge")).toHaveText("sample");
+  await expect(page.locator("#legend-rows li")).toHaveCount(6);
+  // It holds no control: the pointer goes through it to the map (wheel, drag, hover).
+  expect(
+    await page.evaluate(
+      () => getComputedStyle(document.getElementById("legend") as Element).pointerEvents,
+    ),
+  ).toBe("none");
+  await expect(page.locator("#legend-exchanges")).toContainText("Exports");
+  // Faded after 8 s without input (B-019); a move brings it back.
+  await page.mouse.move(400, 300);
+  await expect(legend).toHaveClass(/quiet/, { timeout: 10_000 });
+  await page.mouse.move(420, 320);
+  await expect(legend).not.toHaveClass(/quiet/);
+  await page.keyboard.press("h");
+  await expect(legend).toBeHidden();
+  await page.keyboard.press("H");
+  await expect(legend).toBeVisible();
+});
+
+test("?screensaver leaves the legend out", async ({ page }) => {
+  await page.goto("/screensaver.html?screensaver");
+  await expect(page.locator("#survey-area")).toHaveText("Flyover: Hauts-de-France");
+  await expect(page.locator("#legend")).toBeHidden();
+});
+
 test("F goes full screen in the mode, and Escape leaves both", async ({ page }) => {
   await page.goto("/screensaver.html");
   await expect(page.locator("#panel-body")).toBeVisible();

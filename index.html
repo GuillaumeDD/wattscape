@@ -56,6 +56,20 @@
       <p id="season-note" role="status" hidden></p>
     </main>
     <footer id="credits">
+      <!-- The legend (B-019): the mix of the area in view, filled by src/ui/legend.ts;
+           top right (on a phone, bottom left, above the credits and the survey's
+           controls); it fades away when nothing moves. -->
+      <section id="legend" aria-labelledby="legend-title">
+        <div id="legend-head">
+          <h2 id="legend-title"></h2>
+          <span id="legend-badge" hidden></span>
+        </div>
+        <div id="legend-bar" hidden></div>
+        <ul id="legend-rows" hidden></ul>
+        <p id="legend-consumption" hidden></p>
+        <p id="legend-exchanges" hidden></p>
+        <p id="legend-source"></p>
+      </section>
       <!-- The survey mode's controls (B-032): discreet, they fade away while it plays;
            just above the credits, whatever their height. -->
       <div id="survey">

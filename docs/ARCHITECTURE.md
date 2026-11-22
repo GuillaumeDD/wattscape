@@ -520,7 +520,7 @@ checked against real screens.
 | Thermal plant chimneys              | `tch_thermique`   | smoke 2 + 7·a px high, a puff every 3 / (0.3 + 0.7·a) s                          |
 | Bioenergy plants                    | `tch_bioenergies` | a small smoke, 2 + 4·a px high; its window lit at night when a ≥ 0.5             |
 | Town windows lit; power lines later | `consommation`    | l = (c − p5) / (p95 − p5), clamped 0–1; lamps on 4 + 12·l of 16 town pixels      |
-| Legend: stacked bar and figures     | MW per source     | shares of total production; import if `ech_physiques` > 0, export if < 0 (B-019) |
+| Legend: stacked bar and figures     | MW per source     | shares; France: the 12 regions summed; `ech_physiques` > 0 import, < 0 export    |
 | Clouds and their shadows            | `cloud_cover`     | a cloud per 38 km lattice point with chance min(0.75, 0.95·cover); dim if > 70 % |
 | Rain, drizzle, snow, fog, lightning | `weather_code`    | its group (§ Open-Meteo): streaks, flakes, banks on low ground, a bolt every 6 s |
 | Clouds drifting                     | `wind_*_10m`      | mean wind of the readings shown, in 5 km/h steps; the clouds move with it        |
@@ -535,6 +535,19 @@ newest step), a reading dated more than 15 minutes in the future, or a technolog
 éCO2mix gives no load factor for (`null`). The page note says why ("données
 indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
 3 hours) still drives the plants and is labelled as stale.
+
+The **legend** (B-019, `src/ui/legend.ts`) shows the step the plants show, for the
+area in view (the tour's while it runs): each source's MW as éCO2mix gives it and
+its share of the six together, the consumption, and `ech_physiques` as an import
+(> 0) or an export (< 0), with the reading's time, « ancien » past 3 hours, and an
+« exemple » or « accéléré » label for a sample or the time-lapse. France has no row
+of its own in that request (D-025): its legend is the **sum of the 12 regions**,
+shown only when all 12 published the step, never a partial sum, and says so. The
+sum agrees with the national row (DS-02) within 37 MW per field at the 8 steps
+checked on 2026-11-22 (S-029; so the national row leaves Corsica out too). Without a figure (loading,
+unavailable, a step after the time shown, a region left out of the step) it shows
+none, and says why. It fades away after 8 s without a move of the mouse or a key,
+`H` hides or shows it, and the screensaver mode leaves it out (PRD § 4.8).
 
 ## Sky, light and weather
 
