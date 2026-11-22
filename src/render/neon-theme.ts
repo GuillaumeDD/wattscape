@@ -35,8 +35,9 @@ import {
   modernLight,
   modernMapDensity,
   spread,
-  toolsOf,
 } from "./modern-theme.ts";
+import { type Brush } from "./art/shapes.ts";
+import { type Source } from "../data/eco2mix.ts";
 import { animateModernWeather, drawModernWeather } from "./modern-weather.ts";
 import { type Rgb } from "./palette.ts";
 import {
@@ -148,6 +149,12 @@ interface Fields {
   readonly border: Float64Array;
   /** 1 in the area in focus, 0 elsewhere. */
   readonly focus: Float64Array;
+  /**
+   * 1 where the altitude is known around a cell (French land and the sea), falling
+   * to 0 near land abroad: BD ALTI stops at the border, so the smoothed relief
+   * drops there in a cliff no contour should draw (PRD Q-11).
+   */
+  readonly known: Float64Array;
   /** Hill shading from the north-west, about 0.45 to 1.25. */
   readonly shade: Float64Array;
   /** The towns' lamps, 0 to 1; all 0 by day. */
@@ -170,6 +177,7 @@ function fieldsOf(layer: TerrainLayer, scene: Scene): Fields {
   const sea = new Uint8Array(n);
   const inFocus = new Uint8Array(n);
   const focus = new Float64Array(n);
+  const measured = new Float64Array(n);
   const landShare = new Float64Array(n);
   for (let i = 0; i < n; i++) {
     const kind = kinds[i] ?? SEA;
@@ -181,8 +189,12 @@ function fieldsOf(layer: TerrainLayer, scene: Scene): Fields {
     const french = isLand && kind !== FOREIGN;
     inFocus[i] = (focusKind === -1 ? french : kind === focusKind) ? 255 : 0;
     focus[i] = inFocus[i] === 255 ? 1 : 0;
+    measured[i] = kind === FOREIGN ? 0 : 1;
   }
   const height = blur(blur(raw, columns, rows), columns, rows);
+  // As far as the relief's smoothing reaches: two passes, then a cut near 1.
+  const measuredAround = blur(blur(measured, columns, rows), columns, rows);
+  for (let i = 0; i < n; i++) measuredAround[i] = clamp01(((measuredAround[i] ?? 0) - 0.75) * 4);
   // The chamfer distances count 3 per cell; each side of the coast is half a cell
   // (1.5) from it.
   const offshore = coastDistance(land, columns, rows);
@@ -245,6 +257,7 @@ function fieldsOf(layer: TerrainLayer, scene: Scene): Fields {
     coast,
     border,
     focus,
+    known: measuredAround,
     shade,
     lamps,
   };
@@ -253,10 +266,11 @@ function fieldsOf(layer: TerrainLayer, scene: Scene): Fields {
 }
 
 /** Where a frame is drawn, and the view: the modern theme's frame, with no vignette. */
-type Frame = ModernFrame & {
+export type NeonFrame = ModernFrame & {
   /** 0 by day to 1 at night (`neonNight`). */
   readonly night: number;
 };
+type Frame = NeonFrame;
 
 const SKY_DEPTH = -32768;
 
@@ -368,7 +382,9 @@ function drawGround(frame: Frame, scene: Scene, layer: TerrainLayer): void {
       let b = seaBase[2] + (landBase[2] * 1.6 - seaBase[2]) * base;
       // The lines, on the run's top pixel.
       const coast = neonGlow(Math.abs(at(f.coast)) * scale, coastWidth, 2.5 * density);
-      const c = coast * gain * inside * 0.9;
+      // Dimmer abroad and around other regions; full along the area's own shore,
+      // where the focus read between cells is a half.
+      const c = coast * gain * inside * (0.4 + 0.5 * Math.min(1, 2 * inFocus));
       let lr = NEON_COAST[0] * c;
       let lg = NEON_COAST[1] * c;
       let lb = NEON_COAST[2] * c;
@@ -392,7 +408,8 @@ function drawGround(frame: Frame, scene: Scene, layer: TerrainLayer): void {
           const d = Math.abs(h - level);
           if (d < dist) dist = d;
         }
-        const cl = clamp01(1 - dist / slope) * 0.45 * (0.35 + 0.65 * inFocus) * inside;
+        const cl =
+          clamp01(1 - dist / slope) * 0.45 * (0.35 + 0.65 * inFocus) * inside * at(f.known);
         lr += NEON_CONTOUR[0] * cl;
         lg += NEON_CONTOUR[1] * cl;
         lb += NEON_CONTOUR[2] * cl;
@@ -412,12 +429,17 @@ function drawGround(frame: Frame, scene: Scene, layer: TerrainLayer): void {
         lg *= 1 - fog;
         lb *= 1 - fog;
       }
+      // The lines go on the run's top pixel; on a face so steep that its run is
+      // taller than a scene pixel, a cliff, they spread dimly over the whole run
+      // instead, so that a cliff is not hatched by the lines of its rows.
+      const run = above - top;
+      const thin = run > density ? density / run : 0;
       for (let y = top > 0 ? top : 0; y < above; y++) {
         const p = y * width + x;
-        const first = y === top;
-        data[p * 4] = first ? r + lr : r;
-        data[p * 4 + 1] = first ? g + lg : g;
-        data[p * 4 + 2] = first ? b + lb : b;
+        const k = thin > 0 ? thin : y === top ? 1 : 0;
+        data[p * 4] = r + lr * k;
+        data[p * 4 + 1] = g + lg * k;
+        data[p * 4 + 2] = b + lb * k;
         data[p * 4 + 3] = 255;
         depth[p] = row;
       }
@@ -686,6 +708,158 @@ function standingAt(
   };
 }
 
+/** The neon colour of each source (D-084, proposed): its signature hue, brighter. */
+export const NEON_SOURCES: Readonly<Record<Source, Rgb>> = {
+  nuclear: hex("#ffe14a"),
+  hydro: hex("#3d8bff"),
+  wind: hex("#3ff5d8"),
+  solar: hex("#ff9a2e"),
+  thermal: hex("#ff5470"),
+  bioenergy: hex("#8dff5a"),
+};
+
+/** The landmarks' one colour. */
+export const NEON_LANDMARK = hex("#d6b8ff");
+
+/** How bright a plant is with no figure, or at rest: dim, never dark. */
+export const NEON_PLANT_FLOOR = 0.35;
+
+/**
+ * A plant's colour: its source's, as bright as its activity, the load factor of its
+ * technology in its region (ARCHITECTURE § Data-to-scene mapping): from
+ * `NEON_PLANT_FLOOR` at 0 to full at 1. With no figure (`null`, or not a number),
+ * the floor: a missing figure never reads as a stop, nor as a run.
+ */
+export function neonPlantColour(source: Source, activity: number | null): Rgb {
+  const c = NEON_SOURCES[source];
+  const a = activity === null || !Number.isFinite(activity) ? 0 : clamp01(activity);
+  const k = NEON_PLANT_FLOOR + (1 - NEON_PLANT_FLOOR) * a;
+  return [c[0] * k, c[1] * k, c[2] * k];
+}
+
+/** What the neon brush draws with, and in which colour what stands next is drawn. */
+export interface NeonTools extends Brush {
+  /** What is drawn next stands there, in that colour: the relief in front hides it. */
+  stand(on: Standing, colour: Rgb): void;
+  /** The boxes drawn in so far, one for each thing that stood, in the pixels drawn. */
+  touched(): readonly Rect[];
+}
+
+/** The halo's reach around a shape's edge, in scene pixels. */
+const HALO = 1.2;
+/** The outline's half-width, in scene pixels. */
+const STROKE = 0.28;
+
+/**
+ * The neon brush (B-042): a shape is drawn as its outline of light, in the colour
+ * of what stands, with a halo outside and inside, from the same distance to its
+ * edge as the modern brush fills it with (./art/shapes.ts); the light is added to
+ * the pixels under it. A lamp (an unlit warm fill) is drawn solid, as it is. A
+ * shadow (a dark spot) is left out: a line of light casts none. A soft spot, a
+ * plume's puff, is a faint glow of the colour. Hidden where the relief in front
+ * covers what stands, as in the modern theme.
+ *
+ * They draw into `target`: the frame's own pixels, or finer ones (the frame then
+ * still says what the relief hides).
+ */
+export function neonToolsOf(frame: Frame, emissive: boolean, target: Surface): NeonTools {
+  const { depth } = frame;
+  const { data, width, height } = target;
+  const density = (width * frame.density) / frame.width;
+  const back = frame.density / density;
+  const columns = frame.width;
+  const column = new Int32Array(width);
+  for (let px = 0; px < width; px++) column[px] = Math.floor(px * back);
+  const rowOf = new Int32Array(height);
+  for (let py = 0; py < height; py++) rowOf[py] = Math.floor(py * back);
+  let limit = 0;
+  let tint: Rgb = NEON_LANDMARK;
+  const touched: { left: number; top: number; right: number; bottom: number }[] = [];
+  let current: { left: number; top: number; right: number; bottom: number } | null = null;
+  const touch = (x0: number, y0: number, x1: number, y1: number): void => {
+    if (!(x0 < x1 && y0 < y1)) return;
+    if (current === null) {
+      current = { left: x0, top: y0, right: x1, bottom: y1 };
+      touched.push(current);
+      return;
+    }
+    current.left = Math.min(current.left, x0);
+    current.top = Math.min(current.top, y0);
+    current.right = Math.max(current.right, x1);
+    current.bottom = Math.max(current.bottom, y1);
+  };
+  const add = (p: number, k: number, c: Rgb): void => {
+    const i = p * 4;
+    data[i] = (data[i] ?? 0) + c[0] * k;
+    data[i + 1] = (data[i + 1] ?? 0) + c[1] * k;
+    data[i + 2] = (data[i + 2] ?? 0) + c[2] * k;
+  };
+  const hidden = (px: number, py: number): boolean =>
+    (depth[(rowOf[py] ?? 0) * columns + (column[px] ?? 0)] ?? 0) > limit;
+  return {
+    emissive,
+    stand(on, colour) {
+      // Two scene pixels of slack: its foot stands on the ground, not behind it.
+      limit = on.row + 2 * frame.density;
+      current = null;
+      tint = colour;
+    },
+    touched: () => touched,
+    spot(cx, cy, rx, ry, colour, alpha, unlit = false) {
+      if (!(rx > 0) || !(ry > 0)) return;
+      if (colour[0] + colour[1] + colour[2] < 60) return;
+      const c = unlit ? colour : mixRgb(tint, STAR, 0.3);
+      const k0 = unlit ? alpha : alpha * 0.35;
+      const x0 = Math.max(0, Math.floor((cx - rx) * density));
+      const x1 = Math.min(width, Math.ceil((cx + rx) * density));
+      const y0 = Math.max(0, Math.floor((cy - ry) * density));
+      const y1 = Math.min(height, Math.ceil((cy + ry) * density));
+      touch(x0, y0, x1, y1);
+      for (let py = y0; py < y1; py++) {
+        const dy = ((py + 0.5) / density - cy) / ry;
+        for (let px = x0; px < x1; px++) {
+          const dx = ((px + 0.5) / density - cx) / rx;
+          const a = (1 - dx * dx - dy * dy) * k0;
+          if (!(a > 0) || hidden(px, py)) continue;
+          add(py * width + px, a, c);
+        }
+      }
+    },
+    fill(left, top, right, bottom, distance, colour, ink, span) {
+      // A see-through fill, a shade under something, is left out.
+      if (ink?.alpha !== undefined && ink.alpha < 0.5) return;
+      const lamp = ink?.unlit === true && colour[0] > 200 && colour[1] > 150;
+      const c = lamp ? colour : tint;
+      const x0 = Math.max(0, Math.floor((left - HALO) * density));
+      const x1 = Math.min(width, Math.ceil((right + HALO) * density));
+      const y0 = Math.max(0, Math.floor((top - HALO) * density));
+      const y1 = Math.min(height, Math.ceil((bottom + HALO) * density));
+      touch(x0, y0, x1, y1);
+      for (let py = y0; py < y1; py++) {
+        const y = (py + 0.5) / density;
+        const [from, to] = span === undefined ? [-Infinity, Infinity] : span(y);
+        const xa = Math.max(x0, Math.floor((from - HALO) * density));
+        const xb = Math.min(x1, Math.ceil((to + HALO) * density));
+        for (let px = xa; px < xb; px++) {
+          const x = (px + 0.5) / density;
+          const d = distance(x, y);
+          if (d > HALO || hidden(px, py)) continue;
+          let k: number;
+          if (lamp) {
+            const q = d > 0 ? d / (HALO * 0.5) : 0;
+            k = clamp01(0.5 - d * density) * 0.85 + (d > 0 ? 0.35 / (1 + 4 * q * q) : 0);
+          } else {
+            const e = d < 0 ? -d : d;
+            const q = e / (HALO * 0.4);
+            k = clamp01(STROKE * density + 0.5 - e * density) + 0.3 / (1 + 4 * q * q);
+          }
+          if (k > 0.004) add(py * width + px, k, c);
+        }
+      }
+    },
+  };
+}
+
 /** The buffers of the frame drawn last, reused while the size stays the same. */
 let depths: [Int16Array, Int16Array] | null = null;
 let spare: Uint8ClampedArray | null = null;
@@ -755,9 +929,9 @@ export function drawNeonScene(scene: Scene, out: Surface): Drawn {
     weather !== null &&
     anyPrecipitation(weather.grid, viewBox(scene.camera, scene.width, scene.height));
 
-  // The plants and the landmarks: the modern theme's drawings until B-042.
+  // The plants and the landmarks: the modern theme's drawings, as lines of light.
   const size: SpriteSize = scene.camera.scale >= SPRITES_FROM_SCALE ? "full" : "marker";
-  const pen = toolsOf(frame, scene.light.emissive, out);
+  const pen = neonToolsOf(frame, scene.light.emissive, out);
   const landmarks: (Standing & { readonly landmark: Landmark })[] =
     size === "full"
       ? scene.landmarks
@@ -769,7 +943,7 @@ export function drawNeonScene(scene: Scene, out: Surface): Drawn {
           .sort((a, b) => a.row - b.row || a.x - b.x)
       : [];
   for (const m of landmarks) {
-    pen.stand(m);
+    pen.stand(m, NEON_LANDMARK);
     drawModernLandmark(pen, m.landmark, landmarkBox(m.landmark, m.x, m.y).left, m.y);
   }
   const plants: (Standing & { readonly plant: ScenePlant })[] = visiblePlants(
@@ -780,7 +954,7 @@ export function drawNeonScene(scene: Scene, out: Surface): Drawn {
     .map((plant) => ({ plant, ...standingAt(frame, scene, layer, plant.site.x, plant.site.y) }))
     .sort((a, b) => a.row - b.row || a.x - b.x);
   for (const p of plants) {
-    pen.stand(p);
+    pen.stand(p, neonPlantColour(p.plant.site.source, p.plant.activity));
     drawModernBody(pen, p.plant.site, p.plant.activity, p.x, p.y, size);
   }
   const marks: Mark[] = [
@@ -804,9 +978,9 @@ export function drawNeonScene(scene: Scene, out: Surface): Drawn {
     marks,
     animate(target: Surface, seconds: number): readonly Rect[] {
       if (target.width !== out.width || target.height !== out.height) return [];
-      const motion = toolsOf(frame, scene.light.emissive, target);
+      const motion = neonToolsOf(frame, scene.light.emissive, target);
       for (const p of moving) {
-        motion.stand(p);
+        motion.stand(p, neonPlantColour(p.plant.site.source, p.plant.activity));
         drawModernMotion(motion, p.plant.site, p.plant.activity, p.x, p.y, size, seconds);
       }
       if (!falling) return motion.touched();

@@ -8,10 +8,17 @@ import {
   NEON_CONTOURS_FAR,
   NEON_CONTOURS_NEAR,
   NEON_LAMP,
+  type NeonFrame,
+  NEON_PLANT_FLOOR,
+  NEON_SOURCES,
   neonGlow,
   neonNight,
+  neonPlantColour,
   neonTheme,
+  neonToolsOf,
 } from "../src/render/neon-theme";
+import { box, lamp, shadow } from "../src/render/art/shapes";
+import { type Rgb } from "../src/render/palette";
 import { createSurface, hashSurface, type Surface } from "../src/render/surface";
 import { areaBox, type Camera, fitBox } from "../src/scene/camera";
 import { type Scene } from "../src/scene/scene";
@@ -196,5 +203,101 @@ describe("drawNeonScene", () => {
         expect(inside, `${String(x)}, ${String(y)}`).toBe(true);
       }
     expect(drawn.animate(createSurface(scene.width, scene.height), 1.3)).toEqual([]);
+  });
+});
+
+describe("neonPlantColour", () => {
+  const full = NEON_SOURCES.nuclear;
+  const at = (a: number | null): number => neonPlantColour("nuclear", a)[0] / full[0];
+  it("is dim at rest, full at full activity, and in between in proportion", () => {
+    expect(at(0)).toBeCloseTo(NEON_PLANT_FLOOR, 9);
+    expect(at(1)).toBeCloseTo(1, 9);
+    expect(at(0.5)).toBeCloseTo(NEON_PLANT_FLOOR + (1 - NEON_PLANT_FLOOR) * 0.5, 9);
+    expect(at(0.5)).toBeGreaterThan(at(0.25));
+  });
+  it("is dim, never dark nor full, with no figure, and clamps an absurd one", () => {
+    expect(at(null)).toBeCloseTo(NEON_PLANT_FLOOR, 9);
+    expect(at(Number.NaN)).toBeCloseTo(NEON_PLANT_FLOOR, 9);
+    expect(at(Number.POSITIVE_INFINITY)).toBeCloseTo(NEON_PLANT_FLOOR, 9);
+    expect(at(-3)).toBeCloseTo(NEON_PLANT_FLOOR, 9);
+    expect(at(7)).toBeCloseTo(1, 9);
+  });
+  it("keeps the source's hue: every channel scales by the same factor", () => {
+    const [r, g, b] = neonPlantColour("wind", 0.4);
+    const w = NEON_SOURCES.wind;
+    expect(r / w[0]).toBeCloseTo(g / w[1], 9);
+    expect(g / w[1]).toBeCloseTo(b / w[2], 9);
+  });
+});
+
+describe("neonToolsOf", () => {
+  const SIZE = 40;
+  const DENSITY = 2;
+  /** A flat, dark frame of SIZE × SIZE output pixels, the ground at row 0 everywhere. */
+  function blank(): { frame: NeonFrame; out: Surface } {
+    const out = createSurface(SIZE, SIZE);
+    const frame: NeonFrame = {
+      data: out.data,
+      depth: new Int16Array(SIZE * SIZE),
+      width: SIZE,
+      height: SIZE,
+      density: DENSITY,
+      scale: DENSITY,
+      ox: 0,
+      oy: 0,
+      light: [1, 1, 1],
+      vx: new Float64Array(SIZE),
+      vy: new Float64Array(SIZE),
+      night: 0,
+    };
+    return { frame, out };
+  }
+  const red = (out: Surface, x: number, y: number): number =>
+    out.data[(Math.floor(y * DENSITY) * SIZE + Math.floor(x * DENSITY)) * 4] ?? 0;
+  const front = { x: 0, y: 0, row: 1000 };
+  const TINT: Rgb = [200, 40, 40];
+
+  it("draws a shape as its outline: brighter on the edge than inside, a halo outside", () => {
+    const { frame, out } = blank();
+    const pen = neonToolsOf(frame, false, out);
+    pen.stand(front, TINT);
+    box(pen, 6, 6, 14, 14, [90, 90, 90]);
+    const edge = red(out, 6.1, 10);
+    const middle = red(out, 10, 10);
+    const halo = red(out, 5.4, 10);
+    const far = red(out, 2, 10);
+    expect(edge).toBeGreaterThan(middle);
+    expect(halo).toBeGreaterThan(0);
+    expect(edge).toBeGreaterThan(halo);
+    expect(far).toBe(0);
+    expect(pen.touched().length).toBe(1);
+  });
+
+  it("leaves a shadow out, and a see-through shade", () => {
+    const { frame, out } = blank();
+    const pen = neonToolsOf(frame, false, out);
+    pen.stand(front, TINT);
+    shadow(pen, 10, 10, 8);
+    box(pen, 6, 6, 14, 14, [90, 90, 90], { alpha: 0.3 });
+    expect(out.data.some((v, i) => i % 4 !== 3 && v > 0)).toBe(false);
+  });
+
+  it("draws a lamp solid, in its own colour, whatever stands", () => {
+    const { frame, out } = blank();
+    const pen = neonToolsOf(frame, true, out);
+    pen.stand(front, [0, 0, 255]);
+    lamp(pen, 10, 10, 1.5);
+    const i = (20 * SIZE + 20) * 4;
+    expect(out.data[i]).toBeGreaterThan(200);
+    expect(out.data[i]).toBeGreaterThan(out.data[i + 2] ?? 0);
+  });
+
+  it("hides what the relief in front covers", () => {
+    const { frame, out } = blank();
+    frame.depth.fill(500);
+    const pen = neonToolsOf(frame, false, out);
+    pen.stand({ x: 0, y: 0, row: 10 }, TINT);
+    box(pen, 6, 6, 14, 14, [90, 90, 90]);
+    expect(out.data.some((v, i) => i % 4 !== 3 && v > 0)).toBe(false);
   });
 });
