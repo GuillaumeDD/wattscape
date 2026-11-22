@@ -271,7 +271,7 @@ Steps 5 to 7 ran in a different cut (captions, the modern theme, then weather an
 seasons); B-019 and B-021 are still open. What comes next is proposed, with its
 order, in
 [`BACKLOG.md` § Next steps](BACKLOG.md#next-steps-proposed-2026-11-21-for-guillaume-to-order-prd-q-58)
-(Q-58).
+(Q-58), revised after wave 2 (Q-67, D-083).
 
 ## 9. Growth
 
@@ -302,7 +302,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | done     |
 | G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | done     |
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
-| G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | proposed |
+| G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | planned  |
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
 | G-026 | Survey lap in budget: longer stays, fewer frames in slow flights (D-075)               | proposed |
 | G-027 | The modern theme by default (Guillaume, 2026-11-21; B-037)                             | done     |
@@ -381,3 +381,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-64 | Towerless nuclear on or off: the region's figure, or per unit?  | The region's figure now, said in the caption; per unit (DS-08) checked later, as G-003 (B-038)       | The region's figure (Guillaume, 2026-11-21, decision card; D-080)     |
 | Q-65 | Where do B-037 and B-038 go in the waves?                       | Wave 2, one thread, B-037 then B-038 on one branch, beside the legend; both before B-033             | Wave 2, one thread (Guillaume, 2026-11-21, decision card; D-081)      |
 | Q-66 | Towerless nuclear running: which sign, on the board of four?    | A gauge on the roof: no motion, cheap, the figure itself (B-038)                                     | A beacon on the dome (Guillaume, 2026-11-22, decision card; D-082)    |
+| Q-67 | After wave 2: the neon theme before the optimisation?           | Neon (mockups, cost measured) and legend at once; Mac measures any time; then optimise all themes    | Neon and legend first (Guillaume, 2026-11-22, decision card; D-083)   |

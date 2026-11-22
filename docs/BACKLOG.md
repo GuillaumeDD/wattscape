@@ -149,7 +149,8 @@ Proposed order (Q-58), at most three threads at once:
 
 A third theme, futuristic, minimal and neon (Guillaume, 2026-11-21), waits in
 Growth (G-024): it needs mockups and a choice first, as the modern theme did
-(D-055), and fits after wave 1, when a branch is free.
+(D-055). Its place, before the optimisation, is in § Order after wave 2 below
+(D-083).
 
 ### Added 2026-11-21: the default theme and the towerless nuclear plants
 
@@ -218,3 +219,28 @@ branch (they touch the settings, then the plants' art: distinct from the legend'
 files), so wave 2 holds two branches. B-037 goes first, before B-024 and B-035 are
 measured if they are not yet, and both before B-033, whose screenshots must show
 the default and the new drawing.
+
+### Order after wave 2 (Guillaume, 2026-11-22: PRD Q-67, D-083)
+
+Wave 2's default theme and towerless plants are done (B-037, B-038). What is left,
+in this order, at most three branches at once (D-066); it replaces waves 3 and 4
+of the table above:
+
+| Wave | Thread                                                     | Items                  |
+| ---- | ---------------------------------------------------------- | ---------------------- |
+| 3    | Neon theme: directions on mockups, cost measured, a choice | G-024, then its B- ids |
+| 3    | Legend, beside it (distinct files: the panel, not the art) | B-019                  |
+| any  | Measures on Guillaume's machine, whenever it suits him     | B-024, B-035           |
+| 4    | Optimisation over the three themes, from those measures    | G-016, G-017, G-026    |
+| 5    | Polish and share                                           | B-033                  |
+| 6    | New data: one idea, chosen on mockups                      | G-002, G-004, G-023 …  |
+
+- The neon mockups follow AGENTS.md § Performance: each direction comes with its
+  cost measured on a prototype before the decision card; a glow drawn on the CPU
+  may cost more than the modern theme.
+- The neon theme graduates to backlog items (map, then plants and landmarks) once
+  a direction is chosen; drawing it from the modern theme's shapes, as lines of
+  light, is one of the directions, and the cheapest to build.
+- The measures touch no code, so they wait for no thread; if they show the modern
+  theme in budget on a machine with a GPU (as D-060 suspects), part of wave 4 may
+  be dropped.
