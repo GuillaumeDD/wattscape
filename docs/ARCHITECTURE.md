@@ -513,7 +513,7 @@ checked against real screens.
 | On screen                           | Figure            | Formula (provisional)                                                            |
 | ----------------------------------- | ----------------- | -------------------------------------------------------------------------------- |
 | Steam puffs over cooling towers     | `tch_nucleaire`   | height 3 + 9·a px, a puff every 3 / (0.4 + 0.6·a) s per tower; none at 0         |
-| Nuclear plants without towers       | `tch_nucleaire`   | lit windows at night, round(3·a) of 3; nothing moves (PRD Q-16)                  |
+| Nuclear plants without towers       | `tch_nucleaire`   | dome beacon: 0.25 + 0.5·a blinks/s (B-038); lit windows at night, round(3·a)/3   |
 | Wind turbine rotors                 | `tch_eolien`      | 0.5·a turn a second (blades pass at 1.5·a Hz); 1–3 turbines by MW, 5 at sea      |
 | Solar fields                        | `tch_solaire`     | glints on a·33 % of the panel cells, a new draw every 0.5 s (so none at night)   |
 | Dams                                | `tch_hydraulique` | ceil(3·a) streams of water falling down the face                                 |
@@ -740,7 +740,9 @@ validates them on the deployed build.
   bioenergy: a shed with a small chimney. Full sprites from 0.7 pixel per km; below,
   on the national view, a 3-pixel marker of the source's colour for the sites of
   1 000 MW or more (the nuclear sites and the largest dams), the towers' steam
-  still rising. Between 0.7 and 1.2 only the major sites of 50 MW or more show; a
+  still rising. A nuclear site without towers has no steam to show: a beacon on its
+  dome, in the source's colour by day and a lamp at night, blinks while it works
+  (full sprites only; B-038). Between 0.7 and 1.2 only the major sites of 50 MW or more show; a
   diffuse site on land shows from 0.7 whatever its size, their number telling the
   region's capacity (D-041). Two
   plants closer than 8 pixels across or 4 down would overlap: the smaller one is

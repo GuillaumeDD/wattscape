@@ -16,7 +16,8 @@
  * fourth in `step-11-modern-landmarks.png`), at the sharp density a full HD screen gets (D-058,
  * `step-8-modern-sharp-*.png`), the weather in both themes (B-018,
  * `step-12-weather-*.png`), the seasons (B-022, `step-13-seasons-*.png`), and the snow
- * on the ground (B-022, `step-14-snow-*.png`).
+ * on the ground (B-022, `step-14-snow-*.png`), and the beacon of the nuclear plants
+ * without towers (B-038, `step-19-beacon-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -495,5 +496,48 @@ for (const theme of ["pixel", "modern"] as const) {
     const file = `${OUT}/step-14-snow-${theme}-${name}.png`;
     writePng(file, surface, theme === "pixel" ? 2 : 1);
     console.log(`${file}: ${hashSurface(surface)}`);
+  }
+}
+
+// The beacon of the nuclear plants without towers (B-038): in each theme, Paluel
+// (Normandie) and Tricastin (Saint-Paul-Trois-Châteaux, Auvergne-Rhône-Alpes) close
+// up, side by side, by day and at night, from the recorded steps, at 0 s of
+// animation, when the beacon is lit.
+for (const theme of ["pixel", "modern"] as const) {
+  const density = theme === "pixel" ? 1 : MODERN_SHARP_DENSITY;
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const sheet = createSurface(WIDTH * density, (HEIGHT / 2) * density);
+    (
+      [
+        ["28", 462.1, 149.5],
+        ["84", 774.9, 763.3],
+      ] as const
+    ).forEach(([focus, x, y], k) => {
+      const camera: Camera = { x, y, scale: 8 };
+      const surface = createSurface(WIDTH * density, HEIGHT * density);
+      const drawn = (theme === "pixel" ? drawPixelScene : drawModernScene)(
+        referenceScene(focus, camera, elevation),
+        surface,
+      );
+      drawn.animate(surface, 0);
+      // The middle half of the view, left and right, around the plant.
+      const left = (WIDTH / 4) * density;
+      const top = Math.floor(HEIGHT / 4) * density;
+      const w = (WIDTH / 2) * density;
+      for (let row = 0; row < (HEIGHT / 2) * density; row++)
+        sheet.data.set(
+          surface.data.subarray(
+            ((top + row) * surface.width + left) * 4,
+            ((top + row) * surface.width + left + w) * 4,
+          ),
+          (row * sheet.width + k * w) * 4,
+        );
+    });
+    const file = `${OUT}/step-19-beacon-${theme}-${time}.png`;
+    writePng(file, sheet, theme === "pixel" ? 4 : 1);
+    console.log(`${file}: ${hashSurface(sheet)}`);
   }
 }
