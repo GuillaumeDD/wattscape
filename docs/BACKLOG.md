@@ -48,6 +48,9 @@ Statuses: `todo` / `wip` / `done`.
 | B-038 | Towerless nuclear: on or off      | The 7 sites without towers tell running from stopped by day and at night, both themes; options drawn on one board, chosen (Q-64); mapping row and frames updated    | done   |
 | B-039 | Snow note folded away             | The folded panel keeps the weather's source and time, not the inferred-snow sentence; open, unchanged; FR + EN; `tests/weather-note.test.ts`                        | done   |
 | B-040 | Repository link in the credits    | The credits line ends with a link to the GitHub repository, FR + EN label, `rel="noopener noreferrer"`; nothing fetched, the CSP unchanged                          | done   |
+| B-041 | Neon theme: the map, the choice   | A third theme (D-084), in the panel and `?theme=neon`: coast, region border, contours, rivers, lamps as lines of light; plate; frames                               | todo   |
+| B-042 | Neon theme: plants, landmarks     | The modern drawings outlined in light, each plant in its source colour, brighter with its activity (a new mapping row); cost measured                               | todo   |
+| B-043 | Neon theme: weather, seasons      | Clouds, rain, fog and ground snow in the neon idiom, the seasons as a shift of the ground's tint; drawn on a board before coding                                    | todo   |
 
 ## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
 
@@ -244,3 +247,44 @@ of the table above:
 - The measures touch no code, so they wait for no thread; if they show the modern
   theme in budget on a machine with a GPU (as D-060 suspects), part of wave 4 may
   be dropped.
+
+### The neon theme (Guillaume, 2026-11-22: PRD Q-68, D-084)
+
+Direction A, lines of light, chosen on three mockups with their cost
+(`docs/screenshots/step-21-neon-mockup-*.png`). One thread, one branch, one PR per
+item, in this order:
+
+11. **Neon theme: the map and the choice** (B-041; Growth G-024).
+    - Goal: a third theme in the selector and `?theme=neon`, its map drawn as
+      lines of light over a dark relief.
+    - Acceptance:
+      1. `src/render/neon-theme.ts`, its density as the modern theme's (sharp at 4,
+         the map at 2), the same camera, marks and captions;
+      2. the coast, the border of the region in focus (or of France), contour
+         lines between the map's classes, the rivers and the towns' lamps, each
+         glow a function of a distance worked out where the pixel is drawn (no
+         blur of the frame); a dusk-blue ground by day, black at night, stars;
+      3. no `Math.sin`, `exp` or `random` decides a pixel of the still frame
+         (AGENTS.md § Determinism); frames hashed in Node and Chromium;
+      4. the idle drift drawn from a plate, as B-028, every pixel the same as a
+         full draw (a test pans through it);
+      5. FR + EN name in the selector; `tests/settings.test.ts` accepts `neon`;
+      6. ARCHITECTURE § Art direction and § Performance (measured with
+         `tools/perf.ts frames --theme neon` against the modern theme, same run);
+      7. until B-042, the plants and the landmarks are the modern drawings.
+    - Effort: M, one PR.
+12. **Neon theme: plants and landmarks** (B-042).
+    - Goal: every drawing of the modern theme (D-057) outlined in light, a plant
+      in its source's colour, a landmark in one colour.
+    - Acceptance: a brush that draws a shape's edge and its halo from the same
+      distance as the modern brush (`src/render/art/shapes.ts`), shadows left out;
+      the plant's brightness follows its activity, a new row of ARCHITECTURE §
+      Data-to-scene mapping (no figure: dim, never off, so a missing figure never
+      reads as a stop); unit tests per state (0, partial, full, null); frames;
+      cost of a step of the motion measured against the modern theme's.
+    - Effort: M, one PR.
+13. **Neon theme: weather and seasons** (B-043).
+    - Goal: the weather of B-018 and the seasons of B-022 in the neon idiom.
+    - Acceptance: options drawn on one board before coding (D-068), with their
+      cost; the ground snow kept when the weather is off (D-072); frames.
+    - Effort: M: the board, then one PR.

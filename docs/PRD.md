@@ -303,7 +303,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | done     |
 | G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | done     |
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
-| G-024 | A futuristic, minimal neon theme, chosen by the user (Guillaume, 2026-11-21)           | planned  |
+| G-024 | A futuristic, minimal neon theme, lines of light (Guillaume, 2026-11-21; Q-68, B-041)  | planned  |
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
 | G-026 | Survey lap in budget: longer stays, fewer frames in slow flights (D-075)               | proposed |
 | G-027 | The modern theme by default (Guillaume, 2026-11-21; B-037)                             | done     |
@@ -383,3 +383,4 @@ decisions they make are logged in [`DECISIONS.md`](DECISIONS.md).
 | Q-65 | Where do B-037 and B-038 go in the waves?                       | Wave 2, one thread, B-037 then B-038 on one branch, beside the legend; both before B-033             | Wave 2, one thread (Guillaume, 2026-11-21, decision card; D-081)      |
 | Q-66 | Towerless nuclear running: which sign, on the board of four?    | A gauge on the roof: no motion, cheap, the figure itself (B-038)                                     | A beacon on the dome (Guillaume, 2026-11-22, decision card; D-082)    |
 | Q-67 | After wave 2: the neon theme before the optimisation?           | Neon (mockups, cost measured) and legend at once; Mac measures any time; then optimise all themes    | Neon and legend first (Guillaume, 2026-11-22, decision card; D-083)   |
+| Q-68 | Neon theme: which direction, on the three mockups?              | A, lines of light: the modern theme's shapes outlined; cheapest of the three, plants moving          | A, lines of light (Guillaume, 2026-11-22, decision card; D-084)       |

@@ -1512,3 +1512,49 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** the measures on Guillaume's machine show the default theme well
   over its budget on battery, or the neon prototype costs more than the modern
   theme at rest.
+
+## D-084 — The neon theme: lines of light
+
+- **Context:** the third theme, futuristic, minimal and neon (G-024), was to be
+  chosen on mockups, each direction with its cost measured on a prototype first
+  (D-083, AGENTS.md § Performance). Three directions were prototyped on
+  2026-11-22, each glow worked out from a distance where its pixel is drawn (to a
+  line, to a shape's edge), never by blurring the frame: A, lines of light, the
+  modern theme's shapes as outlines (the coast, the border of the region in focus,
+  contour lines between the map's classes, the rivers, the towns' lamps; the plants
+  and the landmarks outlined in their source's colour); B, ridge lines, the land
+  as horizontal lines raised by the relief, each hiding what is behind it; C,
+  points of light, a field of dots raised by the relief, the plants as glowing
+  solids. Drawn for France, Normandie and Auvergne-Rhône-Alpes, by day and at
+  night (`docs/screenshots/step-21-neon-mockup-*.png`; PRD Q-68).
+- **Cost:** `tools/perf.ts frames`, one run each in the same session, the modern
+  theme first, on the cloud's shared vCPU (an order of magnitude). Main-thread
+  work in ms per second, with Normandie's plants moving, then in the idle drift;
+  then the flight France ↔ Normandie and the wheel zoom at p95, in ms per frame:
+
+  | Theme  | Plants moving | Idle drift | Flight p95 | Wheel p95 |
+  | ------ | ------------- | ---------- | ---------- | --------- |
+  | Modern | 44–50         | 59–61      | 34         | 25–28     |
+  | A      | 60–64         | 83–86      | 49–57      | 38–41     |
+  | B      | 66–70         | 85–87      | 33         | 21–32     |
+  | C      | 70–76         | 79–91      | 40–50      | 28–34     |
+
+  The prototype drew the drift without the modern theme's plate (B-028), which
+  explains most of its gap there; it had no weather and no seasons.
+
+- **Options:** A, B, C, or a mix drawn on the same board first (D-068); A
+  recommended (it reuses the modern theme's shapes, keeps the most readable
+  detail, and cost the least of the three with plants moving).
+- **Decision:** A, lines of light (Guillaume, 2026-11-22, decision card). Proposed
+  by Claude and still open to him: a plant's brightness follows its activity (a
+  new row of ARCHITECTURE § Data-to-scene mapping), the palette (cyan coast,
+  magenta border, violet contours, amber lamps), a dusk-blue ground by day and a
+  black one at night. Built as B-041 (the map and the choice), B-042 (plants and
+  landmarks), B-043 (weather and seasons).
+- **Why:** Guillaume's choice, made with the figures above on the card. They meet
+  D-083's condition to revisit (the prototype costs more than the modern theme at
+  rest, 60–64 ms/s for 44–50); the order of D-083 stands, the theme built first,
+  then the optimisation over the three themes, unless Guillaume says otherwise.
+- **Revisit if:** the theme, built with its plate, stays well above the modern
+  theme's cost at rest on a real machine, or the lines read as clutter on a real
+  screen.
