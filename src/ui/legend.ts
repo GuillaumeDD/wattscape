@@ -3,8 +3,8 @@
  * source's MW and share, the consumption, the imports or exports, and the reading's
  * time, its freshness, or the sample label. Discreet: it fades away after a few
  * seconds without a move of the mouse or a key, comes back with the next one, and
- * `H` hides or shows it; the pointer goes through it to the map. Text only, never
- * HTML.
+ * `H` hides or shows it; a button folds it to its title, bar and source, and the
+ * pointer goes through the rest of it to the map. Text only, never HTML.
  *
  * The figures are the plants' own (the same step of every region, D-025): a region
  * shows its row as RTE publishes it; France shows the sum of the 12 regions, only
@@ -211,17 +211,47 @@ export function sourceColour(source: Source): string {
   return `rgb(${String(r)} ${String(g)} ${String(b)})`;
 }
 
+/** The fold button's labels, in the current language: to fold, and to unfold. */
+export interface FoldLabels {
+  readonly fold: string;
+  readonly unfold: string;
+}
+
 export interface Legend {
-  /** Shows a text, in the current language. */
-  render(text: LegendText): void;
+  /** Shows a text, and the fold button's label, in the current language. */
+  render(text: LegendText, labels: FoldLabels): void;
   /** Shows the legend, and fades it again later. */
   stir(): void;
 }
 
-/** Wires the legend in the page: its fading, and `H`. */
-export function mountLegend(): Legend {
+/**
+ * Wires the legend in the page: its fading, `H`, and its fold button, which starts
+ * `folded` and tells `onFold` each change (the page remembers it).
+ */
+export function mountLegend(folded: boolean, onFold: (folded: boolean) => void): Legend {
   const box = document.getElementById("legend");
+  const toggle = document.getElementById("legend-toggle");
   let quietTimer: number | null = null;
+  let labels: FoldLabels = { fold: "", unfold: "" };
+
+  /** Shows the fold state: the details hidden or not, the button's sign and label. */
+  const showFold = (): void => {
+    box?.classList.toggle("folded", folded);
+    document.getElementById("legend-details")?.toggleAttribute("hidden", folded);
+    if (toggle === null) return;
+    const label = folded ? labels.unfold : labels.fold;
+    toggle.textContent = folded ? "+" : "−";
+    toggle.setAttribute("aria-expanded", String(!folded));
+    toggle.setAttribute("aria-label", label);
+    toggle.title = label;
+  };
+  toggle?.addEventListener("click", (event) => {
+    folded = !folded;
+    showFold();
+    onFold(folded);
+    // A click leaves the focus on the button, which would keep the legend from fading.
+    if (event.detail > 0 && event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
+  });
 
   const stir = (): void => {
     box?.classList.remove("quiet");
@@ -240,7 +270,9 @@ export function mountLegend(): Legend {
   stir();
 
   return {
-    render(text) {
+    render(text, foldLabels) {
+      labels = foldLabels;
+      showFold();
       const set = (id: string, value: string): void => {
         const el = document.getElementById(id);
         if (el !== null) {

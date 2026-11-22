@@ -58,16 +58,20 @@
     <footer id="credits">
       <!-- The legend (B-019): the mix of the area in view, filled by src/ui/legend.ts;
            top right (on a phone, bottom left, above the credits and the survey's
-           controls); it fades away when nothing moves. -->
+           controls); it fades away when nothing moves, and folds. -->
       <section id="legend" aria-labelledby="legend-title">
         <div id="legend-head">
           <h2 id="legend-title"></h2>
           <span id="legend-badge" hidden></span>
+          <!-- Folds the legend to its title, bar and source (its only control). -->
+          <button id="legend-toggle" type="button" aria-controls="legend-details"></button>
         </div>
         <div id="legend-bar" hidden></div>
-        <ul id="legend-rows" hidden></ul>
-        <p id="legend-consumption" hidden></p>
-        <p id="legend-exchanges" hidden></p>
+        <div id="legend-details">
+          <ul id="legend-rows" hidden></ul>
+          <p id="legend-consumption" hidden></p>
+          <p id="legend-exchanges" hidden></p>
+        </div>
         <p id="legend-source"></p>
       </section>
       <!-- The survey mode's controls (B-032): discreet, they fade away while it plays;

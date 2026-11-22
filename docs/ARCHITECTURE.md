@@ -547,7 +547,9 @@ sum agrees with the national row (DS-02) within 37 MW per field at the 8 steps
 checked on 2026-11-22 (S-029; so the national row leaves Corsica out too). Without a figure (loading,
 unavailable, a step after the time shown, a region left out of the step) it shows
 none, and says why. It fades away after 8 s without a move of the mouse or a key,
-`H` hides or shows it, and the screensaver mode leaves it out (PRD § 4.8).
+`H` hides or shows it, and the screensaver mode leaves it out (PRD § 4.8). A button
+folds it to its title, bar and source, as the viewer chose last, else folded on a
+phone (Guillaume, 2026-11-22); the pointer goes through the rest of it to the map.
 
 ## Sky, light and weather
 

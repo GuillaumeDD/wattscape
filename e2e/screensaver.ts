@@ -45,7 +45,7 @@ if (canvas instanceof HTMLCanvasElement) {
   });
   const parsed = parseEco2mixRegions(sample);
   const readings = parsed.ok ? parsed.reading : null;
-  mountLegend().render(
+  mountLegend(false, () => undefined).render(
     legendText(
       legendFigures(readings, "28"),
       "28",
@@ -54,6 +54,7 @@ if (canvas instanceof HTMLCanvasElement) {
       t,
       (ms) => new Date(ms).toISOString().slice(11, 16),
     ),
+    { fold: t("legendFold"), unfold: t("legendUnfold") },
   );
   const season = seasonFromQuery(location.search);
   if (season !== undefined) view.setSeason(season);

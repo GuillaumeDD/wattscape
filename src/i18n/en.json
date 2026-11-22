@@ -113,5 +113,7 @@
   "legendLoading": "Mix: loading RTE éCO2mix data…",
   "legendUnavailable": "Mix unavailable: no RTE éCO2mix reading to show.",
   "legendAhead": "The RTE éCO2mix reading ({time}) is later than the time shown: no mix to show.",
-  "legendShareUnder": "< {share}"
+  "legendShareUnder": "< {share}",
+  "legendFold": "Fold the legend",
+  "legendUnfold": "Unfold the legend"
 }

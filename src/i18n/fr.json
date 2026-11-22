@@ -113,5 +113,7 @@
   "legendLoading": "Mix : chargement des données RTE éCO2mix…",
   "legendUnavailable": "Mix indisponible : pas de relevé RTE éCO2mix à montrer.",
   "legendAhead": "Le relevé RTE éCO2mix ({time}) est postérieur à l'heure montrée : pas de mix à montrer.",
-  "legendShareUnder": "< {share}"
+  "legendShareUnder": "< {share}",
+  "legendFold": "Replier la légende",
+  "legendUnfold": "Déplier la légende"
 }

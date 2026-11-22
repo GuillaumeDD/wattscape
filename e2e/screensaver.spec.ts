@@ -94,6 +94,26 @@ test("the legend shows the mix, fades without input, comes back, and H hides it"
   await expect(legend).toBeVisible();
 });
 
+test("the legend's button folds it to its title, bar and source, and unfolds it", async ({
+  page,
+}) => {
+  await page.goto("/screensaver.html");
+  const toggle = page.locator("#legend-toggle");
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(toggle).toHaveAttribute("aria-label", "Fold the legend");
+  await toggle.click();
+  await expect(page.locator("#legend-rows")).toBeHidden();
+  await expect(page.locator("#legend-exchanges")).toBeHidden();
+  await expect(page.locator("#legend-title")).toBeVisible();
+  await expect(page.locator("#legend-bar")).toBeVisible();
+  await expect(page.locator("#legend-source")).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(toggle).toHaveAttribute("aria-label", "Unfold the legend");
+  await toggle.click();
+  await expect(page.locator("#legend-rows li")).toHaveCount(6);
+  await expect(page.locator("#legend-rows")).toBeVisible();
+});
+
 test("?screensaver leaves the legend out", async ({ page }) => {
   await page.goto("/screensaver.html?screensaver");
   await expect(page.locator("#survey-area")).toHaveText("Flyover: Hauts-de-France");

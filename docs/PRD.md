@@ -150,7 +150,8 @@ idea that the grid can be seen.
 ### 4.8 Learning layer
 
 - A discreet legend: the area's mix (stacked bar), consumption, imports/exports, and
-  the time of the reading. Hidden after a few seconds of inactivity.
+  the time of the reading. Hidden after a few seconds of inactivity; it folds to
+  its title, bar and source (Guillaume, 2026-11-22).
 - Hover or tap on a plant or landmark: a short caption (name, what it is, the live
   figure it shows). Every caption fact is sourced (AGENTS.md §5).
 - The legend and captions never cover the scene for long; the screensaver mode shows

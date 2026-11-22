@@ -14,11 +14,13 @@ import {
   browserStorage,
   initialArea,
   initialDriftOn,
+  initialLegendFolded,
   initialPanelFolded,
   initialTheme,
   initialWeatherOn,
   sampleFromQuery,
   saveDriftOn,
+  saveLegendFolded,
   screensaverFromQuery,
   seasonFromQuery,
   savePanelFolded,
@@ -108,7 +110,16 @@ let surveyState: SurveyState = { mode: "off", area: null };
 const surveyBar = mountSurveyBar((command) => {
   scene?.survey(command);
 });
-const legend = mountLegend();
+/** A phone, in portrait or landscape: under 40 rem wide or under 30 rem high. */
+const NARROW = "(max-width: 40rem), (max-height: 30rem)";
+const storage = browserStorage();
+const legend = mountLegend(
+  initialLegendFolded(storage, window.matchMedia(NARROW).matches),
+  (folded) => {
+    saveLegendFolded(storage, folded);
+    renderLegend();
+  },
+);
 
 /** The area the legend speaks of: the one the tour shows while it runs, else the chosen one. */
 function legendArea(): Eco2mixArea {
@@ -129,6 +140,7 @@ function renderLegend(): void {
       (key) => translate(locale, key),
       readingTime,
     ),
+    { fold: translate(locale, "legendFold"), unfold: translate(locale, "legendUnfold") },
   );
 }
 
@@ -278,7 +290,6 @@ function renderThemeOptions(): void {
   select.value = theme;
 }
 
-const storage = browserStorage();
 let theme: ThemeId = initialTheme(location.search, storage);
 /** Whether the sky's weather shows (B-030, D-072); the ground snow always does. */
 let weatherOn = initialWeatherOn(location.search, storage);
@@ -292,8 +303,6 @@ const areaState: AreaState = {
 };
 
 let locale: Locale = savedLocale(storage) ?? detectLocale(navigator.languages);
-/** A phone, in portrait or landscape: under 40 rem wide or under 30 rem high. */
-const NARROW = "(max-width: 40rem), (max-height: 30rem)";
 let panelFolded = initialPanelFolded(storage, window.matchMedia(NARROW).matches);
 render(locale);
 renderArea(true);

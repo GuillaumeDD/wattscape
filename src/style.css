@@ -397,17 +397,33 @@ body.scene #credits {
 #legend.quiet {
   opacity: 0;
 }
+/* A legend holding the focus (its button, by Tab) never fades. */
+#legend:focus-within {
+  opacity: 1;
+}
+/* Its one control takes the pointer, while it shows. */
+#legend-toggle {
+  min-width: 1.5rem;
+  padding: 0 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  pointer-events: auto;
+}
+#legend.quiet #legend-toggle {
+  pointer-events: none;
+}
 #legend[hidden],
 #legend [hidden] {
   display: none;
 }
 #legend-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
 }
 #legend-title {
+  flex: 1;
   margin: 0;
   color: var(--accent);
   font-size: 0.8rem;
