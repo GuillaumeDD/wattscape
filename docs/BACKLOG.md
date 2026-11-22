@@ -48,7 +48,7 @@ Statuses: `todo` / `wip` / `done`.
 | B-038 | Towerless nuclear: on or off      | The 7 sites without towers tell running from stopped by day and at night, both themes; options drawn on one board, chosen (Q-64); mapping row and frames updated    | done   |
 | B-039 | Snow note folded away             | The folded panel keeps the weather's source and time, not the inferred-snow sentence; open, unchanged; FR + EN; `tests/weather-note.test.ts`                        | done   |
 | B-040 | Repository link in the credits    | The credits line ends with a link to the GitHub repository, FR + EN label, `rel="noopener noreferrer"`; nothing fetched, the CSP unchanged                          | done   |
-| B-041 | Neon theme: the map, the choice   | A third theme (D-084), in the panel and `?theme=neon`: coast, region border, contours, rivers, lamps as lines of light; plate; frames                               | todo   |
+| B-041 | Neon theme: the map, the choice   | A third theme (D-084), in the panel and `?theme=neon`: coast, region border, contours, rivers, lamps as lines of light; plate; frames                               | done   |
 | B-042 | Neon theme: plants, landmarks     | The modern drawings outlined in light, each plant in its source colour, brighter with its activity (a new mapping row); cost measured                               | todo   |
 | B-043 | Neon theme: weather, seasons      | Clouds, rain, fog and ground snow in the neon idiom, the seasons as a shift of the ground's tint; drawn on a board before coding                                    | todo   |
 

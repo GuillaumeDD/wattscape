@@ -17,13 +17,15 @@
  * `step-8-modern-sharp-*.png`), the weather in both themes (B-018,
  * `step-12-weather-*.png`), the seasons (B-022, `step-13-seasons-*.png`), and the snow
  * on the ground (B-022, `step-14-snow-*.png`), and the beacon of the nuclear plants
- * without towers (B-038, `step-19-beacon-*.png`).
+ * without towers (B-038, `step-19-beacon-*.png`); then the neon theme (G-024, B-041,
+ * `step-22-neon-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine.ts";
 import { drawModernScene, MODERN_SHARP_DENSITY } from "../src/render/modern-theme.ts";
+import { drawNeonScene } from "../src/render/neon-theme.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, hashSurface, type Surface } from "../src/render/surface.ts";
 import { areaBox, type Camera, fitBox, flightAt } from "../src/scene/camera.ts";
@@ -541,3 +543,23 @@ for (const theme of ["pixel", "modern"] as const) {
     console.log(`${file}: ${hashSurface(sheet)}`);
   }
 }
+
+// The neon theme (G-024, B-041): France, Normandie and Auvergne-Rhône-Alpes, by day
+// and at night, at the sharp density a full HD screen gets, the plants' motion at
+// 1.3 s.
+for (const [name, focus] of [
+  ["france", null],
+  ["normandie", "28"],
+  ["auvergne-rhone-alpes", "84"],
+] as const)
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+    const surface = createSurface(WIDTH * MODERN_SHARP_DENSITY, HEIGHT * MODERN_SHARP_DENSITY);
+    drawNeonScene(referenceScene(focus, camera, elevation), surface).animate(surface, 1.3);
+    const file = `${OUT}/step-22-neon-${name}-${time}.png`;
+    writePng(file, surface);
+    console.log(`${file}: ${hashSurface(surface)}`);
+  }

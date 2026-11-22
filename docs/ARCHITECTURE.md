@@ -773,13 +773,14 @@ camera, the light, the region in focus, the terrain layers, the level of detail 
 the towns. A **theme** (`src/render/theme.ts`) turns it into pixels: the pixel-art
 theme (`src/render/pixel-theme.ts`), and the modern one (`src/render/modern-theme.ts`,
 § The modern theme), the default since D-079, which came without touching the
-model but for the rivers' lines, added to a layer (`TerrainLayer.courses`). The
-viewer chooses in the panel or by `?theme=pixel` (`src/ui/settings.ts`; the names
+model but for the rivers' lines, added to a layer (`TerrainLayer.courses`), and the
+neon one (`src/render/neon-theme.ts`, § The neon theme). The
+viewer chooses in the panel or by `?theme=pixel` or `?theme=neon` (`src/ui/settings.ts`; the names
 are in `src/render/theme-ids.ts`), and the choice is remembered in `localStorage`:
 a stored choice wins over the default, a stored `pixel` too (D-079).
 A theme says how many output pixels it draws per scene pixel (`density`: 1 for
 pixel art; the modern one halves its own while the camera moves, D-056); the scene, its camera, the marks and the inputs stay in scene pixels,
-so the framing, the captions and the controls are the same under both. The step-2 mockups
+so the framing, the captions and the controls are the same under all three. The step-2 mockups
 (`docs/screenshots/step-2-mockup-*.png`) were drawn by the first version of this
 theme; `tools/screenshots.ts` writes the step-3 frames (`step-3-*.png`): France,
 Normandie and Auvergne-Rhône-Alpes as the app frames them, the Mont Blanc massif
@@ -918,6 +919,54 @@ D-061) is the one a laptop on battery meets first.
   `hypot`. Only the turning blades take a sine, as in pixel art: an animation, not
   what the world contains. Its frames are hashed in Node and in Chromium like the
   others.
+
+### The neon theme (B-041)
+
+A third theme, futuristic and minimal (PRD G-024): the same scene as lines of light
+over a dark relief (`src/render/neon-theme.ts`, `?theme=neon`). Three directions
+were drawn on mockups with their cost measured on a prototype (2026-11-22,
+`docs/screenshots/step-21-neon-mockup-*.png`); Guillaume chose A, lines of light
+(PRD Q-68, D-084). What follows beyond that choice is **proposed** (D-084), drawn
+by `tools/screenshots.ts` (`step-22-neon-*.png`).
+
+- **Same view and density** as the modern theme: the same offsets, 2 output pixels
+  per scene pixel for the map, spread to the sharp 4 on a full HD screen, halved
+  while the camera moves (`modernDensity`); so the marks and the captions are the
+  modern theme's, at the same places (a test compares them).
+- **Ground:** dark, a little lighter on land, with the modern theme's hill shading,
+  the area in focus brighter; dusk blue by day, near black at night (`neonNight`,
+  from the darkness of § Sky, light and weather). The land melts into the sky over
+  140 km at the map's north edge, as in the modern theme. The sky is a gradient from
+  dark to violet near the horizon, with stars at night.
+- **Lines of light,** each glow a function of a distance worked out where its pixel
+  is drawn (`neonGlow`: a core and a halo falling as 1 / (1 + 4 (d / h)²)), never a
+  blur of the frame:
+  - the coast, cyan: the signed distance to it, a 3-4 chamfer distance between
+    cells (`coastDistance`) on each side, read between cells;
+  - the border of the region in focus (of France on the national view), magenta:
+    the chamfer distance to the cells of the area that touch land out of it;
+  - contour lines, violet, at altitudes between two of the map's classes, never on
+    a class's floor, which is a plateau (`NEON_CONTOURS_NEAR`, and fewer on the
+    national view, `NEON_CONTOURS_FAR`); about a pixel wide, from the slope of the
+    altitude read between cells;
+  - the rivers (`courses`), blue, as in the modern theme but glowing, on French
+    land only, hidden by the relief in front, never over the sky.
+  - every line goes on the top pixel of each column's run of ground, so a steep
+    face is not smeared; past the grid's edges the edge cells go on, as in the
+    other themes, but their lines fade over 15 km, so the grid's edge draws no
+    straight line.
+- **Towns:** at night, an amber glow around each town of a region with a figure,
+  stronger the more the region consumes (the same `lampLevels`, § Data-to-scene
+  mapping); none by day, none without a figure.
+- **Plate:** as the modern theme's (B-028), the ground and the rivers drawn once
+  larger than the frame and cropped while the camera only pans; the sky, fixed to
+  the screen, is drawn after the crop. Every pixel is the one a full draw gives (a
+  test pans through a plate and draws each frame in full).
+- **Plants, landmarks, weather:** the modern theme's drawings and weather for now;
+  their neon drawings are B-042 and B-043.
+- **Determinism:** as the modern theme's, additions, multiplications, divisions,
+  floors and square roots only for the still frame. Its frames are hashed in Node
+  and in Chromium like the others.
 
 ### Camera and controls (B-011)
 
@@ -1306,6 +1355,29 @@ ground front to back with a horizon per column, each pixel once (−3 %), walkin
 only the columns at least a pixel wide (0 %). The cost follows the cells walked;
 only a coarser layer between 0.5 and 1.4 would cut it, which changes the picture
 (not wanted for now, Q-17).
+
+**The neon theme** (B-041), same tool with `--theme neon`, on 2026-11-22, one run
+by day and one at night, the modern theme measured just before it in the same
+session; its plants and landmarks are still the modern theme's drawings:
+
+| View                          | Modern: p95, busy      | Neon: p50, p95, busy           |
+| ----------------------------- | ---------------------- | ------------------------------ |
+| France, still                 | 0.8–0.9 ms, 30–32 ms/s | 0.6 ms, 0.8–0.9 ms, 28–33 ms/s |
+| Normandie, plants moving      | 3.2–3.4 ms, 45 ms/s    | 2.0–2.1 ms, 3.0–3.5 ms, 42–48  |
+| Idle drift (Normandie)        | 18–19 ms, 57–66 ms/s   | 0.3–0.4 ms, 13 ms, 55–56 ms/s  |
+| Drag pan (Normandie)          | 14–16 ms, 131–147 ms/s | 1.2–1.3 ms, 18–20 ms, 107–110  |
+| Flight France ↔ Normandie     | 32–34 ms, 260–291 ms/s | 16 ms, 44–48 ms, 386–392 ms/s  |
+| Wheel zoom in and out (worst) | 25–28 ms, 246–278 ms/s | 14–15 ms, 30 ms, 333–335 ms/s  |
+
+The survey mode: its flight 21 ms at p95 and 440 to 453 ms/s (modern: 13 to 14 ms,
+292 to 324), its stay 16 to 18 ms and 88 to 95 ms/s (modern: 10 to 13 ms, 84 to 86).
+At rest the neon theme costs what the modern one does, over the 30 ms/s of the
+steady state as the modern one already is (D-061); its plate makes the drift and a
+drag cheaper. A moving camera costs more: about 1.3 times the modern theme's work
+per second, and the flight's frames at p95 near 45 ms, over the 25 ms of D-028,
+where the modern theme sits at 32 to 34 the same day. Where the extra time goes is
+not profiled yet: that is for the optimisation over the three themes (D-083), with
+B-024's measures on a real machine.
 
 ## Internationalization
 

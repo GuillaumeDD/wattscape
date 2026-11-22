@@ -13,6 +13,7 @@ import { PLANT_SITES } from "../src/map/plants.ts";
 import { FINE_ELEVATION_RLE } from "../src/map/relief.ts";
 import { LESSER_RIVERS_PACKED } from "../src/map/rivers-fine.ts";
 import { drawModernScene, MODERN_SHARP_DENSITY } from "../src/render/modern-theme.ts";
+import { drawNeonScene } from "../src/render/neon-theme.ts";
 import { drawPixelScene } from "../src/render/pixel-theme.ts";
 import { createSurface, type Surface } from "../src/render/surface.ts";
 import { drawTestCard } from "../src/render/test-card.ts";
@@ -105,6 +106,20 @@ function modern(
 ): Surface {
   const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
   const drawn = drawModernScene(referenceScene(focus, camera, sunElevation), out);
+  if (seconds !== undefined) drawn.animate(out, seconds);
+  return out;
+}
+
+/** The same scene by the neon theme (G-024, B-041), at the modern theme's densities. */
+function neon(
+  focus: CellRegion | null,
+  camera: Camera,
+  sunElevation: number,
+  seconds?: number,
+  density = MODERN_DENSITY,
+): Surface {
+  const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
+  const drawn = drawNeonScene(referenceScene(focus, camera, sunElevation), out);
   if (seconds !== undefined) drawn.animate(out, seconds);
   return out;
 }
@@ -252,6 +267,14 @@ export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
     modern("28", framed("28"), 35, 1.3, MODERN_SHARP_DENSITY),
   "modern-sharp-normandie-night-t1.3": () =>
     modern("28", framed("28"), -20, 1.3, MODERN_SHARP_DENSITY),
+  // The neon theme (G-024, B-041): France by day, a region at night with its lamps
+  // and its plants moving, the relief by day, the blend between the two layers, and
+  // the sharp density.
+  "neon-france-day": () => neon(null, framed(null), 35),
+  "neon-normandie-night-t1.3": () => neon("28", framed("28"), -20, 1.3),
+  "neon-auvergne-rhone-alpes-day": () => neon("84", framed("84"), 35),
+  "neon-crossfade-night": () => neon(null, { ...kmOf(45.5, 3), scale: 0.6 }, -20),
+  "neon-sharp-normandie-day-t1.3": () => neon("28", framed("28"), 35, 1.3, MODERN_SHARP_DENSITY),
   // The weather (B-018), as `?weather=` imposes it, at a fixed time: France with a
   // different sky in each region, Normandie under rain, then under a storm at night,
   // in both themes, at an animation time that shows the rain and one that flashes.
