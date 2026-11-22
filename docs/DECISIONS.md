@@ -1461,3 +1461,26 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   files, so wave 2 holds two branches (D-066); B-033's screenshots must show the
   new default and the new drawing.
 - **Revisit if:** the legend and B-038 turn out to edit the same files.
+
+## D-082 — Towerless nuclear plants: a beacon on the dome (revises D-027)
+
+- **Context:** the 7 nuclear sites without cooling towers showed their load factor
+  by lit windows at night only (D-027, PRD Q-16): by day a running plant and a
+  stopped one looked the same. Guillaume asked for a clearer running or stopped
+  look (G-028, B-038), from the region's figure (D-080). Four options were drawn on
+  one board, in both themes, by day and at night, at a = 1, 0.5, 0 and with no
+  figure, beside the current drawing (`docs/screenshots/step-19-beacon-board-*.png`;
+  PRD Q-66): 1 a small vapour plume over the turbine hall, 2 a warm-water shimmer
+  on the water nearby (G-014), 3 a beacon blinking on the dome, 4 a gauge along
+  the roof, its length a. Drawing cost per site and animation step, measured on
+  the prototype in Node: 0.1 to 15 µs, the shimmer the highest, the gauge static.
+- **Options:** the four above; the gauge was recommended (no motion, so no cost at
+  rest, and it shows the figure itself).
+- **Decision:** the beacon on the dome (Guillaume, 2026-11-22, decision card). It
+  blinks 0.25 + 0.5·a times a second, lit half of each blink, never at 0 or with no
+  figure; full sprites only; the windows still light at night. Shipped in
+  PR #74 (ARCHITECTURE § Data-to-scene mapping).
+- **Why:** Guillaume's choice; a stopped site and a missing figure both stay
+  still, so no figure ever reads as a stop.
+- **Revisit if:** the beacon reads as an alarm on a real screen, or output per unit
+  (DS-08, G-003) turns GO and a single stopped site can be shown.
