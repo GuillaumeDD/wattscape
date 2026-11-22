@@ -1484,3 +1484,31 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   still, so no figure ever reads as a stop.
 - **Revisit if:** the beacon reads as an alarm on a real screen, or output per unit
   (DS-08, G-003) turns GO and a single stopped site can be shown.
+
+## D-083 — After wave 2: the neon theme and the legend, then the optimisation
+
+- **Context:** wave 2's default theme and towerless plants are done (D-079 to
+  D-082); left open are the legend (B-019), the measures on Guillaume's machine
+  (B-024, B-035, D-071), the optimisation levers in Growth (G-016, G-017, G-026),
+  the polish (B-033) and new data. Guillaume recalled a new theme in the backlog,
+  the futuristic, minimal neon theme (G-024), and thought it should come before
+  the performance tests and the optimisation (2026-11-22, PRD Q-67). No decision
+  forbade it: D-060, D-061 and D-075 ask for a measure on a real machine before
+  optimising, not for the optimisation before a new theme.
+- **Options (decision card, 2026-11-22):** the neon theme and the legend in two
+  threads at once, then the optimisation over the three themes (recommended);
+  measure and optimise first, the legend beside, the neon theme after with a
+  second round of measures; the legend alone first, then talk again.
+- **Decision:** the neon theme and the legend first, then the optimisation
+  (Guillaume, 2026-11-22, decision card). Order: a neon thread (directions drawn
+  on mockups, France and two regions, by day and at night, each with its cost
+  measured on the prototype, then a choice) and a legend thread (B-019), at once;
+  the measures B-024 and B-035 on Guillaume's machine whenever it suits him, as
+  they touch no code; then the optimisation (G-016, G-017, G-026) over the three
+  themes; then B-033; then one new data idea.
+- **Why:** the optimisation levers sit in the modern theme's drawing path, which
+  a neon theme will likely share, so one pass covers every theme; B-033's
+  screenshots must show the neon theme and the legend.
+- **Revisit if:** the measures on Guillaume's machine show the default theme well
+  over its budget on battery, or the neon prototype costs more than the modern
+  theme at rest.
