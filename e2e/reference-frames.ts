@@ -155,8 +155,12 @@ export const MIXED_WEATHER: RegionalWeather = (() => {
 })();
 
 /** A reference frame under a weather, in either theme. */
+/** The drawing function of a theme. */
+const drawOf = (theme: "pixel" | "modern" | "neon"): typeof drawModernScene =>
+  theme === "pixel" ? drawPixelScene : theme === "modern" ? drawModernScene : drawNeonScene;
+
 function weathered(
-  theme: "pixel" | "modern",
+  theme: "pixel" | "modern" | "neon",
   focus: CellRegion | null,
   sunElevation: number,
   weather: RegionalWeather,
@@ -169,7 +173,7 @@ function weathered(
     weather,
     timeMs: WEATHER_TIME_MS,
   };
-  const drawn = (theme === "pixel" ? drawPixelScene : drawModernScene)(s, out);
+  const drawn = drawOf(theme)(s, out);
   drawn.animate(out, seconds);
   return out;
 }
@@ -207,7 +211,12 @@ export function snowWeather(plains: boolean): RegionalWeather {
 }
 
 /** A winter frame under snow, in either theme. */
-function snowed(theme: "pixel" | "modern", focus: CellRegion | null, plains: boolean): Surface {
+function snowed(
+  theme: "pixel" | "modern" | "neon",
+  focus: CellRegion | null,
+  plains: boolean,
+  weatherHidden = false,
+): Surface {
   const density = theme === "pixel" ? 1 : MODERN_DENSITY;
   const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
   const s = {
@@ -215,14 +224,15 @@ function snowed(theme: "pixel" | "modern", focus: CellRegion | null, plains: boo
     season: { from: "winter", to: "winter", share: 0 } as const,
     weather: snowWeather(plains),
     timeMs: WEATHER_TIME_MS,
+    ...(weatherHidden ? { weatherHidden: true } : {}),
   };
-  (theme === "pixel" ? drawPixelScene : drawModernScene)(s, out);
+  drawOf(theme)(s, out);
   return out;
 }
 
 /** A reference frame in a season (B-022), in either theme. */
 function seasoned(
-  theme: "pixel" | "modern",
+  theme: "pixel" | "modern" | "neon",
   focus: CellRegion | null,
   sunElevation: number,
   season: SeasonState,
@@ -230,7 +240,7 @@ function seasoned(
   const density = theme === "pixel" ? 1 : MODERN_DENSITY;
   const out = createSurface(FRAME_WIDTH * density, FRAME_HEIGHT * density);
   const s = { ...referenceScene(focus, framed(focus), sunElevation), season };
-  (theme === "pixel" ? drawPixelScene : drawModernScene)(s, out);
+  drawOf(theme)(s, out);
   return out;
 }
 
@@ -310,4 +320,22 @@ export const REFERENCE_FRAMES: Readonly<Record<string, () => Surface>> = {
   "snow-auvergne-rhone-alpes-plains-pixel": () => snowed("pixel", "84", true),
   "snow-auvergne-rhone-alpes-mountains-modern": () => snowed("modern", "84", false),
   "snow-auvergne-rhone-alpes-plains-modern": () => snowed("modern", "84", true),
+  // The neon theme's weather and seasons (B-043, D-086): clouds outlined, rain,
+  // fog, a bolt; a season, a turn between two; snow on the ground, with the sky's
+  // weather shown and hidden (D-072).
+  "neon-weather-france-mixed-t1.3": () => weathered("neon", null, 35, MIXED_WEATHER, 1.3),
+  "neon-weather-normandie-fog-t1.3": () =>
+    weathered("neon", "28", 35, overrideWeather("fog", WEATHER_TIME_MS), 1.3),
+  "neon-weather-normandie-storm-night-t0.1": () =>
+    weathered("neon", "28", -20, overrideWeather("storm", WEATHER_TIME_MS), 0.1),
+  "neon-weather-auvergne-rhone-alpes-snow-t1.3": () =>
+    weathered("neon", "84", 35, overrideWeather("snow", WEATHER_TIME_MS), 1.3),
+  "neon-season-normandie-winter": () =>
+    seasoned("neon", "28", 35, { from: "winter", to: "winter", share: 0 }),
+  "neon-season-auvergne-rhone-alpes-turning-autumn": () =>
+    seasoned("neon", "84", 35, { from: "summer", to: "autumn", share: 0.5 }),
+  "neon-season-normandie-spring-night": () =>
+    seasoned("neon", "28", -20, { from: "spring", to: "spring", share: 0 }),
+  "neon-snow-auvergne-rhone-alpes-plains": () => snowed("neon", "84", true),
+  "neon-snow-auvergne-rhone-alpes-mountains-hidden": () => snowed("neon", "84", false, true),
 };

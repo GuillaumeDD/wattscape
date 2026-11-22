@@ -526,7 +526,7 @@ checked against real screens.
 | Clouds drifting                     | `wind_*_10m`      | mean wind of the readings shown, in 5 km/h steps; the clouds move with it        |
 | Neon: a plant's outline brightness  | `tch_*` (a)       | its source's colour × (0.35 + 0.65·a); 0.35 with no figure: dim, never dark      |
 
-Both themes draw these rows from the same figures with the same formulas; the
+The three themes draw these rows from the same figures with the same formulas; the
 modern one (`src/render/art/modern-plants.ts`) draws a puff as a soft spot trailing
 two fainter ones, and the blades of a farm that does not turn stand still, one up.
 
@@ -976,8 +976,20 @@ by `tools/screenshots.ts` (`step-22-neon-*.png`).
   covers France only), so the cliff at the border draws no hatching. Where a
   column's run of ground is taller than a scene pixel (a cliff), its lines are
   spread, dim, over the whole run.
-- **Weather and seasons:** the modern theme's for now; their neon drawings are
-  B-043.
+- **Weather** (B-043, D-086, direction A, contours; `src/render/neon-weather.ts`):
+  the same clouds, fog, rain, snow and lightning, from the same figures (§
+  Data-to-scene mapping), drawn as light. A cloud is a line of light along its
+  edge, from its depth in the mask (`cloudLine`), in its group's colour (fair
+  white, rain blue, storm violet), over a light veil that dims the map by at most
+  a fifth; fog lies as scan lines of violet light, one scene row in three; rain
+  falls as streaks of blue light, snow as dots with a faint ring, both between the
+  clouds only; a bolt is drawn the same way, white. The light adds to the frame.
+- **Seasons and snow** (B-043): the season is the colour of the contour lines,
+  winter ice blue, spring green, summer the theme's violet, autumn amber
+  (`NEON_SEASON_LINES`), turning by patches as the modern theme's tints do (§
+  Seasons). Snow on the ground (`snowCoverOf`) lightens the land's ground and
+  whitens its contour lines, also with the sky's weather hidden (D-072). The
+  colours are **proposed** (D-086).
 - **Determinism:** as the modern theme's, additions, multiplications, divisions,
   floors and square roots only for the still frame. Its frames are hashed in Node
   and in Chromium like the others.

@@ -50,7 +50,7 @@ Statuses: `todo` / `wip` / `done`.
 | B-040 | Repository link in the credits    | The credits line ends with a link to the GitHub repository, FR + EN label, `rel="noopener noreferrer"`; nothing fetched, the CSP unchanged                          | done   |
 | B-041 | Neon theme: the map, the choice   | A third theme (D-084), in the panel and `?theme=neon`: coast, region border, contours, rivers, lamps as lines of light; plate; frames                               | done   |
 | B-042 | Neon theme: plants, landmarks     | The modern drawings outlined in light, each plant in its source colour, brighter with its activity (a new mapping row); cost measured                               | done   |
-| B-043 | Neon theme: weather, seasons      | Clouds outlined, rain as streaks, fog as scan lines, ground snow; the season as the contours' colour (D-086); board drawn first                                     | todo   |
+| B-043 | Neon theme: weather, seasons      | Clouds outlined, rain as streaks, fog as scan lines, ground snow; the season as the contours' colour (D-086); board drawn first                                     | done   |
 
 ## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
 
