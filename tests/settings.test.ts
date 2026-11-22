@@ -267,13 +267,21 @@ describe("theme (?theme=, G-011)", () => {
     }).not.toThrow();
   });
 
-  it("opens with the URL's theme, then the remembered one, then pixel art", () => {
+  it("opens with the URL's theme, then the remembered one, then the modern theme", () => {
     const remembered = memoryStorage({ "wattscape.theme": "modern" });
     expect(initialTheme("?theme=pixel", remembered)).toBe("pixel");
     expect(initialTheme("", remembered)).toBe("modern");
     expect(initialTheme("?theme=neon", remembered)).toBe("modern");
-    expect(initialTheme("", memoryStorage())).toBe("pixel");
-    expect(initialTheme("", throwing)).toBe("pixel");
+    expect(initialTheme("", memoryStorage())).toBe("modern");
+    expect(initialTheme("", throwing)).toBe("modern");
+    expect(initialTheme("?theme=neon", memoryStorage())).toBe("modern");
+  });
+
+  it("keeps a stored pixel-art choice over the modern default (D-079)", () => {
+    const pixel = memoryStorage({ "wattscape.theme": "pixel" });
+    expect(initialTheme("", pixel)).toBe("pixel");
+    expect(initialTheme("?theme=neon", pixel)).toBe("pixel");
+    expect(initialTheme("?theme=modern", pixel)).toBe("modern");
   });
 });
 

@@ -17,7 +17,8 @@
  * `--throttle N`, Chromium slows the CPU N times (a slower laptop).
  *
  * `soak`: the live page (real clock, live éCO2mix) left alone in a region for
- * `minutes`, as a screensaver is. Every minute, after a forced garbage collection, it
+ * `minutes`, as a screensaver is, in the theme a first visit opens in (the modern
+ * one since D-079). Every minute, after a forced garbage collection, it
  * writes one line: the JS heap, the DOM counters, the busy time since the last line
  * and the requests made. The heap must stay flat.
  */

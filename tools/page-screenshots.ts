@@ -10,7 +10,8 @@
  * (pixel art) and from Provence-Alpes-Côte d'Azur at night (modern theme), on a
  * 1280 × 720 window, and from Bretagne on a phone; a picture mid-flight, 5 s after
  * Play, and one on arrival, the controls woken by a move of the mouse. The
- * screensaver mode (B-021, `step-16-screensaver-*.png`), as its section below says.
+ * screensaver mode (B-021, `step-16-screensaver-*.png`) and the default theme
+ * (B-037, `step-18-default-*.png`), as their sections below say.
  */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
@@ -42,7 +43,13 @@ const browser = await chromium.launch(
 const DAY = "sample=day&at=2026-11-12T09:45Z&weather=clear";
 const NIGHT = "sample=night&at=2026-11-12T01:00Z&weather=clear";
 const shots = [
-  { name: "normandie-day", query: `area=53&${DAY}`, width: 1280, height: 720, phone: false },
+  {
+    name: "normandie-day",
+    query: `area=53&${DAY}&theme=pixel`,
+    width: 1280,
+    height: 720,
+    phone: false,
+  },
   {
     name: "occitanie-night-modern",
     query: `area=93&${NIGHT}&theme=modern`,
@@ -50,7 +57,7 @@ const shots = [
     height: 720,
     phone: false,
   },
-  { name: "phone", query: `area=53&${DAY}`, width: 390, height: 844, phone: true },
+  { name: "phone", query: `area=53&${DAY}&theme=pixel`, width: 390, height: 844, phone: true },
 ];
 for (const shot of shots) {
   const page = await browser.newPage({
@@ -80,8 +87,8 @@ for (const shot of shots) {
 // Provence-Alpes-Côte d'Azur at night (modern theme). Each on arrival at the tour's
 // first stop, the mouse left still: no controls, no cursor.
 const savers = [
-  { name: "day", query: `screensaver&area=53&${DAY}`, pressF: false },
-  { name: "winter", query: `screensaver&area=53&${DAY}&season=winter`, pressF: false },
+  { name: "day", query: `screensaver&area=53&${DAY}&theme=pixel`, pressF: false },
+  { name: "winter", query: `screensaver&area=53&${DAY}&season=winter&theme=pixel`, pressF: false },
   { name: "night-modern", query: `area=93&${NIGHT}&theme=modern`, pressF: true },
 ];
 for (const shot of savers) {
@@ -97,6 +104,27 @@ for (const shot of savers) {
   await page.waitForTimeout(16_000);
   await page.screenshot({ path: `${OUT}/step-16-screensaver-${shot.name}.png` });
   console.log(shot.name, await page.locator("#survey-area").textContent());
+  await page.close();
+}
+
+// The default theme (B-037, `step-18-default-*.png`): a first visit, with no
+// `?theme=` and nothing stored, opens in the modern theme (D-079); Normandie and
+// Provence-Alpes-Côte d'Azur, by day and at night, once the intro has landed.
+const firsts = [
+  { name: "normandie-day", query: `area=28&${DAY}` },
+  { name: "normandie-night", query: `area=28&${NIGHT}` },
+  { name: "provence-day", query: `area=93&${DAY}` },
+  { name: "provence-night", query: `area=93&${NIGHT}` },
+];
+for (const shot of firsts) {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  page.on("pageerror", (error) => {
+    throw error;
+  });
+  await page.goto(`${BASE}?${shot.query}`);
+  await page.waitForTimeout(10_000);
+  await page.screenshot({ path: `${OUT}/step-18-default-${shot.name}.png` });
+  console.log(shot.name, await page.locator("#theme").inputValue());
   await page.close();
 }
 await browser.close();

@@ -32,7 +32,7 @@ if (canvas instanceof HTMLCanvasElement) {
     const end = Date.UTC(2026, 10, 12, 12);
     const span = 3 * 60 * 60 * 1000;
     const fast = replayClock(end - span, span, 6000);
-    const view = mountSceneView(canvas, fast, area, true);
+    const view = mountSceneView(canvas, fast, area, true, () => undefined, theme);
     startReplayFeed(
       fast,
       end,
