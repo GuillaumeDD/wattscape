@@ -30,6 +30,7 @@ import {
   weatherFromQuery,
 } from "./ui/settings";
 import { startWeatherFeed, type WeatherFeed, type WeatherState } from "./ui/weather-feed";
+import { weatherNoteText } from "./ui/weather-note";
 import { overrideWeather, sceneWeather } from "./scene/weather";
 import { anySnow } from "./scene/snow";
 import { type WeatherGroup } from "./data/open-meteo";
@@ -192,49 +193,24 @@ function renderPlantsNote(): void {
   setText("plants-note", t(keys[state.kind]).replace("{time}", time));
 }
 
-const WEATHER_NAMES = {
-  clear: "weatherClear",
-  cloudy: "weatherCloudy",
-  fog: "weatherFog",
-  drizzle: "weatherDrizzle",
-  rain: "weatherRain",
-  snow: "weatherSnow",
-  storm: "weatherStorm",
-} as const satisfies Record<WeatherGroup, MessageKey>;
-
-/**
- * Where the weather comes from, and its time, or that it is imposed by `?weather=`;
- * turned off, that it is hidden, and where the snow still on the ground comes from.
- */
+/** The weather note: its sources and time, and the inferred snow while the panel is open. */
 function renderWeatherNote(): void {
-  if (!weatherOn) {
-    const t = (key: MessageKey): string => translate(locale, key);
-    const hidden = t(snowShown ? "weatherHiddenSnow" : "weatherHidden");
-    setText("weather-note", snowShown ? `${hidden} ${weatherSource()}` : hidden);
-    return;
-  }
-  setText("weather-note", weatherSource());
-}
-
-/** Where the weather comes from, and its time, or that it is imposed by `?weather=`. */
-function weatherSource(): string {
-  const t = (key: MessageKey): string => translate(locale, key);
-  const state = weatherState;
-  if (weatherOverride !== undefined)
-    return t("weatherOverride").replace("{group}", t(WEATHER_NAMES[weatherOverride]));
-  if (state.kind === "loading" || state.kind === "unavailable")
-    return t(state.kind === "loading" ? "weatherLoading" : "weatherUnavailable");
-  const keys = {
-    live: "weatherLive",
-    stale: "weatherStale",
-    ahead: "weatherAhead",
-  } as const satisfies Record<typeof state.kind, MessageKey>;
-  const time = new Intl.DateTimeFormat(locale, {
-    ...(state.kind === "live" ? {} : { dateStyle: "short" as const }),
-    timeStyle: "short",
-  }).format(new Date(state.timeMs));
-  const snow = snowShown && state.kind !== "ahead" ? ` ${t("weatherSnowInferred")}` : "";
-  return t(keys[state.kind]).replace("{time}", time) + snow;
+  const text = weatherNoteText(
+    {
+      weatherOn,
+      snowShown,
+      folded: panelFolded,
+      override: weatherOverride,
+      state: weatherState,
+    },
+    (key) => translate(locale, key),
+    (ms, dated) =>
+      new Intl.DateTimeFormat(locale, {
+        ...(dated ? { dateStyle: "short" as const } : {}),
+        timeStyle: "short",
+      }).format(new Date(ms)),
+  );
+  setText("weather-note", text);
 }
 
 /** The panel's switches, as the viewer left them. */
@@ -447,6 +423,7 @@ document.getElementById("panel-toggle")?.addEventListener("click", () => {
   panelFolded = !panelFolded;
   savePanelFolded(storage, panelFolded);
   renderPanel();
+  renderWeatherNote();
   renderCaption();
 });
 

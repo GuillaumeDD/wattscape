@@ -655,7 +655,8 @@ indisponibles"); each plant's caption (B-020) says it too. A stale reading (over
     cell; only if that cell's mean is lower than the point, at the cells within
     8 km that are high enough. "At its height" is by elevation
     class. The page note says the snow is inferred whenever a reading reports
-    some (`weatherSnowInferred`).
+    some (`weatherSnowInferred`), while the panel is open: folded, the note keeps
+    to the sources and their time (B-039, `src/ui/weather-note.ts`).
   - **Drawn:** pixel art paints the cell in the peaks' white (`snow`), shaded and
     veiled as the land; the modern theme blends the land's tint to the peaks'
     white, with a soft edge over 3 × 3 cells (`softSnow`), never abroad. Over the season's colours; the
