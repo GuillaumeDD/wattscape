@@ -46,6 +46,8 @@ Statuses: `todo` / `wip` / `done`.
 | B-036 | Camera still                      | A switch in the panel, `?drift=off` and `Space`, remembered: the camera then moves only on input or in survey mode (D-074)                                          | done   |
 | B-037 | Modern theme by default           | The page opens in the modern theme; a stored choice kept as Q-63 says; `?theme=pixel` still works; tests, frames, screenshots and docs that assume pixel art, swept | done   |
 | B-038 | Towerless nuclear: on or off      | The 7 sites without towers tell running from stopped by day and at night, both themes; options drawn on one board, chosen (Q-64); mapping row and frames updated    | done   |
+| B-039 | Snow note folded away             | The folded panel keeps the weather's source and time, not the inferred-snow sentence; open, unchanged; FR + EN; `tests/weather-note.test.ts`                        | done   |
+| B-040 | Repository link in the credits    | The credits line ends with a link to the GitHub repository, FR + EN label, `rel="noopener noreferrer"`; nothing fetched, the CSP unchanged                          | done   |
 
 ## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
 

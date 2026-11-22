@@ -24,6 +24,13 @@ describe("index.html", () => {
     );
   });
 
+  it("links to the repository from the credits too (B-040)", () => {
+    const credits = html.slice(html.indexOf('<footer id="credits">'), html.indexOf("</footer>"));
+    expect(credits).toMatch(
+      /<a\s+id="credits-repo"\s+href="https:\/\/github\.com\/GuillaumeDD\/wattscape"\s+rel="noopener noreferrer"/,
+    );
+  });
+
   it("opens every link out without handing the page to it", () => {
     const links = [...html.matchAll(/<a\b[^>]*>/g)].map((m) => m[0]);
     const out = links.filter((a) => /href="https?:/.test(a));
