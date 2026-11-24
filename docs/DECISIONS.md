@@ -1578,3 +1578,30 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
 - **Revisit if:** the sum drifts from the national row by more than a rounding of
   the shares (say 1 % of production), or the regions stop publishing a step
   together, leaving France's legend often empty.
+
+## D-086 — The neon theme's weather and seasons: contours
+
+- **Context:** B-043 draws the weather (B-018) and the seasons (B-022) in the neon
+  theme, chosen on a board first (D-068), with the cost measured on a prototype
+  (AGENTS.md § Performance). Two directions were prototyped on 2026-11-22
+  (`docs/screenshots/step-23-neon-weather-mockup-*.png`; PRD Q-70): A, contours,
+  the clouds as outlines of light over a light veil, rain as streaks of light, fog
+  as scan lines, the season as the colour of the contour lines (ice blue, green,
+  violet, amber); B, veils, the clouds as dark veils with a rim on their lit side,
+  rain as dots, fog as a violet haze, a storm cloud lit from inside, the season as
+  a tint of the ground. In both, snow on the ground lightens the ground and whitens
+  the contours, and stays when the weather is hidden (D-072).
+- **Cost:** a script in Node on the prototype (not `tools/perf.ts`), 960 × 540, the
+  three in turn, twice, median per view over six views: a still frame took 129–197
+  ms with A, 134–214 with B, 139–268 with the modern theme's weather drawn in the
+  neon theme (as merged in B-041); a step of the motion took 0.6–2.8 ms in all
+  three. Neither costs more than what it replaces.
+- **Options:** A, B, or a mix drawn on the same board first (D-068); A recommended
+  (the theme's own idiom, lines of light; B darkens the map).
+- **Decision:** A, contours (Guillaume, 2026-11-22, decision card). Proposed by
+  Claude and still open to him: the four seasons' line colours, the clouds' line
+  colours by group (fair, rain, storm), the snow's ground and line colours.
+- **Why:** Guillaume's choice; it keeps every element of the theme a line of light,
+  at no extra cost.
+- **Revisit if:** the cloud outlines read as clutter over the contours on a real
+  screen, or the season's line colour is not noticed.

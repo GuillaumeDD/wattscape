@@ -50,7 +50,7 @@ Statuses: `todo` / `wip` / `done`.
 | B-040 | Repository link in the credits    | The credits line ends with a link to the GitHub repository, FR + EN label, `rel="noopener noreferrer"`; nothing fetched, the CSP unchanged                          | done   |
 | B-041 | Neon theme: the map, the choice   | A third theme (D-084), in the panel and `?theme=neon`: coast, region border, contours, rivers, lamps as lines of light; plate; frames                               | done   |
 | B-042 | Neon theme: plants, landmarks     | The modern drawings outlined in light, each plant in its source colour, brighter with its activity (a new mapping row); cost measured                               | done   |
-| B-043 | Neon theme: weather, seasons      | Clouds, rain, fog and ground snow in the neon idiom, the seasons as a shift of the ground's tint; drawn on a board before coding                                    | todo   |
+| B-043 | Neon theme: weather, seasons      | Clouds outlined, rain as streaks, fog as scan lines, ground snow; the season as the contours' colour (D-086); board drawn first                                     | todo   |
 
 ## Next steps (proposed 2026-11-21, for Guillaume to order: PRD Q-58)
 
@@ -286,5 +286,8 @@ item, in this order:
 13. **Neon theme: weather and seasons** (B-043).
     - Goal: the weather of B-018 and the seasons of B-022 in the neon idiom.
     - Acceptance: options drawn on one board before coding (D-068), with their
-      cost; the ground snow kept when the weather is off (D-072); frames.
+      cost (done: direction A, contours, D-086); the ground snow kept when the
+      weather is off (D-072); unit tests per element (cloud outline, rain, fog,
+      flake, bolt; each season's colour, a turn between two; snow); frames with
+      weather, with each season and with snow; cost against the merged theme.
     - Effort: M: the board, then one PR.
