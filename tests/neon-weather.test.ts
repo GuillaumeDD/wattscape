@@ -178,7 +178,8 @@ describe("the neon seasons and snow", () => {
 
   const camera = fitBox(areaBox(coarseLayer(), "84"), FRAME_WIDTH, FRAME_HEIGHT);
   const draw = (season: SeasonState, extra: Partial<Scene> = {}): Surface => {
-    const out = createSurface(W, H);
+    // One output pixel per scene pixel: the colours are the same, at a quarter of the work.
+    const out = createSurface(FRAME_WIDTH, FRAME_HEIGHT);
     drawNeonScene({ ...referenceScene("84", camera, 35), season, ...extra }, out);
     return out;
   };

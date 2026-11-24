@@ -57,7 +57,7 @@ import {
   NEON_SNOW_GROUND,
   NEON_SNOW_LINE,
 } from "./neon-weather.ts";
-import { turnedAt } from "../scene/season.ts";
+import { type SeasonState, turnedAt } from "../scene/season.ts";
 import { snowCoverOf, softSnow } from "../scene/snow.ts";
 
 const hex = (s: string): Rgb => [
@@ -179,6 +179,58 @@ interface Fields {
 
 const fieldsCache = new WeakMap<TerrainLayer, Fields>();
 
+interface Colours {
+  readonly season: SeasonState;
+  readonly snowCover: Uint8Array | null;
+  readonly ground: Float64Array;
+  readonly lines: Float64Array;
+}
+const coloursCache = new WeakMap<TerrainLayer, Colours>();
+
+/**
+ * The season (B-022) on the contour lines, by patches as the modern theme turns its
+ * tints (src/scene/season.ts), and the snow on the ground (src/scene/snow.ts), kept
+ * when the sky's weather is hidden (D-072): per cell, apart from the other fields,
+ * so a change of focus or of lamps does not work them out again.
+ */
+function coloursOf(
+  layer: TerrainLayer,
+  season: SeasonState,
+  snowCover: Uint8Array | null,
+): Colours {
+  const known = coloursCache.get(layer);
+  if (
+    known !== undefined &&
+    known.snowCover === snowCover &&
+    known.season.from === season.from &&
+    known.season.to === season.to &&
+    known.season.share === season.share
+  )
+    return known;
+  const { columns, rows, km } = layer;
+  const n = columns * rows;
+  const ground = new Float64Array(n * 3);
+  const lines = new Float64Array(n * 3);
+  const snowy = snowCover === null ? null : softSnow(layer, snowCover);
+  const from = NEON_SEASON_LINES[season.from];
+  const to = NEON_SEASON_LINES[season.to];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < columns; c++) {
+      const i = r * columns + c;
+      const t = season.share > 0 ? turnedAt(season, (c + 0.5) * km, (r + 0.5) * km) : 0;
+      const white = snowy === null ? 0 : (snowy[i] ?? 0);
+      for (let ch = 0; ch < 3; ch++) {
+        const l = (from[ch] ?? 0) + ((to[ch] ?? 0) - (from[ch] ?? 0)) * t;
+        const g = LAND_DAY[ch] ?? 0;
+        ground[i * 3 + ch] = g + ((NEON_SNOW_GROUND[ch] ?? 0) - g) * white;
+        lines[i * 3 + ch] = l + ((NEON_SNOW_LINE[ch] ?? 0) - l) * white;
+      }
+    }
+  const colours = { season, snowCover, ground, lines };
+  coloursCache.set(layer, colours);
+  return colours;
+}
+
 /** The fields of a layer for a scene: made again when the focus or the lamps change. */
 function fieldsOf(layer: TerrainLayer, scene: Scene): Fields {
   const focusKind = scene.focus === null ? -1 : kindOfRegion(scene.focus);
@@ -268,28 +320,7 @@ function fieldsOf(layer: TerrainLayer, scene: Scene): Fields {
   }
   const lamps = blur(glow, columns, rows);
   for (let i = 0; i < n; i++) lamps[i] = Math.min(1, (lamps[i] ?? 0) * 2.2);
-  // The season (B-022) on the contour lines, by patches as the modern theme turns
-  // its tints (src/scene/season.ts), and the snow on the ground (src/scene/snow.ts),
-  // kept when the sky's weather is hidden (D-072).
-  const ground = new Float64Array(n * 3);
-  const lines = new Float64Array(n * 3);
-  const snowy = snowCover === null ? null : softSnow(layer, snowCover);
-  for (let r = 0; r < rows; r++)
-    for (let c = 0; c < columns; c++) {
-      const i = r * columns + c;
-      const t = turnedAt(season, (c + 0.5) * km, (r + 0.5) * km);
-      let g: Rgb = LAND_DAY;
-      let l = mixRgb(NEON_SEASON_LINES[season.from], NEON_SEASON_LINES[season.to], t);
-      const white = snowy === null ? 0 : (snowy[i] ?? 0);
-      if (white > 0) {
-        g = mixRgb(g, NEON_SNOW_GROUND, white);
-        l = mixRgb(l, NEON_SNOW_LINE, white);
-      }
-      for (let ch = 0; ch < 3; ch++) {
-        ground[i * 3 + ch] = g[ch] ?? 0;
-        lines[i * 3 + ch] = l[ch] ?? 0;
-      }
-    }
+  const { ground, lines } = coloursOf(layer, season, snowCover);
   const fields: Fields = {
     snowCover,
     ground,
