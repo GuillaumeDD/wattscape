@@ -101,14 +101,14 @@ describe("drawNeonScene", () => {
     expect(() => drawNeonScene(scene, createSurface(scene.width * 2, scene.height * 3))).toThrow();
   });
 
-  it("draws the same frame from the same scene, at 2 and at the sharp 4", () => {
-    for (const density of [2, 4]) {
-      const scene = referenceScene("84", framed("84"), -20);
-      const a = hashSurface(draw(scene, density));
-      // Another scene in between: nothing kept from it shows.
-      draw(referenceScene("28", framed("28"), 35), density);
-      expect(hashSurface(draw(scene, density))).toBe(a);
-    }
+  // One case per density: both in one test passed in 3 s here, then timed out at 5 s
+  // in CI once the seasons and the snow were added (B-043).
+  it.each([2, 4])("draws the same frame from the same scene, at density %i", (density) => {
+    const scene = referenceScene("84", framed("84"), -20);
+    const a = hashSurface(draw(scene, density));
+    // Another scene in between: nothing kept from it shows.
+    draw(referenceScene("28", framed("28"), 35), density);
+    expect(hashSurface(draw(scene, density))).toBe(a);
   });
 
   it("is dark: most pixels well under mid-grey, by day and at night", () => {

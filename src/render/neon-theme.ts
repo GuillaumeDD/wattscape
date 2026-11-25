@@ -11,7 +11,8 @@
  *
  * Same view, density and offsets as the modern theme (./modern-theme.ts), so a
  * camera frames the same ground in all three themes. The plants and the landmarks
- * are the modern theme's drawings until they have their own (B-042).
+ * are the modern theme's drawings, outlined in light (B-042); the weather and the
+ * seasons are drawn in ./neon-weather.ts (B-043).
  *
  * Pure, and the same in every engine: additions, multiplications, divisions, floors
  * and square roots decide every pixel of the still frame (AGENTS.md § Determinism).
@@ -38,7 +39,6 @@ import {
 } from "./modern-theme.ts";
 import { type Brush } from "./art/shapes.ts";
 import { type Source } from "../data/eco2mix.ts";
-import { animateModernWeather, drawModernWeather } from "./modern-weather.ts";
 import { type Rgb } from "./palette.ts";
 import {
   lampLevels,
@@ -50,6 +50,15 @@ import {
 import { type Surface } from "./surface.ts";
 import type { Drawn, Mark, Rect, Theme } from "./theme.ts";
 import { cloudMask } from "./weather-art.ts";
+import {
+  animateNeonWeather,
+  drawNeonWeather,
+  NEON_SEASON_LINES,
+  NEON_SNOW_GROUND,
+  NEON_SNOW_LINE,
+} from "./neon-weather.ts";
+import { type SeasonState, turnedAt } from "../scene/season.ts";
+import { snowCoverOf, softSnow } from "../scene/snow.ts";
 
 const hex = (s: string): Rgb => [
   parseInt(s.slice(1, 3), 16),
@@ -138,6 +147,7 @@ function blur(src: Float64Array, columns: number, rows: number): Float64Array {
 /** What a layer gives every frame: fields per cell, read between cells. */
 interface Fields {
   readonly towns: readonly Town[];
+  readonly snowCover: Uint8Array | null;
   readonly key: string;
   /** Smoothed altitude, metres. */
   readonly height: Float64Array;
@@ -159,17 +169,78 @@ interface Fields {
   readonly shade: Float64Array;
   /** The towns' lamps, 0 to 1; all 0 by day. */
   readonly lamps: Float64Array;
+  /**
+   * Per cell, three by three (r, g, b): the land's ground by day, lighter under
+   * snow, and the contour lines' colour, the season's, white under snow (B-043).
+   */
+  readonly ground: Float64Array;
+  readonly lines: Float64Array;
 }
 
 const fieldsCache = new WeakMap<TerrainLayer, Fields>();
+
+interface Colours {
+  readonly season: SeasonState;
+  readonly snowCover: Uint8Array | null;
+  readonly ground: Float64Array;
+  readonly lines: Float64Array;
+}
+const coloursCache = new WeakMap<TerrainLayer, Colours>();
+
+/**
+ * The season (B-022) on the contour lines, by patches as the modern theme turns its
+ * tints (src/scene/season.ts), and the snow on the ground (src/scene/snow.ts), kept
+ * when the sky's weather is hidden (D-072): per cell, apart from the other fields,
+ * so a change of focus or of lamps does not work them out again.
+ */
+function coloursOf(
+  layer: TerrainLayer,
+  season: SeasonState,
+  snowCover: Uint8Array | null,
+): Colours {
+  const known = coloursCache.get(layer);
+  if (
+    known !== undefined &&
+    known.snowCover === snowCover &&
+    known.season.from === season.from &&
+    known.season.to === season.to &&
+    known.season.share === season.share
+  )
+    return known;
+  const { columns, rows, km } = layer;
+  const n = columns * rows;
+  const ground = new Float64Array(n * 3);
+  const lines = new Float64Array(n * 3);
+  const snowy = snowCover === null ? null : softSnow(layer, snowCover);
+  const from = NEON_SEASON_LINES[season.from];
+  const to = NEON_SEASON_LINES[season.to];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < columns; c++) {
+      const i = r * columns + c;
+      const t = season.share > 0 ? turnedAt(season, (c + 0.5) * km, (r + 0.5) * km) : 0;
+      const white = snowy === null ? 0 : (snowy[i] ?? 0);
+      for (let ch = 0; ch < 3; ch++) {
+        const l = (from[ch] ?? 0) + ((to[ch] ?? 0) - (from[ch] ?? 0)) * t;
+        const g = LAND_DAY[ch] ?? 0;
+        ground[i * 3 + ch] = g + ((NEON_SNOW_GROUND[ch] ?? 0) - g) * white;
+        lines[i * 3 + ch] = l + ((NEON_SNOW_LINE[ch] ?? 0) - l) * white;
+      }
+    }
+  const colours = { season, snowCover, ground, lines };
+  coloursCache.set(layer, colours);
+  return colours;
+}
 
 /** The fields of a layer for a scene: made again when the focus or the lamps change. */
 function fieldsOf(layer: TerrainLayer, scene: Scene): Fields {
   const focusKind = scene.focus === null ? -1 : kindOfRegion(scene.focus);
   const levels = lampLevels(scene);
-  const key = `${String(focusKind)}|${levels.join()}|${String(scene.light.emissive)}`;
+  const season = scene.season;
+  const snowCover = snowCoverOf(layer, scene.weather);
+  const key = `${String(focusKind)}|${levels.join()}|${String(scene.light.emissive)}|${season.from}|${season.to}|${String(season.share)}`;
   const known = fieldsCache.get(layer);
-  if (known?.key === key && known.towns === scene.towns) return known;
+  if (known?.key === key && known.towns === scene.towns && known.snowCover === snowCover)
+    return known;
   const { columns, rows, km, kinds, elevation } = layer;
   const n = kinds.length;
   const raw = new Float64Array(n);
@@ -249,7 +320,11 @@ function fieldsOf(layer: TerrainLayer, scene: Scene): Fields {
   }
   const lamps = blur(glow, columns, rows);
   for (let i = 0; i < n; i++) lamps[i] = Math.min(1, (lamps[i] ?? 0) * 2.2);
+  const { ground, lines } = coloursOf(layer, season, snowCover);
   const fields: Fields = {
+    snowCover,
+    ground,
+    lines,
     towns: scene.towns,
     key,
     height,
@@ -314,7 +389,6 @@ function drawGround(frame: Frame, scene: Scene, layer: TerrainLayer): void {
   const { km, columns, rows } = layer;
   const rise = scale / RISE_METRES_PER_KM;
   const lift = Math.ceil(HIGHEST_METRES * rise) + 1;
-  const landBase = mixRgb(LAND_DAY, LAND_NIGHT, night);
   const seaBase = mixRgb(SEA_DAY, SEA_NIGHT, night);
   const skyLow = mixRgb(SKY_DAY_LOW, SKY_NIGHT_LOW, night);
   const gain = 0.75 + 0.35 * night;
@@ -377,9 +451,19 @@ function drawGround(frame: Frame, scene: Scene, layer: TerrainLayer): void {
       const inFocus = at(f.focus);
       // The ground: dark, the land a little lighter, shaded, brighter in focus.
       const base = landShare * inside * (0.55 + 0.45 * at(f.shade)) * (0.55 + 0.45 * inFocus);
-      let r = seaBase[0] + (landBase[0] * 1.6 - seaBase[0]) * base;
-      let g = seaBase[1] + (landBase[1] * 1.6 - seaBase[1]) * base;
-      let b = seaBase[2] + (landBase[2] * 1.6 - seaBase[2]) * base;
+      // The land's ground and its contours' colour, by season and snow.
+      const gr = f.ground;
+      const at3 = (a: Float64Array, ch: number): number =>
+        (a[i00 * 3 + ch] ?? 0) * w00 +
+        (a[i01 * 3 + ch] ?? 0) * w01 +
+        (a[i10 * 3 + ch] ?? 0) * w10 +
+        (a[i11 * 3 + ch] ?? 0) * w11;
+      const g0 = at3(gr, 0) + (LAND_NIGHT[0] - at3(gr, 0)) * night;
+      const g1 = at3(gr, 1) + (LAND_NIGHT[1] - at3(gr, 1)) * night;
+      const g2 = at3(gr, 2) + (LAND_NIGHT[2] - at3(gr, 2)) * night;
+      let r = seaBase[0] + (g0 * 1.6 - seaBase[0]) * base;
+      let g = seaBase[1] + (g1 * 1.6 - seaBase[1]) * base;
+      let b = seaBase[2] + (g2 * 1.6 - seaBase[2]) * base;
       // The lines, on the run's top pixel.
       const coast = neonGlow(Math.abs(at(f.coast)) * scale, coastWidth, 2.5 * density);
       // Dimmer abroad and around other regions; full along the area's own shore,
@@ -410,9 +494,9 @@ function drawGround(frame: Frame, scene: Scene, layer: TerrainLayer): void {
         }
         const cl =
           clamp01(1 - dist / slope) * 0.45 * (0.35 + 0.65 * inFocus) * inside * at(f.known);
-        lr += NEON_CONTOUR[0] * cl;
-        lg += NEON_CONTOUR[1] * cl;
-        lb += NEON_CONTOUR[2] * cl;
+        lr += at3(f.lines, 0) * cl;
+        lg += at3(f.lines, 1) * cl;
+        lb += at3(f.lines, 2) * cl;
       }
       const lamp = at(f.lamps);
       if (lamp > 0) {
@@ -915,7 +999,7 @@ export function drawNeonScene(scene: Scene, out: Surface): Drawn {
   }
   if (map !== out.data) spread(map, scene.width * density, scene.height * density, out);
 
-  // The weather (B-018), the modern theme's until the neon one's (B-043).
+  // The weather (B-018), as lines of light (B-043).
   const grid = scene.weatherHidden === true ? null : weatherGrid(scene.coarse, scene.weather);
   const weather =
     grid === null
@@ -924,7 +1008,7 @@ export function drawNeonScene(scene: Scene, out: Surface): Drawn {
           grid,
           mask: cloudMask(grid, scene.camera, scene.width, scene.height, sharp, scene.timeMs),
         };
-  if (weather !== null) drawModernWeather(scene, weather.grid, weather.mask, out, null);
+  if (weather !== null) drawNeonWeather(scene, weather.grid, weather.mask, out);
   const falling =
     weather !== null &&
     anyPrecipitation(weather.grid, viewBox(scene.camera, scene.width, scene.height));
@@ -984,7 +1068,7 @@ export function drawNeonScene(scene: Scene, out: Surface): Drawn {
         drawModernMotion(motion, p.plant.site, p.plant.activity, p.x, p.y, size, seconds);
       }
       if (!falling) return motion.touched();
-      animateModernWeather(scene, weather.grid, weather.mask, target, seconds);
+      animateNeonWeather(scene, weather.grid, weather.mask, target, seconds);
       return [{ left: 0, top: 0, right: target.width, bottom: target.height }];
     },
   };

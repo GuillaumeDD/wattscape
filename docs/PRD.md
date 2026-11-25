@@ -303,7 +303,7 @@ The feature funnel: ideas land here first, then graduate to `docs/BACKLOG.md`.
 | G-021 | A link to the code repository in the page (Guillaume, 2026-11-21; B-031)               | done     |
 | G-022 | Survey mode: play, pause, stop, slow flights (Guillaume, 2026-11-21; B-032)            | done     |
 | G-023 | The wholesale electricity price, if an open, keyless source is GO                      | proposed |
-| G-024 | A futuristic, minimal neon theme, lines of light (Guillaume, 2026-11-21; Q-68, B-041)  | planned  |
+| G-024 | A futuristic, minimal neon theme, lines of light (Guillaume, 2026-11-21; Q-68, B-041)  | done     |
 | G-025 | The idle drift switched off by the viewer (Guillaume, 2026-11-21; B-036)               | done     |
 | G-026 | Survey lap in budget: longer stays, fewer frames in slow flights (D-075)               | proposed |
 | G-027 | The modern theme by default (Guillaume, 2026-11-21; B-037)                             | done     |

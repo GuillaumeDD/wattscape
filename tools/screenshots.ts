@@ -18,7 +18,7 @@
  * `step-12-weather-*.png`), the seasons (B-022, `step-13-seasons-*.png`), and the snow
  * on the ground (B-022, `step-14-snow-*.png`), and the beacon of the nuclear plants
  * without towers (B-038, `step-19-beacon-*.png`); then the neon theme (G-024, B-041,
- * `step-22-neon-*.png`).
+ * `step-22-neon-*.png`), and its weather and seasons (B-043, `step-24-neon-*.png`).
  */
 import { coarseLayer, fineLayer } from "../src/map/layers.ts";
 import { kmOf, type CellRegion } from "../src/map/grid.ts";
@@ -563,3 +563,58 @@ for (const [name, focus] of [
     writePng(file, surface);
     console.log(`${file}: ${hashSurface(surface)}`);
   }
+
+// The neon theme's weather and seasons (B-043, D-086), at the sharp density: the
+// weather shots of B-018 (the storm at 0.1 s, when it flashes), Auvergne-Rhône-Alpes
+// in the four seasons by day (winter, spring / summer, autumn), and under snow with
+// the sky's weather hidden.
+for (const [name, focus, elevation, weather, seconds] of [
+  ["france-mixed-day", null, 35, MIXED_WEATHER, 1.3],
+  ["normandie-rain-day", "28", 35, overrideWeather("rain", WEATHER_TIME_MS), 1.3],
+  ["normandie-storm-night", "28", -20, overrideWeather("storm", WEATHER_TIME_MS), 0.1],
+  ["auvergne-rhone-alpes-fog-night", "84", -20, overrideWeather("fog", WEATHER_TIME_MS), 1.3],
+] as const) {
+  const camera = fitBox(areaBox(coarse, focus), WIDTH, HEIGHT);
+  const surface = createSurface(WIDTH * MODERN_SHARP_DENSITY, HEIGHT * MODERN_SHARP_DENSITY);
+  const scene = { ...referenceScene(focus, camera, elevation), weather, timeMs: WEATHER_TIME_MS };
+  drawNeonScene(scene, surface).animate(surface, seconds);
+  const file = `${OUT}/step-24-neon-weather-${name}.png`;
+  writePng(file, surface);
+  console.log(`${file}: ${hashSurface(surface)}`);
+}
+{
+  const camera = fitBox(areaBox(coarse, "84"), WIDTH, HEIGHT);
+  const sheet = createSurface(WIDTH * MODERN_DENSITY * 2, HEIGHT * MODERN_DENSITY * 2);
+  SEASONS.forEach((season, k) => {
+    const surface = createSurface(WIDTH * MODERN_DENSITY, HEIGHT * MODERN_DENSITY);
+    const scene = {
+      ...referenceScene("84", camera, 35),
+      season: { from: season, to: season, share: 0 },
+    };
+    drawNeonScene(scene, surface);
+    for (let y = 0; y < surface.height; y++)
+      sheet.data.set(
+        surface.data.subarray(y * surface.width * 4, (y + 1) * surface.width * 4),
+        ((Math.floor(k / 2) * surface.height + y) * sheet.width + (k % 2) * surface.width) * 4,
+      );
+  });
+  writePng(`${OUT}/step-24-neon-seasons-auvergne-rhone-alpes.png`, sheet);
+  console.log(`${OUT}/step-24-neon-seasons-auvergne-rhone-alpes.png: ${hashSurface(sheet)}`);
+  for (const [time, elevation] of [
+    ["day", 35],
+    ["night", -20],
+  ] as const) {
+    const surface = createSurface(WIDTH * MODERN_SHARP_DENSITY, HEIGHT * MODERN_SHARP_DENSITY);
+    const scene = {
+      ...referenceScene("84", camera, elevation),
+      season: { from: "winter", to: "winter", share: 0 } as const,
+      weather: snowWeather(true),
+      timeMs: WEATHER_TIME_MS,
+      weatherHidden: true,
+    };
+    drawNeonScene(scene, surface);
+    const file = `${OUT}/step-24-neon-snow-auvergne-rhone-alpes-${time}.png`;
+    writePng(file, surface);
+    console.log(`${file}: ${hashSurface(surface)}`);
+  }
+}
