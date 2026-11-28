@@ -927,7 +927,7 @@ A third theme, futuristic and minimal (PRD G-024): the same scene as lines of li
 over a dark relief (`src/render/neon-theme.ts`, `?theme=neon`). Three directions
 were drawn on mockups with their cost measured on a prototype (2026-11-22,
 `docs/screenshots/step-21-neon-mockup-*.png`); Guillaume chose A, lines of light
-(PRD Q-68, D-084). What follows beyond that choice is **proposed** (D-084), drawn
+(PRD Q-68, D-084). What follows was proposed, then confirmed by Guillaume (Q-71 to Q-73, D-087), drawn
 by `tools/screenshots.ts` (`step-22-neon-*.png`).
 
 - **Same view and density** as the modern theme: the same offsets, 2 output pixels
@@ -989,7 +989,7 @@ by `tools/screenshots.ts` (`step-22-neon-*.png`).
   (`NEON_SEASON_LINES`), turning by patches as the modern theme's tints do (§
   Seasons). Snow on the ground (`snowCoverOf`) lightens the land's ground and
   whitens its contour lines, also with the sky's weather hidden (D-072). The
-  colours are **proposed** (D-086).
+  colours were confirmed by Guillaume (Q-74 to Q-76, D-087).
 - **Determinism:** as the modern theme's, additions, multiplications, divisions,
   floors and square roots only for the still frame. Its frames are hashed in Node
   and in Chromium like the others.

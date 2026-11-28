@@ -1605,3 +1605,25 @@ Superseded by [D-015](#d-015--region-lookup-on-the-map-cells-and-22-km-around-fr
   at no extra cost.
 - **Revisit if:** the cloud outlines read as clutter over the contours on a real
   screen, or the season's line colour is not noticed.
+
+## D-087 — Answers to the neon theme's questionnaire (PRD Q-71 to Q-78)
+
+- **Context:** the end of the neon theme (G-024; B-041 to B-043, PRs #79 to #84):
+  the choices still provisional, each asked with a recommendation in the project
+  thread on 2026-11-25 (PRD Q-71 to Q-78, PR #86).
+- **Options:** for each, the recommendation or a free answer.
+- **Decision:** every recommendation, Guillaume, 2026-11-28 ("OK pour tout"):
+  - the palette (D-084): cyan coast, magenta border, violet contours, amber lamps,
+    a dusk-blue ground by day and a black one at night (Q-71);
+  - the plants in their source's colour, the landmarks in lavender (Q-72); a
+    plant's brightness 0.35 + 0.65·a, 0.35 with no figure (Q-73);
+  - the weather and the seasons (D-086): the seasons' contour colours, to look at
+    again on the deployed build (Q-74); the clouds outlined by group over a veil
+    of at most a fifth, the fog on one scene row in three (Q-75); the snow as a
+    lighter ground and white contour lines, also with the weather hidden (Q-76);
+  - accepted for now: the faint light on the Italian border cliff, where the
+    relief data stops (Q-77); the motion at about 1.8 times the modern theme's
+    cost, until the optimisation over the three themes (Q-78, D-083).
+- **Why:** each was the recommendation, with its reason in PRD § Open questions.
+- **Revisit if:** the conditions in D-084 and D-086 arise; the border light shows
+  on a real screen; the optimisation step measures the neon motion.
