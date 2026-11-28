@@ -72,7 +72,7 @@ const mixRgb = (a: Rgb, b: Rgb, t: number): Rgb => [
   a[2] + (b[2] - a[2]) * t,
 ];
 
-/** The lines' colours (D-084, proposed): the coast, the border, the contours, the lamps. */
+/** The lines' colours (D-084, confirmed in D-087): the coast, the border, the contours, the lamps. */
 export const NEON_COAST = hex("#2ef2ff");
 export const NEON_BORDER = hex("#ff3ddc");
 export const NEON_CONTOUR = hex("#8b6bff");
@@ -792,7 +792,7 @@ function standingAt(
   };
 }
 
-/** The neon colour of each source (D-084, proposed): its signature hue, brighter. */
+/** The neon colour of each source (D-084, confirmed in D-087): its signature hue, brighter. */
 export const NEON_SOURCES: Readonly<Record<Source, Rgb>> = {
   nuclear: hex("#ffe14a"),
   hydro: hex("#3d8bff"),

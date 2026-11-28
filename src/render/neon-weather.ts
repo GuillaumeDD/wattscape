@@ -22,7 +22,7 @@ const hex = (s: string): Rgb => [
   parseInt(s.slice(5, 7), 16),
 ];
 
-/** The contour lines' colour in each season (D-086, proposed): summer's is B-041's. */
+/** The contour lines' colour in each season (D-086, confirmed in D-087): summer's is B-041's. */
 export const NEON_SEASON_LINES: Readonly<Record<Season, Rgb>> = {
   winter: hex("#8fd0ff"),
   spring: hex("#5cffa8"),
